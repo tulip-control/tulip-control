@@ -922,7 +922,7 @@ def simu_abstract(ts, simu_type):
                 Part.remove_edge(j, i)
                 continue
             if not cov_j.issubset(pre_i):
-                #  add new node and update the graph
+                # check if intersection exists for dual-simu
                 tmp_cov = cov_j.intersection(pre_i)
                 is_exist = False
                 if simu_type == 'dual':
@@ -933,7 +933,8 @@ def simu_abstract(ts, simu_type):
                 if(is_exist):
                     Part.add_edge(k,i)
                     Part.remove_edge(j,i)
-                else:
+                else:                    
+                    #  add new node and update the graph
                     Part.node[j]['cov'] = tmp_cov
                     if simu_type == 'dual':
                         Part.add_node(num_cell, ap=Part.node[j]['ap'], cov=cov_j)
@@ -955,7 +956,6 @@ def simu_abstract(ts, simu_type):
                     if not lookup[j]:
                         queue.put(j)
                         lookup[j] = True
-                    queue.put(j)
                     queue.put(num_cell)
                     lookup[num_cell] = True
                     num_cell += 1
