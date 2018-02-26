@@ -39,16 +39,10 @@ from tulip.transys.labeled_graphs import (
 from tulip.transys.mathset import PowerSet, MathSet
 from networkx import MultiDiGraph
 try:
-<<<<<<< HEAD
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
-=======
     from queue import Queue
 except ImportError:
     from Queue import Queue  # Python 2
 
->>>>>>> 53e7bab26a7c0c0385204362208236646794af65
 # inline imports
 #
 # from tulip.transys.export import graph2promela
@@ -848,11 +842,7 @@ def _output_fts(ts, Part):
     for i in Part:
         simu2ts[i] = Part.node[i]['cov']
         for j in Part.node[i]['cov']:
-<<<<<<< HEAD
-            if(j in ts2simu.keys()):
-=======
             if j in ts2simu:
->>>>>>> 53e7bab26a7c0c0385204362208236646794af65
                 ts2simu[j].append(i)
             else:
                 ts2simu[j] = [i]
@@ -896,10 +886,12 @@ def simu_abstract(ts, simu_type):
     S0 = dict()
     Part = MultiDiGraph()  # a graph associated with the new partition
     num_cell = 0
+    hash_ap = dict() # map ap to cells in Part
     for node in G:
         ap = repr(G.node[node]['ap'])
         if ap not in S0:
             S0[ap] = set()
+            hash_ap[ap]=set()
             Part.add_node(num_cell, ap=ap, cov=S0[ap])  # hash table S0--->G
             num_cell += 1
         S0[ap].add(node)
@@ -909,6 +901,7 @@ def simu_abstract(ts, simu_type):
     # add edges in the coarsest partition, and add nodes in the queue
     for i in Part:
         pre_i = _pre(G, Part.node[i]['cov'])
+        hash_ap[Part.node[i]['ap']].add(i)
         for j in Part:
             cov_j = Part.node[j]['cov']
             if pre_i.intersection(cov_j) != set():
@@ -930,33 +923,44 @@ def simu_abstract(ts, simu_type):
                 continue
             if not cov_j.issubset(pre_i):
                 #  add new node and update the graph
-                Part.node[j]['cov'] = cov_j.intersection(pre_i)
+                tmp_cov = cov_j.intersection(pre_i)
+                is_exist = False
                 if simu_type == 'dual':
-                    Part.add_node(num_cell, ap=Part.node[j]['ap'], cov=cov_j)
-                elif simu_type == 'bi':
-                    Part.add_node(
-                        num_cell,
-                        ap=Part.node[j]['ap'],
-                        cov=cov_j.difference(pre_i))
-                # if j--->j exists, then num_cell--->num_cell exists, except
-                # the case that i == j, which shows that num_cell--->num_cell
-                # is a fake transition.
-                if Part.has_successor(j, j) and j != i:
-                    Part.add_edge(num_cell, num_cell)
-                [Part.add_edge(k, num_cell) for k in Part.predecessors_iter(j)]
-                [Part.add_edge(num_cell, k) for k in Part.successors_iter(j)]
-                # remove wrong edge in coarser part
-                Part.remove_edge(num_cell, i)
-                # add affected cells into the queue
-                if not lookup[j]:
+                    for k in hash_ap[Part.node[j]['ap']]:
+                        if tmp_cov == Part.node[k]['cov']:
+                            is_exist = True
+                            break
+                if(is_exist):
+                    Part.add_edge(k,i)
+                    Part.remove_edge(j,i)
+                else:
+                    Part.node[j]['cov'] = tmp_cov
+                    if simu_type == 'dual':
+                        Part.add_node(num_cell, ap=Part.node[j]['ap'], cov=cov_j)
+                    elif simu_type == 'bi':
+                        Part.add_node(
+                            num_cell,
+                            ap=Part.node[j]['ap'],
+                            cov=cov_j.difference(pre_i))
+                    # if j--->j exists, then num_cell--->num_cell exists, except
+                    # the case that i == j, which shows that num_cell--->num_cell
+                    # is a fake transition.
+                    if Part.has_successor(j, j) and j != i:
+                        Part.add_edge(num_cell, num_cell)
+                    [Part.add_edge(k, num_cell) for k in Part.predecessors_iter(j)]
+                    [Part.add_edge(num_cell, k) for k in Part.successors_iter(j)]
+                    # remove wrong edge in coarser part
+                    Part.remove_edge(num_cell, i)
+                    # add affected cells into the queue
+                    if not lookup[j]:
+                        queue.put(j)
+                        lookup[j] = True
                     queue.put(j)
-                    lookup[j] = True
-                queue.put(j)
-                queue.put(num_cell)
-                lookup[num_cell] = True
-                num_cell += 1
-                if i == j:
-                    break
+                    queue.put(num_cell)
+                    lookup[num_cell] = True
+                    num_cell += 1
+                    if i == j:
+                        break
     # construct new FTS
     [ts_simu, part_hash] = _output_fts(ts, Part)
     return ts_simu, part_hash
