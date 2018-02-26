@@ -930,7 +930,7 @@ def simu_abstract(ts, simu_type):
                         if tmp_cov == Part.node[k]['cov']:
                             is_exist = True
                             break
-                if(is_exist):
+                if is_exist:
                     Part.add_edge(k,i)
                     Part.remove_edge(j,i)
                 else:                    
@@ -938,16 +938,16 @@ def simu_abstract(ts, simu_type):
                     Part.node[j]['cov'] = tmp_cov
                     if simu_type == 'dual':
                         Part.add_node(num_cell, ap=Part.node[j]['ap'], cov=cov_j)
+                        hash_ap[Part.node[j]['ap']].add(num_cell)
                     elif simu_type == 'bi':
                         Part.add_node(
                             num_cell,
                             ap=Part.node[j]['ap'],
                             cov=cov_j.difference(pre_i))
+                    
                     # if j--->j exists, then num_cell--->num_cell exists, except
                     # the case that i == j, which shows that num_cell--->num_cell
                     # is a fake transition.
-                    if Part.has_successor(j, j) and j != i:
-                        Part.add_edge(num_cell, num_cell)
                     [Part.add_edge(k, num_cell) for k in Part.predecessors_iter(j)]
                     [Part.add_edge(num_cell, k) for k in Part.successors_iter(j)]
                     # remove wrong edge in coarser part
@@ -960,7 +960,11 @@ def simu_abstract(ts, simu_type):
                     lookup[num_cell] = True
                     num_cell += 1
                     if i == j:
+                        Part.remove_edge(num_cell-1, num_cell-1)
                         break
+            if queue.qsize()>1000:
+                print('stop')
+                
     # construct new FTS
     [ts_simu, part_hash] = _output_fts(ts, Part)
     return ts_simu, part_hash
