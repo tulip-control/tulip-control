@@ -1,4 +1,8 @@
-"""Test the management of `tulip.__version__`."""
+"""Test the management of `tulip.__version__`.
+
+When testing out of source, first run `setup.py`
+to generate the module `tulip._version`.
+"""
 import imp
 import os
 import os.path

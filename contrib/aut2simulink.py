@@ -43,7 +43,10 @@ Co-mentors Mumu Xu, Necmiye Ozay and Ufuk Topcu.
 
 from __future__ import print_function
 import re, copy, os, sys
-import Queue
+try:
+    import queue as _queue
+except ImportError:
+    import Queue as _queue
 
 
 class AutomatonState(object):
@@ -360,11 +363,11 @@ def write_case_no(enviroment,system,f,verbosem):
         system.put(temp1)
     f.write('end')
 
-queue=Queue.Queue()
-queue1=Queue.Queue()
-queue2=Queue.Queue()
-enviroment=Queue.Queue()
-system=Queue.Queue()
+queue=_queue.Queue()
+queue1=_queue.Queue()
+queue2=_queue.Queue()
+enviroment=_queue.Queue()
+system=_queue.Queue()
 try:
     load_file(sys.argv[1]+'.aut')
     read_variables(sys.argv[1]+'.smv')
