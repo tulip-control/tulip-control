@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 """Tests of `transys.transys.simu_abstract`."""
-import sys, os
-
-sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../tulip'))
-
 import logging
 from tulip.transys.transys import FTS, simu_abstract
 import numpy as np
@@ -129,6 +124,5 @@ def simu_abstract_test():
                                 bi_part['simu2ts'])
         assert check_simulation(bi_simu, ts, bi_part['simu2ts'],
                                 bi_part['ts2simu'])
-        
 if __name__ == "__main__":
     bi_simu = simu_abstract_test()

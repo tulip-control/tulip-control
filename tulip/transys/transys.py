@@ -38,11 +38,7 @@ from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
 from networkx import MultiDiGraph
-try:
-    from queue import Queue
-except ImportError:
-    from Queue import Queue  # Python 2
-
+import numpy as np
 # inline imports
 #
 # from tulip.transys.export import graph2promela
@@ -809,8 +805,7 @@ def _pre(graph, list_n):
         pre_set = pre_set.union(graph.predecessors(n))
     return pre_set
 
-
-def _output_fts(ts, Part):
+def _output_fts(ts, transitions, sol):
     """Convert the Part from C{nx.MultiDiGraph} to FTS.
 
     The returned FTS does not contain any edge attribute in the original FTS.
@@ -839,14 +834,15 @@ def _output_fts(ts, Part):
     ts2simu = dict()
     simu2ts = dict()
     Part_hash = dict(ts2simu=ts2simu, simu2ts=simu2ts)
-    for i in Part:
-        simu2ts[i] = Part.node[i]['cov']
-        for j in Part.node[i]['cov']:
+    n_cells = len(sol)
+    for i in range(n_cells):
+        simu2ts[i] = sol[i]
+        for j in sol[i]:
             if j in ts2simu:
                 ts2simu[j].append(i)
             else:
                 ts2simu[j] = [i]
-    S = Part.nodes()
+    S = range(n_cells)
     S0 = set()
     for i in ts.states.initial:
         [S0.add(j) for j in ts2simu[i]]
@@ -854,12 +850,13 @@ def _output_fts(ts, Part):
     ts_simu.states.initial.add_from(S0)
     AP = ts.aps
     ts_simu.atomic_propositions.add_from(AP)
-    for i in Part:
-        ts_simu.states.add(i, ap=eval(Part.node[i]['ap']))
-    for i, j in Part.edges_iter():
-        ts_simu.transitions.add(i, j)
+    for i in range(n_cells):
+        ts_simu.states.add(i, ap=ts.node[next(iter(sol[i]))]['ap'])
+    for i in range(n_cells):
+        for j in range(n_cells):
+            if transitions[j, i]:
+                ts_simu.transitions.add(i, j)
     return ts_simu, Part_hash
-
 
 def simu_abstract(ts, simu_type):
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
@@ -882,89 +879,71 @@ def simu_abstract(ts, simu_type):
     """
     # create MultiDiGraph instance from the input FTS
     G = MultiDiGraph(ts)
-    # build coarsest partition (graph + hash table)
+    # build coarsest partition
     S0 = dict()
     Part = MultiDiGraph()  # a graph associated with the new partition
-    num_cell = 0
+    n_cells = 0
     hash_ap = dict() # map ap to cells in Part
     for node in G:
         ap = repr(G.node[node]['ap'])
         if ap not in S0:
             S0[ap] = set()
             hash_ap[ap]=set()
-            Part.add_node(num_cell, ap=ap, cov=S0[ap])  # hash table S0--->G
-            num_cell += 1
+            Part.add_node(n_cells, ap=ap, cov=S0[ap])  # hash table S0--->G
+            n_cells += 1
         S0[ap].add(node)
-    # build a queue of node, used for the while loop
-    queue = Queue()
-    lookup = dict()
-    # add edges in the coarsest partition, and add nodes in the queue
-    for i in Part:
-        pre_i = _pre(G, Part.node[i]['cov'])
-        hash_ap[Part.node[i]['ap']].add(i)
-        for j in Part:
-            cov_j = Part.node[j]['cov']
-            if pre_i.intersection(cov_j) != set():
-                Part.add_edge(j, i)
-        queue.put(i)
-        lookup[i] = True
-    # bisimulation loop
-    while not queue.empty():
-        # pop a node from the queue
-        i = queue.get()
-        lookup[i] = False
-        # calculuate its pre in G
-        pre_i = _pre(G, Part.node[i]['cov'])
-        # intersect the pre of node with states of other nodes
-        for j in Part.predecessors(i):
-            cov_j = Part.node[j]['cov']
-            if pre_i.intersection(cov_j) == set():
-                Part.remove_edge(j, i)
+        
+    sol = []
+    for ap in S0:
+        sol.append(S0[ap])
+    
+    IJ = np.ones([n_cells,n_cells])
+    transitions = np.zeros([n_cells,n_cells])
+    while np.sum(IJ)>0:
+        # get i,j from IJ matrix, i--->j
+        ind = np.nonzero(IJ)
+        i = ind[1][0]
+        j = ind[0][0]
+        IJ[j, i] = 0
+        si = sol[i]
+        sj = sol[j]
+        pre_j = _pre(G,sj)
+        if si.issubset(pre_j):
+            transitions[j, i] = 1
+        else:
+            isect = si.intersection(pre_j)
+            if isect == set():
                 continue
-            if not cov_j.issubset(pre_i):
-                # check if intersection exists for dual-simu
-                tmp_cov = cov_j.intersection(pre_i)
-                is_exist = False
+            else:
+                # check if the isect has existed
+                check_isect = False
                 if simu_type == 'dual':
-                    for k in hash_ap[Part.node[j]['ap']]:
-                        if tmp_cov == Part.node[k]['cov']:
-                            is_exist = True
+                    assert len(sol) == n_cells
+                    for k in range(n_cells):
+                        if sol[k] == isect:
+                            check_isect = True
                             break
-                if is_exist:
-                    Part.add_edge(k,i)
-                    Part.remove_edge(j,i)
-                else:                    
-                    #  add new node and update the graph
-                    Part.node[j]['cov'] = tmp_cov
-                    if simu_type == 'dual':
-                        Part.add_node(num_cell, ap=Part.node[j]['ap'], cov=cov_j)
-                        hash_ap[Part.node[j]['ap']].add(num_cell)
-                    elif simu_type == 'bi':
-                        Part.add_node(
-                            num_cell,
-                            ap=Part.node[j]['ap'],
-                            cov=cov_j.difference(pre_i))
-                    
-                    # if j--->j exists, then num_cell--->num_cell exists, except
-                    # the case that i == j, which shows that num_cell--->num_cell
-                    # is a fake transition.
-                    [Part.add_edge(k, num_cell) for k in Part.predecessors_iter(j)]
-                    [Part.add_edge(num_cell, k) for k in Part.successors_iter(j)]
-                    # remove wrong edge in coarser part
-                    Part.remove_edge(num_cell, i)
-                    # add affected cells into the queue
-                    if not lookup[j]:
-                        queue.put(j)
-                        lookup[j] = True
-                    queue.put(num_cell)
-                    lookup[num_cell] = True
-                    num_cell += 1
-                    if i == j:
-                        Part.remove_edge(num_cell-1, num_cell-1)
-                        break
-            if queue.qsize()>1000:
-                print('stop')
-                
-    # construct new FTS
-    [ts_simu, part_hash] = _output_fts(ts, Part)
+                if not check_isect:
+                    # assume that i != j
+                    sol.append(isect)
+                    # update transition matrix
+                    transitions = np.pad(transitions, (0, 1), 'constant')
+                    transitions[n_cells, :] = 0
+                    transitions[:, n_cells] = transitions[:,i]
+                    transitions[j, n_cells] = 1
+                    if simu_type == 'bi':
+                        sol[i] = sol[i].difference(sol[n_cells])
+                        transitions[i, :] = 0   
+                        if i == j:
+                            transitions[j, n_cells] = 0
+                    # update IJ matrix
+                    IJ = np.pad(IJ, (0, 1), 'constant', constant_values=1)
+                    if simu_type == 'bi':
+                        IJ[i, :] = 1
+                        IJ[:, i] = 1
+                    n_cells += 1
+                else:
+                    transitions[j, k] = 1
+        IJ = ((IJ - transitions)>0).astype(int)
+    [ts_simu, part_hash] = _output_fts(ts, transitions, sol)
     return ts_simu, part_hash
