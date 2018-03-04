@@ -4,7 +4,7 @@ Tests for the abstraction from continuous dynamics to logic
 import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-#logging.getLogger('tulip').setLevel(logging.ERROR)
+# logging.getLogger('tulip').setLevel(logging.ERROR)
 logger.setLevel(logging.DEBUG)
 
 from nose.tools import assert_raises
@@ -23,6 +23,7 @@ import polytope as pc
 
 input_bound = 0.4
 
+
 def subsys0():
     dom = pc.box2poly([[0., 3.], [0., 2.]])
 
@@ -30,12 +31,13 @@ def subsys0():
     B = np.eye(2)
 
     U = pc.box2poly([[0., 1.],
-                  [0., 1.]])
+                     [0., 1.]])
     U.scale(input_bound)
 
     sys_dyn = hybrid.LtiSysDyn(A, B, Uset=U, domain=dom)
 
     return sys_dyn
+
 
 def subsys1():
     dom = pc.box2poly([[0., 3.], [0., 2.]])
@@ -44,12 +46,13 @@ def subsys1():
     B = np.eye(2)
 
     U = pc.box2poly([[0., 0.],
-                  [-1., 0.]])
+                     [-1., 0.]])
     U.scale(input_bound)
 
     sys_dyn = hybrid.LtiSysDyn(A, B, Uset=U, domain=dom)
 
     return sys_dyn
+
 
 def transition_directions_test():
     """Unit test for correctness of abstracted transition directions, with:
@@ -83,7 +86,7 @@ def transition_directions_test():
     ppp, new2old = abstract.part2convex(ppp)
     # configure discretization
     N = 8
-    trans_len=1
+    trans_len = 1
     disc_params = dict()
     for mode in modes:
         disc_params[mode] = dict(N=N, trans_length=trans_len)
@@ -110,6 +113,7 @@ def transition_directions_test():
         assert d['sys_actions'] == 'fly'
 
 transition_directions_test.slow = True
+
 
 def test_transient_regions():
     """drift is too strong, so no self-loop must exist
@@ -152,13 +156,14 @@ def test_transient_regions():
     ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
                              trans_length=1)
     logger.debug(ab.ts)
-    self_loops = {i for i,j in ab.ts.transitions() if i==j}
+    self_loops = {i for i, j in ab.ts.transitions() if i == j}
     logger.debug('self loops at states: ' + str(self_loops))
 
     assert(not self_loops)
 
-    #ax = ab.plot(show_ts=True)
-    #ax.figure.savefig('./very_simple.pdf')
+    # ax = ab.plot(show_ts=True)
+    # ax.figure.savefig('./very_simple.pdf')
+
 
 def define_partition(dom):
     p = dict()
@@ -168,6 +173,7 @@ def define_partition(dom):
     ppp = abstract.prop2part(dom, p)
     ppp, new2old_reg = abstract.part2convex(ppp)
     return ppp
+
 
 def define_dynamics(dom):
     A = np.eye(2)
@@ -190,6 +196,48 @@ def define_dynamics(dom):
     sys = hybrid.LtiSysDyn(A, B, E, K, U, W, dom)
     return sys
 
+
+def define_dynamics_dual():
+    # Continuous state space
+    cont_state_space = pc.box2poly([[-1.5, 1.5]])
+
+    # Continuous dynamics
+    # (continuous-state, discrete-time)
+    A = np.array([[2]])
+    B = np.array([[1]])
+
+    # Available control, possible disturbances
+    U = np.array([[-2.0, 2.0]])
+
+    # Convert to polyhedral representation
+    U = pc.box2poly(U)
+
+    # Construct the LTI system describing the dynamics
+    sys_dyn = hybrid.LtiSysDyn(A, B, None, None, U, None, cont_state_space)
+    # @dynamics_section_end@
+
+    # @partition_section@
+    # Define atomic propositions for relevant regions of state space
+    cont_props = {}
+    cont_props['a'] = pc.box2poly([[-1.5, -1]])
+    cont_props['b'] = pc.box2poly([[-1, 1]])
+    cont_props['c'] = pc.box2poly([[1, 1.5]])
+
+    part = []
+    part.append(pc.box2poly([[-1.5, -1]]))
+    part.append(pc.box2poly([[-1, 1]]))
+    part.append(pc.box2poly([[1, 1.5]]))
+    part.append(pc.box2poly([[-1, 0.5]]))
+    part.append(pc.box2poly([[-0.5, 1]]))
+    part.append(pc.box2poly([[-0.5, 0.5]]))
+    part.append(pc.box2poly([[-1.25, -1]]))
+    part.append(pc.box2poly([[1, 1.25]]))
+    # Compute the proposition preserving partition of the continuous state
+    # space
+    cont_partition = abstract.prop2part(cont_state_space, cont_props)
+    return sys_dyn, cont_partition, part
+
+
 def test_abstract_the_dynamics():
     """test_abstract_the_dynamics (known to fail without GLPK)"""
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
@@ -197,20 +245,21 @@ def test_abstract_the_dynamics():
     sys = define_dynamics(dom)
     logger.info(sys)
 
-    disc_options = {'N':3, 'trans_length':2, 'min_cell_volume':1.5}
+    disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
 
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, **disc_options)
-    assert(ab.ppp.compute_adj() )
-    assert(ab.ppp.is_partition() )
-    #ax = ab.plot(show_ts=True, color_seed=0)
-    #sys.plot(ax, show_domain=False)
-    #print(ab.ts)
+    assert(ab.ppp.compute_adj())
+    assert(ab.ppp.is_partition())
+    # ax = ab.plot(show_ts=True, color_seed=0)
+    # sys.plot(ax, show_domain=False)
+    # print(ab.ts)
 
-    #self_loops = {i for i,j in ab.ts.transitions() if i==j}
-    #print('self loops at states: ' + str(self_loops))
+    # self_loops = {i for i,j in ab.ts.transitions() if i==j}
+    # print('self loops at states: ' + str(self_loops))
 
 test_abstract_the_dynamics.slow = True
+
 
 def test_abstract_the_dynamics_dual():
     """test_abstract_the_dynamics using dual-simulation algorithm"""
@@ -219,19 +268,26 @@ def test_abstract_the_dynamics_dual():
     sys = define_dynamics(dom)
     logger.info(sys)
 
-    disc_options = {'N':3, 'trans_length':2, 'min_cell_volume':1.5}
+    disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
 
     ab = abstract.discretize(ppp, sys, plotit=False,
-                             save_img=False, simu_type='dual',**disc_options)
-    assert(ab.ppp.compute_adj() )
-    #ax = ab.plot(show_ts=True, color_seed=0)
-    #sys.plot(ax, show_domain=False)
-    #print(ab.ts)
+                             save_img=False, simu_type='dual', **disc_options)
+    assert(ab.ppp.compute_adj())
 
-    #self_loops = {i for i,j in ab.ts.transitions() if i==j}
-    #print('self loops at states: ' + str(self_loops))
+    [sys_dyn, cont_partition, part] = define_dynamics_dual()
+    disc_options = {'N': 1, 'trans_length': 1000, 'min_cell_volume': 0.0}
+    ab_2 = abstract.discretize(cont_partition, sys_dyn,
+                               simu_type='dual', **disc_options)
 
-test_abstract_the_dynamics.slow = True
+    table = np.zeros([len(part), 1])
+    for i in ab_2.ppp.regions:
+        for j in range(len(part)):
+            if i == part[j]:
+                table[j] = 1
+    assert np.sum(table) == len(part)
+
+test_abstract_the_dynamics_dual.slow = True
+
 
 def test_is_feasible():
     """Difference between attractor and fixed horizon."""
