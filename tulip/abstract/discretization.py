@@ -991,7 +991,7 @@ def reachable_within(trans_length, adj_k, adj):
 
     k = 1
     while k < trans_length:
-        adj_k = np.dot(adj_k, adj)
+        adj_k = (np.dot(adj_k, adj)!=0).astype(int)
         k += 1
     adj_k = (adj_k > 0).astype(int)
 
