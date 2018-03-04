@@ -212,6 +212,26 @@ def test_abstract_the_dynamics():
 
 test_abstract_the_dynamics.slow = True
 
+def test_abstract_the_dynamics_dual():
+    """test_abstract_the_dynamics using dual-simulation algorithm"""
+    dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
+    ppp = define_partition(dom)
+    sys = define_dynamics(dom)
+    logger.info(sys)
+
+    disc_options = {'N':3, 'trans_length':2, 'min_cell_volume':1.5}
+
+    ab = abstract.discretize(ppp, sys, plotit=False,
+                             save_img=False, simu_type='dual',**disc_options)
+    assert(ab.ppp.compute_adj() )
+    #ax = ab.plot(show_ts=True, color_seed=0)
+    #sys.plot(ax, show_domain=False)
+    #print(ab.ts)
+
+    #self_loops = {i for i,j in ab.ts.transitions() if i==j}
+    #print('self loops at states: ' + str(self_loops))
+
+test_abstract_the_dynamics.slow = True
 
 def test_is_feasible():
     """Difference between attractor and fixed horizon."""
@@ -240,3 +260,4 @@ def drifting_dynamics(dom):
 
 if __name__ == '__main__':
     test_abstract_the_dynamics()
+    test_abstract_the_dynamics_dual()
