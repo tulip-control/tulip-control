@@ -47,7 +47,14 @@ script:
   - pip download --no-dependencies dd==0.4.3
   - tar xzf dd-*.tar.gz
   - cd dd-*/
-  - python setup.py install --fetch --cudd
+  - export CUDD_VERSION=3.0.0
+  - export CUDD_GZ=cudd-${CUDD_VERSION}.tar.gz
+  - curl -sSL https://sourceforge.net/projects/cudd-mirror/files/${CUDD_GZ}/download > ${CUDD_GZ}
+  - expr `shasum -a 256 ${CUDD_GZ}|cut -d ' ' -f1`
+    = b8e966b4562c96a03e7fbea239729587d7b395d53cadcc39a7203b49cf7eeb69
+  - tar -xzf ${CUDD_GZ}
+  - python -c 'from download import make_cudd; make_cudd()'
+  - python setup.py install --cudd
   - cd ..
   # optional python packages
   - pip install gr1py
