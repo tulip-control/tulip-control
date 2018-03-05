@@ -249,8 +249,8 @@ def test_abstract_the_dynamics():
 
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, **disc_options)
-    assert(ab.ppp.compute_adj())
-    assert(ab.ppp.is_partition())
+    assert ab.ppp.compute_adj()
+    assert ab.ppp.is_partition()
     # ax = ab.plot(show_ts=True, color_seed=0)
     # sys.plot(ax, show_domain=False)
     # print(ab.ts)
@@ -272,7 +272,7 @@ def test_abstract_the_dynamics_dual():
 
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, simu_type='dual', **disc_options)
-    assert(ab.ppp.compute_adj())
+    assert ab.ppp.compute_adj()
 
     [sys_dyn, cont_partition, part] = define_dynamics_dual()
     disc_options = {'N': 1, 'trans_length': 1000, 'min_cell_volume': 0.0}
