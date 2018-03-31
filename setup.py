@@ -106,7 +106,8 @@ def run_setup():
         tests_require=[
             'nose',
             'matplotlib >= 2.0.0',
-            'mock'],
+            'mock',
+            'setuptools >= 39.0.0'],
         packages=[
             'tulip', 'tulip.transys', 'tulip.transys.export',
             'tulip.abstract', 'tulip.spec',
