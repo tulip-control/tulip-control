@@ -10,7 +10,8 @@ import os.path
 import git
 import mock
 from nose.tools import assert_raises
-from setuptools.version import pkg_resources
+import pkg_resources
+from pkg_resources.extern import packaging
 
 import tulip
 import tulip._version
@@ -68,7 +69,7 @@ def test_git_version(mock_repo):
 def assert_pep440(version):
     """Raise `AssertionError` if `version` violates PEP440."""
     v = pkg_resources.parse_version(version)
-    assert isinstance(v, pkg_resources.SetuptoolsVersion), v
+    assert isinstance(v, packaging.version.Version), v
 
 
 if __name__ == '__main__':
