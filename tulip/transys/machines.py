@@ -531,12 +531,12 @@ class MealyMachine(Transducer):
         # match only inputs (explicit valuations, not symbolic)
         enabled_trans = [
             (i, j, d)
-            for i, j, d in self.edges_iter([from_state], data=True)
+            for i, j, d in self.edges([from_state], data=True)
             if project_dict(d, restricted_inputs) == inputs]
 
         if len(enabled_trans) == 0:
             some_possibilities = []
-            for i, j, d in self.edges_iter([from_state], data=True):
+            for i, j, d in self.edges([from_state], data=True):
                 # The number of possible inputs to suggest here is
                 # arbitrary. Consider making it a function parameter.
                 if len(some_possibilities) >= 5:
@@ -940,7 +940,7 @@ def strip_ports(mealy, names):
     new.add_nodes_from(mealy)
     new.states.initial.add_from(mealy.states.initial)
 
-    for u, v, d in mealy.edges_iter(data=True):
+    for u, v, d in mealy.edges(data=True):
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)
     return new

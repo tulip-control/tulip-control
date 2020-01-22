@@ -22,17 +22,19 @@ log.addHandler(logging.StreamHandler())
 def test_grspec_to_automaton():
     sp = grspec_0()
     a = omega_int._grspec_to_automaton(sp)
-    dvars = dict(x=dict(type='bool', owner='env', dom=None),
-                 y=dict(type='bool', owner='sys', dom=None))
-    assert a.vars == dvars, (a.vars, dvars)
-    r = a.action['env']
-    assert r == list(), r
-    r = a.action['sys']
-    assert r == ['( ( X x ) -> ( X y ) )'], r
-    r = a.win['<>[]']
-    assert r == ['!(( ! x ))'], r
-    r = a.win['[]<>']
-    assert r == ['( ! y )'], r
+    v = ["x", "x'", "y", "y'"]
+    assert len(a.vars.keys()) == len(v), a
+    assert set(a.vars.keys()) == set(v), a
+    assert a.varlist['env'] == ['x']
+    assert a.varlist['sys'] == ['y']
+    r = a._fetch_expr(a.action['env'])
+    assert r == "TRUE", r
+    r = a._fetch_expr(a.action['sys'])
+    assert r == '( ( ( X x ) -> ( X y ) ) )', r
+#    r = a.win['<>[]']
+#    assert r == '!(( ! x ))', r
+#    r = a.win['[]<>']
+#    assert r == ['( ! y )'], r
 
 
 def test_synthesis_bool():
@@ -68,12 +70,12 @@ def test_synthesis_fol():
     assert len(g.inputs) == 1, g.inputs
     assert 'x' in g.inputs, g.inputs
     dom = g.inputs['x']
-    dom_ = set(range(5))
+    dom_ = set(range(4))
     assert dom == dom_, (dom, dom_)
     assert len(g.outputs) == 1, g.outputs
     assert 'y' in g.outputs, g.outputs
     dom = g.outputs['y']
-    dom_ = set(range(5))
+    dom_ = set(range(4))
     assert dom == dom_, (dom, dom_)
 
 
@@ -90,7 +92,7 @@ def test_synthesis_strings():
     assert dom == dom_, (dom, dom_)
     # check simulation
     n = len(g)
-    assert n == 4, n
+    assert n == 5, n
     u = 'Sinit'
     u, r = g.reaction(u, dict(x=0))
     assert r == dict(y='a'), r
@@ -109,7 +111,7 @@ def test_synthesis_moore():
     # g.save('moore.pdf')
     assert g is not None
     n = len(g)
-    assert n == 26, n
+    assert n == 17, n
 
 
 def test_synthesis_mealy_all_init():
@@ -122,7 +124,7 @@ def test_synthesis_mealy_all_init():
     # g.save('moore.pdf')
     assert g is not None
     n = len(g)
-    assert n == 6, n
+    assert n == 5, n
 
 
 def test_synthesis_unrealizable():
@@ -165,9 +167,9 @@ def grspec_1():
     sp = form.GRSpec()
     sp.moore = False
     sp.plus_one = False
-    sp.env_vars = dict(x=(0, 4))
-    sp.sys_vars = dict(y=(0, 4))
-    sp.env_init = ['(0 <= y) & (y <= 4)']
+    sp.env_vars = dict(x=(0, 3))
+    sp.sys_vars = dict(y=(0, 3))
+    sp.env_init = ['(0 <= y) & (y <= 3)']
     sp.sys_safety = ["y' = x'"]
     return sp
 
@@ -175,17 +177,17 @@ def grspec_1():
 def grspec_2():
     sp = form.GRSpec()
     sp.moore = True
-    sp.env_vars = dict(x=(0, 4))
-    sp.sys_vars = dict(y=(0, 4))
-    sp.env_init = ['(0 <= y) & (y <= 4)']
+    sp.env_vars = dict(x=(0, 3))
+    sp.sys_vars = dict(y=(0, 3))
+    sp.env_init = ['(0 <= y) & (y <= 3)']
     sp.sys_safety = ["y' = x"]
     return sp
 
 def grspec_3():
     sp = form.GRSpec()
     sp.moore = False
-    sp.env_vars = dict(x=(0, 4))
-    sp.sys_vars = dict(y=(0, 4))
+    sp.env_vars = dict(x=(0, 3))
+    sp.sys_vars = dict(y=(0, 3))
     sp.env_init = ['(0 <= y) & (y <= 4)']
     sp.sys_safety = ["y = x"]
     return sp
@@ -195,7 +197,7 @@ def grspec_4():
     sp = form.GRSpec()
     sp.moore = False
     sp.env_init = ['(x = 0) & (y = "a")']
-    sp.env_vars = dict(x=(0, 2))
+    sp.env_vars = dict(x=(0, 3))
     sp.sys_vars = dict(y=['a', 'b'])
     sp.sys_safety = [
         '(x = 0) -> (y = "a")',

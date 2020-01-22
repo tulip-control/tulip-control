@@ -68,7 +68,7 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
     else:
         label_format = {'type?label': '', 'separator': r'\\n'}
 
-    for u, d in graph.nodes_iter(data=True):
+    for u, d in graph.nodes(data=True):
         # initial state ?
         is_initial = u in states.initial
         is_accepting = _is_accepting(graph, u)
@@ -350,7 +350,7 @@ def _transitions2dot_str(trans, to_pydot_graph, tikz=False):
     label_format = trans.graph._transition_dot_label_format
     label_mask = trans.graph._transition_dot_mask
 
-    for (u, v, key, edge_data) in trans.graph.edges_iter(
+    for (u, v, key, edge_data) in trans.graph.edges(
         data=True, keys=True
     ):
         edge_dot_label = _form_edge_label(

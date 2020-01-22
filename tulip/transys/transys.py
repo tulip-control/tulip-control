@@ -696,9 +696,9 @@ def _dumps_states(g):
     a = []
     for u in nodes:
         s = '\t State: {u}, AP: {ap}\n'.format(
-            u=u, ap=g.node[u]['ap']) + ', '.join([
+            u=u, ap=g.nodes[u]['ap']) + ', '.join([
                 '{k}: {v}'.format(k=k, v=v)
-                for k, v in g.node[u].items()
+                for k, v in g.nodes[u].items()
                 if k is not 'ap'])
         a.append(s)
     return ''.join(a)

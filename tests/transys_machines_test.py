@@ -38,7 +38,7 @@ def test_strip_ports():
     ]
 
     assert(len(edges) == len(new.edges()))
-    for (u, v, d), (x, y, b) in zip(new.edges_iter(data=True), edges):
+    for (u, v, d), (x, y, b) in zip(new.edges(data=True), edges):
         assert(u == x)
         assert(v == y)
         assert(d == b)

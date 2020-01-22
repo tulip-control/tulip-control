@@ -66,7 +66,7 @@ def ltl2ba(formula):
     symbols, g, initial, accepting = parser.parse(ltl2ba_out)
     ba = Automaton('Buchi', alphabet=symbols)
     ba.add_nodes_from(g)
-    ba.add_edges_from(g.edges_iter(data=True))
+    ba.add_edges_from(g.edges(data=True))
     ba.initial_nodes = initial
     ba.accepting_sets = accepting
     logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
@@ -106,7 +106,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         return prod_attr_dict
 
     # union of state labels from the networkx tuples
-    for prod_state_id, attr_dict in prod_graph.nodes_iter(data=True):
+    for prod_state_id, attr_dict in prod_graph.nodes(data=True):
         prod_attr_dict = state_label_union(attr_dict)
         prod_state = prod_ids2states(prod_state_id, self, other)
 
@@ -126,7 +126,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
 
     # # multiply mutable states (only the reachable added)
     # if self.states.mutants or other.states.mutants:
-    #     for idx, prod_state_id in enumerate(prod_graph.nodes_iter() ):
+    #     for idx, prod_state_id in prod_graph.nodes():
     #         prod_state = prod_ids2states(prod_state_id, self, other)
     #         prod_sys.states.mutants[idx] = prod_state
     #
@@ -135,7 +135,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
 
     # action labeling is taken care by nx,
     # since transition taken at a time
-    for from_state_id, to_state_id, edge_dict in prod_graph.edges_iter(data=True):
+    for from_state_id, to_state_id, edge_dict in prod_graph.edges(data=True):
 
         from_state = prod_ids2states(from_state_id, self, other)
         to_state = prod_ids2states(to_state_id, self, other)

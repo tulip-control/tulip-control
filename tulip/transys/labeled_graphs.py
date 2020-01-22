@@ -113,7 +113,7 @@ class States(object):
         self.initial = []
 
     def __getitem__(self, state):
-        return self.graph.node[state]
+        return self.graph.nodes[state]
 
     def __call__(self, *args, **kwargs):
         """Return list of states.
@@ -352,7 +352,7 @@ class States(object):
                 msg += ' with states = ' + str(states)
                 logger.debug(msg)
         found_state_label_pairs = []
-        for state, attr_dict in self.graph.nodes_iter(data=True):
+        for state, attr_dict in self.graph.nodes(data=True):
             logger.debug('Checking state_id = ' + str(state) +
                          ', with attr_dict = ' + str(attr_dict))
             if states is not None:
@@ -368,7 +368,10 @@ class States(object):
                 logger.debug('Any label acceptable.')
                 ok = True
             else:
-                ok = label_is_desired(attr_dict, with_attr_dict)
+                typed_attr = TypedDict()
+                typed_attr.set_types(self.graph._node_label_types)
+                typed_attr.update(attr_dict)
+                ok = label_is_desired(typed_attr, with_attr_dict)
             if ok:
                 logger.debug('Label Matched:\n\t' + str(attr_dict) +
                              ' == ' + str(with_attr_dict))
@@ -386,7 +389,7 @@ class States(object):
         Def. 2.4, p.23 U{[BK08]
         <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
         """
-        return not bool(self.graph.successors(state))
+        return not bool(list(self.graph.successors(state)))
 
 
 class Transitions(object):
@@ -531,7 +534,7 @@ class Transitions(object):
         nx_adj = nx.from_scipy_sparse_matrix(
             adj, create_using=nx.DiGraph())
         # add each edge using existing checks
-        for i, j in nx_adj.edges_iter():
+        for i, j in nx_adj.edges():
             si = adj2states[i]
             sj = adj2states[j]
             self.add(si, sj, attr_dict, check, **attr)
@@ -598,7 +601,7 @@ class Transitions(object):
         except:
             raise TypeError('with_attr_dict must be a dict')
         found_transitions = []
-        u_v_edges = self.graph.edges_iter(nbunch=from_states, data=True)
+        u_v_edges = self.graph.edges(nbunch=from_states, data=True)
         if to_states is not None:
             u_v_edges = [(u, v, d)
                          for u, v, d in u_v_edges
@@ -611,7 +614,10 @@ class Transitions(object):
                 logger.debug('No labels defined.')
             else:
                 logger.debug('Checking guard.')
-                ok = label_is_desired(attr_dict, with_attr_dict)
+                typed_attr = TypedDict()
+                typed_attr.set_types(self.graph._edge_label_types)
+                typed_attr.update(attr_dict)
+                ok = label_is_desired(typed_attr, with_attr_dict)
             if ok:
                 logger.debug('Transition label matched desired label.')
                 transition = (u, v, dict(attr_dict))
@@ -866,10 +872,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         @rtype: bool
         """
-        for node, attr_dict in self.nodes_iter(data=True):
+        for node, attr_dict in self.nodes(data=True):
             if not attr_dict.is_consistent():
                 return False
-        for node_i, node_j, attr_dict in self.edges_iter(data=True):
+        for node_i, node_j, attr_dict in self.edges(data=True):
             if not attr_dict.is_consistent():
                 return False
         return True
@@ -911,7 +917,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self._check_for_untyped_keys(typed_attr,
                                      self._node_label_types,
                                      check)
-        nx.MultiDiGraph.add_node(self, n, attr_dict=typed_attr)
+        nx.MultiDiGraph.add_node(self, n, **typed_attr)
 
     def add_nodes_from(self, nodes, check=True, **attr):
         """Create or label multiple nodes.
@@ -1020,14 +1026,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     key -= 1
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            keydict[key] = datadict
+            super().add_edge(u, v, key, **datadict)
         else:
             logger.debug('first directed edge between these nodes')
             # selfloops work this way without special treatment
-            key = 0
-            keydict = {key: typed_attr}
-            self.succ[u][v] = keydict
-            self.pred[v][u] = keydict
+            super().add_edge(u, v, **typed_attr)
 
     def add_edges_from(self, labeled_ebunch, attr_dict=None,
                        check=True, **attr):

@@ -18,7 +18,7 @@ def test_to_labeled_graph():
              'U', 'X', '&', '|', '!', '->'}
     g = tx.Tree.from_recursive_ast(tree)
     h = tx.ast_to_labeled_graph(g, detailed=False)
-    labels = {d['label'] for u, d in h.nodes_iter(data=True)}
+    labels = {d['label'] for u, d in h.nodes(data=True)}
     assert labels == nodes
 
 

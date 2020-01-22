@@ -65,7 +65,7 @@ class Tree(nx.MultiDiGraph):
         # need to override networkx.DiGraph.__str__
         return ('Abstract syntax tree as graph with edges:\n' +
                 str([(str(u), str(v))
-                    for u, v, k in self.edges_iter(keys=True)]))
+                    for u, v, k in self.edges(keys=True)]))
 
     @property
     def variables(self):
@@ -103,7 +103,7 @@ class Tree(nx.MultiDiGraph):
         else:
             w.operands = [self.to_recursive_ast(v)
                           for _, v, _ in sorted(
-                              self.edges_iter(u, keys=True),
+                              self.edges(u, keys=True),
                               key=lambda x: x[2])]
             assert len(u.operands) == len(w.operands)
         return w
@@ -117,7 +117,7 @@ class Tree(nx.MultiDiGraph):
         @type tree: L{Tree}
         """
         assert not self.succ.get(leaf)
-        for u, v, k in tree.edges_iter(keys=True):
+        for u, v, k in tree.edges(keys=True):
             self.add_edge(u, v, key=k)
         # replace old leaf with subtree root
         ine = self.in_edges(leaf, keys=True)
@@ -169,7 +169,7 @@ def ast_to_labeled_graph(tree, detailed):
         if detailed:
             label += '\n' + str(type(u).__name__)
         g.add_node(id(u), label=label)
-    for u, v, k in tree.edges_iter(keys=True):
+    for u, v, k in tree.edges(keys=True):
         g.add_edge(id(u), id(v), label=k)
     return g
 
@@ -249,7 +249,7 @@ def sub_values(tree, var_values):
         L{Num}, L{Const}, or L{Bool}
     """
     old2new = dict()
-    for u in tree.nodes_iter():
+    for u in tree.nodes():
         if u.type != 'var':
             continue
         val = var_values[u.value]
@@ -276,7 +276,7 @@ def sub_constants(tree, var_str2int):
     """
     # logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
-    for u in tree.nodes_iter():
+    for u in tree.nodes():
         if u.type != 'str':
             continue
         var, op = pair_node_to_var(tree, u)
@@ -302,7 +302,7 @@ def sub_bool_with_subtree(tree, bool2subtree):
         are defined by C{bool2form}.
     @type bool2form: C{dict} from C{str} to L{Tree}
     """
-    for u in tree.nodes():
+    for u in list(tree.nodes()):
         if u.type == 'var' and u.value in bool2subtree:
             # tree.write(str(id(tree)) + '_before.png')
             tree.add_subtree(u, bool2subtree[u.value])
@@ -330,18 +330,18 @@ def pair_node_to_var(tree, c):
     # find parent Binary operator
     while True:
         old = c
-        c = next(iter(tree.predecessors_iter(c)))
+        c = next(iter(tree.predecessors(c)))
         if c.type == 'operator':
             if len(c.operands) == 2:
                 break
-    p, q = tree.successors_iter(c)
+    p, q = tree.successors(c)
     v = p if q == old else q
     # go down until terminal found
     # assuming correct syntax for gr1c
     while True:
         if not tree.succ.get(v):
             break
-        v = next(iter(tree.successors_iter(v)))
+        v = next(iter(tree.successors(v)))
     # now: b, is the operator and: v, the variable
     return v, c
 
@@ -446,7 +446,7 @@ def collect_primed_vars(t):
             c = (u.operator == 'X') or c
         except AttributeError:
             pass
-        Q.extend((v, c) for v in g.successors_iter(u))
+        Q.extend((v, c) for v in g.successors(u))
     return primed
 
 

@@ -96,10 +96,10 @@ def run_setup():
         license='BSD',
         classifiers=classifiers,
         install_requires=[
-            'networkx >= 1.8, <= 1.10',
+            'networkx >= 2.0, <= 2.4',
             'numpy >= 1.7',
-            'omega >= 0.0.9, < 0.1.0',
-            'ply >= 3.4',
+            'omega >= 0.1.2',
+            'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.0',
             'pydot >= 1.2.0',
             'scipy'],
