@@ -4,6 +4,9 @@ from __future__ import print_function
 
 import numpy as np
 import tulip.gridworld as gw
+import unittest
+import psutil
+
 from tulip.synth import is_realizable
 
 
@@ -147,6 +150,8 @@ class GridWorld_test(object):
     def test_dumploadloop(self):
         assert self.X == gw.GridWorld(self.X.dumps())
 
+    @unittest.skipIf(psutil.virtual_memory().total < 64e9,
+                     "not enough memory available")
     def test_spec_realizable_bool(self):
         spec = self.X.spec(nonbool=False)
         spec.moore = False
