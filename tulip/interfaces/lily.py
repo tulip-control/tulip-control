@@ -155,7 +155,7 @@ def lily_strategy2moore(g, env_vars, sys_vars):
     g.remove_node('title')
     phantom_init = {x for x in g if x.startswith('init-')}
     game_nodes = {x for x in g if x not in phantom_init}
-    sys_nodes = {x for x in game_nodes if g.node[x].get('shape') is None}
+    sys_nodes = {x for x in game_nodes if g.nodes[x].get('shape') is None}
     mapping = {k: i for i, k in enumerate(sys_nodes)}
     # avoid mapping MooreMachine, because it raises errors
     h = nx.relabel_nodes(g, mapping)

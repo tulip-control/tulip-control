@@ -497,7 +497,7 @@ class ParityGame(GameGraph):
         max_c = -1
         # node = None
         for x in self:
-            if self.node[x]['color'] > max_c:
-                max_c = self.node[x]['color']
+            if self.nodes[x]['color'] > max_c:
+                max_c = self.nodes[x]['color']
                 # node = x
         return max_c

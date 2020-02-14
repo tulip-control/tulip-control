@@ -240,7 +240,7 @@ def test_load_aut_json():
     # compare
     for u, d in h.nodes(data=True):
         assert u in g, (u, g.nodes())
-        d_ = g.node[u]
+        d_ = g.nodes[u]
         for k, v in d.items():
             v_ = d_.get(k)
             assert v_ == v, (k, v, v_, d, d_)

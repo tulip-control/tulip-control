@@ -272,7 +272,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
     For example:
 
     >>> ts.states.add('s0')
-    >>> ts.node['s0']['my_cost'] = 5
+    >>> ts.nodes['s0']['my_cost'] = 5
 
     The difference is that atomic proposition and action labels
     are checked to make sure they are elements of the system's
@@ -745,7 +745,7 @@ class GameGraph(LabeledDiGraph):
         @return: set of states
         @rtype: C{set}
         """
-        return {x for x in self if self.node[x]['player'] == n}
+        return {x for x in self if self.nodes[x]['player'] == n}
 
     def edge_controlled_by(self, e):
         """Return the index of the player controlling edge C{e}.
@@ -755,7 +755,7 @@ class GameGraph(LabeledDiGraph):
         @rtype: integer 0 or 1
         """
         from_state = e[0]
-        return self.node[from_state]['player']
+        return self.nodes[from_state]['player']
 
 
 class LabeledGameGraph(GameGraph):
@@ -852,7 +852,7 @@ def _output_fts(ts, transitions, sol):
     AP = ts.aps
     ts_simu.atomic_propositions.add_from(AP)
     for i in range(n_cells):
-        ts_simu.states.add(i, ap=ts.node[next(iter(sol[i]))]['ap'])
+        ts_simu.states.add(i, ap=ts.nodes[next(iter(sol[i]))]['ap'])
     for i in range(n_cells):
         for j in range(n_cells):
             if transitions[j, i]:
@@ -887,7 +887,7 @@ def simu_abstract(ts, simu_type):
     n_cells = 0
     hash_ap = dict()  # map ap to cells in Part
     for node in G:
-        ap = repr(G.node[node]['ap'])
+        ap = repr(G.nodes[node]['ap'])
         if ap not in S0:
             S0[ap] = set()
             hash_ap[ap] = set()

@@ -31,7 +31,7 @@ def McNaughton(p):
     sigma = c % 2
     W = {0:set(), 1:set()}
     while True:
-        max_color_pos = {x for x in p if p.node[x]['color'] == c}
+        max_color_pos = {x for x in p if p.nodes[x]['color'] == c}
 
         a = attractor(max_color_pos, p, sigma)
 
@@ -80,7 +80,7 @@ def ctrl_next(W, pg, player):
     cnext = set()
     for node in W:
         for pred in pg.predecessors(node):
-            if pg.node[pred]['player'] == player:
+            if pg.nodes[pred]['player'] == player:
                 print('controlled by player, good')
             elif len(pg.succ[pred]) == 1:
                 print('controlled by opponent, bad only 1 outgoing')

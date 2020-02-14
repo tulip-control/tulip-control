@@ -269,8 +269,8 @@ class States(object):
         @param color: with which to paint C{state}
         @type color: str of valid dot color
         """
-        self.graph.node[state]['style'] = 'filled'
-        self.graph.node[state]['fillcolor'] = color
+        self.graph.nodes[state]['style'] = 'filled'
+        self.graph.nodes[state]['fillcolor'] = color
 
     def find(self, states=None, with_attr_dict=None, **with_attr):
         """Filter by desired states and by desired state labels.
@@ -668,13 +668,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
     it gets the default value:
 
       >>> g.add_node(2)
-      >>> g.node[2]
+      >>> g.nodes[2]
       {'drink': 'tea'}
 
     The main difference with vanilla C{networkx} is
     that the dict above includes type checking:
 
-      >>> type(g.node[2])
+      >>> type(g.nodes[2])
       tulip.transys.mathset.TypedDict
 
     The C{'setter'} key with value C{True}
@@ -700,7 +700,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     To add untyped labels, do so explicitly:
 
       >>> g.add_node(3, day='Jan', check=False)
-      >>> g.node[3]
+      >>> g.nodes[3]
       {'day': 'Jan', 'drink': 'tea'}
 
 

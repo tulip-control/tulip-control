@@ -927,7 +927,7 @@ def map_ap_to_states(fts):
     """
     table = {p: set() for p in fts.atomic_propositions}
     for u in fts:
-        for p in fts.node[u]['ap']:
+        for p in fts.nodes[u]['ap']:
             table[p].add(u)
     return table
 

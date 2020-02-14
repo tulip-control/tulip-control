@@ -31,7 +31,7 @@ sys.states.initial.add(0)
 sys.add_edges_from([(0, 1), (1, 0)])
 
 sys.atomic_propositions.add('p')
-sys.node[0]['ap'] = {'p'}
+sys.nodes[0]['ap'] = {'p'}
 
 specs = spec.GRSpec(sys_vars={'p'}, sys_prog={'p'})
 
