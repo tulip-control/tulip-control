@@ -38,6 +38,7 @@ Relevant links:
   - U{Lily<http://www.ist.tugraz.at/staff/jobstmann/lily/>}
 """
 import logging
+import errno
 import os
 import re
 import subprocess
@@ -117,7 +118,7 @@ def synthesize(formula, env_vars=None, sys_vars=None):
                              universal_newlines=True)
         out = p.stdout.read()
     except OSError as e:
-        if e.errno == os.errno.ENOENT:
+        if e.errno == errno.ENOENT:
             raise Exception(
                 'lily.pl not found in path.\n'
                 'See the Lily docs for setting PERL5LIB and PATH.')

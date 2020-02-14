@@ -35,6 +35,7 @@ Relevant links:
   - U{slugs<https://github.com/LTLMoP/slugs>}
 """
 from __future__ import absolute_import
+import errno
 import logging
 import json
 import os
@@ -205,7 +206,7 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
             stderr=subprocess.PIPE,
             universal_newlines=True)
     except OSError as e:
-        if e.errno == os.errno.ENOENT:
+        if e.errno == errno.ENOENT:
             raise Exception('slugs not found in path.')
         else:
             raise

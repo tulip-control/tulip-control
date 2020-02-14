@@ -43,6 +43,7 @@ Use the logging module to throttle verbosity.
 """
 from __future__ import print_function
 
+import errno
 from pkg_resources import parse_version
 import logging
 import copy
@@ -456,7 +457,7 @@ def synthesize(spec):
             universal_newlines=True
         )
     except OSError as e:
-        if e.errno == os.errno.ENOENT:
+        if e.errno == errno.ENOENT:
             raise Exception('gr1c not found in path.')
         else:
             raise
