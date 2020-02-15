@@ -25,7 +25,7 @@ def test_synthesis_cudd():
     h = omega_int.synthesize_enumerated_streett(sp, use_cudd=True)
     assert h is not None
     n = len(h)
-    assert n == 25, n
+    assert n == 16, n
 
 
 def test_is_circular_cudd():
