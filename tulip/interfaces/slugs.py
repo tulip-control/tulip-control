@@ -177,7 +177,7 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
         raise Exception('slugs/compiler.py not found.')
 
     with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
-        subprocess.check_call([slugs_compiler_path, filename],
+        subprocess.check_call(['python2', slugs_compiler_path, filename],
                               stdout=slugs_infile,
                               stderr=subprocess.STDOUT,
                               universal_newlines=True)
