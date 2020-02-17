@@ -356,6 +356,7 @@ def load_aut_json(x):
     symtab = autjs['ENV'] + autjs['SYS']
     A.env_vars = dict([list(v.items())[0] for v in autjs['ENV']])
     A.sys_vars = dict([list(v.items())[0] for v in autjs['SYS']])
+    A.initial_nodes = set()
     omit = {'state', 'trans'}
     for node_ID, d in autjs['nodes'].items():
         node_label = {k: d[k] for k in d if k not in omit}
@@ -363,6 +364,8 @@ def load_aut_json(x):
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
         A.add_node(node_ID, **node_label)
+        if node_label['initial']:
+            A.initial_nodes.add(node_ID)
     for node_ID, d in autjs['nodes'].items():
         for to_node in d['trans']:
             A.add_edge(node_ID, to_node)
