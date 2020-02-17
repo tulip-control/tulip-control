@@ -362,7 +362,7 @@ def load_aut_json(x):
         node_label['state'] = dict([(list(symtab[i].keys())[0],
                                      autjs['nodes'][node_ID]['state'][i])
                                     for i in range(len(symtab))])
-        A.add_node(node_ID, node_label)
+        A.add_node(node_ID, **node_label)
     for node_ID, d in autjs['nodes'].items():
         for to_node in d['trans']:
             A.add_edge(node_ID, to_node)
