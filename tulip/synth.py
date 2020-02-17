@@ -1268,6 +1268,9 @@ def strategy2mealy(A, spec):
     mach.states.add_from(A)
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
+    u = next(iter(A))
+    strategy_vars = A.nodes[u]['state'].keys()
+    assert set(all_vars).issubset(strategy_vars)
     # transitions labeled with I/O
     for u in A:
         for v in A.successors(u):
@@ -1284,11 +1287,7 @@ def strategy2mealy(A, spec):
     # fix an ordering for keys
     # because tuple(dict.items()) is not safe:
     # https://docs.python.org/2/library/stdtypes.html#dict.items
-    try:
-        u = next(iter(A))
-        keys = A.nodes[u]['state'].keys()
-    except Exception:
-        logger.warning('strategy has no states.')
+    keys = list(all_vars)
     # to store tuples of dict values for fast search
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
