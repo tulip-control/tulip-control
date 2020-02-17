@@ -1266,10 +1266,13 @@ def strategy2mealy(A, spec):
         k: v for k, v in sys_vars.items()
         if isinstance(v, list)})
     mach.states.add_from(A)
+    all_vars = dict(env_vars)
+    all_vars.update(sys_vars)
     # transitions labeled with I/O
     for u in A:
         for v in A.successors(u):
             d = A.nodes[v]['state']
+            d = {k: v for k, v in d.items() if k in all_vars}
             d = _int2str(d, str_vars)
             mach.transitions.add(u, v, attr_dict=None, check=False, **d)
 
@@ -1300,6 +1303,7 @@ def strategy2mealy(A, spec):
         # add edge: Sinit -> u ?
         tmp.update(var_values)
         if eval(isinit, tmp):
+            var_values = {k: v for k, v in var_values.items() if k in all_vars}
             label = _int2str(var_values, str_vars)
             mach.transitions.add(initial_state, u, attr_dict=None, check=False, **label)
             # remember variable values to avoid
