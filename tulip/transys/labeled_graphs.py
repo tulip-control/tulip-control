@@ -859,7 +859,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                         'in the existing types, pass: check = False')
                 raise AttributeError(msg)
             else:
-                msg += '\nAllowed because you passed: check = True'
+                msg += '\nAllowed because you passed: check = False'
                 logger.warning(msg)
         else:
             logger.debug('no untyped keys.')
