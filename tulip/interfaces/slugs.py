@@ -110,11 +110,11 @@ def synthesize(spec, symbolic=False):
         for v in d['trans']:
             g.add_edge(u, v)
     h = nx.DiGraph()
-    for u, d in g.nodes_iter(data=True):
+    for u, d in g.nodes(data=True):
         bit_state = d['state']
         int_state = _bitfields_to_ints(bit_state, vrs)
         h.add_node(u, state=int_state)
-    for u, v in g.edges_iter():
+    for u, v in g.edges():
         h.add_edge(u, v)
     logger.debug(
         ('loaded strategy with vertices:\n  {v}\n'

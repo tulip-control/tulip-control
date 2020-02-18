@@ -1268,10 +1268,10 @@ def strategy2mealy(A, spec):
     mach.states.add_from(A)
     # transitions labeled with I/O
     for u in A:
-        for v in A.successors_iter(u):
-            d = A.node[v]['state']
+        for v in A.successors(u):
+            d = A.nodes[v]['state']
             d = _int2str(d, str_vars)
-            mach.transitions.add(u, v, **d)
+            mach.transitions.add(u, v, attr_dict=None, check=False, **d)
 
             logger.info('node: {v}, state: {d}'.format(v=v, d=d))
     # special initial state, for first reaction
@@ -1283,7 +1283,7 @@ def strategy2mealy(A, spec):
     # https://docs.python.org/2/library/stdtypes.html#dict.items
     try:
         u = next(iter(A))
-        keys = A.node[u]['state'].keys()
+        keys = A.nodes[u]['state'].keys()
     except Exception:
         logger.warning('strategy has no states.')
     # to store tuples of dict values for fast search
@@ -1291,7 +1291,7 @@ def strategy2mealy(A, spec):
     # Mealy reaction to initial env input
     init_valuations = set()
     tmp = dict()
-    for u, d in A.nodes_iter(data=True):
+    for u, d in A.nodes(data=True):
         var_values = d['state']
         vals = tuple(var_values[k] for k in keys)
         # already an initial valuation ?
@@ -1301,7 +1301,7 @@ def strategy2mealy(A, spec):
         tmp.update(var_values)
         if eval(isinit, tmp):
             label = _int2str(var_values, str_vars)
-            mach.transitions.add(initial_state, u, **label)
+            mach.transitions.add(initial_state, u, attr_dict=None, check=False, **label)
             # remember variable values to avoid
             # spurious non-determinism wrt the machine's memory
             #
@@ -1355,7 +1355,7 @@ def _int2str(label, str_vars):
 
 def mask_outputs(machine):
     """Erase outputs from each edge where they are zero."""
-    for u, v, d in machine.edges_iter(data=True):
+    for u, v, d in machine.edges(data=True):
         for k in d:
             if k in machine.outputs and d[k] == 0:
                 d.pop(k)
@@ -1448,7 +1448,7 @@ def determinize_machine_init(mach, init_out_values=None):
     # restrict attention to given output ports only
     given_ports = tuple(k for k in mach.outputs if k in init_out_values)
     rm_edges = set()
-    for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
+    for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
         for k in given_ports:
             if d[k] != init_out_values[k]:
                 rm_edges.add((i, j, key))
@@ -1461,7 +1461,7 @@ def determinize_machine_init(mach, init_out_values=None):
     # fix a key order
     inputs = tuple(k for k in mach.inputs)
     rm_edges = set()
-    for i, j, key, d in mach.edges_iter(['Sinit'], data=True, keys=True):
+    for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
         in_values = tuple(d[k] for k in inputs)
         # newly encountered input valuation ?
         if in_values not in possible_inputs:

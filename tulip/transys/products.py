@@ -287,7 +287,7 @@ def find_ba_succ(prev_q, next_s, fts, ba):
 
     logger.debug('Next state:\t' + str(next_s))
     try:
-        ap = fts.node[next_s]['ap']
+        ap = fts.nodes[next_s]['ap']
     except:
         raise Exception(
             'No AP label for FTS state: ' + str(next_s) +

@@ -28,7 +28,7 @@ try:
     import omega
     from omega.logic import bitvector as bv
     from omega.games import gr1
-    from omega.symbolic import symbolic as sym
+    from omega.symbolic import temporal as trl
     from omega.games import enumeration as enum
 except ImportError:
     omega = None
@@ -44,14 +44,10 @@ def is_realizable(spec, use_cudd=False):
     See `synthesize_enumerated_streett` for more details.
     """
     aut = _grspec_to_automaton(spec)
-    sym.fill_blanks(aut)
-    bdd = _init_bdd(use_cudd)
-    aut.bdd = bdd
-    a = aut.build()
     t0 = time.time()
-    z, _, _ = gr1.solve_streett_game(a)
+    z, _, _ = gr1.solve_streett_game(aut)
     t1 = time.time()
-    return gr1.is_realizable(z, a)
+    return gr1.is_realizable(z, aut)
 
 
 def synthesize_enumerated_streett(spec, use_cudd=False):
@@ -62,24 +58,22 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     @rtype: `networkx.DiGraph`
     """
     aut = _grspec_to_automaton(spec)
-    sym.fill_blanks(aut)
-    bdd = _init_bdd(use_cudd)
-    aut.bdd = bdd
-    a = aut.build()
-    assert a.action['sys'][0] != bdd.false
+    assert aut.action['sys'] != aut.false
     t0 = time.time()
-    z, yij, xijk = gr1.solve_streett_game(a)
+    z, yij, xijk = gr1.solve_streett_game(aut)
     t1 = time.time()
     # unrealizable ?
-    if not gr1.is_realizable(z, a):
+    if not gr1.is_realizable(z, aut):
         print('WARNING: unrealizable')
         return None
-    t = gr1.make_streett_transducer(z, yij, xijk, a)
+    u = gr1.make_streett_transducer(z, yij, xijk, aut)
+    aut.init['env'] = aut.init['impl_env']
+    aut.init['sys'] = aut.init['impl_sys']
+    aut.action['sys'] = u
     t2 = time.time()
-    (u,) = t.action['sys']
-    assert u != bdd.false
-    g = enum.action_to_steps(t, qinit=spec.qinit)
-    h = _strategy_to_state_annotated(g, a)
+    assert u != aut.false
+    g = enum.action_to_steps(aut, qinit=aut.qinit)
+    h = _strategy_to_state_annotated(g, aut)
     del u, yij, xijk
     t3 = time.time()
     log.info((
@@ -100,25 +94,8 @@ def is_circular(spec, use_cudd=False):
     @rtype: `bool`
     """
     aut = _grspec_to_automaton(spec)
-    sym.fill_blanks(aut)
-    bdd = _init_bdd(use_cudd)
-    aut.bdd = bdd
     triv, t = gr1.trivial_winning_set(aut)
     return triv != t.bdd.false
-
-
-def _init_bdd(use_cudd):
-    if _bdd is None:
-        raise ImportError(
-            'Failed to import `dd.bdd`.\n'
-            'Install package `dd`.')
-    if not use_cudd:
-        return _bdd.BDD()
-    if cudd is None:
-        raise ImportError(
-            'Failed to import module `dd.cudd`.\n'
-            'Compile the Cython bindings of `dd` to CUDD.')
-    return cudd.BDD()
 
 
 def _int_bounds(aut):
@@ -153,24 +130,24 @@ def _strategy_to_state_annotated(g, aut):
     @rtype: `nx.DiGraph`
     """
     h = nx.DiGraph()
-    for u, d in g.nodes_iter(data=True):
+    for u, d in g.nodes(data=True):
         dvars = {k: d[k] for k in d if k in aut.vars}
         h.add_node(u, state=dvars)
-    for u, v in g.edges_iter():
+    for u, v in g.edges():
         h.add_edge(u, v)
     return h
 
 
 def _grspec_to_automaton(g):
-    """Return `symbolic.Automaton` from `GRSpec`.
+    """Return `omega.symbolic.temporal.Automaton` from `GRSpec`.
 
     @type g: `tulip.spec.form.GRSpec`
-    @rtype: `omega.symbolic.symbolic.Automaton`
+    @rtype: `omega.symbolic.temporal.Automaton`
     """
     if omega is None:
         raise ImportError(
             'Failed to import package `omega`.')
-    a = sym.Automaton()
+    a = trl.Automaton()
     d = dict(g.env_vars)
     d.update(g.sys_vars)
     for k, v in d.items():
@@ -186,18 +163,24 @@ def _grspec_to_automaton(g):
                 'unknown variable type: {v}'.format(v=v))
         d[k] = r
     g.str_to_int()
+    
     # reverse mapping by `synth.strategy2mealy`
-    a.vars = bv.make_table(d, env_vars=g.env_vars)
+    a.declare_variables(**d)
+    a.varlist.update(env=list(g.env_vars.keys()), sys=list(g.sys_vars.keys()))
+
     f = g._bool_int.__getitem__
-    a.init['env'] = [f(ei) for ei in g.env_init]
-    a.init['sys'] = [f(si) for si in g.sys_init]
-    a.action['env'] = [f(es) for es in g.env_safety]
-    a.action['sys'] = [f(ss) for ss in g.sys_safety]
-    a.win['<>[]'] = [
-        '!({s})'.format(s=s)
-        for s in map(f, g.env_prog)]
-    a.win['[]<>'] = [f(sp) for sp in g.sys_prog]
+    a.init['env'] = " & ".join("( %s )" % f(ei) for ei in g.env_init) if len(g.env_init) > 0 else "TRUE"
+    a.init['sys'] = " & ".join("( %s )" % f(si) for si in g.sys_init) if len(g.sys_init) > 0 else "TRUE"
+    a.action['env'] = " & ".join("( %s )" % f(es) for es in g.env_safety) if len(g.env_safety) > 0 else "TRUE"
+    a.action['sys'] = " & ".join("( %s )" % f(ss) for ss in g.sys_safety) if len(g.sys_safety) > 0 else "TRUE"
+
+    w1 = ['!({s})'.format(s=s) for s in map(f, g.env_prog)] if len(g.env_prog) > 0 else ["FALSE"]
+    w2 = [f(sp) for sp in g.sys_prog] if len(g.sys_prog) > 0 else ["TRUE"]
+    a.win['<>[]'] = a.bdds_from(*w1)
+    a.win['[]<>'] = a.bdds_from(*w2)
+
     a.moore = g.moore
     a.plus_one = g.plus_one
     a.qinit = g.qinit
+
     return a

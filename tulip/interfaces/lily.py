@@ -168,7 +168,7 @@ def lily_strategy2moore(g, env_vars, sys_vars):
 
     # add initial states
     for u in phantom_init:
-        for v in g.successors_iter(u):
+        for v in g.successors(u):
             m.states.initial.add(mapping[v])
 
     # label vertices with output values
@@ -186,7 +186,7 @@ def lily_strategy2moore(g, env_vars, sys_vars):
             continue
 
         # label edges with input values that matter
-        for v_, w, attr in h.out_edges_iter(v, data=True):
+        for v_, w, attr in h.out_edges(v, data=True):
             assert(v_ is v)
             assert(w in m)
             d = _parse_label(attr['label'])

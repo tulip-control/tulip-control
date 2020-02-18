@@ -115,7 +115,7 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
     c = list()
     for u, ifu in zip(M, ifs()):
         edges = list()
-        for (_, w, d), ifw in zip(M.edges_iter(u, data=True), ifs()):
+        for (_, w, d), ifw in zip(M.edges(u, data=True), ifs()):
             if M.inputs:
                 guard = ' and '.join(
                     '({k} == {v})'.format(k=k, v=v)

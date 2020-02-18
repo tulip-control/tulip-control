@@ -12,7 +12,7 @@ def ts_test():
 
     ts.states.add('s0')
     assert('s0' in ts)
-    assert('s0' in ts.node)
+    assert('s0' in ts.nodes)
     assert('s0' in ts.states)
 
     states = {'s0', 's1', 's2', 's3'}
