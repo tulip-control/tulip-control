@@ -1235,7 +1235,9 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    Z.plot(font_pt=min(288 // Z.W.shape[1], 48), show_grid=True, axes=ax)
+
+    def init():
+        Z.plot(font_pt=min(288 // Z.W.shape[1], 48), show_grid=True, axes=ax)
 
     def update_line(num, dlist, lines):
         for (p, t), d in zip(lines, dlist):
@@ -1256,13 +1258,13 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         lines.append((l, l_trail))
 
     if not save_prefix:
-        ani = matplotlib.animation.FuncAnimation(fig, update_line,
-                                                 len(paths[0]),
-                                                 fargs=(data, lines),
-                                                 interval=500)
-        plt.show()
+        anim = matplotlib.animation.FuncAnimation(
+            fig, update_line, len(paths[0]),
+            init_func=init, fargs=(data, lines), interval=500)
+        return anim
     else:
         print("Writing %s000.png - %s%03d.png" %
               (save_prefix, save_prefix, len(paths[0])-1))
         for n in range(len(paths[0])):
             update_line(n, data, lines)
+        return None
