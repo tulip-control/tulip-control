@@ -135,6 +135,7 @@ def _strategy_to_state_annotated(g, aut):
         h.add_node(u, state=dvars)
     for u, v in g.edges():
         h.add_edge(u, v)
+    h.initial_nodes = set(g.initial_nodes)
     return h
 
 
