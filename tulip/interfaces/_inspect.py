@@ -13,6 +13,14 @@ try:
 except ImportError:
     cvxopt_glpk = None
 try:
+    import dd
+except ImportError:
+    dd = None
+try:
+    from dd import cudd as dd_cudd
+except ImportError:
+    dd_cudd = None
+try:
     import scipy
 except ImportError:
     scipy = None
@@ -49,10 +57,19 @@ def print_env():
         'gr1py', gr1py_int.gr1py, 'https://pypi.python.org/pypi/gr1py')
     c.append(s)
     s = _format_python_package_message(
-        'omega', omega_int.omega, 'https://pypi.python.org/pypi/omega')
+        'dd', dd, 'https://pypi.python.org/pypi/dd')
+    c.append(s)
+    if dd_cudd is None:
+        s = (
+            'Could not import Cython module `dd.cudd`.\n'
+            'Can be installed by compiling and linking the Cython bindings '
+            'of `dd` to CUDD.\n')
+    else:
+        s = 'Found Cython module `dd.cudd` as:\n    {dd_cudd}\n.'.format(
+            dd_cudd=dd_cudd)
     c.append(s)
     s = _format_python_package_message(
-        'dd.cudd', omega_int.cudd, 'https://pypi.python.org/pypi/dd')
+        'omega', omega_int.omega, 'https://pypi.python.org/pypi/omega')
     c.append(s)
     s = _format_python_package_message(
         'numpy', numpy, 'https://pypi.python.org/pypi/numpy')
