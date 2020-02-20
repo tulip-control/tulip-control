@@ -22,7 +22,7 @@ log.addHandler(logging.StreamHandler())
 
 def test_synthesis_cudd():
     sp = grspec_1()
-    h = omega_int.synthesize_enumerated_streett(sp, use_cudd=True)
+    h = omega_int.synthesize_enumerated_streett(sp)
     assert h is not None
     n = len(h)
     assert n == 16, n
@@ -33,5 +33,5 @@ def test_is_circular_cudd():
     f.sys_vars['y'] = 'bool'
     f.env_prog = ['y']
     f.sys_prog = ['y']
-    triv = omega_int.is_circular(f, use_cudd=True)
+    triv = omega_int.is_circular(f)
     assert triv, triv

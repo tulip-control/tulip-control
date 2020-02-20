@@ -30,7 +30,7 @@ import networkx as nx
 log = logging.getLogger(__name__)
 
 
-def is_realizable(spec, use_cudd=False):
+def is_realizable(spec):
     """Return `True` if, and only if, realizable.
 
     See `synthesize_enumerated_streett` for more details.
@@ -42,11 +42,10 @@ def is_realizable(spec, use_cudd=False):
     return gr1.is_realizable(z, aut)
 
 
-def synthesize_enumerated_streett(spec, use_cudd=False):
+def synthesize_enumerated_streett(spec):
     """Return transducer enumerated as a graph.
 
     @type spec: `tulip.spec.form.GRSpec`
-    @param use_cudd: efficient BDD computations with `dd.cudd`
     @rtype: `networkx.DiGraph`
     """
     aut = _grspec_to_automaton(spec)
@@ -78,11 +77,10 @@ def synthesize_enumerated_streett(spec, use_cudd=False):
     return h
 
 
-def is_circular(spec, use_cudd=False):
+def is_circular(spec):
     """Return `True` if trivial winning set non-empty.
 
     @type spec: `tulip.spec.form.GRSpec`
-    @param use_cudd: efficient BDD computations with `dd.cudd`
     @rtype: `bool`
     """
     aut = _grspec_to_automaton(spec)
