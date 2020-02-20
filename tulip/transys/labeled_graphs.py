@@ -1026,11 +1026,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                     key -= 1
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            super().add_edge(u, v, key, **datadict)
+            nx.MultiDiGraph.add_edge(self, u, v, key, **datadict)
         else:
             logger.debug('first directed edge between these nodes')
             # selfloops work this way without special treatment
-            super().add_edge(u, v, **typed_attr)
+            nx.MultiDiGraph.add_edge(self, u, v, **typed_attr)
 
     def add_edges_from(self, labeled_ebunch, attr_dict=None,
                        check=True, **attr):
