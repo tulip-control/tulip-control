@@ -17,14 +17,6 @@ import logging
 import time
 
 try:
-    import dd.bdd as _bdd
-except ImportError:
-    _bdd = None
-try:
-    from dd import cudd
-except ImportError:
-    cudd = None
-try:
     import omega
     from omega.logic import bitvector as bv
     from omega.games import gr1
