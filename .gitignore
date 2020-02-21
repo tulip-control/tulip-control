@@ -29,3 +29,5 @@ __pycache__
 /MANIFEST
 /.coverage
 /tests/cover/
+
+.ipynb_checkpoints/
