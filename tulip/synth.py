@@ -449,6 +449,7 @@ def sys_to_spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
+    assert not set(aps).intersection(states)
     # init
     sys_init = list()
     sys_trans = list()
@@ -460,6 +461,10 @@ def sys_to_spec(
     sys_action_ids = dict()
     env_action_ids = dict()
     for action_type, codomain in actions.items():
+        assert not set(codomain).intersection(aps), (codomain, aps)
+        assert not set(codomain).intersection(states), (codomain, states)
+        assert action_type not in states, action_type
+        assert action_type not in aps, action_type
         msg = 'action_type:\n\t' + str(action_type) + '\n'
         msg += 'with codomain:\n\t' + str(codomain)
         logger.debug(msg)
@@ -528,6 +533,7 @@ def env_to_spec(
     aps = ofts.aps
     states = ofts.states
     trans = ofts.transitions
+    assert not set(aps).intersection(states)
     # init
     sys_init = list()
     sys_trans = list()
@@ -540,6 +546,10 @@ def env_to_spec(
     sys_action_ids = dict()
     env_action_ids = dict()
     for action_type, codomain in actions.items():
+        assert not set(codomain).intersection(aps), (codomain, aps)
+        assert not set(codomain).intersection(states), (codomain, states)
+        assert action_type not in states, action_type
+        assert action_type not in aps, action_type
         if 'sys' in action_type:
             action_ids, constraint = iter2var(
                 codomain, sys_vars, action_type,
