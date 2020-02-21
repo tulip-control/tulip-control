@@ -427,11 +427,11 @@ def multiple_env_actions_check(solver='omega'):
 
 def test_var_name_conflicts():
     """Check redefinitions between states, actions, atomic props."""
-    conversion_raises = lambda x, y: assert_raises(
-        Exception, spec=x, sys=y,
-        ignore_initial=True,
-        statevar='loc',
-        bool_actions=False)
+    def conversion_raises(f, ofts):
+        with assert_raises(AssertionError):
+            f(ofts, ignore_initial=True,
+            statevar='loc', bool_actions=False)
+
 
     # FTS to spec
 
@@ -459,12 +459,14 @@ def test_var_name_conflicts():
     env = transys.FTS()
     env.states.add('out')
     env.env_actions.add('out')
+    env.owner = 'env'
 
     conversion_raises(synth.env_to_spec, env)
 
     env = transys.FTS()
     env.states.add('env_actions')
     env.env_actions.add('out')
+    env.owner = 'env'
 
     conversion_raises(synth.env_to_spec, env)
 
@@ -488,6 +490,7 @@ def test_var_name_conflicts():
     env.states.add('s0')
     env.atomic_propositions.add('out')
     env.env_actions.add('out')
+    env.owner = 'env'
 
     conversion_raises(synth.env_to_spec, env)
 
@@ -495,6 +498,7 @@ def test_var_name_conflicts():
     env.states.add('s0')
     env.atomic_propositions.add('env_actions')
     env.env_actions.add('out')
+    env.owner = 'env'
 
     conversion_raises(synth.env_to_spec, env)
 
@@ -507,6 +511,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     # states vs sys_actions
@@ -516,6 +521,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     sys = transys.FTS()
@@ -524,6 +530,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     # states vs env_actions
@@ -533,6 +540,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     sys = transys.FTS()
@@ -541,6 +549,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     # sys_actions vs APs
@@ -551,6 +560,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     sys = transys.FTS()
@@ -560,6 +570,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     # env_actions vs APs
@@ -570,6 +581,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
     sys = transys.FTS()
@@ -579,6 +591,7 @@ def test_var_name_conflicts():
 
     conversion_raises(synth.sys_to_spec, sys)
 
+    sys.owner = 'env'
     conversion_raises(synth.env_to_spec, sys)
 
 
