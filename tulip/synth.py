@@ -1288,6 +1288,46 @@ def strategy2mealy(A, spec):
     # because tuple(dict.items()) is not safe:
     # https://docs.python.org/2/library/stdtypes.html#dict.items
     keys = list(all_vars)
+    if hasattr(A, 'initial_nodes'):
+        _init_edges_using_initial_nodes(
+            A, mach, keys, all_vars, str_vars, initial_state)
+    else:
+        _init_edges_using_compile_init(
+            spec, A, mach, keys, all_vars, str_vars, initial_state)
+    n = len(A)
+    m = len(mach)
+    assert m == n + 1, (n, m)
+    if not mach.successors('Sinit'):
+        raise Exception(
+            'The machine obtained from the strategy '
+            'does not have any initial states !\n'
+            'The strategy is:\n'
+            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
+            'edges:\n' + str(A.edges()) + 2 * '\n' +
+            'and the machine:\n' + str(mach) + 2 * '\n' +
+            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n')
+    return mach
+
+
+def _init_edges_using_initial_nodes(
+        A, mach, keys, all_vars, str_vars, initial_state):
+    assert A.initial_nodes
+    init_valuations = set()
+    for u in A.initial_nodes:
+        d = A.nodes[u]['state']
+        vals = tuple(d[k] for k in keys)
+        # already an initial valuation ?
+        if vals in init_valuations:
+            continue
+        init_valuations.add(vals)
+        d = {k: v for k, v in d.items() if k in all_vars}
+        d = _int2str(d, str_vars)
+        mach.transitions.add(initial_state, u, attr_dict=None, **d)
+
+
+def _init_edges_using_compile_init(
+        spec, A, mach, keys, all_vars, str_vars, initial_state):
+    init_valuations = set()
     # to store tuples of dict values for fast search
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
@@ -1319,19 +1359,6 @@ def strategy2mealy(A, spec):
             logger.debug('found initial state: {u}'.format(u=u))
         logger.debug('machine vertex: {u}, has var values: {v}'.format(
                      u=u, v=var_values))
-    n = len(A)
-    m = len(mach)
-    assert m == n + 1, (n, m)
-    if not mach.successors('Sinit'):
-        raise Exception(
-            'The machine obtained from the strategy '
-            'does not have any initial states !\n'
-            'The strategy is:\n'
-            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
-            'edges:\n' + str(A.edges()) + 2 * '\n' +
-            'and the machine:\n' + str(mach) + 2 * '\n' +
-            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n')
-    return mach
 
 
 def _int2str(label, str_vars):
