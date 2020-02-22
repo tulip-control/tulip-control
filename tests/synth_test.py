@@ -364,7 +364,7 @@ def test_only_mode_control():
 
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
-
+    specs.qinit = '\E \A'
     r = synth.is_realizable(specs, env=env_sws, ignore_env_init=True)
     assert not r
 

@@ -277,19 +277,34 @@ class GRSpec(LTL):
 
       - C{qinit}: select quantification of initial values for variables:
 
-        - C{'\A \A'}: forall env forall sys
-          assume C{env_init}
-          C{sys_init} must be empty
+        C{win} below describes the set of winning states.
+        C{internal_init} is the initial condition for the
+        internal strategy variables.
+        C{Op == expr} means operator C{Op} is defined as the expression C{expr}.
 
-        - C{'\A \E'}: forall env exist sys (usually not Moore)
-          assume C{env_init} and require C{sys_init}
+          - C{'\A \A'}: C{forall env_vars:  forall sys_vars:  env_init -> win}.
+            C{sys_init} must be empty or contain true.
+            The strategy enumeration iterates through all assignments that
+            satisfy C{env_init & internal_init}.
 
-        - C{'\E \A'}: exist sys forall env
-          assume C{env_init} and require C{sys_init}
+          - C{'\A \E'}: C{forall env_vars:  exist sys_vars:  form}, where:
+              - C{form == sys_init & (env_init -> win)}  (C{plus_one is True})
+              - C{form == env_init -> (sys_init & win)}  (C{plus_one is False})
+            The strategy enumeration iterates through all assignments that
+            satisfy C{\E sys_vars:  env_init}, and
+            picks assignments that satisfy C{form & internal_init}.
 
-        - C{'\E \E'}: exist env exist sys
-          require C{sys_init}
-          C{env_init} must be empty
+          - C{'\E \A'}: C{exist sys_vars:  forall env_vars:  form}, where:
+              - C{form == sys_init & (env_init -> win)}  (C{plus_one is True})
+              - C{form == env_init -> (sys_init & win)}  (C{plus_one is False})
+            The strategy enumeration picks an assignment that satisfies
+            C{internal_init & \A env_vars:  form} and iterates through
+            all assignments that satisfy C{env_init}.
+
+          - C{'\E \E'}: C{exist env_vars:  exist sys_vars:  sys_init & win}.
+            C{env_init} must be empty or contain true.
+            The strategy enumeration picks an assignment that satisfies
+            C{sys_init & win & internal_init}.
 
       - C{env_vars}: alias for C{input_variables} of L{LTL},
         concerning variables that are determined by the environment.

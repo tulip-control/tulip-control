@@ -57,15 +57,11 @@ def synthesize_enumerated_streett(spec):
     if not gr1.is_realizable(z, aut):
         print('WARNING: unrealizable')
         return None
-    u = gr1.make_streett_transducer(z, yij, xijk, aut)
-    aut.init['env'] = aut.init['impl_env']
-    aut.init['sys'] = aut.init['impl_sys']
-    aut.action['sys'] = u
+    gr1.make_streett_transducer(z, yij, xijk, aut)
     t2 = time.time()
-    assert u != aut.false
-    g = enum.action_to_steps(aut, qinit=aut.qinit)
+    g = enum.action_to_steps(aut, 'env', 'impl', qinit=aut.qinit)
     h = _strategy_to_state_annotated(g, aut)
-    del u, yij, xijk
+    del z, yij, xijk
     t3 = time.time()
     log.info((
         'Winning set computed in {win} sec.\n'

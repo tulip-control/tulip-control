@@ -100,7 +100,7 @@ def run_setup():
         install_requires=[
             'networkx >= 2.0, <= 2.4',
             'numpy >= 1.7',
-            'omega >= 0.2.0, < 0.3.0',
+            'omega >= 0.3.1, < 0.4.0',
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
             'pydot >= 1.2.0',
