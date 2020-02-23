@@ -108,7 +108,7 @@ def transition_directions_test():
     assert nx.is_isomorphic(ts, h)
     ts = swab.ts
     assert nx.is_isomorphic(ts, h)
-    for _, _, d in ts.edges_iter(data=True):
+    for _, _, d in ts.edges(data=True):
         assert d['env_actions'] == 'normal'
         assert d['sys_actions'] == 'fly'
 

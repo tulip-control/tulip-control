@@ -95,7 +95,7 @@ class basic_test(object):
                            2: (1,0),
                            3: (0,0),
                            4: (1,0)}
-        for u, d in g.nodes_iter(data=True):
+        for u, d in g.nodes(data=True):
             state = d['state']
             assert(len(state) == 2)
             assert(label_reference[u] == (state['x'], state['y']))
