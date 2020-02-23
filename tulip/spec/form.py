@@ -698,7 +698,9 @@ class GRSpec(LTL):
 
         The returned bytecode can be used with C{eval}
         and a C{dict} assigning values to variables.
-        Its value is the conjunction of C{env_init} and C{sys_init}.
+        Its value is the implication
+
+            C{env_init => sys_init}
 
         Use the corresponding python data types
         for the C{dict} values:

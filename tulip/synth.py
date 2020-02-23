@@ -1268,6 +1268,9 @@ def strategy2mealy(A, spec):
     mach.states.add_from(A)
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
+    u = next(iter(A))
+    strategy_vars = A.nodes[u]['state'].keys()
+    assert set(all_vars).issubset(strategy_vars)
     # transitions labeled with I/O
     for u in A:
         for v in A.successors(u):
@@ -1284,11 +1287,47 @@ def strategy2mealy(A, spec):
     # fix an ordering for keys
     # because tuple(dict.items()) is not safe:
     # https://docs.python.org/2/library/stdtypes.html#dict.items
-    try:
-        u = next(iter(A))
-        keys = A.nodes[u]['state'].keys()
-    except Exception:
-        logger.warning('strategy has no states.')
+    keys = list(all_vars)
+    if hasattr(A, 'initial_nodes'):
+        _init_edges_using_initial_nodes(
+            A, mach, keys, all_vars, str_vars, initial_state)
+    else:
+        _init_edges_using_compile_init(
+            spec, A, mach, keys, all_vars, str_vars, initial_state)
+    n = len(A)
+    m = len(mach)
+    assert m == n + 1, (n, m)
+    if not mach.successors('Sinit'):
+        raise Exception(
+            'The machine obtained from the strategy '
+            'does not have any initial states !\n'
+            'The strategy is:\n'
+            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
+            'edges:\n' + str(A.edges()) + 2 * '\n' +
+            'and the machine:\n' + str(mach) + 2 * '\n' +
+            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n')
+    return mach
+
+
+def _init_edges_using_initial_nodes(
+        A, mach, keys, all_vars, str_vars, initial_state):
+    assert A.initial_nodes
+    init_valuations = set()
+    for u in A.initial_nodes:
+        d = A.nodes[u]['state']
+        vals = tuple(d[k] for k in keys)
+        # already an initial valuation ?
+        if vals in init_valuations:
+            continue
+        init_valuations.add(vals)
+        d = {k: v for k, v in d.items() if k in all_vars}
+        d = _int2str(d, str_vars)
+        mach.transitions.add(initial_state, u, attr_dict=None, **d)
+
+
+def _init_edges_using_compile_init(
+        spec, A, mach, keys, all_vars, str_vars, initial_state):
+    init_valuations = set()
     # to store tuples of dict values for fast search
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
@@ -1320,19 +1359,6 @@ def strategy2mealy(A, spec):
             logger.debug('found initial state: {u}'.format(u=u))
         logger.debug('machine vertex: {u}, has var values: {v}'.format(
                      u=u, v=var_values))
-    n = len(A)
-    m = len(mach)
-    assert m == n + 1, (n, m)
-    if not mach.successors('Sinit'):
-        raise Exception(
-            'The machine obtained from the strategy '
-            'does not have any initial states !\n'
-            'The strategy is:\n'
-            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
-            'edges:\n' + str(A.edges()) + 2 * '\n' +
-            'and the machine:\n' + str(mach) + 2 * '\n' +
-            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n')
-    return mach
 
 
 def _int2str(label, str_vars):
