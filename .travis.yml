@@ -43,8 +43,7 @@ script:
   - python -c "import cvxopt.glpk"
   # install `dd.cudd`
   - pip uninstall --yes dd
-  # `omega == 0.0.11` requires this version of `dd`
-  - pip download --no-dependencies dd==0.4.3
+  - pip download --no-dependencies dd
   - tar xzf dd-*.tar.gz
   - cd dd-*/
   - export CUDD_VERSION=3.0.0
