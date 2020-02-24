@@ -2,6 +2,10 @@
 from __future__ import division
 from __future__ import print_function
 
+try:
+    from dd import cudd as dd_cudd
+except ImportError:
+    dd_cudd = None
 import numpy as np
 import tulip.gridworld as gw
 import unittest
@@ -150,8 +154,8 @@ class GridWorld_test(object):
     def test_dumploadloop(self):
         assert self.X == gw.GridWorld(self.X.dumps())
 
-    @unittest.skipIf(psutil.virtual_memory().total < 64e9,
-                     "not enough memory available")
+    @unittest.skipIf(dd_cudd is None,
+                     '`dd.cudd` not installed')
     def test_spec_realizable_bool(self):
         spec = self.X.spec(nonbool=False)
         spec.moore = False
