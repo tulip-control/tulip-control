@@ -36,7 +36,7 @@ Labeled graphs
 --------------
 
 Already, ``networkx`` graphs `provide labeling capabilities
-<http://networkx.github.io/documentation/latest/tutorial/tutorial.html#node-attributes>`_
+<https://networkx.github.io/documentation/stable/tutorial.html#node-attributes>`_
 for nodes and edges.
 A ``dict`` is associated with each node and (multi)edge.
 The labeling annotation can be stored as a key-value pair in the ``dict``.
@@ -229,15 +229,15 @@ possible post states,
 
   set([e[1] for e in g.transitions.find('s0', with_attr_dict={'sys_action':'jump'})])
 
-Alternatively ``find()`` may be bypassed in favor of the ``networkx`` method `edges_iter <https://networkx.github.io/documentation/latest/reference/generated/networkx.MultiDiGraph.edges_iter.html?highlight=edges_iter#networkx.MultiDiGraph.edges_iter>`_, as in
+Alternatively ``find()`` may be bypassed in favor of the ``networkx`` method `edges <https://networkx.github.io/documentation/stable/reference/classes/generated/networkx.MultiDiGraph.edges.html>`_, as in
 
 .. code-block:: python
 
-  [u for u, d in g.edges_iter('s0', data=True) if d['sys_action'] == 'jump']
+  [u for u, d in g.edges('s0', data=True) if d['sys_action'] == 'jump']
 
 To add or label multiple nodes with one call,
 call ``LabeledDiGraph.add_nodes_from``, as described `here
-<http://networkx.github.io/documentation/latest/reference/generated/networkx.MultiDiGraph.add_nodes_from.html>`_.
+<https://networkx.github.io/documentation/stable/reference/classes/generated/networkx.MultiDiGraph.add_nodes_from.html>`_.
 
 
 .. code-block:: python
