@@ -222,6 +222,7 @@ def test_aut_xml2mealy():
 
 def test_load_aut_json():
     g = gr1c.load_aut_json(REFERENCE_AUTJSON_smallbool)
+    assert set(g.initial_nodes) == {'0x1E8F990'}
     assert g.env_vars == dict(x='boolean'), (g.env_vars)
     assert g.sys_vars == dict(y='boolean'), (g.sys_vars)
     # `REFERENCE_AUTJSON_smallbool` defined above
