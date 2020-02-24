@@ -950,10 +950,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Notes
         =====
-        1. Argument C{key} has been removed compared to
-           C{networkx.MultiDiGraph.add_edge}, because edges are defined
-           by their labeling, i.e., multiple edges with same labeling
-           are not allowed.
 
         @param check: raise C{AttributeError} if C{attr_dict}
             has untyped attribute keys, otherwise warn
