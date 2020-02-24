@@ -154,7 +154,7 @@ def _grspec_to_automaton(g):
                 'unknown variable type: {v}'.format(v=v))
         d[k] = r
     g.str_to_int()
-    
+
     # reverse mapping by `synth.strategy2mealy`
     a.declare_variables(**d)
     a.varlist.update(env=list(g.env_vars.keys()), sys=list(g.sys_vars.keys()))
