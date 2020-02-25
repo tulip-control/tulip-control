@@ -9,7 +9,6 @@ except ImportError:
 import numpy as np
 import tulip.gridworld as gw
 import unittest
-import psutil
 
 from tulip.synth import is_realizable
 
