@@ -521,7 +521,7 @@ class MealyMachine(Transducer):
         @type lazy: bool
 
         @return: output values and next state.
-        @rtype: (outputs, next_state)
+        @rtype: (next_state, outputs)
           where C{outputs}: C{{'port_name':port_value, ...}}
         """
         if lazy:
