@@ -81,7 +81,7 @@ def get_input(
     x0, ssys, abstraction,
     start, end,
     R=None, r=None, Q=None,
-    ord=1, mid_weight=0.0
+    ord=1, mid_weight=0.0, solver=None
 ):
     """Compute continuous control input for discrete transition.
 
@@ -281,7 +281,7 @@ def get_input(
                 r[idx, 0] += -mid_weight * xc
                 u, cost = get_input_helper(
                     x0, ssys, P1, P3, N, R, r, Q, ord,
-                    closed_loop=closed_loop
+                    closed_loop=closed_loop, solver=solver
                 )
                 r[idx, 0] += mid_weight * xc
 
@@ -304,14 +304,14 @@ def get_input(
             r[idx, 0] += -mid_weight * xc
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q, ord,
-            closed_loop=closed_loop
+            closed_loop=closed_loop, solver=solver
         )
     return low_u
 
 
 def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q, ord=1,
-    closed_loop=True
+    closed_loop=True, solver=None
 ):
     """Calculate the sequence u_seq such that:
 
@@ -421,6 +421,10 @@ def get_input_helper(
             ) +
             0.5 * r.T.dot(Ct)
         ).T
+        if solvers != None:
+            raise Exception(
+                "_get_input_helper: ",
+                "solver specified but only 'None' allowed for ord = 2")
         sol = solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
             raise Exception(
@@ -446,12 +450,12 @@ def get_input_helper(
             np.hstack((np.zeros((Lu.shape[0], 2)), Lu))
         ))
         h_LP = np.vstack((np.zeros((2 * N * (n + m), 1)), M))
-    sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP)
+    sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP, solver=solver)
     if sol['status'] != 0:
         raise Exception(
             "getInputHelper: "
-            "LP solver finished with message " +
-            str(sol['message']))
+            "LP solver finished with error code " +
+            str(sol['status']))
     var = np.array(sol['x']).flatten()
     u = var[-N * m:]
     cost = sol['fun']
@@ -527,6 +531,6 @@ def find_discrete_state(x0, part):
     @rtype: int
     """
     for (i, region) in enumerate(part):
-        if pc.is_inside(region, x0):
+        if x0 in region:
             return i
     return None
