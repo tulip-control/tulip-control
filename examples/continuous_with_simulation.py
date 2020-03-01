@@ -90,10 +90,15 @@ print('\n Simulation starts \n')
 T = 100
 # let us pick an environment signal
 randParkSignal = [random.randint(0, 1) for b in range(1, T + 1)]
+
+# Set up parameters for get_input()
+disc_dynamics.disc_params['conservative'] = True
+disc_dynamics.disc_params['closed_loop'] = False
+
 # initialization:
 #     pick initial continuous state consistent with
 #     initial controller state (discrete)
-u, v, edge_data = ctrl.edges('Sinit', data=True)[1]
+u, v, edge_data = list(ctrl.edges('Sinit', data=True))[1]
 s0_part = edge_data['loc']
 init_poly_v = pc.extreme(disc_dynamics.ppp[s0_part][0])
 x_init = sum(init_poly_v) / init_poly_v.shape[0]
