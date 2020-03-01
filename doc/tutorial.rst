@@ -209,7 +209,7 @@ continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
 
 Putting everything together, we now obtain a specification of the form in
 :eq:`spec` (see also :doc:`specifications`).  We can then use a GR(1) game
-solver, as those available in `omega <https://github.com/johnyf/omega>`_
+solver, as those available in `omega <https://github.com/tulip-control/omega>`_
 and `gr1c <http://scottman.net/2012/gr1c>`_
 to automatically synthesize a strategy that
 ensures the satisfaction of the specification, taking into account all the

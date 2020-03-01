@@ -59,7 +59,7 @@ Alternative discrete synthesis tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The default synthesis tool for GR(1) and Rabin(1) specifications is
-`omega <https://github.com/johnyf/omega>`_
+`omega <https://github.com/tulip-control/omega>`_
 (installed by ``pip``).
 
 TuLiP can use other tools for formal synthesis.
