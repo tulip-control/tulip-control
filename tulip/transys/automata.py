@@ -38,6 +38,7 @@ from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import SubSet, PowerSet
+from tulip.transys.cost import ValidTransitionCost
 from tulip.transys.transys import GameGraph
 
 
@@ -157,6 +158,27 @@ class FiniteStateAutomaton(LabeledDiGraph):
         # intercept to remove also from accepting states
         self.accepting.remove(node)
         super(FiniteStateAutomaton, self).remove_node(node)
+
+
+class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
+    """FiniteStateAutomaton with weight/cost on the transitinos
+    """
+
+    def __init__(
+            self, deterministic=False,
+            accepting_states_type=None,
+            atomic_proposition_based=True,
+            symbolic=False
+    ):
+        edge_label_types = [
+            {'name': 'cost',
+             'values': ValidTransitionCost(),
+             'setter': True}
+        ]
+        super(WeightedFiniteStateAutomaton, self).__init__(
+            deterministic, accepting_states_type, atomic_proposition_based, symbolic
+        )
+        super(WeightedFiniteStateAutomaton, self).add_label_types(edge_label_types, True)
 
 
 class FiniteWordAutomaton(FiniteStateAutomaton):
