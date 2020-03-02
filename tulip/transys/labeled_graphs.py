@@ -38,7 +38,6 @@ import os
 import copy
 from pprint import pformat
 from collections import Iterable
-import warnings
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:
@@ -802,6 +801,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # export properties
         self.dot_node_shape = {'normal': 'circle'}
         self.default_layout = 'dot'
+
+    def add_label_types(self, label_types, is_edge):
+        """Add label_types to node or edge depending on is_edge param
+
+        @param label_types: see L{__init__}.
+        @param is_edge: whether to add label_types to node (False) or edge (True)
+        """
+        labeling, defaults = self._init_labeling(label_types)
+        if is_edge:
+            self._edge_label_types.update(labeling)
+            self._edge_label_defaults.update(defaults)
+        else:
+            self._node_label_types.update(labeling)
+            self._node_label_defaults.update(defaults)
 
     def _init_labeling(self, label_types):
         """Initialize labeling.

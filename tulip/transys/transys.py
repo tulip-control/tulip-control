@@ -37,6 +37,7 @@ from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
+from tulip.transys.cost import ValidTransitionCost
 from networkx import MultiDiGraph
 import numpy as np
 # inline imports
@@ -103,6 +104,20 @@ class KripkeStructure(LabeledDiGraph):
             pformat(self.transitions(), indent=3) +
             '\n' + _hl + '\n')
         return s
+
+
+class WeightedKripkeStructure(KripkeStructure):
+    """KripkeStructure with weight/cost on the transitions
+    """
+
+    def __init__(self):
+        edge_label_types = [
+            {'name': 'cost',
+             'values': ValidTransitionCost(),
+             'setter': True}
+        ]
+        super(WeightedKripkeStructure, self).__init__()
+        super(WeightedKripkeStructure, self).add_label_types(edge_label_types, True)
 
 
 class FiniteTransitionSystem(LabeledDiGraph):
