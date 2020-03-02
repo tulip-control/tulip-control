@@ -36,21 +36,21 @@ Suggested abbreviation:
     >>> from tulip import transys as trs
 """
 from __future__ import absolute_import
+
+from .algorithms import ltl2ba
 from .mathset import MathSet, SubSet, PowerSet, TypedDict
-from .labeled_graphs import prepend_with
+from .labeled_graphs import LabeledDiGraph, prepend_with
 from .transys import (
     KripkeStructure, FiniteTransitionSystem, FTS,
     LabeledGameGraph,
-    tuple2fts, line_labeled_with, cycle_labeled_with
-)
-
+    tuple2fts, line_labeled_with, cycle_labeled_with,
+    simu_abstract)
 from .automata import (
-    BuchiAutomaton, BA, tuple2ba,
+    FiniteStateAutomaton, BuchiAutomaton, BA, tuple2ba,
     RabinAutomaton, DRA,
-    ParityGame
-)
-
-
-from .machines import MooreMachine, MealyMachine
-
+    ParityGame)
+from .machines import (
+    create_machine_ports, MooreMachine, MealyMachine,
+    guided_run, random_run, interactive_run,
+    moore2mealy, mealy2moore)
 from .products import OnTheFlyProductAutomaton
