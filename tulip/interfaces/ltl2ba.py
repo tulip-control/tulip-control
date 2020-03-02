@@ -38,7 +38,7 @@ import ply.lex
 import ply.yacc
 
 
-TABMODULE = 'ltl2ba_parsetab'
+TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
 
 
 class Lexer(object):
