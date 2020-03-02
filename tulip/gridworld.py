@@ -53,6 +53,12 @@ from .spec.form import GRSpec
 # import matplotlib
 
 
+__all__ = [
+    'GridWorld', 'random_world', 'narrow_passage',
+    'unoccupied', 'add_trolls',
+    'extract_coord', 'animate_paths']
+
+
 class GridWorld(object):
     """4-connected grids with primitives like obstacles and goals."""
 

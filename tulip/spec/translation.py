@@ -49,6 +49,9 @@ from tulip.spec import ast
 import tulip.spec.form
 
 
+__all__ = ['translate']
+
+
 def make_jtlv_nodes():
     opmap = {
         'False': 'FALSE', 'True': 'TRUE',

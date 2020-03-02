@@ -45,6 +45,9 @@ from tulip.interfaces import ltl2ba as ltl2baint
 from tulip.transys.labeled_graphs import LabeledDiGraph
 
 
+__all__ = ['ltl2ba']
+
+
 _hl = 40 * '-'
 logger = logging.getLogger(__name__)
 

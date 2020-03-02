@@ -31,5 +31,14 @@
 # SUCH DAMAGE.
 """Specification subpackage of TuLiP"""
 from __future__ import absolute_import
-from .form import LTL, GRSpec
-from .translation import translate
+
+from . import form
+from .form import *
+from . import gr1_fragment
+from .gr1_fragment import *
+from . import parser
+from .parser import *
+from . import transformation
+from .transformation import *
+from . import translation
+from .translation import *

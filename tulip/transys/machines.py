@@ -43,6 +43,12 @@ from tulip.transys.labeled_graphs import LabeledDiGraph
 # from tulip.transys.export import machine2scxml
 
 
+__all__ = [
+    'create_machine_ports', 'MooreMachine', 'MealyMachine',
+    'guided_run', 'random_run', 'interactive_run',
+    'moore2mealy', 'mealy2moore']
+
+
 _hl = 40 * '-'
 # port type
 pure = {'present', 'absent'}

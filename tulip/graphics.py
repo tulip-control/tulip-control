@@ -59,6 +59,9 @@ except Exception as e:
 
 # from mayavi import mlab
 
+__all__ = ['dimension', 'newax', 'dom2vec', 'quiver']
+
+
 def dimension(ndarray):
     """dimension of ndarray  (DEPRECATED)
 
