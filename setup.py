@@ -70,6 +70,13 @@ def run_setup():
         parser.build(tabmodule, outputdir=outputdir,
                      write_tables=True,
                      debug=True, debuglog=logger)
+        import tulip.interfaces.ltl2ba
+        tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
+        outputdir = 'tulip/interfaces'
+        parser = tulip.interfaces.ltl2ba.Parser()
+        parser.build(tabmodule, outputdir=outputdir,
+                     write_tables=True,
+                     debug=True, debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
         print('Failed to build PLY tables: {e}'.format(e=e))
