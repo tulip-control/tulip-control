@@ -89,52 +89,57 @@ if not ctrl.save('continuous.png'):
 print('\n Simulation starts \n')
 T = 100
 # let us pick an environment signal
-randParkSignal = [random.randint(0, 1) for b in range(1, T + 1)]
+randParkSignal = [random.randint(0, 1) for b in range(T)]
 
 # Set up parameters for get_input()
 disc_dynamics.disc_params['conservative'] = True
 disc_dynamics.disc_params['closed_loop'] = False
 
-# initialization:
-#     pick initial continuous state consistent with
-#     initial controller state (discrete)
-u, v, edge_data = list(ctrl.edges('Sinit', data=True))[1]
-s0_part = edge_data['loc']
-init_poly_v = pc.extreme(disc_dynamics.ppp[s0_part][0])
-x_init = sum(init_poly_v) / init_poly_v.shape[0]
-x = [x_init[0]]
-y = [x_init[1]]
-N = disc_dynamics.disc_params['N']
-s0_part = find_controller.find_discrete_state(
-    [x[0], y[0]], disc_dynamics.ppp)
-ctrl = synth.determinize_machine_init(ctrl, {'loc': s0_part})
-(s, dum) = ctrl.reaction('Sinit', {'park': randParkSignal[0]})
-print(dum)
-for i in range(0, T):
-    (s, dum) = ctrl.reaction(s, {'park': randParkSignal[i]})
-    u = find_controller.get_input(
-        x0=np.array([x[i * N], y[i * N]]),
-        ssys=sys_dyn,
-        abstraction=disc_dynamics,
-        start=s0_part,
-        end=disc_dynamics.ppp2ts.index(dum['loc']),
-        ord=1,
-        mid_weight=5)
-    for ind in range(N):
-        s_now = np.dot(
-            sys_dyn.A, [x[-1], y[-1]]
-        ) + np.dot(sys_dyn.B, u[ind])
-        x.append(s_now[0])
-        y.append(s_now[1])
+
+def simulate(randParkSignal, sys_dyn, ctrl, disc_dynamics, T):
+    # initialization:
+    #     pick initial continuous state consistent with
+    #     initial controller state (discrete)
+    u, v, edge_data = list(ctrl.edges('Sinit', data=True))[1]
+    s0_part = edge_data['loc']
+    init_poly_v = pc.extreme(disc_dynamics.ppp[s0_part][0])
+    x_init = sum(init_poly_v) / init_poly_v.shape[0]
+    x = [x_init[0]]
+    y = [x_init[1]]
+    N = disc_dynamics.disc_params['N']
     s0_part = find_controller.find_discrete_state(
-        [x[-1], y[-1]], disc_dynamics.ppp)
-    s0_loc = disc_dynamics.ppp2ts[s0_part]
-    print(s0_loc)
-    print(dum['loc'])
+        [x[0], y[0]], disc_dynamics.ppp)
+    ctrl = synth.determinize_machine_init(ctrl, {'loc': s0_part})
+    (s, dum) = ctrl.reaction('Sinit', {'park': randParkSignal[0]})
     print(dum)
-show_traj = True
-if show_traj:
-    assert plt, 'failed to import matplotlib'
-    plt.plot(x)
-    plt.plot(y)
-    plt.show()
+    for i in range(0, T):
+        (s, dum) = ctrl.reaction(s, {'park': randParkSignal[i]})
+        u = find_controller.get_input(
+            x0=np.array([x[i * N], y[i * N]]),
+            ssys=sys_dyn,
+            abstraction=disc_dynamics,
+            start=s0_part,
+            end=disc_dynamics.ppp2ts.index(dum['loc']),
+            ord=1,
+            mid_weight=5)
+        for ind in range(N):
+            s_now = np.dot(
+                sys_dyn.A, [x[-1], y[-1]]
+            ) + np.dot(sys_dyn.B, u[ind])
+            x.append(s_now[0])
+            y.append(s_now[1])
+        s0_part = find_controller.find_discrete_state(
+            [x[-1], y[-1]], disc_dynamics.ppp)
+        s0_loc = disc_dynamics.ppp2ts[s0_part]
+        print(s0_loc)
+        print(dum['loc'])
+        print(dum)
+    show_traj = True
+    if show_traj:
+        assert plt, 'failed to import matplotlib'
+        plt.plot(x)
+        plt.plot(y)
+        plt.show()
+
+
+simulate(randParkSignal, sys_dyn, ctrl, disc_dynamics, T)
