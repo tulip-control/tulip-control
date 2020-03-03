@@ -1213,6 +1213,9 @@ def _spec_plus_sys(
             sys, ignore_sys_init,
             statevar=statevar)
         _copy_options_from_ts(sys_formula, sys, specs)
+        if specs.qinit == '\A \A':
+            sys_formula.env_init.extend(sys_formula.sys_init)
+            sys_formula.sys_init = list()
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
     if env is not None:
@@ -1225,6 +1228,9 @@ def _spec_plus_sys(
         env_formula = env_to_spec(
             env, ignore_env_init,
             statevar=statevar)
+        if specs.qinit == '\A \A':
+            env_formula.env_init.extend(env_formula.sys_init)
+            env_formula.sys_init = list()
         _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
         logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
