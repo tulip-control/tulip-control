@@ -10,7 +10,7 @@ omega==0.3.1
 gr1py==0.2.0
 
 # extras (uncomment as needed)
-# cvxopt==1.1.7  # for faster polytopic operations
+# cvxopt==1.2.4  # for faster polytopic operations
 # matplotlib  # for plots
 
 # tests
