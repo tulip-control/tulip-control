@@ -381,9 +381,7 @@ class MathSet(object):
         """
         s = MathSet()
         for item in iterable:
-            print(item)
             if item in self:
-                print('Adding...\n')
                 s.add(item)
         return s
 
