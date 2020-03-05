@@ -48,6 +48,9 @@ from tulip.transys.mathset import SubSet, TypedDict
 # from tulip.transys.export import graph2dot
 
 
+__all__ = ['LabeledDiGraph', 'prepend_with']
+
+
 logger = logging.getLogger(__name__)
 
 

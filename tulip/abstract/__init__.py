@@ -34,22 +34,13 @@
 """
 from __future__ import absolute_import
 
-# avoid shadowing modules
-from .discretization import (
-    AbstractSwitched, AbstractPwa,
-    discretize, discretize_switched,
-    multiproc_discretize, multiproc_discretize_switched)
-from .feasible import is_feasible, solve_feasible
-
-from .prop2partition import (
-    prop2part, part2convex,
-    pwa_partition, add_grid,
-    PropPreservingPartition, PPP, ppp2ts)
-
-from .plot import (
-    plot_partition, plot_transition_arrow,
-    plot_abstraction_scc, plot_ts_on_partition,
-    project_strategy_on_partition, plot_strategy,
-    plot_trajectory)
-
-from .find_controller import get_input, find_discrete_state
+from . import discretization
+from .discretization import *
+from . import feasible
+from .feasible import *
+from . import find_controller
+from .find_controller import *
+from . import plot
+from .plot import *
+from . import prop2partition
+from .prop2partition import *

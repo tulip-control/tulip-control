@@ -52,6 +52,10 @@ from collections import Iterable
 import numpy as np
 import polytope as pc
 
+
+__all__ = ['is_feasible', 'solve_feasible']
+
+
 def is_feasible(
     from_region, to_region, sys, N,
     closed_loop=True,

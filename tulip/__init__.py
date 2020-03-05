@@ -50,83 +50,18 @@ except ImportError:
     __version__ = None
 
 import tulip.abstract
-from tulip.abstract import (
-    # tulip.abstract.discretization
-    AbstractSwitched, AbstractPwa,
-    discretize, discretize_switched,
-    multiproc_discretize, multiproc_discretize_switched,
-    # tulip.abstract.feasible
-    is_feasible, solve_feasible,
-    # tulip.abstract.find_controller
-    get_input, find_discrete_state,
-    # tulip.abstract.plot
-    plot_partition, plot_transition_arrow,
-    plot_abstraction_scc, plot_ts_on_partition,
-    project_strategy_on_partition, plot_strategy,
-    plot_trajectory,
-    # tulip.abstract.prop2partition
-    prop2part, part2convex,
-    pwa_partition, add_grid,
-    PropPreservingPartition, PPP, ppp2ts)
-
+from tulip.abstract import *
 import tulip.dumpsmach
-from tulip.dumpsmach import write_python_case, python_case
-
+from tulip.dumpsmach import *
 import tulip.graphics
-from tulip.graphics import dimension, newax, dom2vec, quiver
-
+from tulip.graphics import *
 import tulip.gridworld
-from tulip.gridworld import (
-    GridWorld, random_world, narrow_passage, unoccupied, add_trolls,
-    extract_coord, animate_paths)
-
+from tulip.gridworld import *
 import tulip.hybrid
-from tulip.hybrid import LtiSysDyn, PwaSysDyn, SwitchedSysDyn
-
-from tulip.interfaces import print_env
-
+from tulip.hybrid import *
 import tulip.spec
-from tulip.spec import (
-    # tulip.spec.form
-    LTL, GRSpec, replace_dependent_vars,
-    # tulip.spec.gr1_fragment
-    check, str_to_grspec, split_gr1, has_operator, stability_to_gr1,
-    response_to_gr1, eventually_to_gr1, until_to_gr1,
-    # tulip.spec.parser
-    parse,
-    # tulip.spec.transformation
-    Tree, ast_to_labeled_graph, check_for_undefined_identifiers,
-    sub_values, sub_constants, sub_bool_with_subtree,
-    pair_node_to_var, infer_constants, check_var_name_conflict,
-    collect_primed_vars,
-    # tulip.spec.translation
-    translate)
-
+from tulip.spec import *
 import tulip.synth
-from tulip.synth import (
-    mutex, exactly_one, sys_to_spec, env_to_spec,
-    build_dependent_var_table,
-    synthesize_many, synthesize, is_realizable,
-    strategy2mealy, mask_outputs, determinize_machine_init)
-
+from tulip.synth import *
 import tulip.transys
-from tulip.transys import (
-    # tulip.transys.algorithms
-    ltl2ba,
-    # tulip.transys.automata
-    FiniteStateAutomaton, BuchiAutomaton, BA, tuple2ba,
-    RabinAutomaton, DRA,
-    ParityGame,
-    # tulip.transys.labeled_graphs
-    LabeledDiGraph, prepend_with,
-    # tulip.transys.machines
-    create_machine_ports, MooreMachine, MealyMachine,
-    guided_run, random_run, interactive_run,
-    moore2mealy, mealy2moore,
-    # tulip.transys.mathset
-    MathSet, SubSet, PowerSet, TypedDict,
-    # tulip.transys.transys
-    KripkeStructure, FiniteTransitionSystem, FTS,
-    LabeledGameGraph,
-    tuple2fts, line_labeled_with, cycle_labeled_with,
-    simu_abstract)
+from tulip.transys import *

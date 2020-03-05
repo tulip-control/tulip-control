@@ -67,6 +67,12 @@ from .plot import plot_ts_on_partition
 #
 # inline: import matplotlib.pyplot as plt
 
+
+__all__ = [
+    'AbstractSwitched', 'AbstractPwa',
+    'discretize', 'discretize_switched',
+    'multiproc_discretize', 'multiproc_discretize_switched']
+
 debug = False
 
 class AbstractSwitched(object):

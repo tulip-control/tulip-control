@@ -54,6 +54,13 @@ from tulip import transys as trs
 #
 # from tulip.graphics import newax
 
+
+__all__ = [
+    'prop2part', 'part2convex',
+    'pwa_partition', 'add_grid',
+    'PropPreservingPartition', 'PPP', 'ppp2ts']
+
+
 _hl = 40 * '-'
 
 def prop2part(state_space, cont_props_dict):

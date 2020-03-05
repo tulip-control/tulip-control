@@ -37,20 +37,17 @@ Suggested abbreviation:
 """
 from __future__ import absolute_import
 
-from .algorithms import ltl2ba
-from .mathset import MathSet, SubSet, PowerSet, TypedDict
-from .labeled_graphs import LabeledDiGraph, prepend_with
-from .transys import (
-    KripkeStructure, FiniteTransitionSystem, FTS,
-    LabeledGameGraph,
-    tuple2fts, line_labeled_with, cycle_labeled_with,
-    simu_abstract)
-from .automata import (
-    FiniteStateAutomaton, BuchiAutomaton, BA, tuple2ba,
-    RabinAutomaton, DRA,
-    ParityGame)
-from .machines import (
-    create_machine_ports, MooreMachine, MealyMachine,
-    guided_run, random_run, interactive_run,
-    moore2mealy, mealy2moore)
-from .products import OnTheFlyProductAutomaton
+from . import algorithms
+from .algorithms import *
+from . import automata
+from .automata import *
+from . import labeled_graphs
+from .labeled_graphs import *
+from . import machines
+from .machines import *
+from . import mathset
+from .mathset import *
+from . import products
+from .products import *
+from . import transys
+from .transys import *

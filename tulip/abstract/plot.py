@@ -48,6 +48,14 @@ from polytope.plot import plot_partition, plot_transition_arrow
 # import matplotlib as mpl
 # from tulip.graphics import newax
 
+
+__all__ = [
+    'plot_partition', 'plot_transition_arrow',
+    'plot_abstraction_scc', 'plot_ts_on_partition',
+    'project_strategy_on_partition', 'plot_strategy',
+    'plot_trajectory']
+
+
 def plot_abstraction_scc(ab, ax=None):
     """Plot Regions colored by strongly connected component.
 

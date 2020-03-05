@@ -56,6 +56,9 @@ import numpy as np
 # from mayavi.mlab import quiver3d
 
 
+__all__ = ['dimension', 'newax', 'dom2vec', 'quiver']
+
+
 def dimension(ndarray):
     """dimension of ndarray  (DEPRECATED)
 
