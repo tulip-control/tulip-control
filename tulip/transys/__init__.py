@@ -37,6 +37,8 @@ Suggested abbreviation:
 """
 from __future__ import absolute_import
 
+__all__ = list()
+
 from . import algorithms
 from .algorithms import *
 from . import automata
@@ -51,3 +53,11 @@ from . import products
 from .products import *
 from . import transys
 from .transys import *
+
+__all__.extend(algorithms.__all__)
+__all__.extend(automata.__all__)
+__all__.extend(labeled_graphs.__all__)
+__all__.extend(machines.__all__)
+__all__.extend(mathset.__all__)
+__all__.extend(products.__all__)
+__all__.extend(transys.__all__)
