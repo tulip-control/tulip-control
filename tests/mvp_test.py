@@ -2,7 +2,7 @@ import copy
 from tulip.transys.cost import VectorCost
 from tulip.transys import WeightedKripkeStructure as WKS
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
-from tulip.transys.compositions import ks_synchronous_parallel
+from tulip.transys.compositions import synchronous_parallel
 from tulip.spec.prioritized_safety import PrioritizedSpecification
 from tulip.transys.mathset import PowerSet
 from tulip.transys.graph_algorithms import (
@@ -99,7 +99,7 @@ def composition_test():
     ts2 = _construct_wks(states2, transitions2, init2)
     ts3 = _construct_wks(states3, transitions3, init3)
 
-    ts = ks_synchronous_parallel([ts1, ts2, ts3])
+    ts = synchronous_parallel([ts1, ts2, ts3])
     assert isinstance(ts, WKS)
 
     assert len(ts.states) == len(states1) * len(states2) * len(states3)
@@ -225,7 +225,7 @@ def mvp_test():
     ts_h = _construct_wks(states_h, transitions_h, init_h, "h")
     ts_l = _construct_wks(states_l, transitions_l, init_l)
 
-    ts = ks_synchronous_parallel([ts_a, ts_h, ts_l])
+    ts = synchronous_parallel([ts_a, ts_h, ts_l])
 
     # To define the transition !(h4 & a4), we define 2 sets:
     #   * ap_without_h4 contains all the atomic propositions except 'h4'
