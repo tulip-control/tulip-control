@@ -39,7 +39,11 @@ from __future__ import absolute_import
 from .mathset import MathSet, SubSet, PowerSet, TypedDict
 from .labeled_graphs import prepend_with
 from .transys import (
-    KripkeStructure, WeightedKripkeStructure, FiniteTransitionSystem, FTS,
+    KripkeStructure,
+    WeightedKripkeStructure,
+    MarkovChain,
+    MarkovDecisionProcess,
+    FiniteTransitionSystem, FTS,
     LabeledGameGraph,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )

@@ -49,6 +49,7 @@ logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
+
 class KripkeStructure(LabeledDiGraph):
     """Directed graph with labeled vertices and initial vertices.
 
@@ -110,14 +111,61 @@ class WeightedKripkeStructure(KripkeStructure):
     """KripkeStructure with weight/cost on the transitions
     """
 
+    cost_label = "cost"
+
     def __init__(self):
         edge_label_types = [
-            {'name': 'cost',
+            {'name': self.cost_label,
              'values': ValidTransitionCost(),
              'setter': True}
         ]
         super(WeightedKripkeStructure, self).__init__()
         super(WeightedKripkeStructure, self).add_label_types(edge_label_types, True)
+
+
+class MarkovChain(KripkeStructure):
+    """KripkeStructure with probability on the transitions
+    """
+
+    probability_label = "probability"
+
+    class ValidProbability(object):
+        """A class for defining valid transition cost."""
+
+        def __contains__(self, obj):
+            try:
+                if obj >= 0 and obj <= 1:
+                    return True
+                return False
+            except Exception:
+                return False
+
+
+    def __init__(self):
+        edge_label_types = [
+            {'name': self.probability_label,
+             'values': MarkovChain.ValidProbability(),
+             'setter': True}
+        ]
+        super(MarkovChain, self).__init__()
+        super(MarkovChain, self).add_label_types(edge_label_types, True)
+
+
+class MarkovDecisionProcess(MarkovChain):
+    """Markov chain with an additional label called `action` on the transitions
+    """
+
+    action_label = "action"
+
+    def __init__(self):
+        edge_label_types = [
+            {'name': self.action_label,
+             'values': MathSet(),
+             'setter': True}
+        ]
+        super(MarkovDecisionProcess, self).__init__()
+        super(MarkovDecisionProcess, self).add_label_types(edge_label_types, True)
+        self.actions = self.action
 
 
 class FiniteTransitionSystem(LabeledDiGraph):
