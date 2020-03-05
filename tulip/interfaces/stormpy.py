@@ -1,181 +1,63 @@
-import os, json
+# Copyright (c) 2012-2015 by California Institute of Technology
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# 3. Neither the name of the California Institute of Technology nor
+#    the names of its contributors may be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH
+# OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+# OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+"""Interface to C{stormpy}
+
+U{https://moves-rwth.github.io/stormpy/}
+"""
+
+import copy
 import stormpy
-import numpy
-from itertools import product
+from tulip.transys import MarkovChain as MC
+from tulip.transys import MarkovDecisionProcess as MDP
+from tulip.transys.mathfunc import FunctionOnLabeledState
 
 
-class StateTransition:
-    def __init__(self, to_state, probability, action=0):
-        self.to_state = to_state
-        self.action = action
-        self.probability = probability
+def build_stormpy_model(path):
+    """Return the stormpy model created from the prism file
+
+    @type path: a string indicating the path to the prism file
+    """
+
+    prism_program = stormpy.parse_prism_program(path)
+    return stormpy.build_model(prism_program)
 
 
-class Model:
-    def __init__(self, model_type, domain, initial_state):
-        self.model_type = model_type
-        self.domain = domain
-        self.initial_state = initial_state
-        self.state_var = "s"
-        self.states_transitions = {}
-        self.states_labels = {}
+def print_stormpy_model(model):
+    """Print the stormpy model"""
 
-    def __str__(self):
-        ret = (
-            "Model type: "
-            + str(self.model_type)
-            + ", number of states "
-            + str(len(self.states_transitions))
-            + "\n"
-        )
-        for state, state_transitions in self.states_transitions.items():
-            for transition in state_transitions:
-                ret += (
-                    "  From state "
-                    + str(state)
-                    + ", label "
-                    + str(self.states_labels[state])
-                    + ", action "
-                    + str(transition.action)
-                    + ", with probability "
-                    + self._get_prob_str(transition.probability)
-                    + ", go to state "
-                    + str(transition.to_state)
-                    + "\n"
-                )
-        return ret
-
-    def _get_state_str(self, state, is_prime):
-        state_str = []
-        for coord in range(len(state)):
-            this_str = "(" + self.state_var + str(coord)
-            if is_prime:
-                this_str += "'"
-            this_str += "=" + str(state[coord]) + ")"
-            state_str.append(this_str)
-        return " & ".join(state_str)
-
-    @staticmethod
-    def _get_prob_str(prob):
-        return "{:.4f}".format(prob)
-
-    @staticmethod
-    def _get_transition_dict(state_transitions):
-        transition_dict = {}
-
-        for transition in state_transitions:
-            if transition.action not in transition_dict:
-                transition_dict[transition.action] = []
-            transition_dict[transition.action].append(
-                (transition.probability, transition.to_state)
-            )
-
-        return transition_dict
-
-    def _get_label_dict(self):
-        all_labels = set([l for labels in self.states_labels.values() for l in labels])
-        label_dict = {}
-        for label in all_labels:
-            label_dict[label] = [
-                state
-                for state in self.states_labels.keys()
-                if label in self.states_labels[state]
-            ]
-        return label_dict
-
-    def _get_transition_str(self, transitions):
-        str_list = [
-            self._get_prob_str(transition[0])
-            + " : "
-            + self._get_state_str(transition[1], True)
-            for transition in transitions
-        ]
-        return " + ".join(str_list)
-
-    def add_state(self, state, labels):
-        if state not in self.states_transitions:
-            self.states_transitions[state] = []
-            self.states_labels[state] = labels
-
-    def add_transition(self, from_state, to_state, probability, action=None):
-        assert from_state in self.states_transitions
-        assert to_state in self.states_transitions
-        transition = StateTransition(to_state, probability, action)
-        self.states_transitions[from_state].append(transition)
-
-    def validate(self, eps=1e-3):
-        for state, state_transitions in self.states_transitions.items():
-            transition_dict = self._get_transition_dict(state_transitions)
-            for action, transitions in transition_dict.items():
-                total_probability = sum([t[0] for t in transitions])
-                if abs(1 - total_probability) > eps:
-                    print(
-                        "State {}, action {}, total probability: {}".format(
-                            state, action, total_probability
-                        )
-                    )
-                    return False
-        return True
-
-    def write(self, fname):
-        with open(fname, "w") as f:
-            f.write(self.model_type)
-            f.write("\n\nmodule composition\n")
-            for i in range(len(self.domain)):
-                f.write(
-                    "    {}{} : [{}..{}] init {};\n".format(
-                        self.state_var,
-                        i,
-                        self.domain[i][0],
-                        self.domain[i][-1],
-                        self.initial_state[i],
-                    )
-                )
-            f.write("\n")
-
-            for state, state_transitions in self.states_transitions.items():
-                transition_dict = self._get_transition_dict(state_transitions)
-                for action, transitions in transition_dict.items():
-                    action_str = ""
-                    if self.model_type == "mdp":
-                        action_str = "act{}".format(action)
-                    f.write(
-                        "    [{}] {} -> {};\n".format(
-                            action_str,
-                            self._get_state_str(state, False),
-                            self._get_transition_str(transitions),
-                        )
-                    )
-
-            f.write("\nendmodule\n\n")
-
-            for label, states in self._get_label_dict().items():
-                if label == "init":
-                    continue
-                state_str = "|".join(
-                    ["(" + self._get_state_str(state, False) + ")" for state in states]
-                )
-                f.write('label "{}" = {};\n'.format(label, state_str))
-
-
-def _get_labels(models, state):
-    return [
-        l
-        for coord in range(len(state))
-        for l in models[coord].states[state[coord]].labels
-        if l != "init"
-    ]
-
-
-def _is_prism_program(candidate):
-    return isinstance(candidate, stormpy.storage.PrismProgram)
-
-
-def print_model(model, name=""):
-    model = get_model(model)
     print(
-        "Model {}, type {}, number of states {}, number of transitins {}".format(
-            name, model.model_type, model.nr_states, model.nr_transitions
+        "Model type {}, number of states {}, number of transitins {}".format(
+            model.model_type, model.nr_states, model.nr_transitions
         )
     )
     for state in model.states:
@@ -192,126 +74,353 @@ def print_model(model, name=""):
                 )
 
 
-def get_model(model):
-    if _is_prism_program(model):
-        return stormpy.build_model(model)
-    return model
+def get_action_map(stormpy_model, tulip_transys):
+    """Get a map of action of stormpy_model and that of tulip_transys
+
+    @return a dictionary whose key is the string representation of an action of stormpy_model
+        and value is the corresponding action of tulip_transys
+    """
+    action_map = {}
+
+    for from_state_stormpy in stormpy_model.states:
+        from_state_tulip = to_tulip_state(from_state_stormpy, tulip_transys)
+        for stormpy_action in from_state_stormpy.actions:
+            possible_actions = action_map.get(str(stormpy_action), None)
+            if possible_actions is None:
+                action_map[str(stormpy_action)] = list(tulip_transys.actions)
+                possible_actions = action_map[str(stormpy_action)]
+            _update_possible_actions_with_transitions(
+                possible_actions,
+                stormpy_model,
+                tulip_transys,
+                from_state_tulip,
+                stormpy_action.transitions,
+                prob_tol=1e-6,
+            )
+    return action_map
 
 
-def build_prism_program(path):
-    return stormpy.parse_prism_program(path)
+def to_tulip_action(stormpy_action, stormpy_model, tulip_transys, action_map=None):
+    """Get an action of tulip_transys that corresponds to stormpy_action on stormpy_model
 
+    The computation is based on the transition probability, i.e., it returns an action
+    such that from each pair of source and target state, the transition probability
+    matches that of stormpy_action.
+    """
 
-def compose_models(models, path, debug=False):
-    domain = []
-    initial_state = []
-    model_type = "dtmc"
-    mdp_indices = []
+    if action_map is None:
+        action_map = get_action_map(stormpy_model, tulip_transys)
 
-    all_models = []
-    for idx, model in enumerate(models):
-        this_model = get_model(model)
-        all_models.append(this_model)
-
-        assert (
-            this_model.model_type == stormpy.storage.ModelType.DTMC
-            or this_model.model_type == stormpy.storage.ModelType.MDP
+    possible_tulip_action = action_map[str(stormpy_action)]
+    if len(possible_tulip_action) == 0:
+        raise ValueError(
+            "Cannot find an action on tulip_transys corresponding to {}".format(
+                stormpy_action
+            )
         )
-        if this_model.model_type == stormpy.storage.ModelType.MDP:
-            model_type = "mdp"
-            mdp_indices.append(idx)
-        domain.append(range(0, this_model.nr_states))
-        assert len(this_model.initial_states) == 1
-        initial_state.append(this_model.initial_states[0])
 
-    model = Model(model_type, domain, initial_state)
-    for state in product(*domain):
-        model.add_state(state, _get_labels(all_models, state))
-        states_transitions = []
-        for coord in range(len(state)):
-            states_transitions.append(
-                [
-                    StateTransition(transition.column, transition.value(), action)
-                    for action in all_models[coord].states[state[coord]].actions
-                    for transition in action.transitions
-                ]
+    return possible_tulip_action[0]
+
+
+def to_tulip_labels(stormpy_state, tulip_transys):
+    """Get the set of atomic propositions at stormpy_state for tulip_transys.
+
+    This typically involves getting rid of stormpy internal labels such as
+    "init", "deadlock", etc
+
+    @return a MathSet object corresponding to the set of atomicic propositions
+        of stormpy_state in tulip_transys
+    """
+    return tulip_transys.atomic_propositions.intersection(stormpy_state.labels)
+
+
+def to_tulip_state(stormpy_state, tulip_transys):
+    """Get a unique state of tulip_transys that corresponds to stormpy_state
+
+    The computation is based on the state labels, i.e., it returns the unique state
+    in tulip_transys with the same labels as stormpy_state.
+
+    If such a state does not exist or is not unique, ValueError will be raised.
+    """
+
+    possible_states = [
+        s
+        for s in tulip_transys.states
+        if set(tulip_transys.states[s]["ap"])
+        == set(to_tulip_labels(stormpy_state, tulip_transys))
+    ]
+
+    if len(possible_states) != 1:
+        raise ValueError(
+            "Cannot find a unique state corresponding to label {}".format(
+                stormpy_state.labels
+            )
+        )
+    return possible_states[0]
+
+
+def to_tulip_transys(path):
+    """Return either a MarkovChain or MarkovDecisionProcess object created from the prism file
+
+    @type path: a string indicating the path to the prism file
+    """
+
+    # Convert a state of prism file (typically represented by an integer) to
+    # state on the tulip transition system.
+    def get_ts_state(in_model_state):
+        return "s" + str(in_model_state)
+
+    # Only allow DTMC and MDP models
+    in_model = build_stormpy_model(path)
+    assert (
+        in_model.model_type == stormpy.storage.ModelType.DTMC
+        or in_model.model_type == stormpy.storage.ModelType.MDP
+    )
+
+    # The list of states and initial states
+    state_list = [get_ts_state(s) for s in in_model.states]
+    initial_state_list = [get_ts_state(s) for s in in_model.initial_states]
+
+    ts = MC() if in_model.model_type == stormpy.storage.ModelType.DTMC else MDP()
+    ts.states.add_from(state_list)
+    ts.states.initial.add_from(initial_state_list)
+
+    # Neglect stormpy internal state labels
+    neglect_labels = ["init", "deadlock"]
+
+    # Populate the set of atomic propositinos and compute the labels and transitions at each state
+    for state in in_model.states:
+        state_ap = copy.deepcopy(state.labels)
+        for label in neglect_labels:
+            state_ap.discard(label)
+        ts.atomic_propositions.add_from(state_ap)
+        ts.states[get_ts_state(state)]["ap"] = state_ap
+        for action in state.actions:
+            if in_model.model_type == stormpy.storage.ModelType.MDP:
+                ts.actions.add(str(action))
+            for transition in action.transitions:
+                transition_attr = {MC.probability_label: transition.value()}
+                if in_model.model_type == stormpy.storage.ModelType.MDP:
+                    transition_attr[MDP.action_label] = str(action)
+                ts.transitions.add(
+                    get_ts_state(state),
+                    get_ts_state(transition.column),
+                    transition_attr,
+                )
+    return ts
+
+
+def to_prism_file(ts, path):
+    """Write a prism file corresponding to ts
+
+    @type ts: either a MarkovChain or MarkovDecisionProcess
+    @type path: a string indicating the path of the output prism file
+    """
+
+    # Only deal with MDP and MC with a unique initial state
+    assert type(ts) == MDP or type(ts) == MC
+    assert len(ts.states) > 0
+    assert len(ts.states.initial) == 1
+
+    # The state and action of prism file will be of the form si and acti
+    # where i is the index in state_list and action_list of the state and action
+    # of the tulip model.
+    # This is to deal with restriction on naming of prism model.
+    # For example, it doesn't allow action that is just an integer.
+    state_var = "s"
+    state_list = list(ts.states)
+    action_list = list(ts.actions) if type(ts) == MDP else []
+
+    # Given all the transitions from a state s of ts, return a dictionary whose
+    # key is an action a and the value is a tuple (probability, to_state)
+    # indicating the transition probability from state s to to_state under action a.
+    def get_transition_dict(state_transitions):
+        transition_dict = {}
+
+        for transition in state_transitions:
+            action = transition[2].get(MDP.action_label, None)
+            if action is None:
+                action = 0
+            if action not in transition_dict:
+                transition_dict[action] = []
+            transition_dict[action].append(
+                (transition[2].get(MC.probability_label), transition[1])
             )
 
-        for state_transition in product(*states_transitions):
-            to_state = tuple(t.to_state for t in state_transition)
-            action = 0
-            if len(mdp_indices) == 1:
-                action = state_transition[mdp_indices[0]].action
-            elif len(mdp_indices) > 1:
-                action = tuple(state_transition[idx].action for idx in mdp_indices)
-            trans_prob = numpy.prod([t.probability for t in state_transition])
-            model.add_state(to_state, _get_labels(all_models, to_state))
-            model.add_transition(state, to_state, trans_prob, action)
+        return transition_dict
 
-    assert model.validate()
-    if debug:
-        print(model)
-    model.write(path)
+    # Return a properly formatted string for the given probability
+    def get_prob_str(prob):
+        return "{:.4f}".format(prob)
 
-    return stormpy.parse_prism_program(path)
+    # Return a string representing the state with the given index and whether
+    # it is primed (primed in prism file indicates the next state).
+    def get_state_str(state_index, is_prime):
+        state_str = state_var
+        if is_prime:
+            state_str += "'"
+        state_str += "=" + str(state_index)
+        return state_str
+
+    # Return the description of transitions in prism file
+    def get_transition_str(transitions):
+        str_list = [
+            get_prob_str(transition[0])
+            + " : ("
+            + get_state_str(state_list.index(transition[1]), True)
+            + ")"
+            for transition in transitions
+        ]
+        return " + ".join(str_list)
+
+    # Return a dictionary whose key is an atomic proposition
+    # and whose value is a list of state such that the atomic proposition]
+    # is in its state labels.
+    def get_label_dict():
+        label_dict = {}
+        for label in ts.atomic_propositions:
+            label_dict[label] = [
+                state for state in ts.states if label in ts.states[state]["ap"]
+            ]
+        return label_dict
+
+    # Use the above functions to describe the model in prism format.
+    with open(path, "w") as f:
+        # Type of model
+        if type(ts) == MDP:
+            f.write("mdp")
+        elif type(ts) == MC:
+            f.write("dtmc")
+
+        # The set of states and initial state
+        f.write("\n\nmodule sys_model\n")
+        f.write(
+            "    {} : [0..{}] init {};\n".format(
+                state_var,
+                len(ts.states) - 1,
+                state_list.index(list(ts.states.initial)[0]),
+            )
+        )
+        f.write("\n")
+
+        # Transitions
+        for idx, state in enumerate(state_list):
+            transition_dict = get_transition_dict(ts.transitions.find(state))
+            for action, transitions in transition_dict.items():
+                action_str = ""
+                if type(ts) == MDP:
+                    action_str = "act" + str(action_list.index(action))
+                f.write(
+                    "    [{}] {} -> {};\n".format(
+                        action_str,
+                        get_state_str(idx, False),
+                        get_transition_str(transitions),
+                    )
+                )
+
+        f.write("\nendmodule\n\n")
+
+        # Labels
+        for label, states in get_label_dict().items():
+            state_str = "|".join(
+                ["(" + get_state_str(state_list.index(s), False) + ")" for s in states]
+            )
+            f.write('label "{}" = {};\n'.format(label, state_str))
 
 
-def model_checking(prism_program, formula):
-    assert _is_prism_program(prism_program)
-    model = stormpy.build_model(prism_program)
+def model_checking(tulip_transys, formula, prism_file_path, extract_policy=False):
+    """Model check tulip_transys against formula
+
+    @type tulip_transys: either a MarkovChain or MarkovDecisionProcess object.
+    @type formula: a string describing PCTL formula according to Prism format.
+    @type prism_file_path: a string indicating the path to export the intermediate
+        prism file (mostly for debugging purpose)
+    @type extract_policy: boolean that indicates whether to extract policy
+
+    @return result
+        * If extract_policy = False, then for each state in model.states,
+          result[state] is the probability of satisfying the formula starting at state.
+        * If extract_policy = True, then result = (prob,policy) where for each
+          state in model.states, prob[state] is the probability of satisfying the
+          formula starting at state and policy[state] is the action to be applied at
+          state.
+    """
+
+    assert type(tulip_transys) == MDP or type(tulip_transys) == MC
+    to_prism_file(tulip_transys, prism_file_path)
+
+    prism_program = stormpy.parse_prism_program(prism_file_path)
+    stormpy_model = stormpy.build_model(prism_program)
     properties = stormpy.parse_properties(formula, prism_program)
-    result = stormpy.model_checking(model, properties[0], extract_scheduler=True)
-    return (result, model)
+    result = stormpy.model_checking(
+        stormpy_model, properties[0], extract_scheduler=extract_policy
+    )
+    prob = _extract_probability(result, stormpy_model, tulip_transys)
+    if not extract_policy:
+        return prob
+
+    policy = _extract_policy(result, stormpy_model, tulip_transys)
+    return (prob, policy)
 
 
-def export_policy(model, result, path):
-    model = get_model(model)
+def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
+    """Extract policy from stormpy_result"""
 
-    assert result.has_scheduler
-    policy = result.scheduler
-    policy_dict = {}
-    for state in model.states:
-        action = 0
-        if policy is not None:
-            choice = policy.get_choice(state)
-            action = choice.get_deterministic_choice()
-        policy_dict[int(state)] = {
-            "labels": list(state.labels),
-            "action": action
-        }
+    assert stormpy_result.has_scheduler
+    stormpy_policy = stormpy_result.scheduler
+    assert stormpy_policy is not None
+    tulip_policy = FunctionOnLabeledState("state", MDP.action_label)
+    action_map = get_action_map(stormpy_model, tulip_transys)
 
-    with open(path, 'w') as outfile:
-        json.dump(policy_dict, outfile, indent=4)
+    for state in stormpy_model.states:
+        tulip_state = to_tulip_state(state, tulip_transys)
+        choice = stormpy_policy.get_choice(state)
+        action = choice.get_deterministic_choice()
+        tulip_policy.add(
+            tulip_state,
+            to_tulip_action(action, stormpy_model, tulip_transys, action_map),
+            to_tulip_labels(state, tulip_transys),
+        )
+
+    return tulip_policy
 
 
-def apply_policy(model, policy_path, path, debug=False):
-    model = get_model(model)
-    assert model.model_type == stormpy.storage.ModelType.MDP
-    assert len(model.initial_states) == 1
+def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
+    """Extract probability of satisfying a specification at each state from stormpy_result"""
 
-    with open(policy_path) as policy_file:
-        policy = json.load(policy_file)
+    probability = FunctionOnLabeledState("state", "probability")
 
-    domain = [range(0, model.nr_states)]
-    initial_state = [model.initial_states[0]]
-    model_type = "dtmc"
+    for state in stormpy_model.states:
+        tulip_state = to_tulip_state(state, tulip_transys)
+        probability.add(tulip_state, stormpy_result.at(state))
 
-    mc_model = Model(model_type, domain, initial_state)
-    for state in model.states:
-        from_state = (int(state),)
-        mc_model.add_state(from_state, _get_labels([model], from_state))
-        policy_action = policy[str(state)]["action"]
-        for action in state.actions:
-            if str(action) != str(policy_action):
-                continue
-            for transition in action.transitions:
-                to_state = (int(transition.column),)
-                mc_model.add_state(to_state, _get_labels([model], to_state))
-                mc_model.add_transition(from_state, to_state, transition.value(), action)
+    return probability
 
-    assert mc_model.validate()
-    if debug:
-        print(mc_model)
-    mc_model.write(path)
 
-    return stormpy.parse_prism_program(path)
+def _update_possible_actions_with_transitions(
+    possible_actions,
+    stormpy_model,
+    tulip_transys,
+    from_state_tulip,
+    stormpy_transitions,
+    prob_tol=1e-6,
+):
+    """Return a subset of possible_actions from from_state_tulip
+    such that the probability of transition to each state matches stormpy_transitions
+    with the given prob_tol
+    """
+
+    for stormpy_transition in stormpy_transitions:
+        to_state_tulip = to_tulip_state(
+            stormpy_model.states[stormpy_transition.column], tulip_transys
+        )
+        probability = stormpy_transition.value()
+        for tulip_transition in tulip_transys.transitions.find(
+            from_state_tulip, [to_state_tulip]
+        ):
+            if abs(tulip_transition[2][MC.probability_label] - probability) > prob_tol:
+                try:
+                    idx = possible_actions.index(tulip_transition[2][MDP.action_label])
+                    possible_actions.pop(idx)
+                except ValueError:
+                    pass
