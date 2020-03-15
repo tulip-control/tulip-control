@@ -18,6 +18,7 @@ from tulip import hybrid, spec, synth
 from tulip.abstract import prop2part, discretize
 from tulip.abstract.plot import plot_partition
 from tulip.abstract import find_controller
+from tulip.abstract.plot import simulate2d, pick_point_in_polytope
 
 
 logging.basicConfig(level='WARNING')
@@ -62,24 +63,25 @@ plot_partition(disc_dynamics.ppp, disc_dynamics.ts,
 # Specification
 # Environment variables and assumptions
 env_vars = {'park'}
-env_init = set()
+env_init = {'X0reach'}  # qinit == '\A \A'
 env_prog = '!park'
 env_safe = set()
 # System variables and requirements
 sys_vars = {'X0reach'}
-sys_init = {'X0reach'}
+sys_init = set()  # qinit == '\A \A'
 sys_prog = {'home'}  # []<>home
 sys_safe = {'(X(X0reach) <-> lot) || (X0reach && !park)'}
 sys_prog |= {'X0reach'}
 # Create the specification
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
-specs.qinit = '\E \A'
+specs.qinit = '\A \A'
 #
 # Synthesize
+disc_dynamics.ts.states.initial.add_from(disc_dynamics.ts.states)
 ctrl = synth.synthesize(specs,
                         sys=disc_dynamics.ts,
-                        ignore_sys_init=True)
+                        ignore_sys_init=False)
 assert ctrl is not None, 'unrealizable'
 # Generate a graphical representation of the controller for viewing
 if not ctrl.save('continuous.png'):
@@ -89,63 +91,34 @@ if not ctrl.save('continuous.png'):
 print('\n Simulation starts \n')
 T = 100
 # let us pick an environment signal
-randParkSignal = [random.randint(0, 1) for b in range(T)]
+env_inputs = [{'park': random.randint(0, 1)} for b in range(T + 1)]
 
 # Set up parameters for get_input()
 disc_dynamics.disc_params['conservative'] = True
 disc_dynamics.disc_params['closed_loop'] = False
 
 
-def simulate(randParkSignal, sys_dyn, ctrl, disc_dynamics, T):
-    # initialization:
-    #     pick initial continuous state consistent with
-    #     initial controller state (discrete)
-    u, v, edge_data = list(ctrl.edges('Sinit', data=True))[1]
+def pick_initial_state(ctrl, disc_dynamics):
+    """Construct initial discrete and continuous state
+
+    for `qinit == '\A \A'`.
+    """
+    # pick initial discrete state
+    init_edges = ctrl.edges('Sinit', data=True)
+    u, v, edge_data = next(iter(init_edges))
+    assert u == 'Sinit', u
+    d_init = edge_data
+    # pick initial continuous state
     s0_part = edge_data['loc']
-    init_poly_v = pc.extreme(disc_dynamics.ppp[s0_part][0])
-    x_init = sum(init_poly_v) / init_poly_v.shape[0]
-    x = [x_init[0]]
-    y = [x_init[1]]
-    N = disc_dynamics.disc_params['N']
-    s0_part = find_controller.find_discrete_state(
-        [x[0], y[0]], disc_dynamics.ppp)
-    ctrl = synth.determinize_machine_init(ctrl, {'loc': s0_part})
-    (s, dum) = ctrl.reaction('Sinit', {'park': randParkSignal[0]})
-    print(dum)
-    for i in range(0, T):
-        (s, dum) = ctrl.reaction(s, {'park': randParkSignal[i]})
-        u = find_controller.get_input(
-            x0=np.array([x[i * N], y[i * N]]),
-            ssys=sys_dyn,
-            abstraction=disc_dynamics,
-            start=s0_part,
-            end=disc_dynamics.ppp2ts.index(dum['loc']),
-            ord=1,
-            mid_weight=5)
-        for ind in range(N):
-            s_now = np.dot(
-                sys_dyn.A, [x[-1], y[-1]]
-            ) + np.dot(sys_dyn.B, u[ind])
-            x.append(s_now[0])
-            y.append(s_now[1])
-        s0_part = find_controller.find_discrete_state(
-            [x[-1], y[-1]], disc_dynamics.ppp)
-        s0_loc = disc_dynamics.ppp2ts[s0_part]
-        print(s0_loc)
-        print(dum['loc'])
-        print(dum)
-    show_traj = True
-    if show_traj:
-        assert plt, 'failed to import matplotlib'
-        plt.plot(x)
-        plt.plot(y)
-        plt.show()
+    init_poly = disc_dynamics.ppp.regions[s0_part].list_poly[0]
+    x_init = pick_point_in_polytope(init_poly)
+    s0_part_ = find_controller.find_discrete_state(
+        x_init, disc_dynamics.ppp)
+    assert s0_part == s0_part_, (s0_part, s0_part_)
+    return d_init, x_init
 
 
-simulate(randParkSignal, sys_dyn, ctrl, disc_dynamics, T)
-
-# import tulip.abstract.plot
-# env_inputs = [{'park': random.randint(0, 1)} for b in range(T + 1)]
-# assert specs.qinit in ('\E \E', '\E \A', '\A \E')
-# tulip.abstract.plot.simulate2d(
-#     env_inputs, sys_dyn, ctrl, disc_dynamics, T, qinit=specs.qinit)
+# for `qinit == '\A \A'`
+d_init, x_init = pick_initial_state(ctrl, disc_dynamics)
+simulate2d(env_inputs, sys_dyn, ctrl, disc_dynamics, T,
+           d_init=d_init, x_init=x_init, qinit=specs.qinit)

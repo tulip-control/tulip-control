@@ -41,7 +41,10 @@ logger = logging.getLogger(__name__)
 import numpy as np
 from scipy import sparse as sp
 import networkx as nx
+import polytope as pc
 from polytope.plot import plot_partition, plot_transition_arrow
+
+from tulip.abstract import find_controller
 
 # inline imports:
 #
@@ -192,3 +195,133 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     ax.plot(x_arr[:,0], x_arr[:,1], 'o-')
 
     return ax
+
+
+def simulate2d(
+        env_inputs, sys_dyn, ctrl, disc_dynamics, T,
+        qinit='\E \A',
+        d_init=None,
+        x_init=None,
+        show_traj=True):
+    r"""Simulation for systems with two-dimensional continuous dynamics.
+
+    The first item in `env_inputs` is used as the initial environment
+    discrete state, if `qinit == '\E \A' or qinit == \A \E'`.
+    This item is used to find the initial transition in `ctrl`.
+
+    The initial continuous state is selected within the initial polytope
+    of the partition, if `qinit \in ('\E \E', '\E \A', '\A \E')`.
+
+    The initial continuous state is `x_init` if `qinit == '\A \A'`,
+    and is asserted to correspond to `d_init['loc']`.
+    The initial discrete state is `d_init` if `qinit == '\A \A'`,
+    and is used to find the initial transition in `ctrl`.
+
+    @param env_inputs: `list` of `dict`, with length `T + 1`
+    @param sys_dyn: system dynamics
+    @type sys_dyn: `tulip.hybrid.LtiSysDyn`
+    @type ctrl: `tulip.transys.machines.MealyMachine`
+    @type disc_dynamics: `tulip.abstract.discretization.AbstractPwa`
+    @param T: number of simulation steps
+    @param qinit: quantification of initial conditions
+    @param d_init: initial discrete state,
+        given when `qinit == '\A \A'`
+    @param x_init: initial continuous state,
+        given when `qinit == '\A \A'`
+
+    @param show_traj: plot trajectory
+    """
+    N = disc_dynamics.disc_params['N']
+    # initialization:
+    #     pick initial continuous state consistent with
+    #     initial controller state (discrete)
+    if qinit == '\E \A' or qinit == '\A \E':
+        # pick an initial discrete system state given the#
+        # initial discrete environment state
+        (nd, out) = ctrl.reaction('Sinit', env_inputs[0])
+        init_edges = ctrl.edges('Sinit', data=True)
+        for u, v, edge_data in init_edges:
+            assert u == 'Sinit', u
+            if v == nd:
+                break
+        assert v == nd, (v, nd)
+        s0_part = edge_data['loc']
+        assert s0_part == out['loc'], (s0_part, out)
+    elif qinit == '\E \E':
+        # pick an initial discrete state
+        init_edges = ctrl.edges('Sinit', data=True)
+        u, v, edge_data = next(iter(init_edges))
+        assert u == 'Sinit', u
+        s0_part = edge_data['loc']
+        nd = v
+    elif qinit == '\A \A':
+        assert d_init is not None
+        assert x_init is not None
+        s0_part = find_controller.find_discrete_state(
+            x_init, disc_dynamics.ppp)
+        assert s0_part == d_init['loc'], (s0_part, d_init)
+        # find the machine node with `d_init` as discrete state
+        init_edges = ctrl.edges('Sinit', data=True)
+        for u, v, edge_data in init_edges:
+            assert u == 'Sinit', u
+            if edge_data == d_init:
+                break
+        assert edge_data == d_init, (edge_data, d_init)
+        nd = v
+    # initialize continuous state for the cases that the initial
+    # continuous state is not given
+    if qinit in ('\E \E', '\E \A', '\A \E'):
+        # find initial polytope
+        init_poly = disc_dynamics.ppp.regions[s0_part].list_poly[0]
+        # disc_dynamics.ppp[s0_part][0]
+        #
+        # pick an initial continuous state
+        x_init = pick_point_in_polytope(init_poly)
+        # assert equal
+        s0_part_ = find_controller.find_discrete_state(
+            x_init, disc_dynamics.ppp)
+        assert s0_part == s0_part_, (s0_part, s0_part_)
+    x = [x_init[0]]
+    y = [x_init[1]]
+    for i in range(T):
+        (nd, out) = ctrl.reaction(nd, env_inputs[i + 1])
+        x0 = np.array([x[i * N], y[i * N]])
+        start = s0_part
+        end = disc_dynamics.ppp2ts.index(out['loc'])
+        u = find_controller.get_input(
+            x0=x0,
+            ssys=sys_dyn,
+            abstraction=disc_dynamics,
+            start=start,
+            end=end,
+            ord=1,
+            mid_weight=5)
+        # continuous trajectory for interval `i`
+        for ind in range(N):
+            s_now = np.dot(
+                sys_dyn.A, [x[-1], y[-1]]
+            ) + np.dot(sys_dyn.B, u[ind])
+            x.append(s_now[0])
+            y.append(s_now[1])
+        point = [x[-1], y[-1]]
+        s0_part = find_controller.find_discrete_state(
+            point, disc_dynamics.ppp)
+        s0_loc = disc_dynamics.ppp2ts[s0_part]
+        assert s0_loc == out['loc'], (s0_loc, out['loc'])
+        print('outputs:\n    {out}\n'.format(out=out))
+    if show_traj:
+        from matplotlib import pyplot as plt
+        plt.plot(x, label='x')
+        plt.plot(y, '--', label='y')
+        plt.xlabel('time')
+        plt.legend()
+        plt.grid()
+        plt.show()
+
+
+def pick_point_in_polytope(poly):
+    """Return a point in polytope `poly`."""
+    poly_vertices = pc.extreme(poly)
+    n_extreme = poly_vertices.shape[0]
+    x = sum(poly_vertices) / n_extreme
+    return x
