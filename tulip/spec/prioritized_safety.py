@@ -42,6 +42,8 @@ class FAWithPriority(object):
         assert isinstance(fa, FA)
         assert isinstance(priority, int)
         assert isinstance(level, int)
+        assert priority > 0
+        assert level >= 0
 
         self._fa = fa
         self._priority = priority
@@ -60,12 +62,35 @@ class FAWithPriority(object):
         return self._level
 
 
+class siFLTLGXWithPriority(FAWithPriority):
+    """A class for defining a si-FLTL_{G_X} rule
+    """
+
+    def __init__(self, evaluator, priority, level):
+        assert isinstance(priority, int)
+        assert isinstance(level, int)
+
+        self._evaluator = evaluator
+        self._priority = priority
+        self._level = level
+
+    def automaton(self):
+        raise NotImplementedError
+
+    def evaluate(self, from_labels, to_labels):
+        """Return whether a transition from a state whose labels is a set from_labels
+        to a state whose label is a set to_labels satisfies the rule.
+        """
+        return self._evaluator(from_labels, to_labels)
+
+
 class PrioritizedSpecification(object):
     """A class for defining a prioritized safety specification"""
 
-    def __init__(self):
+    def __init__(self, is_siFLTLGX=False):
         self._Psi = []
         self.atomic_propositions = []
+        self._is_siFLTLGX = is_siFLTLGX
 
     def __getitem__(self, key):
         assert key >= 0
@@ -103,27 +128,30 @@ class PrioritizedSpecification(object):
     def __len__(self):
         return sum([len(psi) for psi in self._Psi])
 
-    def add_rule(self, fa, priority, level):
+    def add_rule(self, fa_or_eval, priority, level):
         """Add rule with automaton fa, priority and level to the specification
 
-        @param fa: FiniteStateAutomaton representing the correctness of the rule
+        @param fa_or_eval:
+            * In the case where is_siFLTLGX is False,
+              FiniteStateAutomaton representing the correctness of the rule
+            * In the case where is_siFLTLGX is True,
+              a function that takes the labels of the initial state
+              and the labels of the final state and returns a Boolean
+              indicating whether the rule is satisfied.
         @param priority: float or int representing the priority of the rule
         @param level: int representing the level of the rule in the hierarchy
         """
-        assert isinstance(fa, FA)
-        assert isinstance(priority, float) or isinstance(priority, int)
-        assert isinstance(level, int)
-        assert priority > 0
-        assert level >= 0
-
         # Check the consistency of atomic propositions
-        if len(self._Psi) == 0:
-            self.atomic_propositions = fa.atomic_propositions
-        else:
-            assert self.atomic_propositions == fa.atomic_propositions
+        if not self._is_siFLTLGX:
+            if len(self._Psi) == 0:
+                self.atomic_propositions = fa_or_eval.atomic_propositions
+            else:
+                assert self.atomic_propositions == fa_or_eval.atomic_propositions
 
-        # Add the rule
-        rule = FAWithPriority(fa, priority, level)
+            # Add the rule
+            rule = FAWithPriority(fa_or_eval, priority, level)
+        else:
+            rule = siFLTLGXWithPriority(fa_or_eval, priority, level)
 
         for l in range(len(self._Psi), level + 1):
             self._Psi.append([])
