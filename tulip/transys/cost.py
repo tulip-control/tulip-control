@@ -119,3 +119,10 @@ class VectorCost(object):
 
     def __le__(self, obj):
         return self.__lt__(obj) or self.__eq__(obj)
+
+    def almost_equal(self, obj, tol=1e-6):
+        obj = self._convert(obj)
+        for i in range(len(self)):
+            if abs(self[i] - obj[i]) > tol:
+                return False
+        return True
