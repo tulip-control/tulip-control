@@ -47,7 +47,10 @@ class ValidTransitionCost(object):
 
 
 class VectorCost(object):
-    """A class for defining a vector cost, with addition and comparision operations"""
+    """
+    A class for defining a vector cost, with addition, multiplication
+    and comparision operations.
+    """
 
     def __init__(self, value):
         if isinstance(value, int) or isinstance(value, float):
@@ -75,11 +78,22 @@ class VectorCost(object):
         return obj
 
     def __add__(self, obj):
-        obj = self._convert(obj)
+        if isinstance(obj, int) or isinstance(obj, float):
+            return VectorCost([el + obj for el in self])
+        assert len(self) == len(obj)
         return VectorCost([self[i] + obj[i] for i in range(len(self))])
+
+    def __mul__(self, obj):
+        if isinstance(obj, int) or isinstance(obj, float):
+            return VectorCost([el * obj for el in self])
+        assert len(self) == len(obj)
+        return VectorCost([self[i] * obj[i] for i in range(len(self))])
 
     def __radd__(self, obj):
         return self.__add__(obj)
+
+    def __rmul__(self, obj):
+        return self.__mul__(obj)
 
     def __eq__(self, obj):
         obj = self._convert(obj)

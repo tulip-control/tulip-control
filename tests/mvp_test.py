@@ -3,7 +3,6 @@
 # It also includes an integration test of minimum violation planning
 # using the example from the EECI 2020 computer lab.
 #
-# * vectorcost_test(): a unit test for tulip.transys.cost module
 # * wks_test(): a unit test for tulip.transys.WeightedKripkeStructure module
 # * wfa_test(): a unit test for tulip.transys.automata.WeightedFiniteStateAutomaton module
 # * composition_test(): a unit test for tulip.transys.compositions module
@@ -13,7 +12,6 @@
 #   on the EECI 2020 computer lab.
 
 import copy
-from tulip.transys.cost import VectorCost
 from tulip.transys import WeightedKripkeStructure as WKS
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
 from tulip.transys.compositions import synchronous_parallel
@@ -24,34 +22,6 @@ from tulip.transys.graph_algorithms import (
     dijkstra_multiple_sources_multiple_targets,
 )
 from tulip.mvp import solve as solve_mvp
-
-
-def vectorcost_test():
-    num_item = 10
-    a = VectorCost([2 * i for i in range(num_item)])
-    assert len(a) == num_item
-    for i in range(num_item):
-        assert a[i] == 2 * i
-
-    b = a + 1
-    c = 1 + a
-    assert b >= a
-    assert b > a
-    assert a < b
-    assert a <= b
-    assert b == c
-    assert a != c
-    assert len(b) == num_item
-    assert len(c) == num_item
-
-    i = 0
-    for b_item in b:
-        assert b_item == 2 * i + 1
-        i += 1
-
-    d = VectorCost([2 * i if i != 2 else 2 * i + 1 for i in range(num_item)])
-
-    assert d > a
 
 
 def wks_test():
