@@ -47,6 +47,7 @@ from .transys import (
     LabeledGameGraph,
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
+from .durational import DurationalKripkeTree, DurationalKripkeGraph
 
 from .automata import (
     BuchiAutomaton, BA, tuple2ba,
