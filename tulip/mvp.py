@@ -34,11 +34,131 @@
 
 from itertools import product
 from tulip.transys import KripkeStructure as KS
+from tulip.transys import DurationalKripkeTree
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
 from tulip.transys.cost import VectorCost
 from tulip.transys.graph_algorithms import dijkstra_multiple_sources_multiple_targets
 from tulip.spec.prioritized_safety import PrioritizedSpecification
 from tulip.transys.mathset import SubSet
+
+
+class IncrementalPrimitives(object):
+    """A class for defining primitive functions for incremental minimum violation planning
+
+    The primitive functions include
+    * sampling: A function \mathbb{N} \to S that takes an integer as an input and return a state
+    * steering: A function that takes 2 states s1, s2 as input and return a trajectory
+      of type tulip.trajectory.DiscreteTimeFiniteTrajectory
+    * near: A function that takes a state and returns a set of states of the nearest neighbors.
+    * labeling: A function that takes in a state and returns a set of labels.
+    """
+
+    def __init__(self, sampling, steering, near, labeling):
+        self.sampling = sampling
+        self.steering = steering
+        self.near = near
+        self.labeling = labeling
+
+
+def solve(ks, goal_label, spec):
+    """Solve the minimum violation planning problem
+
+    This follows from
+    J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
+    Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
+
+    @param ks: the Kripke structure
+    @param goal_label: a label in ks.atomic_propositions that indicates the goal
+    @param spec: the prioritized safety specification of type
+        tulip.spec.prioritized_safety.PrioritizedSpecification
+
+    @return: (best_cost, best_path, weighted_product_automaton) where
+       * best_cost is the optimal cost of reaching the goal
+       * best_path is the optimal path to the goal
+       * weighted_product_automaton is the weighted product automaton ks times spec
+    """
+
+    assert isinstance(ks, KS)
+    assert isinstance(spec, PrioritizedSpecification)
+    assert ks.atomic_propositions == spec.atomic_propositions
+    (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
+
+    goal_states = [state for state in ks.states if goal_label in ks.states[state]["ap"]]
+    accepting_goal_states = SubSet(wpa.states.accepting)
+    accepting_goal_states.add_from(set(product(goal_states, spec.get_states())))
+
+    (cost, product_path) = dijkstra_multiple_sources_multiple_targets(
+        wpa, wpa.states.initial, accepting_goal_states, cost_key="cost"
+    )
+
+    state_path = [state[0] for state in product_path if state[0] != null_state]
+
+    return (cost, state_path, product_path, wpa)
+
+
+def solve_incremental_sifltlgx(
+    initial, goal_label, spec, primitives, num_it=100,
+):
+    """Incrementally solve the minimum violation planning problem for continuous system
+    with si-FLTL_{GX} specification
+
+    This follows from
+    T. Wongpiromsarn, K. Slutsky, E. Frazzoli, and U. Topcu
+    Minimum-Violation Planning for Autonomous Systems: Theoretical and Practical Considerations, 2021
+
+    @param initial: the initial state
+    @param goal_label: a label in that indicates the goal
+    @param spec: the prioritized safety specification of type
+        tulip.spec.prioritized_safety.PrioritizedSpecification
+    @param primitives: the primitive functions of type IncrementalPrimitives
+
+    @return: the resulting durational Kripke structure of type tulip.transys.DurationalKripkeTree
+    """
+
+    K = DurationalKripkeTree(initial)
+    return update_incremental_sifltlgx(K, goal_label, spec, primitives, num_it)
+
+
+def update_incremental_sifltlgx(
+    K, goal_label, spec, primitives, num_it,
+):
+    """Incrementally update the durational Kripke structure K and
+    solve the minimum violation planning problem for continuous system
+    with si-FLTL_{GX} specification.
+
+    @param goal_label: a label in that indicates the goal
+    @param spec: the prioritized safety specification of type
+        tulip.spec.prioritized_safety.PrioritizedSpecification
+    @param primitives: the primitive functions of type IncrementalPrimitives
+
+    @return: the resulting durational Kripke structure of type tulip.transys.DurationalKripkeTree
+    """
+
+    def _get_trajectory_and_cost(s1, s2):
+        trajectory = primitives.steering(s1, s2)
+        if trajectory is None:
+            return None
+        cost = VectorCost(
+            _get_trajectory_cost_sifltlgx(trajectory, primitives.labeling, spec)
+        )
+        return (trajectory, cost)
+
+    def _connect(parents, children):
+        for parent in parents:
+            for child in children:
+                trajectory_and_cost = _get_trajectory_and_cost(parent, child)
+                if trajectory_and_cost is None:
+                    continue
+                K.connect(parent, child, trajectory_and_cost[0], trajectory_and_cost[1])
+
+    for i in range(num_it):
+        s_new = primitives.sampling(i)
+        S_near = primitives.near(s_new, K.S)
+        K.add_state(s_new, goal_label in primitives.labeling(s_new))
+        _connect(S_near, {s_new})
+        _connect({s_new}, S_near)
+
+    return K
 
 
 def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
@@ -76,13 +196,47 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     return cost
 
 
-def _add_transition(
-        from_prod_states,
-        to_prod_states,
-        ks,
-        spec,
-        trans_ks_cost,
-        fa):
+def _get_trajectory_cost_sifltlgx(trajectory, labeling_function, spec):
+    """Return the cost on a trajectory based on the specification and labeling function
+
+    @param trajectory is of type tulip.trajectory.DiscreteTimeFiniteTrajectory
+    @param labeling_function is a function that takes a state as an input and
+        returns a set of labels.
+    @param spec: the prioritized safety specification of type
+        tulip.spec.prioritized_safety.PrioritizedSpecification
+        whose rule is of type siFLTLGXWithPriority
+
+    @rtype list of float
+    """
+
+    def _update_cost(cost, from_labels, to_labels, duration):
+        for rule in spec:
+            if not rule.evaluate(from_labels, to_labels):
+                cost[rule.level()] += rule.priority() * duration
+        cost[-1] += duration
+
+    finite_timed_word = trajectory.get_finite_timed_word(labeling_function)
+    cost = [0 for i in range(spec.get_num_levels() + 1)]
+    if len(finite_timed_word) == 0:
+        return cost
+
+    word_iter = iter(finite_timed_word)
+    curr_labels = next(word_iter)
+
+    while True:
+        try:
+            next_labels = next(word_iter)
+            _update_cost(cost, curr_labels[0], next_labels[0], curr_labels[1])
+            curr_labels = next_labels
+        except StopIteration:
+            if curr_labels[1] > 1e-6:
+                _update_cost(cost, curr_labels[0], curr_labels[0], curr_labels[1])
+            break
+
+    return cost
+
+
+def _add_transition(from_prod_states, to_prod_states, ks, spec, trans_ks_cost, fa):
     """Add a transition from from_prod_state to to_prod_state to fa.
 
     This follows Definition 8 (weighted finite automaton)
@@ -105,8 +259,7 @@ def _add_transition(
     for from_prod_state in from_prod_states:
         for to_prod_state in to_prod_states:
             to_ap = ks.states[to_prod_state[0]]["ap"]
-            cost = _get_rule_violation_cost(
-                from_prod_state, to_prod_state, spec, to_ap)
+            cost = _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap)
             cost.append(trans_ks_cost)
             fa.transitions.add(
                 from_prod_state, to_prod_state, {"cost": VectorCost(cost)}
@@ -138,10 +291,8 @@ def _construct_weighted_product_automaton(ks, spec):
     fa.states.add_from(set(product(ks.states, spec.get_states())))
     fa.states.add_from(set(product([null_state], spec.get_states())))
 
-    fa.states.initial.add_from(
-        set(product([null_state], spec.get_initial_states())))
-    fa.states.accepting.add_from(
-        set(product(ks.states, spec.get_accepting_states())))
+    fa.states.initial.add_from(set(product([null_state], spec.get_initial_states())))
+    fa.states.accepting.add_from(set(product(ks.states, spec.get_accepting_states())))
 
     fa.atomic_propositions.add_from(ks.atomic_propositions)
 
@@ -167,41 +318,3 @@ def _construct_weighted_product_automaton(ks, spec):
         fa,
     )
     return (fa, null_state)
-
-
-def solve(ks, goal_label, spec):
-    """Solve the minimum violation planning problem
-
-    This follows from
-    J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
-    Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
-
-    @param ks: the Kripke structure
-    @param goal_label: a label in ks.atomic_propositions that indicates the goal
-    @param spec: the prioritized safety specification of type
-        tulip.spec.prioritized_safety.PrioritizedSpecification
-
-    @return: (best_cost, best_path, weighted_product_automaton) where
-       * best_cost is the optimal cost of reaching the goal
-       * best_path is the optimal path to the goal
-       * weighted_product_automaton is the weighted product automaton ks times spec
-    """
-
-    assert isinstance(ks, KS)
-    assert isinstance(spec, PrioritizedSpecification)
-    assert ks.atomic_propositions == spec.atomic_propositions
-    (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
-
-    goal_states = [
-        state for state in ks.states if goal_label in ks.states[state]["ap"]]
-    accepting_goal_states = SubSet(wpa.states.accepting)
-    accepting_goal_states.add_from(
-        set(product(goal_states, spec.get_states())))
-
-    (cost, product_path) = dijkstra_multiple_sources_multiple_targets(
-        wpa, wpa.states.initial, accepting_goal_states, cost_key="cost"
-    )
-
-    state_path = [state[0] for state in product_path if state[0] != null_state]
-
-    return (cost, state_path, product_path, wpa)
