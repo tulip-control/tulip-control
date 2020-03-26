@@ -97,7 +97,7 @@ def solve(ks, goal_label, spec):
 
 
 def solve_incremental_sifltlgx(
-    initial, goal_label, spec, primitives, num_it=100,
+    initial, goal_label, spec, primitives, num_it=100, sampling_step_size=1
 ):
     """Incrementally solve the minimum violation planning problem for continuous system
     with si-FLTL_{GX} specification
@@ -112,11 +112,13 @@ def solve_incremental_sifltlgx(
     """
 
     K = DurationalKripkeTree(initial)
-    return update_incremental_sifltlgx(K, goal_label, spec, primitives, num_it)
+    return update_incremental_sifltlgx(
+        K, goal_label, spec, primitives, num_it, sampling_step_size
+    )
 
 
 def update_incremental_sifltlgx(
-    K, goal_label, spec, primitives, num_it,
+    K, goal_label, spec, primitives, num_it, sampling_step_size=1
 ):
     """Incrementally update the durational Kripke structure K and
     solve the minimum violation planning problem for continuous system
@@ -135,7 +137,9 @@ def update_incremental_sifltlgx(
         if trajectory is None:
             return None
         cost = VectorCost(
-            _get_trajectory_cost_sifltlgx(trajectory, primitives.labeling, spec)
+            _get_trajectory_cost_sifltlgx(
+                trajectory, primitives.labeling, spec, sampling_step_size
+            )
         )
         return (trajectory, cost)
 
@@ -192,7 +196,9 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     return cost
 
 
-def _get_trajectory_cost_sifltlgx(trajectory, labeling_function, spec):
+def _get_trajectory_cost_sifltlgx(
+    trajectory, labeling_function, spec, sampling_step_size=1
+):
     """Return the cost on a trajectory based on the specification and labeling function
 
     @param trajectory is of type tulip.trajectory.DiscreteTimeFiniteTrajectory
@@ -211,7 +217,9 @@ def _get_trajectory_cost_sifltlgx(trajectory, labeling_function, spec):
                 cost[rule.level()] += rule.priority() * duration
         cost[-1] += duration
 
-    finite_timed_word = trajectory.get_finite_timed_word(labeling_function)
+    finite_timed_word = trajectory.get_finite_timed_word(
+        labeling_function, sampling_step_size
+    )
     cost = [0 for i in range(spec.get_num_levels() + 1)]
     if len(finite_timed_word) == 0:
         return cost
