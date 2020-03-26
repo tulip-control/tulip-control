@@ -157,7 +157,7 @@ class DiscreteTimeFiniteTrajectory(object):
         """Return the last state"""
         return self._states[-1]
 
-    def get_finite_timed_word(self, labeling_function):
+    def get_finite_timed_word(self, labeling_function, sampling_step_size=1):
         """Returns the finite timed word of trajectory.
 
         See L.I.R. Castro, P. Chaudhari, J. Tumova, S. Karaman, E. Frazzoli, D. Rus.
@@ -167,7 +167,8 @@ class DiscreteTimeFiniteTrajectory(object):
         """
         finite_timed_word = []
         prev_label_time = None
-        for ind, state in enumerate(self._states):
+        for ind in range(0, len(self._states), sampling_step_size):
+            state = self._states[ind]
             if prev_label_time is None:
                 prev_label_time = (labeling_function(state), self._get_time_at(ind))
                 continue
