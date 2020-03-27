@@ -34,7 +34,7 @@
 
 from itertools import product
 from tulip.transys import KripkeStructure as KS
-from tulip.transys import DurationalKripkeTree
+from tulip.transys import DurationalKripkeTree, DurationalKripkeGraph
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
 from tulip.transys.cost import VectorCost
 from tulip.transys.graph_algorithms import dijkstra_multiple_sources_multiple_targets
@@ -97,7 +97,13 @@ def solve(ks, goal_label, spec):
 
 
 def solve_incremental_sifltlgx(
-    initial, goal_label, spec, primitives, num_it=100, sampling_step_size=1
+    initial,
+    goal_label,
+    spec,
+    primitives,
+    use_tree=False,
+    num_it=100,
+    sampling_step_size=1,
 ):
     """Incrementally solve the minimum violation planning problem for continuous system
     with si-FLTL_{GX} specification
@@ -107,11 +113,16 @@ def solve_incremental_sifltlgx(
     @param spec: the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
     @param primitives: the primitive functions of type IncrementalPrimitives
+    @param use_tree: whether to use DurationalKripkeTree or DurationalKripkeGraph
 
     @return: the resulting durational Kripke structure of type tulip.transys.DurationalKripkeTree
+    or DurationalKripkeGraph, depending on use_tree parameter.
     """
 
-    K = DurationalKripkeTree(initial)
+    if use_tree:
+        K = DurationalKripkeTree(initial)
+    else:
+        K = DurationalKripkeGraph(initial)
     return update_incremental_sifltlgx(
         K, goal_label, spec, primitives, num_it, sampling_step_size
     )
