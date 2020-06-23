@@ -125,5 +125,31 @@ def run_setup():
               '!' * 65)
 
 
+def install_cvxopt():
+    """Install a version of cvxopt that is compatible with polytope
+    requirements"""
+    import polytope
+    import subprocess
+    import sys
+    ver = polytope.__version__
+    # Download all files for the current version of polytope
+    subprocess.check_call([
+        sys.executable, "-m",
+        "pip", "download",
+        "-d", "temp",
+        "--no-deps",
+        "polytope=={ver}".format(ver=ver)])
+    # Extract the tar archive
+    subprocess.check_call([
+        "tar", "xzf",
+        "temp/polytope-{ver}.tar.gz".format(ver=ver),
+        "-C", "temp"])
+    # Install cvxopt according to requirements file provided by polytope
+    subprocess.check_call([
+        sys.executable, "-m",
+        "pip", "install",
+        "-r", "temp/polytope-{ver}/requirements/extras.txt".format(ver=ver)])
+
+
 if __name__ == '__main__':
     run_setup()
