@@ -439,7 +439,7 @@ def get_input_helper(
             ) +
             0.5 * r.T.dot(Ct)
         ).T
-        if solvers != None:
+        if solver != None:
             raise Exception(
                 "_get_input_helper: ",
                 "solver specified but only 'None' allowed for ord = 2")
