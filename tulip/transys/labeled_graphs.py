@@ -1117,7 +1117,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                  if d == 0}
             self.states.remove_from(s)
         m = len(self)
-        assert n == 0 or m > 0, 'removed all {n} nodes!'.format(n=n)
+        assert n == 0 or m > 0, ( 
+            'removed all {n} nodes!'.format(n=n) + '\n'
+            ' Please check env_init and env_safety to avoid trivial'
+            ' realizability. Alternatively, you can set "rm_deadends = 0"'
+            ' in the options for "synthesize" to get the trivial strategy.')
         assert n >= 0, 'added {n} nodes'.format(n=n)
         print('removed {r} nodes from '
               '{n} total'.format(r=n - m, n=n))
