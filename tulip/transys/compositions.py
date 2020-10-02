@@ -83,11 +83,12 @@ def ks_synchronous_parallel(
     ks_models, transition_attr_operations={
         "cost": sum_values}):
     """Construct a KripkeStructure object that represents
-    the synchronous paralel composition of KripeStructure objects
+    the synchronous parallel composition of KripeStructure objects
     (i.e., tensor product in graph theory
     https://en.wikipedia.org/wiki/Tensor_product_of_graphs)
 
-    It follows definition 2.42 (synchronous product) in Baier-Katoen,
+    It follows definition 2.42 (synchronous product) in
+    U{[BK08] <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>},
     with the only exception that Act does not have the be the same
     for all the models in ks_models.
 
