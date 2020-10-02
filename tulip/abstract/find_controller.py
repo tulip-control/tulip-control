@@ -269,6 +269,7 @@ def get_input(
 
         # for each polytope in target region
         for P3 in P_end:
+            cost = np.inf
             if mid_weight > 0:
                 rc, xc = pc.cheby_ball(P3)
                 R[
@@ -279,10 +280,27 @@ def get_input(
                 ] += mid_weight * np.eye(n)
 
                 r[idx, 0] += -mid_weight * xc
-                u, cost = get_input_helper(
-                    x0, ssys, P1, P3, N, R, r, Q, ord,
-                    closed_loop=closed_loop, solver=solver
-                )
+                try:
+                    u, cost = get_input_helper(
+                        x0, ssys, P1, P3, N, R, r, Q, ord,
+                        closed_loop=closed_loop, solver=solver
+                    )
+                except _InputHelperLPException as ex:
+                    # The end state might consist of several polytopes.
+                    # For some of them there might not be a control action that
+                    # brings the system there. In that case the matrix
+                    # constructed by get_input_helper will be singular and the
+                    # LP solver cannot return a solution.
+                    # This is not a problem unless all polytopes in the end
+                    # region are unreachable, in which case it seems likely that
+                    # there is something wrong with the abstraction routine.
+                    logger.info(repr(ex))
+                    logger.info((
+                        "Failed to find control action from continuous "
+                        "state {x0} in discrete state {start} "
+                        "to a target polytope in the discrete state {end}.\n"
+                        "Target polytope:\n{P3}").format(
+                            x0=x0, start=start, end=end, P3=P3))
                 r[idx, 0] += mid_weight * xc
 
             if cost < low_cost:
@@ -427,7 +445,7 @@ def get_input_helper(
                 "solver specified but only 'None' allowed for ord = 2")
         sol = solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
-            raise Exception(
+            raise _InputHelperQPException(
                 "getInputHelper: "
                 "QP solver finished with status " +
                 str(sol['status']))
@@ -452,7 +470,7 @@ def get_input_helper(
         h_LP = np.vstack((np.zeros((2 * N * (n + m), 1)), M))
     sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP, solver=solver)
     if sol['status'] != 0:
-        raise Exception(
+        raise _InputHelperLPException(
             "getInputHelper: "
             "LP solver finished with error code " +
             str(sol['status']))
@@ -460,6 +478,14 @@ def get_input_helper(
     u = var[-N * m:]
     cost = sol['fun']
     return u.reshape(N, m), cost
+
+
+class _InputHelperLPException(Exception):
+    pass
+
+
+class _InputHelperQPException(Exception):
+    pass
 
 
 def is_seq_inside(x0, u_seq, ssys, P0, P1):
