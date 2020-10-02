@@ -191,7 +191,8 @@ def main():
             'transys_machines_test',
             'transys_mathset_test',
             'transys_ts_test',
-            'gridworld_test']
+            'gridworld_test',
+            'mvp_test']
         hybrid = [
             'abstract_test',
             'hybrid_test',
