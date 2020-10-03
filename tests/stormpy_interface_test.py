@@ -14,6 +14,7 @@
 import os
 import unittest
 from tulip.transys.compositions import synchronous_parallel, apply_policy
+from tulip.interfaces import stormpy as stormpy_int
 
 # Set up paths to all the models
 model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
@@ -22,16 +23,7 @@ ma_path = os.path.join(model_path, "ma.nm")
 mh_path = os.path.join(model_path, "mh.pm")
 out_model_path = os.path.join(model_path, "tmpout.nm")
 
-skip_test = False
-try:
-    # import stormpy here so that the import error is catched in python2.7
-    import stormpy
-    from tulip.interfaces import stormpy as stormpy_int
-except ImportError:
-    skip_test = True
 
-
-@unittest.skipIf(skip_test, "stormpy not available")
 def light_analysis_test():
     # Build models from prism files
     light = stormpy_int.to_tulip_transys(light_path)
@@ -52,7 +44,6 @@ def light_analysis_test():
     _check_result(light, result, expected_result)
 
 
-@unittest.skipIf(skip_test, "stormpy not available")
 def compose_test():
     # Build models from prism files
     mh = stormpy_int.to_tulip_transys(mh_path)
@@ -89,7 +80,6 @@ def compose_test():
     _check_result(composed, result, expected_result)
 
 
-@unittest.skipIf(skip_test, "stormpy not available")
 def synthesis_test():
     # Build models from prism files
     ma = stormpy_int.to_tulip_transys(ma_path)
