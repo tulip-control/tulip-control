@@ -1,5 +1,5 @@
 # Copyright (c) 2020 by California Institute of Technology
-# and University of Texas at Austin
+# and Iowa State University
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,12 +32,56 @@
 
 """Graph algorithms"""
 
-import copy
 from heapq import heappush, heappop
 
 
-def dijkstra_single_source_multiple_targets(
-        graph, source, target_set, cost_key="cost"):
+def dijkstra_single_source_multiple_targets_general(
+    source, target_set, get_connection_from
+):
+    """Return the shortest path on graph from a source state to a set of target states
+
+    @param source: a state in graph identified as the source state
+    @param target_set: a set of list of states identified as the target states
+    @param get_connection_from: a function that takes a state and returns a list of tuple
+        (child, cost) where child is a child of the given state and cost is the cost
+        from state to child.
+        The type of cost c can be anything that contains __add__ function
+        such that c + 0 is defined.
+
+    @return (cost, path) where path is a list representing the optimal path
+        and cost is the sum of the edge costs on this path.
+    """
+
+    if len(target_set) == 0:
+        return (float("inf"), [])
+
+    dist = {source: 0}
+    visited = set()
+    Q = [(0, source, [])]
+
+    while Q:
+        (cost_to_u, u, path_to_parent) = heappop(Q)
+        if u in visited:
+            continue
+        visited.add(u)
+        path_to_u = path_to_parent + [u]
+
+        if u in target_set:
+            return (cost_to_u, path_to_u)
+
+        for (v, transition_cost) in get_connection_from(u):
+            if v in visited:
+                continue
+            current_cost = dist.get(v, None)
+            new_cost = transition_cost + cost_to_u
+            if not current_cost or new_cost < current_cost:
+                dist[v] = new_cost
+                heappush(Q, (new_cost, v, path_to_u))
+
+    return (float("inf"), [])
+
+
+def dijkstra_single_source_multiple_targets(graph, source, target_set, cost_key="cost"):
     """Return the shortest path on graph from a source state to a set of target states
 
     @param graph: the graph of type tuplip.transys.LabeledDiGraph
@@ -51,35 +95,17 @@ def dijkstra_single_source_multiple_targets(
         and cost is the sum of the edge costs on this path.
     """
 
-    dist = {source: 0}
-    visited = set()
-    Q = [(0, source, [])]
+    def get_connection_from(s):
+        return [(trans[1], trans[2][cost_key]) for trans in graph.transitions.find(s)]
 
-    while Q:
-        (cost, u, path) = heappop(Q)
-        if u in visited:
-            continue
-        visited.add(u)
-        path_to_u = copy.copy(path)
-        path_to_u.append(u)
-        if u in target_set:
-            return (cost, path_to_u)
-
-        for transition in graph.transitions.find(u):
-            v = transition[1]
-            if v in visited:
-                continue
-            current_cost = dist.get(v, None)
-            new_cost = transition[2][cost_key] + cost
-            if not current_cost or new_cost < current_cost:
-                dist[v] = new_cost
-                heappush(Q, (new_cost, v, path_to_u))
-
-    return (float("inf"), ())
+    return dijkstra_single_source_multiple_targets_general(
+        source, target_set, get_connection_from
+    )
 
 
 def dijkstra_multiple_sources_multiple_targets(
-        graph, source_set, target_set, cost_key="cost"):
+    graph, source_set, target_set, cost_key="cost"
+):
     """Return the shortest path on graph from a set of source states
     to a set of target states.
 
