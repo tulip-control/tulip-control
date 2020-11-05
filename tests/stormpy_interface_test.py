@@ -5,16 +5,24 @@
 #
 # https://www.cds.caltech.edu/~murray/wiki/index.php?title=EECI_2020:_Computer_Session:_Stormpy
 #
-# All the tests here are run only if stormpy is available.
+# All the tests here are run only if on Python 3
 #
 # * light_analysis_test() corresponds to Example 1: traffic light (analysis)
 # * compose_test() corresponds to Example 2: traffic light + vehicle (analysis)
 # * synthesis_test() corresponds to Example 4: policy synthesis
 
+import sys
+if sys.version_info.major == 2:
+    skip_test = True
+else:
+    skip_test = False
+
 import os
 import unittest
-from tulip.transys.compositions import synchronous_parallel, apply_policy
-from tulip.interfaces import stormpy as stormpy_int
+
+if not skip_test:
+    from tulip.transys.compositions import synchronous_parallel, apply_policy
+    from tulip.interfaces import stormpy as stormpy_int
 
 # Set up paths to all the models
 model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models")
@@ -24,6 +32,7 @@ mh_path = os.path.join(model_path, "mh.pm")
 out_model_path = os.path.join(model_path, "tmpout.nm")
 
 
+@unittest.skipIf(skip_test, "stormpy not available for Python 2")
 def light_analysis_test():
     # Build models from prism files
     light = stormpy_int.to_tulip_transys(light_path)
@@ -44,6 +53,7 @@ def light_analysis_test():
     _check_result(light, result, expected_result)
 
 
+@unittest.skipIf(skip_test, "stormpy not available for Python 2")
 def compose_test():
     # Build models from prism files
     mh = stormpy_int.to_tulip_transys(mh_path)
@@ -80,6 +90,7 @@ def compose_test():
     _check_result(composed, result, expected_result)
 
 
+@unittest.skipIf(skip_test, "stormpy not available for Python 2")
 def synthesis_test():
     # Build models from prism files
     ma = stormpy_int.to_tulip_transys(ma_path)
