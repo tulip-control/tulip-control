@@ -7,11 +7,12 @@ python:
   - "3.7"
   - "3.8"
 
+dist: bionic
+
 addons:
   apt:
     packages:
     - gfortran
-    - libatlas-dev
     - libatlas-base-dev
     - liblapack-dev
     - libgmp-dev
@@ -19,6 +20,15 @@ addons:
     - graphviz
     - libglpk-dev
     - libboost-dev
+    - libboost-filesystem-dev
+    - libboost-program-options-dev
+    - libboost-regex-dev
+    - libboost-test-dev
+    - libeigen3-dev
+    - z3
+    - libz3-dev
+    - python-z3
+    - libhwloc-dev
 
 before_install:
   - pip install --ignore-installed --upgrade pip setuptools wheel
@@ -80,6 +90,8 @@ script:
   # dev test requirements
   - pip install gitpython
   - pip install mock
+  # stormpy, requires Python 3
+  - if test 3 = `python -c 'import sys; print(sys.version_info.major)'`; then ./extern/get-stormpy.sh; fi
   # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 
