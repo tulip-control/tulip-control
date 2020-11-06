@@ -77,9 +77,9 @@ class LabeledStateInputOutputPair(object):
 
 
 class FunctionOnLabeledState(object):
-    """A class that represents a function of a labeled state, with possibly additinal inputs
+    """A class that represents a function of a labeled state, with possibly additional inputs
 
-    This class represent a function
+    This class represents a function
 
         f : S \times I_1 \times \ldots \times I_n \to O_1 \times \ldots \times O_m
 
@@ -173,7 +173,7 @@ class FunctionOnLabeledState(object):
     def get_state_input_output_pair(self, state, input_dict):
         """Find the first element with the given state and additional input
 
-        @return a LabeledStateInputOutputPair object obj in self._state_input_output_list
+        @return a LabeledStateInputOutputPair object o in self._state_input_output_list
            such that o.is_at(state, input_dict)
         """
         return next(
