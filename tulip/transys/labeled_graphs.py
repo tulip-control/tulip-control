@@ -1133,7 +1133,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                  if d == 0}
             self.states.remove_from(s)
         m = len(self)
-        assert n == 0 or m > 0, ( 
+        assert n == 0 or m > 0, (
             'removed all {n} nodes!'.format(n=n) + '\n'
             ' Please check env_init and env_safety to avoid trivial'
             ' realizability. Alternatively, you can set "rm_deadends = 0"'
