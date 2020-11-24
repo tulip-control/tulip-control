@@ -37,7 +37,10 @@ from __future__ import print_function
 
 import logging
 import re
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from textwrap import fill
 from io import StringIO
 import numpy as np

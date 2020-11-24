@@ -37,7 +37,10 @@ import logging
 import os
 import copy
 from pprint import pformat
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:

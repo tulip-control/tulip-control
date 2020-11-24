@@ -5,7 +5,10 @@ Tests for transys.mathset (part of transys subpackage)
 from __future__ import print_function
 
 from nose.tools import raises
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 from tulip.transys.mathset import MathSet, SubSet, PowerSet, TypedDict
 from tulip.transys.mathset import compare_lists, unique, contains_multiple

@@ -35,7 +35,10 @@ from __future__ import print_function
 import logging
 import warnings
 from itertools import chain, combinations
-from collections import Iterable, Hashable, Container
+try:
+    from collections.abc import Iterable, Hashable, Container
+except ImportError:
+    from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 

@@ -33,7 +33,10 @@
 from __future__ import absolute_import
 import logging
 import copy
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)

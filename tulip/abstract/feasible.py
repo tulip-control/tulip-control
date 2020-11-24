@@ -47,7 +47,10 @@ from __future__ import print_function
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 import numpy as np
 import polytope as pc
