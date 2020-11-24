@@ -33,6 +33,7 @@ before_install:
   - pip install --ignore-installed --upgrade pip setuptools wheel
   - pip install --upgrade --only-binary=numpy,scipy numpy scipy
   - if test 2 = `python -c 'import sys; print(sys.version_info.major)'`; then pip install networkx==2.2; fi
+  - pip install dd --no-binary dd
 
 install:
   - python setup.py sdist
@@ -52,7 +53,7 @@ script:
   - python -c "import cvxopt.glpk"
   # install `dd.cudd`
   - pip uninstall --yes dd
-  - pip download --no-dependencies dd
+  - pip download --no-dependencies dd --no-binary dd
   - tar xzf dd-*.tar.gz
   - cd dd-*/
   - export CUDD_VERSION=3.0.0
