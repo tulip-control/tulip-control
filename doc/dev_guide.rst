@@ -248,8 +248,8 @@ Further reading, of general interest:
 
 - `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
 
-- Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
-  <https://www.kernel.org/doc/Documentation/CodingStyle>`_
+- Sections 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
+  <https://github.com/torvalds/linux/blob/master/Documentation/process/coding-style.rst>`_
 
 - `The Power of 10: Rules for Developing Safety-Critical Code
   <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
