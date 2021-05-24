@@ -225,6 +225,7 @@ entirely ignored.
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
   - MNT: same as "MAI"
+  - MV: move file(s)
   - PEP8: style convention
   - PEP*: change related to PEP*
   - REF: refactoring
