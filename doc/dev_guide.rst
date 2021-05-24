@@ -224,6 +224,7 @@ entirely ignored.
   - EXP: experimental (to be rebased, never in master)
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
+  - MNT: same as "MAI"
   - PEP8: style convention
   - PEP*: change related to PEP*
   - REF: refactoring
