@@ -256,3 +256,6 @@ Further reading, of general interest:
 
 - Chapter 1: "Style", `The Practice of Programming
   <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
+
+- `NumPy development documentation
+      <https://numpy.org/doc/stable/dev/index.html>`_
