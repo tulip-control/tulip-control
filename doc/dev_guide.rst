@@ -206,7 +206,7 @@ entirely ignored.
 
 - Prefix commits to classify the changes.
   The `NumPy development workflow
-  <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_
+  <https://numpy.org/doc/stable/dev/development_workflow.html>`_
   contains a summary of common abbreviations.
   Suggested abbreviations:
 
