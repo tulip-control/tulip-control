@@ -24,7 +24,7 @@ addons:
     - libeigen3-dev
     - z3
     - libz3-dev
-    - python-z3
+    - python3-z3
     - libhwloc-dev
 
 before_install:
