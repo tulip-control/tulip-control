@@ -65,10 +65,11 @@ script:
   # optional python packages
   - pip install gr1py
   # gr1c
-  - export GR1CVERSION=0.11.0
-  - curl -sSLO https://dl.bintray.com/slivingston/generic/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
+  - export GR1CVERSION=0.13.0
+  - curl -sSLO https://github.com/tulip-control/gr1c/releases/download/v${GR1CVERSION}/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
+    https://dl.bintray.com/slivingston/generic/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
   - expr `shasum -a 256 gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz|cut -d ' ' -f1`
-    = 563cc531bb034687c1d184b5d0da95e9f2b5699958912453894b53383cd0a298
+    = 1d45ca69d6acbf84ae6170de60b6c69073dffd3a6130c6213419e401d9d5c470
   - tar -xzf gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
   - export PATH=`pwd`/gr1c-${GR1CVERSION}-Linux_x86-64:$PATH
   # lily
