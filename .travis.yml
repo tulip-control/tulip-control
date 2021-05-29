@@ -4,7 +4,7 @@ python:
   - "3.8"
   - "3.9"
 
-dist: bionic
+dist: focal
 
 addons:
   apt:
