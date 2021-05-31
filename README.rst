@@ -37,7 +37,7 @@ Documentation
 
 There are two main sources of documentation outside the code.  The "user"
 documentation is under ``doc/`` and is built with `Sphinx
-<http://sphinx.pocoo.org/>`_, so the usual steps apply, ::
+<https://www.sphinx-doc.org/>`_, so the usual steps apply, ::
 
   make html
 
