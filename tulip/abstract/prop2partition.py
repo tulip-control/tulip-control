@@ -645,7 +645,7 @@ def ppp2ts(part):
         from the given partition, and map of
         polytope indices to transition system states.
 
-    @rtype: (L{transys.FTS}, \C{dict})
+    @rtype: (L{transys.FTS}, C{dict})
     """
     # generate transition system and add transitions
     ofts = trs.FTS()
