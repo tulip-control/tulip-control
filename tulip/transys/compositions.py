@@ -29,12 +29,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Compositions of transys"""
-
+"""Compositions of transys."""
 import copy
-from itertools import product
 from functools import reduce
+from itertools import product
 from operator import or_
+
 from tulip.transys import KripkeStructure as KS
 from tulip.transys import WeightedKripkeStructure as WKS
 from tulip.transys import MarkovChain as MC
@@ -43,11 +43,13 @@ from tulip.transys import MarkovDecisionProcess as MDP
 
 def sum_values(*values):
     """Return the sum of values, considering only elements that are not None.
+
     An item v,w in values can be anything that contains __add__ function
     such that v+0 and v+w is defined.
     """
     # Cannot simply return sum([v for v in values if v is not None])
-    # because it does 0 + v which will not work for v of type, e.g., VectorCost
+    # because it does 0 + v which will not work for v of type,
+    # e.g., VectorCost
     current = 0
     for v in values:
         if v is not None:
@@ -56,7 +58,8 @@ def sum_values(*values):
 
 
 def mult_values(*values):
-    """Return the product of values, considering only elements that are not None.
+    """Return product of values, considering only elements that are not None.
+
     An item v,w in values can be anything that contains __mul__ function
     such that v*1 and v*w is defined.
     """
@@ -69,6 +72,7 @@ def mult_values(*values):
 
 def neglect_none(*values):
     """Return a tuple of values, considering only elements that are not None.
+
     If the tuple only has one element, just return that element.
     """
     ret = tuple([v for v in values if v is not None])
@@ -78,31 +82,35 @@ def neglect_none(*values):
 
 
 def synchronous_parallel(models, transition_attr_operations={}):
-    """Construct a model that represents
-    the synchronous paralel composition of the given models
-    (i.e., tensor product in graph theory
+    """Construct synchronous parallel composition.
+
+    Construct a model that represents the synchronous parallel composition
+    of the given models (i.e., tensor product in graph theory
     https://en.wikipedia.org/wiki/Tensor_product_of_graphs)
 
     It follows definition 2.42 (synchronous product) in
-    U{[BK08] <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>},
+    U{[BK08]
+        <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>},
     with the only exception that Act does not have the be the same
     for all the models in models.
 
-    @type models: `list` of objects of types `KripeStructure`, `WeightedKripkeStructure`,
+    @type models: `list` of objects of type
+        `KripeStructure` or `WeightedKripkeStructure` or
         `MarkovChain` or `MarkovDecisionProcess`
-    @type transition_attr_operations: `dict` whose key is the transition attribute key
-        and value is the operation to be performed for this transition attribute.
+    @type transition_attr_operations: `dict` whose key is the
+        transition attribute key and
+        value is the operation to be performed for this transition attribute.
         For an attribute whose operation is not specified,
         a tuple of attribute values from all models will be used.
 
-    @return: the synchronous parallel composition of all the objects in models
+    @return: the synchronous parallel composition of
+        all the objects in models
     @rtype: one of the following types:
         * L{transys.KripkeStructure}
         * L{transys.WeightedKripkeStructure}
         * L{transys.MarkovChain}
         * L{transys.MarkovDecisionProcess}
     """
-
     # Let models = [K_1, ..., K_n].
     # Let
     # * prod_states = [S_1, ..., S_n] where S_i is the set of states of K_i
@@ -110,7 +118,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
     #   states of K_i
     prod_states = []
     prod_initials = []
-
+    #
     # Construct prod_states and prod_initials and
     # construct the composed model ts with all the atomic propositions.
     composed_type = _get_composed_model_type(models)
@@ -121,7 +129,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
         prod_states.append(set(model.states))
         prod_initials.append(model.states.initial)
         ts.atomic_propositions.add_from(model.atomic_propositions)
-
+    #
     # Compute the state of ts: S = S_1 \times ... \times S_n.
     # Also, compute the label at each state (s_1, ..., s_n).
     # By definition L(s_1, ..., s_n) = \bigcup_i L_i(s_i)
@@ -129,13 +137,15 @@ def synchronous_parallel(models, transition_attr_operations={}):
     for state in product(*prod_states):
         ts.states.add(state)
         ts.states[state]["ap"] = reduce(
-            or_, [models[i].states[state[i]]["ap"] for i in range(len(models))]
+            or_, [
+                models[i].states[state[i]]["ap"]
+                for i in range(len(models))]
         )
-
+    #
     # Compute the initial state of ts: I = I_1 \times ... \times I_n
     for state in product(*prod_initials):
         ts.states.initial.add(state)
-
+    #
     # Compute the set of actions
     if type(ts) == MDP:
         prod_actions = [list(m.actions) for m in models if type(m) == MDP]
@@ -143,14 +153,13 @@ def synchronous_parallel(models, transition_attr_operations={}):
             ts.actions.add_from(prod_actions[0])
         else:
             ts.actions.add_from(list(product(*prod_actions)))
-
     if WKS.cost_label not in transition_attr_operations:
         transition_attr_operations[WKS.cost_label] = sum_values
     if MC.probability_label not in transition_attr_operations:
         transition_attr_operations[MC.probability_label] = mult_values
     if MDP.action_label not in transition_attr_operations:
         transition_attr_operations[MDP.action_label] = neglect_none
-
+    #
     # Compute the transition of ts according to the rule
     # ((s_1, ..., s_n), (a_1, ..., a_n), (s_1', ..., s_n'))
     # in the transition relation of ts
@@ -162,29 +171,32 @@ def synchronous_parallel(models, transition_attr_operations={}):
         ]
         for transition in product(*transitions):
             to_state = tuple(t[1] for t in transition)
-            attr = _get_transition_attr(transition, transition_attr_operations)
+            attr = _get_transition_attr(
+                transition, transition_attr_operations)
             ts.transitions.add(
                 from_state, to_state, attr,
             )
-
     return ts
 
 
 def apply_policy(model, policy):
-    """Apply the policy on the MarkovDecisionProcess and return the induced MarkovChain
+    """Apply `policy` on `model` and return the induced Markov chain.
+
+    Apply the policy `policy` on the Markov decision process `model`
+    and return the induced Markov chain.
 
     @type model: `MarkovDecisionProcess`
-    @type policy: An object such that for any state in model.states, policy[state]
-        is an action in model.actions
+    @type policy: An object such that for any state in `model.states`,
+        `policy[state]` is an action in `model.actions`
 
-    @return: the induced MarkovChain
+    @return: the induced Markov chain
+    @rtype: `MarkovChain`
     """
     result_model_type = _get_apply_policy_model_type(model)
     result = result_model_type()
     result.states.add_from(model.states)
     result.states.initial.add_from(model.states.initial)
     result.atomic_propositions.add_from(model.atomic_propositions)
-
     for state in model.states:
         result.states[state]["ap"] = copy.deepcopy(model.states[state]["ap"])
         action = policy[state]
@@ -193,20 +205,21 @@ def apply_policy(model, policy):
                 continue
             transition_attr = copy.deepcopy(transition[2])
             del transition_attr[MDP.action_label]
-            result.transitions.add(transition[0], transition[1], transition_attr)
-
+            result.transitions.add(
+                transition[0], transition[1], transition_attr)
     return result
 
 
-
-
 def _get_transition_attr(trans_prod, transition_attr_operations):
-    """Return the attribute of a transition constructed by taking the product
-    of transitions in trans_prod.
+    """Return product of transitions in `trans_prod`.
+
+    Return the attribute of a transition constructed by taking the product
+    of transitions in `trans_prod`.
 
     @type trans_prod: `list` of `Transitions` objects
-    @type transition_attr_operations: `dict` whose key is the transition attribute key
-        and value is the operation to be performed for this transition attribute.
+    @type transition_attr_operations: `dict` whose key is the
+        transition attribute key and value is the operation to
+        be performed for this transition attribute.
         For an attribute whose operation is not specified,
         a tuple of attribute values from all models will be used.
     """
@@ -214,9 +227,9 @@ def _get_transition_attr(trans_prod, transition_attr_operations):
     for idx, trans in enumerate(trans_prod):
         for trans_attr_key, trans_attr_value in trans[2].items():
             if trans_attr_key not in trans_attr:
-                trans_attr[trans_attr_key] = [None for i in range(len(trans_prod))]
+                trans_attr[trans_attr_key] = [
+                    None for i in range(len(trans_prod))]
             trans_attr[trans_attr_key][idx] = trans_attr_value
-
     for key, val in trans_attr.items():
         operation = transition_attr_operations.get(key, None)
         if operation is None:
@@ -227,10 +240,14 @@ def _get_transition_attr(trans_prod, transition_attr_operations):
 
 
 def _get_composed_model_type(models):
-    """Return the class of model obtained from taking a composition of those given by models
+    """Return class of model that corresponds to composition of `models`.
 
-    @type models: `list` of objects of type KripkeStructure, WeightedKripkeStructure,
-        MarkovChain or MarkovDecisionProcess
+    Return the class of model obtained from taking a composition of
+    those given in `models`.
+
+    @type models: `list` of objects of type
+        `KripkeStructure` or `WeightedKripkeStructure` or
+        `MarkovChain` or `MarkovDecisionProcess`
     """
     if all(type(m) in [MDP, MC, KS] for m in models):
         if any(type(m) == MDP for m in models):
@@ -238,20 +255,24 @@ def _get_composed_model_type(models):
         if any(type(m) == MC for m in models):
             return MC
         return KS
-
     if all(type(m) in [WKS, KS] for m in models):
         if any(type(m) == WKS for m in models):
             return WKS
         return KS
-
     return None
 
 
 def _get_apply_policy_model_type(model):
-    """Return the class of model obtained from applying a policy on the given model
+    """Return class of model that corresponds to applying a policy to `model`.
 
-    @type model: KripkeStructure, WeightedKripkeStructure or MarkovDecisionProcess
+    Return the class of model obtained from applying
+    a policy on the given `model`.
+
+    @type model: `KripkeStructure` or `WeightedKripkeStructure` or
+        `MarkovDecisionProcess`
     """
     if type(model) == MDP:
         return MC
-    raise TypeError("Cannot apply policy for model of type {}".format(type(model)))
+    raise TypeError(
+        'Cannot apply policy for model of type {m}'.format(
+            m=type(model)))
