@@ -1,12 +1,8 @@
 # usage: `pip install -r requirements.txt`
 pip>=9.0.0
 setuptools>=39.0.0
-ply==3.10
-networkx==2.4
-scipy
 
 # easy extras
-omega==0.3.1
 gr1py==0.2.0
 
 # extras (uncomment as needed)
