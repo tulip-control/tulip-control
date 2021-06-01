@@ -127,8 +127,7 @@ def run_setup():
 
 
 def install_cvxopt():
-    """Install a version of cvxopt that is compatible with polytope
-    requirements"""
+    """Install `cvxopt` version compatible with polytope requirements."""
     import polytope
     import subprocess
     import sys
