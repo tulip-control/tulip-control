@@ -974,8 +974,6 @@ file_name = 'test_spec'
 #Load adjacency matrix from matfile
 data = scipy.io.loadmat('SLD.mat')
 datatemp = data['A']
-# create matrix from matfile
-A = np.matrix(datatemp)
 
 #Failure Probabilities
 genfail = 1
@@ -994,7 +992,7 @@ gens = [0,1]
 nptime = 0
 
 #Create networkx graph from adjacency matrix
-G=nx.from_numpy_matrix(A)
+G = nx.from_numpy_array(datatemp)
 print('number of edges ' + str(len(G.edges())))
 print('number of nodes ' + str(len(G.nodes())))
 
