@@ -77,7 +77,10 @@ class LabeledStateInputOutputPair(object):
 
 
 class FunctionOnLabeledState(object):
-    """A class that represents a function of a labeled state, with possibly additional inputs
+    r"""Represents a function of a labeled state.
+
+    A class that represents a function of a labeled state,
+    with possibly additional inputs.
 
     This class represents a function
 
