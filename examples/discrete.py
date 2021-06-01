@@ -135,7 +135,7 @@ specs.moore = True
 # synthesizer should find initial system values that satisfy
 # `env_init /\ sys_init` and work, for every environment variable
 # initial values that satisfy `env_init`.
-specs.qinit = '\E \A'
+specs.qinit = r'\E \A'
 ctrl = synth.synthesize(specs, sys=sys)
 assert ctrl is not None, 'unrealizable'
 # @synthesize_end@

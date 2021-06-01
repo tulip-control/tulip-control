@@ -50,7 +50,7 @@ class basic_test(object):
                            env_init="x", env_prog="x",
                            sys_init="y", sys_safety=["y -> X(!y)", "!y -> X(y)"],
                            sys_prog="y && x",
-                           moore=False, plus_one=False, qinit='\A \E')
+                           moore=False, plus_one=False, qinit=r'\A \E')
         self.f = GRSpec(env_vars="x", sys_vars="y",
                         env_init="x", env_prog="x",
                         sys_init="y",
@@ -58,7 +58,7 @@ class basic_test(object):
                         moore=False, plus_one=False, )
         self.dcounter = GRSpec(sys_vars={"y": (0,5)}, sys_init=["y=0"],
                                sys_prog=["y=0", "y=5"],
-                               moore=False, plus_one=False, qinit='\A \E')
+                               moore=False, plus_one=False, qinit=r'\A \E')
 
     def tearDown(self):
         self.f_un = None

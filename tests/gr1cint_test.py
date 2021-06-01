@@ -97,7 +97,7 @@ class basic_test(object):
             sys_prog="y && x",
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
         self.dcounter = GRSpec(
             env_init=['True'],
             sys_vars={"y": (0, 5)},
@@ -105,7 +105,7 @@ class basic_test(object):
             sys_prog=["y=0", "y=5"],
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
 
     def tearDown(self):
         self.f_un = None
@@ -123,12 +123,12 @@ class basic_test(object):
         assert not gr1c.check_realizable(self.f_un)
         self.f_un.sys_safety = []
         assert gr1c.check_realizable(self.f_un)
-        self.f_un.qinit = '\A \A'
+        self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x', '!y']
         self.f_un.sys_init = list()
         assert gr1c.check_realizable(self.f_un)
         assert gr1c.check_realizable(self.dcounter)
-        self.dcounter.qinit = '\A \A'
+        self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
         assert gr1c.check_realizable(self.dcounter)
 
@@ -147,7 +147,7 @@ class basic_test(object):
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
-        self.dcounter.qinit = '\A \A'
+        self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
         g = gr1c.synthesize(self.dcounter)
         assert g is not None

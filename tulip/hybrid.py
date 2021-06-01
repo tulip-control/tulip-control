@@ -55,7 +55,7 @@ def _indent(s, n):
     return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
-    """Represent discrete-time continuous-state dynamics::
+    r"""Represent discrete-time continuous-state dynamics::
 
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
 

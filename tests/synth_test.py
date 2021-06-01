@@ -364,7 +364,7 @@ def test_only_mode_control():
 
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
-    specs.qinit = '\E \A'
+    specs.qinit = r'\E \A'
     r = synth.is_realizable(specs, env=env_sws, ignore_env_init=True)
     assert not r
 
@@ -412,7 +412,7 @@ def multiple_env_actions_check(solver='omega'):
         sys_prog=sys_prog,
         moore=False,
         plus_one=False,
-        qinit='\A \E')
+        qinit=r'\A \E')
     r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert r
     # slightly relax assumption
@@ -420,7 +420,7 @@ def multiple_env_actions_check(solver='omega'):
         sys_prog=sys_prog,
         moore=False,
         plus_one=False,
-        qinit='\A \E')
+        qinit=r'\A \E')
     r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert not r
 

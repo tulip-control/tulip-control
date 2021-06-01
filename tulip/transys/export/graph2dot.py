@@ -273,7 +273,7 @@ def _form_node_label(state, state_data, label_def,
 
     # make indices subscripts
     if tikz:
-        pattern = '([a-zA-Z]\d+)'
+        pattern = r'([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
         state_str = re.sub(pattern, make_subscript, state_str)
 

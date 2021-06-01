@@ -141,7 +141,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
             'Accepting States:\n' +
             pformat(self.states.accepting, indent=3) + 2 * '\n')
         if self.atomic_proposition_based:
-            s += 'Input Alphabet Letters (\in 2^AP):\n\t'
+            s += 'Input Alphabet Letters (\\in 2^AP):\n\t'
         else:
             if hasattr(self, 'alphabet'):
                 s += ('Input Alphabet Letters:\n\t' +

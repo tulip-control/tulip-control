@@ -128,7 +128,7 @@ class Lexer(object):
     t_NUMBER = r'\d+'
 
     t_IMP = '->'
-    t_BIMP = '\<->'
+    t_BIMP = r'\<->'
 
     t_PLUS = r'\+'
     t_MINUS = r'-'

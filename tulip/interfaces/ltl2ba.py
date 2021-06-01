@@ -65,7 +65,7 @@ class Lexer(object):
     t_TRUE = 'TRUE|True|true'
     t_FALSE = 'FALSE|False|false'
 
-    t_COMMENT = '/\*.*\*/'
+    t_COMMENT = r'/\*.*\*/'
     t_NOT = r'\!'
     t_AND = r'\&\&|\&'
     t_OR = r'\|\||\|'

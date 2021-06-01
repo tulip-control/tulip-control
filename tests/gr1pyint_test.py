@@ -23,14 +23,14 @@ class basic_test(object):
             sys_prog="y && x",
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
         self.dcounter = GRSpec(
             sys_vars={"y": (0, 5)},
             sys_init=["y=0"],
             sys_prog=["y=0", "y=5"],
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
 
     def tearDown(self):
         self.f_un = None
@@ -41,14 +41,14 @@ class basic_test(object):
         assert not gr1py.check_realizable(self.f_un)
         self.f_un.sys_safety = []
         assert gr1py.check_realizable(self.f_un)
-        self.f_un.qinit = '\A \A'
+        self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x & y']
         self.f_un.sys_init = list()
         with assert_raises(AssertionError):
             assert gr1py.check_realizable(self.f_un)
         # counter
         assert gr1py.check_realizable(self.dcounter)
-        self.dcounter.qinit = '\A \A'
+        self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
         with assert_raises(AssertionError):
             assert gr1py.check_realizable(self.dcounter)

@@ -499,19 +499,19 @@ def select_options(spec):
     # and y component variables.
     assert not spec.moore
     assert not spec.plus_one
-    if spec.qinit == '\A \E':
+    if spec.qinit == r'\A \E':
         # \A x:  \E y:  EnvInit(x) => SysInit(y)
         init_option = 'ALL_ENV_EXIST_SYS_INIT'
-    elif spec.qinit == '\E \A':
+    elif spec.qinit == r'\E \A':
         raise ValueError(
-            '`qinit = "\E \A"` not supported by `gr1c`. '
-            'Use `qinit = "\A \E"`.')
-    elif spec.qinit == '\A \A':
+            r'`qinit = "\E \A"` not supported by `gr1c`. '
+            r'Use `qinit = "\A \E"`.')
+    elif spec.qinit == r'\A \A':
         # \A x, y:  EnvInit(x, y)
         # undefined SysInit
         assert not spec.sys_init, spec.sys_init
         init_option = 'ONE_SIDE_INIT'
-    elif spec.qinit == '\E \E':
+    elif spec.qinit == r'\E \E':
         # \E x, y:  SysInit(x, y)
         # undefined EnvInit
         assert not spec.env_init, spec.env_init

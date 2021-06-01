@@ -20,7 +20,7 @@ class basic_test(object):
         self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
                                 env_init="x & y", env_prog="x",
                                 sys_init="y", sys_prog="y && x")
-        self.triv.qinit = '\E \A'
+        self.triv.qinit = r'\E \A'
         self.triv_M = synth.synthesize(
             self.triv, solver='omega')
 

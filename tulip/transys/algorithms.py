@@ -232,7 +232,7 @@ def ts_sync_prod(ts1, ts2):
 
 
 def sync_prod(ts, ba):
-    """Synchronous product between (BA, TS), or (BA1, BA2).
+    r"""Synchronous product between (BA, TS), or (BA1, BA2).
 
     The result is always a L{BuchiAutomaton}:
 

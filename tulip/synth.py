@@ -779,7 +779,7 @@ def _env_trans_from_env_ts(
     states, state_ids, trans,
     action_ids=None, env_action_ids=None, sys_action_ids=None
 ):
-    """Convert environment TS transitions to GR(1) representation.
+    r"""Convert environment TS transitions to GR(1) representation.
 
     This contributes to the \rho_e(X, Y, X') part of the spec,
     i.e., constrains the next environment state variables' valuation

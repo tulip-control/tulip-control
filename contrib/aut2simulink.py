@@ -102,13 +102,13 @@ def load_file(aut_file):
     for line in f:
         # parse states
         if (line.find('State ') >= 0):
-            stateid = re.search('State (\d+)', line)
+            stateid = re.search(r'State (\d+)', line)
             stateid = int(stateid.group(1))
-            state = dict(re.findall('(\w+):(\w+)', line))
-            state1 = dict(re.findall('(\w+):(-\w+)', line))
+            state = dict(re.findall(r'(\w+):(\w+)', line))
+            state1 = dict(re.findall(r'(\w+):(-\w+)', line))
             state.update(state1)
         if re.search('successors', line):
-            transition = list(re.findall('\d+', line))
+            transition = list(re.findall(r'\d+', line))
             automaton=(stateid,state,transition)
             queue.put(automaton)
             queue1.put(automaton)
@@ -129,7 +129,7 @@ def read_variables(smv_file):
         if re.search('MODULE env',line):
             for line in f:
                 if re.search(' : ', line):
-                    env = str(re.findall('(\w+) :', line))
+                    env = str(re.findall(r'(\w+) :', line))
                     env = env[2:len(env)-2]
                     enviroment.put(env)
                 if re.search('MODULE sys',line):
@@ -137,7 +137,7 @@ def read_variables(smv_file):
         if re.search('MODULE sys',line):
             for line in f:
                 if re.search(' : ', line):
-                    sys = str(re.findall('(\w+) :', line))
+                    sys = str(re.findall(r'(\w+) :', line))
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 

@@ -84,7 +84,7 @@ def create_machine_ports(spc_vars):
 
 
 class Transducer(LabeledDiGraph):
-    """Sequential Transducer, i.e., a letter-to-letter function.
+    r"""Sequential Transducer, i.e., a letter-to-letter function.
 
     Inputs
     ======
@@ -127,7 +127,7 @@ class Transducer(LabeledDiGraph):
             in the set of possible values Vp.
 
           - C{__call__(guard_set, input_port_value) }:
-            check if C{input_port_value} \\in C{guard_set}
+            check if C{input_port_value} \in C{guard_set}
             This allows symbolic type definitions.
 
             For example, C{input_port_value} might be assigned

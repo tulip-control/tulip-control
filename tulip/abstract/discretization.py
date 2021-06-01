@@ -727,11 +727,11 @@ def _discretize_bi(
         msg += '\t Computed reachable set S0 with volume: '
         msg += '{vol}\n'.format(vol=S0.volume)
         logger.debug(msg)
-        #logger.debug('si \cap s0')
+        #logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug('si \ s0')
+        #logger.debug(r'si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
@@ -759,17 +759,17 @@ def _discretize_bi(
         #     ax.axis([0.0, 1.0, 0.0, 2.0])
         #     ax.figure.savefig('./img/diff_cap_isect.pdf')
         #
-        #     logger.error('Intersection \cap Difference != \emptyset')
+        #     logger.error(r'Intersection \cap Difference != \emptyset')
         #
         #     assert(False)
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), '
+            logger.warning('\t too small: si \\cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
             logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \ Pre(sj), so not reached it')
+            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
@@ -1189,21 +1189,21 @@ def _discretize_dual(
         msg += '\t Computed reachable set S0 with volume: '
         msg += '{vol}\n'.format(vol=S0.volume)
         logger.debug(msg)
-        #logger.debug('si \cap s0')
+        #logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug('si \ s0')
+        #logger.debug(r'si \ s0')
         rsi, xd = pc.cheby_ball(si)
         vol2 = si.volume-vol1 # not accurate. need to check polytope class
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), '
+            logger.warning('\t too small: si \\cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
             logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \ Pre(sj), so not reached it')
+            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # indicate if S0 has exists in sol
         check_isect = False 
         # We don't want our partitions to be smaller than the disturbance set

@@ -323,7 +323,7 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope::
+    r"""Compute the components of the polytope::
 
         L [x(0)' u(0)' ... u(N-1)']' <= M
 

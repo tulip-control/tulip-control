@@ -83,7 +83,7 @@ def get_input(
     R=None, r=None, Q=None,
     ord=1, mid_weight=0.0, solver=None
 ):
-    """Compute continuous control input for discrete transition.
+    r"""Compute continuous control input for discrete transition.
 
     Computes a continuous control input sequence
     which takes the plant:
@@ -331,7 +331,7 @@ def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q, ord=1,
     closed_loop=True, solver=None
 ):
-    """Calculate the sequence u_seq such that:
+    r"""Calculate the sequence u_seq such that:
 
       - x(t+1) = A x(t) + B u(t) + K
       - x(k) \in P1 for k = 0,...N
@@ -489,7 +489,7 @@ class _InputHelperQPException(Exception):
 
 
 def is_seq_inside(x0, u_seq, ssys, P0, P1):
-    """Checks if the plant remains inside P0 for time t = 1, ... N-1
+    r"""Checks if the plant remains inside P0 for time t = 1, ... N-1
     and  that the plant reaches P1 for time t = N.
     Used to test a computed input sequence.
     No disturbance is taken into account.

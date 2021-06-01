@@ -172,7 +172,7 @@ class MarkovDecisionProcess(MarkovChain):
 
 
 class FiniteTransitionSystem(LabeledDiGraph):
-    """Kripke structure with labeled states and edges.
+    r"""Kripke structure with labeled states and edges.
 
     Who controls the state
     ======================
