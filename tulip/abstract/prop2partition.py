@@ -296,11 +296,13 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     regions. Performace significantly degrades without glpk.
     """
     if (grid_size!=None)&(num_grid_pnts!=None):
-        raise Exception("add_grid: Only one of the grid size or number of \
-                        grid points parameters is allowed to be given.")
+        raise Exception(
+            "add_grid: Only one of the grid size or number of "
+            "grid points parameters is allowed to be given.")
     if (grid_size==None)&(num_grid_pnts==None):
-        raise Exception("add_grid: At least one of the grid size or number of \
-                         grid points parameters must be given.")
+        raise Exception(
+            "add_grid: At least one of the grid size or number of "
+            "grid points parameters must be given.")
 
     dim=len(ppp.domain.A[0])
     domain_bb = ppp.domain.bounding_box
@@ -391,8 +393,8 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     for i in range(len(new_list)):
         adj[i,i] = 1
         for j in range(i+1, len(new_list)):
-            if (ppp.adj[parent[i], parent[j]] == 1) or \
-                    (parent[i] == parent[j]):
+            if (ppp.adj[parent[i], parent[j]] == 1 or
+                    parent[i] == parent[j]):
                 if pc.is_adjacent(new_list[i], new_list[j]):
                     adj[i,j] = 1
                     adj[j,i] = 1

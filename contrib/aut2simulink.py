@@ -397,9 +397,11 @@ try:
     else:
         print('Enter a matlab filename that does not exist.')
 except IOError:
-    print('Enter correct filename for a TuLiP generated controller, '+ \
+    print(
+        'Enter correct filename for a TuLiP generated controller, '
         'aut and\nsmv file must have the same name')
 except IndexError:
-    print('Usage: aut2simulink.py JTLV-AUT-FILE MATLAB-FILE\n\n'+ \
-          '    aut and smv file must have the same name.\n'+ \
-          '    Do not include file extensions.')
+    print(
+        'Usage: aut2simulink.py JTLV-AUT-FILE MATLAB-FILE\n\n'
+        '    aut and smv file must have the same name.\n'
+        '    Do not include file extensions.')

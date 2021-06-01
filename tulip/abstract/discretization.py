@@ -774,8 +774,11 @@ def _discretize_bi(
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) and (risect > rd) and \
-           (vol2 > min_cell_volume) and (rdiff > rd):
+        if (
+                vol1 > min_cell_volume and
+                risect > rd and
+                vol2 > min_cell_volume and
+                rdiff > rd):
             # Make sure new areas are Regions and add proposition lists
             if len(isect) == 0:
                 isect = pc.Region([isect], si.props)
@@ -1210,8 +1213,11 @@ def _discretize_dual(
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) and (risect > rd) and \
-           (vol2 > min_cell_volume) and (rsi > rd):                    
+        if (
+                vol1 > min_cell_volume and
+                risect > rd and
+                vol2 > min_cell_volume and
+                rsi > rd):
             # check if the intersection has existed in current partitions
             for idx in range(len(sol)):
                 if(sol[idx] == isect):
@@ -1376,8 +1382,8 @@ def _discretize_dual(
     }
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
-    msg = 'Total abstraction time: ' +\
-          str(end_time - start_time) + '[sec]'
+    msg = 'Total abstraction time: {t} [sec]'.format(
+        t=end_time - start_time)
     print(msg)
     logger.info(msg)
     if save_img and plt is not None:
@@ -1433,8 +1439,8 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             logger.info("Transition found")
 #             transitions[i,j] = 1
 #
-#         elif (vol1 > min_cell_volume) & (risect > rd) & \
-#                 (num_new_reg[i] <= num_orig_neigh[i]+1):
+#         elif ((vol1 > min_cell_volume) & (risect > rd) &
+#                 (num_new_reg[i] <= num_orig_neigh[i]+1)):
 #
 #             # Make sure new cell is Region and add proposition lists
 #             if len(isect) == 0:
@@ -1874,8 +1880,9 @@ def merge_partitions(abstractions):
                 msg += 'of continuous propositions'
                 raise Exception(msg)
 
-            if not (p1.domain.A == p2.domain.A).all() or \
-            not (p1.domain.b == p2.domain.b).all():
+            if (
+                    not (p1.domain.A == p2.domain.A).all() or
+                    not (p1.domain.b == p2.domain.b).all()):
                 raise Exception('merge: partitions have different domains')
 
             # check equality of original PPP partitions

@@ -220,8 +220,9 @@ def ts_sync_prod(ts1, ts2):
     """
     prod_ts = FiniteTransitionSystem()
     # union of AP sets
-    prod_ts.atomic_propositions |= \
-        ts1.atomic_propositions | ts2.atomic_propositions
+    prod_ts.atomic_propositions |= (
+        ts1.atomic_propositions |
+        ts2.atomic_propositions)
     # use more label sets, instead of this explicit approach
     #
     # for synchronous product: Cartesian product of action sets
@@ -383,8 +384,9 @@ def async_prod(self, ts):
         mutable = False
     # union of AP sets
     prod_ts = FiniteTransitionSystem(mutable=mutable)
-    prod_ts.atomic_propositions |= \
-        self.atomic_propositions | ts.atomic_propositions
+    prod_ts.atomic_propositions |= (
+        self.atomic_propositions |
+        ts.atomic_propositions)
     # for parallel product: union of action sets
     prod_ts.actions |= self.actions | ts.actions
     prod_ts = super(FiniteTransitionSystem, self).cartesian_product(

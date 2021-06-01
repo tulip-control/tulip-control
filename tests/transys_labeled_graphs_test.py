@@ -77,8 +77,10 @@ class States_test(object):
     def test_call(self):
         self.S.add_from([-1, "Cal"])
         S_imm_dat = self.S(data=True)
-        assert (len(S_imm_dat) == 2) and ((-1, dict()) in S_imm_dat) and \
-            (("Cal", dict()) in S_imm_dat)
+        assert (
+            len(S_imm_dat) == 2 and
+            (-1, dict()) in S_imm_dat and
+            ("Cal", dict()) in S_imm_dat)
 
     def test_postpre(self):
         self.S.add_from(range(5))
@@ -214,14 +216,16 @@ class States_labeling_test(object):
         assert len(result) == 1 and result[0] == ("state1", {"ap": set(['q'])})
 
         result = self.S_ap.find(["state1", "state0"])
-        assert len(result) == 2 and \
-           ("state1", {"ap": set(['q'])}) in result and \
-           ("state0", {"ap": set(['p'])}) in result
+        assert (
+            len(result) == 2 and
+            ("state1", {"ap": set(['q'])}) in result and
+            ("state0", {"ap": set(['p'])}) in result)
 
         result = self.S_ap.find(with_attr_dict={"ap": {'p'}})
         print(result)
-        assert len(result) == 2 and \
-           set([s for (s, l) in result]) == set(["state0", "state2"])
+        assert (
+            len(result) == 2 and
+            set([s for (s, l) in result]) == set(["state0", "state2"]))
 
         same_result = self.S_ap.find(ap={'p'})
         assert(same_result == result)

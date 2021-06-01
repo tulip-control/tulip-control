@@ -297,17 +297,17 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 #             x, cont_dyn_normal, new_part,
 #             cellid_arr[i-1], cellid_arr[i], 1, mid_weight=10
 #         )
-#         x = np.dot(cont_dyn_normal.A,x).flatten() + \
-#             np.dot(cont_dyn_normal.B,u).flatten() + \
-#             cont_dyn_normal.K.flatten()
+#         x = (np.dot(cont_dyn_normal.A,x).flatten() +
+#              np.dot(cont_dyn_normal.B,u).flatten() +
+#              cont_dyn_normal.K.flatten())
 #     else:
 #         u = abstract.get_input(
 #             x, cont_dyn_refuel, new_part, cellid_arr[i-1],
 #             cellid_arr[i], 1, Q=[], mid_weight=10
 #         )
-#         x = np.dot(cont_dyn_refuel.A,x).flatten() + \
-#             np.dot(cont_dyn_refuel.B,u).flatten() + \
-#             cont_dyn_refuel.K.flatten()
+#         x = (np.dot(cont_dyn_refuel.A,x).flatten() +
+#              np.dot(cont_dyn_refuel.B,u).flatten() +
+#              cont_dyn_refuel.K.flatten())
 
 #     u_arr = np.hstack([u_arr, u.flatten()])
 #     x_arr = np.vstack([x_arr, x])

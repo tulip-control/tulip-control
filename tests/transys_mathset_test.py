@@ -76,16 +76,16 @@ class MathSet_operations_test(object):
         self.y = None
 
     def test_mul(self):
-        assert self.small2_listnum * self.small1_set == \
-            MathSet([([1,2], {-1, 1}), (0.2, {-1, 1})])
-        assert self.small2_listnum * self.small2_listnum == \
-            MathSet([([1,2], [1,2]), ([1,2], 0.2), (0.2, [1,2]), (0.2, 0.2)])
+        assert (self.small2_listnum * self.small1_set ==
+            MathSet([([1,2], {-1, 1}), (0.2, {-1, 1})]))
+        assert (self.small2_listnum * self.small2_listnum ==
+            MathSet([([1,2], [1,2]), ([1,2], 0.2), (0.2, [1,2]), (0.2, 0.2)]))
 
     def test_sub(self):
         assert self.small2_listnum - self.small2_listnum== MathSet()
         assert self.small1_set - self.small2_listnum == self.small1_set
-        assert self.x - self.small2_listnum == \
-            MathSet(['a', 1, {'a', 'b', '8'} ] )
+        assert (self.x - self.small2_listnum ==
+            MathSet(['a', 1, {'a', 'b', '8'}]))
 
     def test_isub(self):
         q = MathSet(self.small2_listnum)

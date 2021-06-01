@@ -143,9 +143,10 @@ class GridWorld(object):
                 out = 'X '
             else:
                 out = ''
-            out += str(self.prefix) + "_" + \
-                str(key[0] + self.offset[0]) + "_" + \
-                str(key[1] + self.offset[1])
+            out += (
+                str(self.prefix) + "_" +
+                str(key[0] + self.offset[0]) + "_" +
+                str(key[1] + self.offset[1]))
             return out
 
     def __copy__(self):
@@ -692,8 +693,7 @@ class GridWorld(object):
                 else:
                     cell_var = self.prefix + "_" + str(i) + "_" + str(j)
                 # adjacency[i]
-                cells[cell_var] \
-                    = Polytope(
+                cells[cell_var] = Polytope(
                         A=np.array(
                             [[0, -1],
                              [0, 1],
@@ -765,21 +765,17 @@ class GridWorld(object):
                                                    use_next=True,
                                                    nonbool=nonbool)
                 if i > row_low and self.W[i - 1][j] == 0:
-                    spec_trans[-1] += " || " + \
-                        self.__getitem__(
-                            (i - 1, j), use_next=True, nonbool=nonbool)
+                    spec_trans[-1] += " || " + self.__getitem__(
+                        (i - 1, j), use_next=True, nonbool=nonbool)
                 if j > col_low and self.W[i][j - 1] == 0:
-                    spec_trans[-1] += " || " + \
-                        self.__getitem__(
-                            (i, j - 1), use_next=True, nonbool=nonbool)
+                    spec_trans[-1] += " || " + self.__getitem__(
+                        (i, j - 1), use_next=True, nonbool=nonbool)
                 if i < row_high - 1 and self.W[i + 1][j] == 0:
-                    spec_trans[-1] += " || " + \
-                        self.__getitem__(
-                            (i + 1, j), use_next=True, nonbool=nonbool)
+                    spec_trans[-1] += " || " + self.__getitem__(
+                        (i + 1, j), use_next=True, nonbool=nonbool)
                 if j < col_high - 1 and self.W[i][j + 1] == 0:
-                    spec_trans[-1] += " || " + \
-                        self.__getitem__(
-                            (i, j + 1), use_next=True, nonbool=nonbool)
+                    spec_trans[-1] += " || " + self.__getitem__(
+                        (i, j + 1), use_next=True, nonbool=nonbool)
                 spec_trans[-1] += ")"
 
         # Safety, static

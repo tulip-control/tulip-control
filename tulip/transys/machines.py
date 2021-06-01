@@ -348,8 +348,8 @@ class MooreMachine(Transducer):
             # inform state vars
             self.outputs[port_name] = port_type
             # printing format
-            self._state_dot_label_format[port_name] = \
-                '/' + str(port_name)
+            self._state_dot_label_format[port_name] = (
+                '/' + str(port_name))
             if masks is None:
                 continue
             if port_name in masks:
@@ -487,11 +487,11 @@ class MealyMachine(Transducer):
             # append
             self._transition_label_def[port_name] = port_type
             # inform state vars
-            self.outputs[port_name] = \
-                self._transition_label_def[port_name]
+            self.outputs[port_name] = (
+                self._transition_label_def[port_name])
             # printing format
-            self._transition_dot_label_format[port_name] = \
-                '/' + str(port_name)
+            self._transition_dot_label_format[port_name] = (
+                '/' + str(port_name))
             if masks is None:
                 continue
             if port_name in masks:

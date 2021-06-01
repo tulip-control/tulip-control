@@ -972,9 +972,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # legacy
         if 'check_states' in attr:
-            msg = 'saw keyword argument: check_states ' +\
-                  'which is no longer available, ' +\
-                  'firstly add the new nodes.'
+            msg = (
+                'saw keyword argument: check_states '
+                'which is no longer available, '
+                'firstly add the new nodes.')
             logger.warning(msg)
         # check nodes exist
         if u not in self._succ:
