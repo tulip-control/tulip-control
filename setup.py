@@ -12,6 +12,11 @@ from setuptools import setup
 
 
 NAME = 'tulip'
+PROJECT_URLS = {
+    'Bug Tracker': 'https://github.com/tulip-control/tulip-control/issues',
+    'Documentation': 'https://tulip-control.sourceforge.io/doc/',
+    'API Documentation': 'https://tulip-control.sourceforge.io/api-doc/',
+    'Source Code': 'https://github.com/tulip-control/tulip-control'}
 VERSION_FILE = '{name}/_version.py'.format(name=NAME)
 MAJOR = 1
 MINOR = 4
@@ -99,8 +104,7 @@ def run_setup():
         author='Caltech Control and Dynamical Systems',
         author_email='tulip@tulip-control.org',
         url='http://tulip-control.org',
-        bugtrack_url=('http://github.com/tulip-control/'
-                      'tulip-control/issues'),
+        project_urls=PROJECT_URLS,
         license='BSD',
         classifiers=classifiers,
         install_requires=[
