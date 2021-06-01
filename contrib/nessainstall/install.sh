@@ -25,7 +25,7 @@
 # e.g.: ~/.bashrc if using bash,
 # or:   ~/.tcshrc if using csh
 CFG_FILE=~/.bashrc
-PYTHON_VERSION=2.7.11
+PYTHON_VERSION=3.9.5
 
 # location to create directory "libraries"
 # will contain python, ATLAS, LAPACK, glpk, gr1c
@@ -346,6 +346,6 @@ pip install matplotlib
 
 # skip virtualenvwrapper: fragile to install
 #pip install virtualenvwrapper
-#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv-2.7' $CFG_FILE
+#sed -i '$ a export VIRTUALENVWRAPPER_VIRTUALENV='"$TMPBIN"'/virtualenv' $CFG_FILE
 #sed -i '$ a source '"$TMPBIN"'/virtualenvwrapper.sh' $CFG_FILE
 #source $CFG_FILE

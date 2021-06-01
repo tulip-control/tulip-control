@@ -58,7 +58,7 @@ Other sources of documentation
 You are currently reading the User's Guide.  There is also API documentation,
 which provides details about the various classes, methods, etc. in TuLiP.  This
 can be accessed using the standard `pydoc
-<https://docs.python.org/2.7/library/pydoc.html>`_ tool.  E.g., ::
+<https://docs.python.org/3/library/pydoc.html>`_ tool.  E.g., ::
 
   pydoc tulip
 

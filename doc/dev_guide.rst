@@ -36,7 +36,7 @@ be followed:
 - Be careful what you export, i.e., make sure that what is obtained when someone
   uses "from tulip.foo import \*" is what you intend.  Otherwise, hide names
   using the `"_" prefix
-  <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
+  <http://docs.python.org/3/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
 - API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.
   Accordingly, docstrings should be marked up with `Epytext
   <http://epydoc.sourceforge.net/manual-epytext.html>`_.

@@ -1,8 +1,5 @@
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
   - "3.7"
   - "3.8"
   - "3.9"
@@ -33,7 +30,6 @@ addons:
 before_install:
   - pip install --ignore-installed --upgrade pip setuptools wheel
   - pip install --upgrade --only-binary=numpy,scipy numpy scipy
-  - if test 2 = `python -c 'import sys; print(sys.version_info.major)'`; then pip install networkx==2.2; fi
   - pip install dd --no-binary dd
 
 install:
@@ -92,7 +88,7 @@ script:
   - pip install gitpython
   - pip install mock
   # stormpy, requires Python 3
-  - if test 3 = `python -c 'import sys; print(sys.version_info.major)'`; then ./extern/get-stormpy.sh; fi
+  - ./extern/get-stormpy.sh
   # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 

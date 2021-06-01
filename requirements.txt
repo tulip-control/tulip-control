@@ -1,6 +1,6 @@
 # usage: `pip install -r requirements.txt`
-pip>=7.1.2
-
+pip>=9.0.0
+setuptools>=39.0.0
 ply==3.10
 networkx==2.4
 scipy
