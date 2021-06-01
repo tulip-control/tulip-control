@@ -113,16 +113,18 @@ class FunctionOnLabeledState(object):
 
     def __init__(self, input_keys, output_keys):
         self._state_input_output_list = []
-        self._input_keys = (
-            input_keys
-            if isinstance(input_keys, Iterable) and not isinstance(input_keys, str)
-            else [input_keys]
-        )
-        self._output_keys = (
-            output_keys
-            if isinstance(output_keys, Iterable) and not isinstance(output_keys, str)
-            else [output_keys]
-        )
+        if (
+                isinstance(input_keys, Iterable) and
+                not isinstance(input_keys, str)):
+            self._input_keys = input_keys
+        else:
+            self._input_keys = [input_keys]
+        if (
+                isinstance(output_keys, Iterable) and
+                not isinstance(output_keys, str)):
+            self._output_keys = output_keys
+        else:
+            self._output_keys = [output_keys]
         self._state_index = input_keys.index("state")
 
     def __str__(self):
