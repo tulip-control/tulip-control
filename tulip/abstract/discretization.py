@@ -461,9 +461,9 @@ def discretize(
     plotit=False, save_img=False, cont_props=None,
     plot_every=1, simu_type='bi'
 ):
-    """Refine the partition via bisimulation 
+    """Refine the partition via bisimulation
     or dual-simulation algorithms, and establish transitions
-    based on reachability analysis. 
+    based on reachability analysis.
 
     Reference
     =========
@@ -508,8 +508,8 @@ def discretize(
 
     @param cont_props: continuous propositions to plot
     @type cont_props: list of C{Polytope}
-    
-    @param simu_type: if 'bi', use bisimulation partition; if 'dual', 
+
+    @param simu_type: if 'bi', use bisimulation partition; if 'dual',
         use dual-simulation partition
     @type simu_type: string,
         default = 'bi'
@@ -648,7 +648,7 @@ def _discretize_bi(
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
-                          np.array(part.adj.todense()) ) 
+                          np.array(part.adj.todense()) )
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -714,12 +714,12 @@ def _discretize_bi(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set, max_num_poly
         )
-        msg = '\n Working with partition cells: {i}, {j}'.format(i=i, 
+        msg = '\n Working with partition cells: {i}, {j}'.format(i=i,
                                                 j=j)
         logger.info(msg)
         msg = '\t{i} (#polytopes = {num}), and:\n'.format(i=i,
                                                 num=len(si))
-        msg += '\t{j} (#polytopes = {num})\n'.format(j=j, 
+        msg += '\t{j} (#polytopes = {num})\n'.format(j=j,
                                                 num=len(sj))
         if ispwa:
             msg += '\t with active subsystem: '
@@ -1058,12 +1058,12 @@ def _discretize_dual(
 
     @param cont_props: continuous propositions to plot
     @type cont_props: list of C{Polytope}
-    
+
     @param simu_type: flag used to choose abstraction algorithm
-        (bisimulation or dual-simulation). 
+        (bisimulation or dual-simulation).
     @type simu_type: string, 'bi' or 'dual'
         default = 'bi'
-    
+
     @rtype: L{AbstractPwa}
     """
     start_time = os.times()[0]
@@ -1179,12 +1179,12 @@ def _discretize_dual(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set, max_num_poly
         )
-        msg = '\n Working with partition cells: {i}, {j}'.format(i=i, 
+        msg = '\n Working with partition cells: {i}, {j}'.format(i=i,
                                                 j=j)
         logger.info(msg)
         msg = '\t{i} (#polytopes = {num}), and:\n'.format(i=i,
                                                 num=len(si))
-        msg += '\t{j} (#polytopes = {num})\n'.format(j=j, 
+        msg += '\t{j} (#polytopes = {num})\n'.format(j=j,
                                                 num=len(sj))
         if ispwa:
             msg += '\t with active subsystem: '
@@ -1208,7 +1208,7 @@ def _discretize_dual(
         if vol2 <= min_cell_volume:
             logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # indicate if S0 has exists in sol
-        check_isect = False 
+        check_isect = False
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
@@ -1238,14 +1238,14 @@ def _discretize_dual(
                 n_cells = len(sol)
                 new_idx = n_cells-1
                 """Update adjacency matrix"""
-                old_adj = np.nonzero(adj[i, :])[0]            
-                adj = np.pad(adj, (0, 1), 'constant')            
+                old_adj = np.nonzero(adj[i, :])[0]
+                adj = np.pad(adj, (0, 1), 'constant')
                 # cell i and new_idx are adjacent
                 adj[i, new_idx] = 1
                 adj[new_idx, i] = 1
                 adj[new_idx, new_idx] = 1
                 if not conservative:
-                    orig = np.hstack([orig, orig[i]])    
+                    orig = np.hstack([orig, orig[i]])
                 msg = ''
                 if logger.getEffectiveLevel() <= logging.DEBUG:
                     msg += '\t\n Adding states {new_idx}\n'.format(new_idx=
@@ -1264,9 +1264,9 @@ def _discretize_dual(
                 """Update transition matrix"""
                 transitions = np.pad(transitions, (0,1), 'constant')
                 adj_k = reachable_within(trans_length, adj, adj)
-                # transitions i ---> k for k is neighbor of new_idx should be 
+                # transitions i ---> k for k is neighbor of new_idx should be
                 # kept by new_idx
-                transitions[:, new_idx] = np.multiply(transitions[:, i], 
+                transitions[:, new_idx] = np.multiply(transitions[:, i],
                            adj_k[:, i])
                 # if j and new_idx are neighbor, then add new_idx ---> j
                 if adj_k[j, new_idx] != 0:
@@ -1308,7 +1308,7 @@ def _discretize_dual(
         msg = '\t total # polytopes: {n_cells}\n'.format(n_cells=n_cells)
         msg += '\t progress ratio: {pr}\n'.format(pr=progress_ratio)
         logger.info(msg)
-        iter_count += 1        
+        iter_count += 1
         # needs to be removed later
 #        if(iter_count>=700):
 #            break
@@ -1348,7 +1348,7 @@ def _discretize_dual(
             fname = 'movie' +str(iter_count).zfill(3)
             fname += '.' + file_extension
             fig.savefig(fname, dpi=250)
-        plt.pause(1)        
+        plt.pause(1)
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
