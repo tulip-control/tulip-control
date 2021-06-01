@@ -6,7 +6,10 @@ setuptools>=39.0.0
 gr1py==0.2.0
 
 # extras (uncomment as needed)
-# cvxopt==1.1.7  # for faster polytopic operations
+# cvxopt==...  # for faster polytopic operations.
+    # Choose the version of `cvxopt` based on
+    # what is required by the version of the
+    # package `polytope` that is installed.
 # matplotlib  # for plots
 
 # tests
