@@ -45,7 +45,6 @@ from textwrap import fill
 from io import StringIO
 import numpy as np
 import networkx as nx
-from networkx.utils import make_str
 import pydot
 # inline:
 #
@@ -244,11 +243,11 @@ def _place_initial_states(trs_graph, pd_graph, tikz):
     init_subg.set_rank('source')
 
     for node in trs_graph.states.initial:
-        pd_node = pydot.Node(make_str(node))
+        pd_node = pydot.Node(str(node))
         init_subg.add_node(pd_node)
 
         phantom_node = 'phantominit' + str(node)
-        pd_node = pydot.Node(make_str(phantom_node))
+        pd_node = pydot.Node(str(phantom_node))
         init_subg.add_node(pd_node)
 
     pd_graph.add_subgraph(init_subg)
