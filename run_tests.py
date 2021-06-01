@@ -170,7 +170,7 @@ def main():
 
         if testfiles and excludefiles:
             print("You can specify files to exclude or include, but not both.")
-            print("Try calling it with \"-h\" flag.")
+            print('Try calling it with "-h" flag.')
             exit(1)
 
         if excludefiles:

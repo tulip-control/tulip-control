@@ -85,7 +85,7 @@ def _assert_gr1c():
         'it will not be possible to realize GR(1) specifications.\n'
         'Consult installation instructions for gr1c at:\n'
         '\t http://scottman.net/2012/gr1c\n'
-        'or the TuLiP User\'s Guide about alternatives.')
+        "or the TuLiP User's Guide about alternatives.")
 
 
 def get_version():
@@ -267,7 +267,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
 
     # Assume version 1 of tulipcon XML
     if aut_elem.attrib["type"] != "basic":
-        raise ValueError("Automaton class only recognizes type \"basic\".")
+        raise ValueError('Automaton class only recognizes type "basic".')
     node_list = aut_elem.findall(ns_prefix+"node")
     id_list = []  # For more convenient searching, and to catch redundancy
     A = nx.DiGraph()
@@ -320,18 +320,21 @@ def _parse_vars(variables, vardict):
         if dom[0] == "[":
             end_ind = dom.find("]")
             if end_ind < 0:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
+                raise ValueError((
+                    'invalid domain for variable "{v}":  {dom}'
+                    ).format(v=v, dom=dom))
             dom_parts = dom[1:end_ind].split(",")
             if len(dom_parts) != 2:
-                raise ValueError("invalid domain for variable \""+
-                    str(v)+"\": "+str(dom))
+                raise ValueError((
+                    'invalid domain for variable "{v}":  {dom}'
+                    ).format(v=v, dom=dom))
             domains.append((int(dom_parts[0]), int(dom_parts[1])))
         elif dom == "boolean":
             domains.append("boolean")
         else:
-            raise ValueError("unrecognized type of domain for variable \""+
-                str(v)+"\": "+str(dom))
+            raise ValueError((
+                'unrecognized type of domain for variable "{v}":  {dom}'
+                ).format(v=v, dom=dom))
     variables = dict([
         (v, domains[i])
         for i, v in enumerate(variables)

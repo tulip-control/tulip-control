@@ -531,8 +531,8 @@ class GridWorld(object):
                         goal_list.append((row_index, j))
                     else:
                         raise ValueError(
-                            "unrecognized row symbol \"" +
-                            str(line[j]) + "\".")
+                            'unrecognized row symbol "' +
+                            str(line[j]) + '".')
                 row_index += 1
             else:
                 # Still looking for gridworld size in the given string

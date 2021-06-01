@@ -170,7 +170,7 @@ def readdstar(getline):
                 A.start_state = int(parts[1])
             elif parts[0] == "AP:":
                 ap_len = int(parts[1])
-                A.ap = tuple([prop.strip("\"").rstrip("\"") for prop in  parts[2:]])
+                A.ap = tuple([prop.strip('"').rstrip('"') for prop in  parts[2:]])
                 assert ap_len == len(A.ap)
             elif parts[0] == "State:":
                 last_state = int(parts[1])

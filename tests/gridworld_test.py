@@ -248,7 +248,7 @@ class RandomWorld_test(object):
 
     def test_feasibility(self):
         for r in range(len(self.rworlds_ensuredfeasible)):
-            print("test \"ensured feasible\" world index", r)
+            print('test "ensured feasible" world index', r)
             print(self.rworlds_ensuredfeasible[r])
             assert self.rworlds_ensuredfeasible[r].is_reachable(
                 self.rworlds_ensuredfeasible[r].init_list[0],
