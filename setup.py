@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 """Installation script."""
 import logging
+import subprocess
+import sys
+
 from setuptools import setup
 # inline:
 # import git
+# import polytope
+# import tulip.spec.lexyacc
 
 
 NAME = 'tulip'
@@ -129,8 +134,6 @@ def run_setup():
 def install_cvxopt():
     """Install `cvxopt` version compatible with polytope requirements."""
     import polytope
-    import subprocess
-    import sys
     ver = polytope.__version__
     # Download all files for the current version of polytope
     subprocess.check_call([
