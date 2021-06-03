@@ -3,6 +3,8 @@
 
 ## 1.4.0
 
+- require Python >= 3.7
+
 - rm interface to `jtlv` solver in 9634403c4f6fc78deb09bdfce978569f878973b8
 
 
