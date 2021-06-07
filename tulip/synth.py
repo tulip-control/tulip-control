@@ -158,7 +158,7 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     action = actions_dict[action_type]
     if ids is not None:
         action = ids[action]
-    if action is '':
+    if action == '':
         return ''
     if nxt:
         return ' X' + _pstr(action)

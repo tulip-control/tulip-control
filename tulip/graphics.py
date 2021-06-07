@@ -141,7 +141,7 @@ def newax(subplots=(1, 1), fig=None,
         if curdim > 3:
             warn('ndim > 3, but plot limited to 3.')
 
-    if mode is 'matrix':
+    if mode == 'matrix':
         ax = list(_grouper(nh, ax))
 
     # single axes ?

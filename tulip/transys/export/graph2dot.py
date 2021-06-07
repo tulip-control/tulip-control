@@ -105,13 +105,13 @@ def _state2dot(graph, to_pydot_graph, state,
     accept_shape = graph.dot_node_shape.get('accepting', '')
 
     shape = accept_shape if is_accepting else normal_shape
-    corners = 'rounded' if shape is 'rectangle' else ''
+    corners = 'rounded' if shape == 'rectangle' else ''
 
     rim_color = '"' + _format_color(rim_color, 'dot') + '"'
 
     fc = d.get('fillcolor', 'none')
-    filled = '' if fc is 'none' else 'filled'
-    if fc is 'gradient':
+    filled = '' if fc == 'none' else 'filled'
+    if fc == 'gradient':
         # top/bottom colors not supported for dot
 
         lc = d.get('left_color', d['top_color'])
@@ -154,13 +154,13 @@ def _state2tikz(graph, to_pydot_graph, state,
                 rim_color, d, node_dot_label):
     style = 'state'
 
-    if rankdir is 'LR':
+    if rankdir == 'LR':
         init_dir = 'initial left'
-    elif rankdir is 'RL':
+    elif rankdir == 'RL':
         init_dir = 'initial right'
-    elif rankdir is 'TB':
+    elif rankdir == 'TB':
         init_dir = 'initial above'
-    elif rankdir is 'BT':
+    elif rankdir == 'BT':
         init_dir = 'initial below'
     else:
         raise ValueError('Unknown rankdir')
@@ -170,7 +170,7 @@ def _state2tikz(graph, to_pydot_graph, state,
     if is_accepting:
         style += ', accepting'
 
-    if graph.dot_node_shape['normal'] is 'rectangle':
+    if graph.dot_node_shape['normal'] == 'rectangle':
         style += ', shape = rectangle, rounded corners'
 
     # darken the rim
@@ -183,7 +183,7 @@ def _state2tikz(graph, to_pydot_graph, state,
 
     fill = d.get('fillcolor')
 
-    if fill is 'gradient':
+    if fill == 'gradient':
         s = {'top_color', 'bottom_color',
              'left_color', 'right_color'}
         for x in s:
@@ -216,9 +216,9 @@ def _format_color(color, prog='tikz'):
     if not isinstance(color, dict):
         raise Exception('color must be str or dict')
 
-    if prog is 'tikz':
+    if prog == 'tikz':
         s = '!'.join([k + '!' + str(v) for k, v in color.items()])
-    elif prog is 'dot':
+    elif prog == 'dot':
         t = sum(color.values())
 
         try:

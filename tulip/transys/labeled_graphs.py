@@ -1223,7 +1223,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 filename = self.name
         fname, fextension = os.path.splitext(filename)
         # default extension
-        if not fextension or fextension is '.':
+        if not fextension or fextension == '.':
             fextension = '.pdf'
         if fileformat:
             fextension = '.' + fileformat
@@ -1231,7 +1231,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # drop '.'
         fileformat = fextension[1:]
         # check for html
-        if fileformat is 'html':
+        if fileformat == 'html':
             from tulip.transys.export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         # subclass has extra export formats ?
