@@ -67,5 +67,5 @@ def _replace_full_name_operators(formula):
     Substitution is case insensitive.
     """
     for name, symbol in ast.FULL_OPERATOR_NAMES.items():
-        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
+        formula = re.sub(r'(?i)\b' + name + r'\b', symbol, formula)
     return formula
