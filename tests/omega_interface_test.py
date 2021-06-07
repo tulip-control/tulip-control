@@ -30,7 +30,7 @@ def test_grspec_to_automaton():
     r = a._fetch_expr(a.action['env'])
     assert r == "TRUE", r
     r = a._fetch_expr(a.action['sys'])
-    assert r == '( ( ( X x ) -> ( X y ) ) )', r
+    assert r == '( ( X x ) -> ( X y ) )', r
 #    r = a.win['<>[]']
 #    assert r == '!(( ! x ))', r
 #    r = a.win['[]<>']
