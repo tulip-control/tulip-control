@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-"""
-Driver script for testing TuLiP.  Try calling it with "-h" flag.
-"""
+"""Driver script for testing TuLiP.  Try calling it with "-h" flag."""
 from __future__ import print_function
+import argparse
 import imp
-import sys
 import os
 from os import walk
-import argparse
+import sys
 
 import nose
 from nose.plugins.base import Plugin
@@ -15,6 +13,7 @@ from nose.plugins.base import Plugin
 
 class ShowFunctions(Plugin):
     name = 'showfunctions'
+
     def describeTest(self, test):
         return str(test)
 
@@ -25,8 +24,8 @@ class ArgParser(argparse.ArgumentParser):
         self.print_help()
         sys.exit(1)
 
-testfamilies_help = (
-"""
+
+testfamilies_help = '''
 name of a family of tests. If the `-f` or `--testfiles`
 switch is not used, then at most one of the following
 can be requested (not case sensitive):
@@ -41,11 +40,11 @@ can be requested (not case sensitive):
   external tool is potentially used.
 
 If the `-f` or `--testfiles` switch is used, then
-TEST [TEST ...] are interpreted as described below."""
-)
+TEST [TEST ...] are interpreted as described below.
+'''
 
-testfiles_help = (
-"""
+
+testfiles_help = '''
 space-separated list of test file names,
 where the suffix "_test.py" is added to
 each given name.  E.g.,
@@ -64,34 +63,35 @@ Use the pseudoargument -- in this case. E.g.,
 
     run_tests.py --fast -- -abstract -synth
 
-Besides what is below, OPTIONS... are passed on to nose."""
-)
+Besides what is below, OPTIONS... are passed on to nose.
+'''
 
 
 def main():
     parser = ArgParser(formatter_class=argparse.RawTextHelpFormatter)
-
-    parser.add_argument('testfamily', metavar='TEST', nargs='*', default=['base'],
-                        help=testfamilies_help)
-    parser.add_argument('-f,--testfiles', dest='testfiles', action='store_true',
-                        help=testfiles_help)
-    parser.add_argument('--fast', action='store_true',
-                        help='exclude tests that are marked as slow')
-    parser.add_argument('--cover', action='store_true',
-                        help='generate a coverage report')
-    parser.add_argument('--outofsource', action='store_true',
-                        help='import tulip from outside the current directory')
+    parser.add_argument(
+        'testfamily', metavar='TEST', nargs='*', default=['base'],
+        help=testfamilies_help)
+    parser.add_argument(
+        '-f,--testfiles', dest='testfiles', action='store_true',
+        help=testfiles_help)
+    parser.add_argument(
+        '--fast', action='store_true',
+        help='exclude tests that are marked as slow')
+    parser.add_argument(
+        '--cover', action='store_true',
+        help='generate a coverage report')
+    parser.add_argument(
+        '--outofsource', action='store_true',
+        help='import tulip from outside the current directory')
     parser.add_argument(
         '-w', '--where', dest='dir', default='tests',
         help='search for tests in directory WHERE\n'
              '(this is exactly the "-w" or "--where" option of nose)')
-
     args, unknown_args = parser.parse_known_args()
-
     if (not args.testfiles) and len(args.testfamily) > 1:
         print('At most one family of tests can be requested.')
         sys.exit(1)
-
     if args.testfiles:
         basenames = args.testfamily
     else:
@@ -101,7 +101,6 @@ def main():
     measure_coverage = args.cover
     require_nonlocaldir_tulip = args.outofsource
     tests_dir = args.dir
-
     if require_nonlocaldir_tulip:
         # Scrub local directory from search path for modules
         try:
@@ -123,22 +122,18 @@ def main():
                               'besides in the local directory')
         else:
             raise()
-
     argv = ["nosetests"]
     if skip_slow:
         argv.append("--attr=!slow")
-
     if measure_coverage:
-        argv.extend(["--with-coverage", "--cover-html", "--cover-package=tulip"])
-
+        argv.extend([
+            '--with-coverage', '--cover-html', '--cover-package=tulip'])
     available = []
     for dirpath, dirnames, filenames in walk(tests_dir):
         available.extend(filenames)
         break
-
     testfiles = []
     excludefiles = []
-
     if args.testfiles:
         for basename in basenames:
             if basename[0] == '-':
@@ -147,7 +142,6 @@ def main():
                 matchstart = lambda f, bname: f.startswith(bname)
             match = [f for f in available
                      if matchstart(f, basename) and f.endswith('.py')]
-
             if len(match) > 1:
                 raise Exception('ambiguous base name: %s, matches: %s' %
                                 (basename, match))
@@ -157,25 +151,23 @@ def main():
                 else:
                     testfiles.append(match[0])
                 continue
-
             if os.path.exists(os.path.join(tests_dir, basename + '_test.py')):
                 testfiles.append(basename + '_test.py')
             elif basename[0] == '-':
-                if os.path.exists(os.path.join(tests_dir, basename[1:] + "_test.py")):
+                if os.path.exists(
+                        os.path.join(tests_dir, basename[1:] + '_test.py')):
                     excludefiles.append(basename[1:] + "_test.py")
                 else:
                     argv.append(basename)
             else:
                 argv.append(basename)
-
         if testfiles and excludefiles:
-            print("You can specify files to exclude or include, but not both.")
-            print('Try calling it with "-h" flag.')
+            print(
+                'You can specify files to exclude or include, but not both.\n'
+                'Try calling it with "-h" flag.')
             exit(1)
-
         if excludefiles:
             argv.append("--exclude=" + "|".join(excludefiles))
-
     else:
         base = [
             'dumpsmach_test',
@@ -207,13 +199,11 @@ def main():
         elif args.testfamily.lower() == 'full':
             pass
         else:
-            print('Unrecognized test family: "'+args.testfamily+'"')
+            print('Unrecognized test family: "' + args.testfamily + '"')
             sys.exit(1)
-
     argv.extend(testfiles)
     argv += ["--where=" + tests_dir]
     argv.extend(unknown_args)
-
     print('calling nose')
     argv.extend(["--verbosity=3",
                  "--exe",
