@@ -216,12 +216,15 @@ entirely ignored.
   - BLD: related to building
   - BUG: error correction
   - CI: related to continuous integration tests (usually ``.travis.yml``)
+  - CHG: change the code
   - DEP: deprecate something, or remove a deprecated object
   - DEV: development utility
   - DOC: documentation (docstrings too)
   - DRAFT: to be rewritten / fixed up (to be rebased, never in master)
   - ENH: enhancement
   - EXP: experimental (to be rebased, never in master)
+  - GIT: related to ``git`` configuration, for example changes to
+    the files ``.gitignore`` and ``.gitattributes``
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
   - MNT: same as "MAI"
@@ -233,6 +236,9 @@ entirely ignored.
   - REV: revert an earlier commit
   - STY: style correction
   - TST: testing
+  - UI: user interface, e.g., command-line options,
+    printing messages, logging, and similar changes
+  - WEB: changes to website; mostly relevant to branch `gh-pages`
 
   Deciding which prefix from the above to use is not always straightforward,
   but doing so is a good exercise. Choose the more severe prefix applicable
