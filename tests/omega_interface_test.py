@@ -2,13 +2,9 @@
 import logging
 
 import networkx as nx
-
 from tulip.spec import form
 from tulip.interfaces import omega as omega_int
 from tulip import synth
-
-
-from nose import tools as nt
 
 
 logging.getLogger('tulip').setLevel('ERROR')

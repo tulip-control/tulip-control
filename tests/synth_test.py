@@ -7,8 +7,9 @@ import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)
 logging.getLogger('omega').setLevel(logging.WARNING)
-from nose.tools import assert_raises
+
 import numpy as np
+import pytest
 from scipy import sparse as sp
 from tulip import spec, synth, transys
 
@@ -428,7 +429,7 @@ def multiple_env_actions_check(solver='omega'):
 def test_var_name_conflicts():
     """Check redefinitions between states, actions, atomic props."""
     def conversion_raises(f, ofts):
-        with assert_raises(AssertionError):
+        with pytest.raises(AssertionError):
             f(ofts, ignore_initial=True,
             statevar='loc', bool_actions=False)
 
@@ -640,7 +641,7 @@ def test_determinize_machine_init():
 
 
 class synthesize_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f_triv = spec.GRSpec(
             sys_vars="y",
             moore=False,
@@ -651,7 +652,7 @@ class synthesize_test(object):
             moore=False,
             plus_one=False)
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f_triv = None
 
     def test_gr1c_basic(self):

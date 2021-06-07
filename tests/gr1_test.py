@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.ltl_parser_log').setLevel(logging.WARNING)
 logging.getLogger('tulip.spec.form').setLevel(logging.WARNING)
 logging.getLogger('omega').setLevel(logging.WARNING)
-from nose.tools import assert_raises
+
+import pytest
 from tulip import spec, synth
 from tulip.spec import parser, transformation
 from tulip.spec import gr1_fragment as gr1
@@ -42,13 +43,13 @@ def test_split_gr1():
     assert d['G'] == ['( ( X y ) > 0 )'], d
     assert d['GF'] == ['( ( ( z - x ) <= 0 ) | ( p -> q ) )'], d
     # not in fragment
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('[]( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('<>( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('(X p ) & ( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('[]<> ( x & (X y) )')
 
 
@@ -60,7 +61,8 @@ def test_has_operator():
 
 
 def test_name_conflict():
-    assert_raises(ValueError, gr1.stability_to_gr1, 'a', aux='a')
+    with pytest.raises(ValueError):
+        gr1.stability_to_gr1('a', aux='a')
 
 
 def test_stability():

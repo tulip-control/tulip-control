@@ -9,10 +9,9 @@ import os.path
 
 import git
 import mock
-from nose.tools import assert_raises
 import pkg_resources
 from pkg_resources.extern import packaging
-
+import pytest
 import tulip
 import tulip._version
 
@@ -58,11 +57,11 @@ def test_git_version(mock_repo):
     assert v == '0.1.2', v
     # tagged as wrong version
     instance.git.describe.return_value = 'v0.1.3'
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         setup.git_version(version)
     # release: no repo
     mock_repo.side_effect = Exception('no repo found')
-    with assert_raises(Exception):
+    with pytest.raises(Exception):
         setup.git_version(version)
 
 

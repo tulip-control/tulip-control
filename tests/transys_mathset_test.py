@@ -3,13 +3,12 @@
 Tests for transys.mathset (part of transys subpackage)
 """
 from __future__ import print_function
-
-from nose.tools import raises
 try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
 
+import pytest
 from tulip.transys.mathset import MathSet, SubSet, PowerSet, TypedDict
 from tulip.transys.mathset import compare_lists, unique, contains_multiple
 from tulip import transys as trs
@@ -65,13 +64,13 @@ def mathset_test():
     assert(a._list == [{'a':1} ] )
 
 class MathSet_operations_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.x = MathSet(['a', 1, [1, 2], {'a', 'b', '8'} ] )
         self.y = MathSet(['b', -2, [3.5, 2.25], {'/', '_'} ] )
         self.small2_listnum = MathSet([[1,2], 0.2])
         self.small1_set = MathSet([{-1, 1}])
 
-    def tearDown(self):
+    def teardown_method(self):
         self.x = None
         self.y = None
 
@@ -121,17 +120,16 @@ class MathSet_operations_test(object):
         assert not self.small2_listnum.intersects(self.small1_set)
 
 
-def unique_check(iterable, expected):
+@pytest.mark.parametrize('iterable,expected',
+    [(range(3), set([0, 1, 2])),
+     ([], set([])),
+     ([1, 1, -1], set([1, -1])),
+     ([[1, 2], 3, 3], [[1, 2], 3]),
+     ('Dessert!!', set('Desert!'))])
+def unique_test(iterable, expected):
     print(unique(iterable))
     assert unique(iterable) == expected
 
-def unique_test():
-    for (iterable, expected) in [(range(3), set([0, 1, 2])),
-                                 ([], set([])),
-                                 ([1, 1, -1], set([1, -1])),
-                                 ([[1, 2], 3, 3], [[1, 2], 3]),
-                                 ("Dessert!!", set("Desert!"))]:
-        yield unique_check, iterable, expected
 
 def contains_multiple_test():
     assert contains_multiple([1, 1])
@@ -199,13 +197,13 @@ def powerset_test():
     return s
 
 class PowerSet_operations_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.p = PowerSet({1, 2, 3})
         self.q_unhashable = PowerSet(MathSet([[1,2], ["a", "b"]]))
         self.singleton = PowerSet(set([1]))
         self.empty = PowerSet()
 
-    def tearDown(self):
+    def teardown_method(self):
         self.p = None
         self.q_unhashable = None
         self.singleton = None
@@ -227,7 +225,7 @@ class PowerSet_operations_test(object):
         assert set(self.empty) == set([()])
 
 class TypedDict_test(object):
-    def setUp(self):
+    def setup_method(self):
         d = TypedDict()
         d.set_types({'animal':{'dog', 'cat'} })
         self.d = d
@@ -238,7 +236,7 @@ class TypedDict_test(object):
         d['animal'] = 'dog'
         assert(d['animal'] == 'dog')
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_add_typed_key_illegal_value(self):
         d = self.d
 

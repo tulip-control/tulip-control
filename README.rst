@@ -60,7 +60,7 @@ may also read API documentation using the standard pydoc tool.  E.g., ::
 Testing
 -------
 
-Tests are performed using `nose <http://readthedocs.org/docs/nose/>`_.  From the
+Tests are performed using `pytest <https://pytest.org>`_.  From the
 root of the source tree (i.e., where ``setup.py`` is located), ::
 
   ./run_tests.py

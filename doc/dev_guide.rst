@@ -88,9 +88,9 @@ tests and any tests that should pass given a successful ``pip install tulip[hybr
 namely, when the optional packages ``cvxopt`` and ``polytope`` are present.
 
 Provided the ``-f`` or ``--testfiles`` switch, it searches under the directory
-``tests/`` for files with names ending in "_test.py", and passes these to `nose
-<http://readthedocs.org/docs/nose/>`_.  Use the flag "-h" to see driver script
-options.  Extra details about options:
+``tests/`` for files with names ending in "_test.py", and passes these to
+`pytest <https://pytest.org>`_.  Use the flag "-h" to
+see driver script options.  Extra details about options:
 
 * The flag "--cover" to generate a coverage report, which will likely be placed
   under ``tests/cover/``.  It uses `Ned Batchelder's coverage module

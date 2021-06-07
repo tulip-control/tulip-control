@@ -4,6 +4,7 @@ import logging
 
 import numpy as np
 from polytope import box2poly
+import pytest
 from tulip import hybrid
 from tulip.abstract import discretize
 from tulip.abstract import prop2part
@@ -93,6 +94,7 @@ def check_simulation(ts1, ts2, L12, L21):
     return True
 
 
+@pytest.mark.slow
 def simu_abstract_test():
     for index in range(2):
         ts = build_FTS(index)
@@ -121,9 +123,6 @@ def simu_abstract_test():
                                 bi_part['simu2ts'])
         assert check_simulation(bi_simu, ts, bi_part['simu2ts'],
                                 bi_part['ts2simu'])
-
-
-simu_abstract_test.slow = True
 
 
 if __name__ == '__main__':

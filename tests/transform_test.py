@@ -3,7 +3,7 @@ from __future__ import print_function
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.ltl_parser_log').setLevel(logging.ERROR)
-# import nose.tools as nt
+
 from tulip.spec.ast import nodes
 from tulip.spec.parser import parse
 from tulip.spec import transformation as tx

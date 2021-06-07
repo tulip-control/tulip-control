@@ -2,7 +2,7 @@
 """Tests for transys.labeled_graphs (part of transys subpackage)"""
 from __future__ import print_function
 
-from nose.tools import raises, assert_raises
+import pytest
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet
 from tulip.transys.transys import FTS
@@ -13,23 +13,20 @@ def str2singleton_test():
     assert labeled_graphs.str2singleton({"Cal"}) == {"Cal"}
 
 
-def prepend_with_check(states, prepend_str, expected):
+@pytest.mark.parametrize('states,prepend_str,expected',
+    [([0,1], 's', ['s0', 's1']),
+     ([], 's', []),
+     ([0], 'Cal', ['Cal0']),
+     ([0, 1], None, [0, 1])])
+def prepend_with_test(states, prepend_str, expected):
     assert labeled_graphs.prepend_with(states, prepend_str) == expected
 
 
-def prepend_with_test():
-    for (states, prepend_str, expected) in [([0,1], "s", ['s0', 's1']),
-                                            ([], "s", []),
-                                            ([0], "Cal", ["Cal0"]),
-                                            ([0, 1], None, [0, 1])]:
-        yield prepend_with_check, states, prepend_str, expected
-
-
 class States_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.S = labeled_graphs.States(labeled_graphs.LabeledDiGraph())
 
-    def tearDown(self):
+    def teardown_method(self):
         self.S = None
 
     def test_contains(self):
@@ -98,13 +95,13 @@ class States_test(object):
 
 
 class Transitions_test(object):
-    def setUp(self):
+    def setup_method(self):
         G = labeled_graphs.LabeledDiGraph()
         self.T = labeled_graphs.Transitions(G)
         G.transitions = self.T
         self.T.graph.states.add_from([1, 2, 3, 4, 5])
 
-    def tearDown(self):
+    def teardown_method(self):
         self.T = None
 
     def test_len(self):
@@ -118,14 +115,15 @@ class Transitions_test(object):
         self.T.graph.states.add_from([10])
         assert len(self.T) == 2
 
-    @raises(Exception)
+    @pytest.mark.xfail(raises=Exception)
     def test_missing_states(self):
         self.T.add(10, 11, check=True)
 
     def test_add_from(self):
         self.T.add(1, 4)
         assert len(self.T) == 1 and set([t for t in self.T()]) == set([(1, 4)])
-        assert_raises(Exception, self.T.add, 1, 4)
+        with pytest.raises(Exception):
+            self.T.add(1, 4)
         assert len(self.T) == 1  # Edge already exists, so not added
 
         self.T.add_from([(5, 2), (4, 3)])
@@ -151,7 +149,7 @@ class Transitions_test(object):
 
 
 class States_labeling_test(object):
-    def setUp(self):
+    def setup_method(self):
         node_label_def = [{
             'name': 'ap',
             'values': PowerSet({'p', 'q', 'r', 'x', 'a', 'b'})}]
@@ -159,10 +157,10 @@ class States_labeling_test(object):
         self.S_ap = labeled_graphs.States(G)
         G.states = self.S_ap
 
-    def tearDown(self):
+    def teardown_method(self):
         self.S_ap = None
 
-    @raises(Exception)
+    @pytest.mark.xfail(raises=Exception)
     def test_add_untyped_keys(self):
         self.S_ap.add(1, foo=MathSet(['p']), check=True)
 
@@ -232,7 +230,7 @@ class States_labeling_test(object):
 
 
 class LabeledDiGraph_test(object):
-    def setUp(self):
+    def setup_method(self):
         p = PowerSet({1, 2})
         node_labeling = [
             {
@@ -255,8 +253,8 @@ class LabeledDiGraph_test(object):
         G.states.add_from({1, 2})
         G.transitions.add(1, 2, month='Jan', day='Mon')
 
-        assert_raises(Exception, G.transitions.add,
-                      1, 2, {'month': 'Jan', 'day': 'abc'})
+        with pytest.raises(Exception):
+            G.transitions.add(1, 2, {'month': 'Jan', 'day': 'abc'})
 
         # note how untyped keys can be set directly via assignment,
         # whereas check=False is needed for G.add_node
@@ -268,7 +266,7 @@ class LabeledDiGraph_test(object):
 
         self.G = G
 
-    @raises(AttributeError)
+    @pytest.mark.xfail(raises=AttributeError)
     def test_add_edge_only_typed(self):
         """check that untyped attribute keys are caught"""
         self.G.add_edge(1, 2, mo='Jan')
@@ -280,15 +278,15 @@ class LabeledDiGraph_test(object):
         self.G.add_edge(1, 2, mo='Jan', check=False)
         assert(self.G[1][2][1] == {'mo':'Jan'})
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_add_edge_illegal_value(self):
         self.G.add_edge(1, 2, month='haha')
 
-#    @raises(ValueError)
+#    @pytest.mark.xfail(raises=ValueError)
 #    def test_node_subscript_assign_illegal_value(self):
 #        self.G.nodes[1]['month'] = 'abc'
 
-#    @raises(ValueError)
+#    @pytest.mark.xfail(raises=ValueError)
 #    def test_edge_subscript_assign_illegal_value(self):
 #        self.G[1][2][0]['day'] = 'abc'
 

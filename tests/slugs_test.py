@@ -43,7 +43,7 @@ def bitfields_to_ints_test():
 
 
 class basic_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.check_realizable = lambda x: slugs.synthesize(x) is not None
         self.synthesize = slugs.synthesize
         self.f_un = GRSpec(env_vars="x", sys_vars="y",
@@ -60,7 +60,7 @@ class basic_test(object):
                                sys_prog=["y=0", "y=5"],
                                moore=False, plus_one=False, qinit=r'\A \E')
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f_un = None
         self.f = None
         self.dcounter = None

@@ -1,4 +1,5 @@
 tulip/_version.py
+.pytest_cache/
 htmlcov/
 *~
 *.log

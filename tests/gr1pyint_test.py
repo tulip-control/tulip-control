@@ -5,14 +5,16 @@ Tests for the interface with gr1py.
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
-from nose.tools import assert_raises
+
 import os
+
+import pytest
 from tulip.spec import GRSpec, translate
 from tulip.interfaces import gr1py
 
 
 class basic_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f_un = GRSpec(
             env_vars="x",
             sys_vars="y",
@@ -32,7 +34,7 @@ class basic_test(object):
             plus_one=False,
             qinit=r'\A \E')
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f_un = None
         self.dcounter = None
 
@@ -44,13 +46,13 @@ class basic_test(object):
         self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x & y']
         self.f_un.sys_init = list()
-        with assert_raises(AssertionError):
+        with pytest.raises(AssertionError):
             assert gr1py.check_realizable(self.f_un)
         # counter
         assert gr1py.check_realizable(self.dcounter)
         self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
-        with assert_raises(AssertionError):
+        with pytest.raises(AssertionError):
             assert gr1py.check_realizable(self.dcounter)
 
     def test_synthesize(self):
