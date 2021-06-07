@@ -31,7 +31,7 @@
 # SUCH DAMAGE.
 
 """A module for defining functions"""
-from collections import Iterable
+from collections.abc import Iterable
 import json
 
 
