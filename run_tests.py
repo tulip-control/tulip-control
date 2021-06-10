@@ -86,7 +86,18 @@ def main():
     if (not args.testfiles) and len(args.testfamily) > 1:
         print('At most one family of tests can be requested.')
         sys.exit(1)
-    _tweak_sys_path(args.outofsource)
+    # `chdir` needed to avoid generating temporary files
+    # in the `tulip` directory (`pytest` does so even when
+    # the option `--rootdir` is given, and `testpaths` defined
+    # in the configuration file)
+    if args.outofsource:
+        print('`chdir("./tests")`')
+        os.chdir('./tests')
+    try:
+        importlib.import_module('tulip')
+    except ImportError:
+        raise ImportError(
+            '`tulip` package not found installed')
     pytest_args = list()
     # skip tests marked as slow
     if args.fast:
@@ -96,7 +107,12 @@ def main():
         pytest_args.extend([
             '--cov=tulip', '--cov-report=html'])
     # determine what test files will be run
-    tests_dir = args.dir
+    if args.outofsource:
+        tests_dir = '.'
+        config_file = 'pytest.ini'
+    else:
+        tests_dir = args.dir
+        config_file = 'tests/pytest.ini'
     if args.testfiles:
         more_args, testfiles = _test_files(tests_dir, args.testfamily)
         pytest_args.extend(more_args)
@@ -110,7 +126,7 @@ def main():
     pytest_args.extend([
         '--verbosity=3',
         '--continue-on-collection-errors',
-        '-c', 'tests/pytest.ini',
+        '-c', config_file,
         ])
     print('calling pytest with arguments:\n{args}'.format(
         args=pprint.pformat(pytest_args)))
@@ -118,41 +134,6 @@ def main():
     # return the exit value of `pytest`,
     # to inform CI runs whether all tests passed
     sys.exit(int(ret))
-
-
-def _tweak_sys_path(require_nonlocaldir_tulip):
-    """Modify `sys.path` if needed, then attempt to import `tulip`."""
-    if require_nonlocaldir_tulip:
-        _rm_local_dir_from_sys_path()
-    _try_import_tulip(require_nonlocaldir_tulip)
-
-
-def _rm_local_dir_from_sys_path():
-    """Remove local directory from Python's search path for modules."""
-    try:
-        while True:
-            sys.path.remove('')
-    except ValueError:
-        pass
-    try:
-        while True:
-            curdir_abspath = os.path.abspath(os.curdir)
-            sys.path.remove(curdir_abspath)
-    except ValueError:
-        pass
-
-
-def _try_import_tulip(require_nonlocaldir_tulip):
-    """Attempt to import `tulip`."""
-    try:
-        importlib.import_module('tulip')
-    except ImportError:
-        if require_nonlocaldir_tulip:
-            raise ImportError(
-                '`tulip` package not found, '
-                'besides (possibly) in the local directory')
-        else:
-            raise()
 
 
 def _test_files(tests_dir, basenames):
@@ -282,10 +263,7 @@ def _parse_args():
         help='generate a coverage report')
     parser.add_argument(
         '--outofsource', action='store_true',
-        help='import `tulip` from outside the current directory')
-    parser.add_argument(
-        '-w', '--where', metavar='DIR', dest='dir', default='tests',
-        help='search for tests in directory DIR\n')
+        help='change directory to `tests/` before invoking `pytest`')
     args, unknown_args = parser.parse_known_args()
     return args, unknown_args
 
