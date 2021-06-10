@@ -3,9 +3,10 @@
 When testing out of source, first run `setup.py`
 to generate the module `tulip._version`.
 """
-import imp
+import importlib
 import os
 import os.path
+import sys
 
 import git
 import mock
@@ -32,7 +33,10 @@ def test_git_version(mock_repo):
     path = os.path.dirname(path)
     path = os.path.dirname(path)  # parent dir
     path = os.path.join(path, 'setup.py')
-    setup = imp.load_source('setup', path)
+    module_spec = importlib.util.spec_from_file_location('setup', path)
+    setup = importlib.util.module_from_spec(module_spec)
+    sys.modules['setup'] = setup
+    module_spec.loader.exec_module(setup)
     # mocking
     version = '0.1.2'
     instance = mock_repo.return_value
