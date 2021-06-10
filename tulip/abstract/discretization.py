@@ -642,13 +642,11 @@ def _discretize_bi(
         else:
             rd = 0.
     # Initialize matrix for pairs to check
-    IJ = part.adj.copy()
-    IJ = IJ.todense()
-    IJ = np.array(IJ)
+    IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
-                          np.array(part.adj.todense()) )
+                          part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -656,9 +654,7 @@ def _discretize_bi(
         dtype = int
     )
     sol = deepcopy(part.regions)
-    adj = part.adj.copy()
-    adj = adj.todense()
-    adj = np.array(adj)
+    adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
     if ispwa:
         subsys_list = list(ppp2pwa)
@@ -1106,13 +1102,11 @@ def _discretize_dual(
         else:
             rd = 0.
     # Initialize matrix for pairs to check
-    IJ = part.adj.copy()
-    IJ = IJ.todense()
-    IJ = np.array(IJ)
+    IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
-                          np.array(part.adj.todense()))
+                          part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -1120,9 +1114,7 @@ def _discretize_dual(
         dtype = int
     )
     sol = deepcopy(part.regions)
-    adj = part.adj.copy()
-    adj = adj.todense()
-    adj = np.array(adj)
+    adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
     if ispwa:
         subsys_list = list(ppp2pwa)

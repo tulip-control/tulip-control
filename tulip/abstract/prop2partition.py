@@ -586,9 +586,9 @@ class PropPreservingPartition(pc.MetricPartition):
 
             s += str(region)
 
-        if hasattr(self.adj, 'todense'):
+        if hasattr(self.adj, 'toarray'):
             s += 'Adjacency matrix:\n'
-            s += str(self.adj.todense()) + '\n'
+            s += str(self.adj.toarray()) + '\n'
         return s
 
     def plot(
