@@ -124,14 +124,13 @@ def test_env_fts_int_states():
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
     env.states.add('e2')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     assert 'e0' not in spec.env_vars
     assert 'e1' not in spec.env_vars
     assert 'e2' not in spec.env_vars
@@ -159,14 +158,13 @@ def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested."""
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=True,
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=True)
     assert 'sys_actions' not in spec.env_vars
     assert 'env_actions' not in spec.env_vars
 
@@ -183,14 +181,13 @@ def test_env_fts_int_actions():
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
     env.env_actions.add('stop')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     assert 'park' not in spec.env_vars
     assert 'go' not in spec.env_vars
     assert 'stop' not in spec.env_vars
@@ -210,14 +207,13 @@ def test_env_ofts_bool_actions():
     env.env_actions_must = 'mutex'
     env.env_actions.remove('stop')
     env.sys_actions.remove('hover')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=True
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=True)
     _check_ofts_bool_actions(spec)
 
 
@@ -262,11 +258,13 @@ def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1)."""
     env = env_ofts_int_actions()
     env.sys_actions_must = 'mutex'
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False)
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     _check_ofts_int_actions(spec)
 
 

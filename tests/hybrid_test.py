@@ -36,6 +36,7 @@ def switched_system_test():
         ('a', 'c'):pwa,
         ('a', 'd'):pwa,
         ('b', 'c'):pwa,
+        ('b', 'd'): pwa,
     }
     env_labels = ['a', 'b']
     sys_labels = ['c', 'd']
@@ -47,6 +48,28 @@ def switched_system_test():
         env_labels=env_labels,
         disc_sys_labels=sys_labels
     )
+
+    print(hyb)
+
+    assert(hyb.disc_domain_size == dom)
+    assert(hyb.dynamics == dyn)
+    assert(hyb.env_labels == env_labels)
+    assert(hyb.disc_sys_labels == sys_labels)
+    assert(hyb.cts_ss == domain)
+    #
+    # omitting a mode raises a warning
+    dyn = {
+        ('a', 'c'):pwa,
+        ('a', 'd'):pwa,
+        ('b', 'c'):pwa,
+    }
+    with pytest.warns(UserWarning):
+        hyb = hybrid.SwitchedSysDyn(
+            disc_domain_size=dom,
+            dynamics=dyn,
+            cts_ss=domain,
+            env_labels=env_labels,
+            disc_sys_labels=sys_labels)
 
     print(hyb)
 
@@ -266,7 +289,9 @@ class SwitchedSysDyn_test(object):
     def test_hybrid_difftstep_from_subsys(self):
         """LtiSysDyn subsystems timesteps do not match that of SwitchedSysDyn"""
         hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
-                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            dynamics=self.dynamics1,
+                            cts_ss=self.total_box,
+                            env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='hello', timestep=.1,
                             overwrite_time=True)
@@ -275,7 +300,9 @@ class SwitchedSysDyn_test(object):
     def test_hybrid_fail_check_time_consistency(self):
         # fail _check_time_consistency
         hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
-                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            dynamics=self.dynamics1,
+                            cts_ss=self.total_box,
+                            env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='sampled', timestep=.2,
                             overwrite_time=False)
@@ -283,12 +310,14 @@ class SwitchedSysDyn_test(object):
     def test_correct_switched_construction(self):
         switched1 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
+                                        cts_ss=self.total_box,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
                                         time_semantics='sampled', timestep=.1,
                                         overwrite_time=True)
         switched2 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
+                                        cts_ss=self.total_box,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
                                         time_semantics='sampled', timestep=.1,
