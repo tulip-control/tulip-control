@@ -67,7 +67,6 @@ script:
   # gr1c
   - export GR1CVERSION=0.13.0
   - curl -sSLO https://github.com/tulip-control/gr1c/releases/download/v${GR1CVERSION}/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
-    https://dl.bintray.com/slivingston/generic/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
   - expr `shasum -a 256 gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz|cut -d ' ' -f1`
     = 1d45ca69d6acbf84ae6170de60b6c69073dffd3a6130c6213419e401d9d5c470
   - tar -xzf gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
