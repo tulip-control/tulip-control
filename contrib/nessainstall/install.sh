@@ -26,7 +26,9 @@
 #   tk-dev \
 #   libgdbm-dev \
 #   libc6-dev \
+#   libffi-dev \
 #   libbz2-dev \
+#   libz-dev \
 #   libatlas-base-dev \
 #   libatlas-dev \
 #   gfortran \
