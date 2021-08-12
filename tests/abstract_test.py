@@ -274,7 +274,7 @@ def test_abstract_the_dynamics_dual():
     assert ab.ppp.compute_adj()
 
     [sys_dyn, cont_partition, part] = define_dynamics_dual()
-    disc_options = {'N': 1, 'trans_length': 1000, 'min_cell_volume': 0.0}
+    disc_options = {'N': 1, 'trans_length': 1_000, 'min_cell_volume': 0.0}
     ab_2 = abstract.discretize(cont_partition, sys_dyn,
                                simu_type='dual', **disc_options)
 
