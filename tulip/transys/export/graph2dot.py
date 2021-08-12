@@ -42,7 +42,7 @@ try:
 except ImportError:
     from collections import Iterable
 from textwrap import fill
-from io import StringIO
+import io
 import numpy as np
 import networkx as nx
 import pydot
@@ -560,7 +560,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-    sio = StringIO()
+    sio = io.BytesIO()
     sio.write(png_str)
     sio.seek(0)
     img = mpimg.imread(sio)
