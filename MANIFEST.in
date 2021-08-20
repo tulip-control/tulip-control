@@ -7,4 +7,5 @@ include LICENSE
 include doc/*
 exclude doc/*.sh
 recursive-include contrib *
-recursive-include extern *
+include extern/README
+include extern/*.sh
