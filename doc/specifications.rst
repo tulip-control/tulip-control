@@ -157,8 +157,8 @@ where:
 
 - NAME can be any alphanumeric other than ``next`` that does not start with any character from ``'F', 'G', 'R', 'U', 'X'``.
 - NUMBER any non-negative integer
-- TRUE is case-insensitive 'true'
-- FALSE is case-insensitive 'false'
+- ``TRUE`` is case-insensitive ``'true'``
+- ``FALSE`` is case-insensitive ``'false'``
 - ``(*`` and ``*)`` delimit comments to the above grammar
 
 The token precedence (lowest to highest) and associativity (r = right, l = left, n = none) is:
