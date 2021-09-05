@@ -102,7 +102,7 @@ def load_file(aut_file):
     for line in f:
         # parse states
         if (line.find('State ') >= 0):
-            stateid = re.search(r'State (\d+)', line)
+            stateid = re.search(r'State\ (\d+)', line)
             stateid = int(stateid.group(1))
             state = dict(re.findall(r'(\w+):(\w+)', line))
             state1 = dict(re.findall(r'(\w+):(-\w+)', line))
@@ -126,18 +126,18 @@ def read_variables(smv_file):
     else:
         f = smv_file
     for line in f:
-        if re.search('MODULE env',line):
+        if re.search(r'MODULE\ env',line):
             for line in f:
-                if re.search(' : ', line):
-                    env = str(re.findall(r'(\w+) :', line))
+                if re.search(r'\ :\ ', line):
+                    env = str(re.findall(r'(\w+)\ :', line))
                     env = env[2:len(env)-2]
                     enviroment.put(env)
-                if re.search('MODULE sys',line):
+                if re.search(r'MODULE\ sys',line):
                     break
-        if re.search('MODULE sys',line):
+        if re.search(r'MODULE\ sys',line):
             for line in f:
-                if re.search(' : ', line):
-                    sys = str(re.findall(r'(\w+) :', line))
+                if re.search(r'\ :\ ', line):
+                    sys = str(re.findall(r'(\w+)\ :', line))
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 
