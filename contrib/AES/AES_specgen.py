@@ -7,7 +7,7 @@ from __future__ import division
 from __future__ import print_function
 
 import sys, os
-import re, copy
+import copy
 import numpy as np
 import scipy
 import scipy.io
