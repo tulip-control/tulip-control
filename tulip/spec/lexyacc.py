@@ -101,23 +101,23 @@ class Lexer(object):
         return t
 
     def t_AND(self, t):
-        r'\&\&|\&'
+        r'\&\&|\&|/\\'
         t.value = '&'
         return t
 
     def t_OR(self, t):
-        r'\|\||\|'
+        r'\|\||\||\\/'
         t.value = '|'
         return t
 
-    t_NOT = r'!'
+    t_NOT = r'!|\~'
 
     t_XOR = r'\^'
 
     t_EQUALS = r'='  # a declarative language has no assignment
-    t_NEQUALS = r'!='
+    t_NEQUALS = r'!=|/='
     t_LT = r'<'
-    t_LE = r'<='
+    t_LE = r'<=|=<'
     t_GT = r'>='
     t_GE = r'>'
 
@@ -125,8 +125,8 @@ class Lexer(object):
     t_RPAREN = r'\)'
     t_NUMBER = r'\d+'
 
-    t_IMP = r'\->'
-    t_BIMP = r'<\->'
+    t_IMP = r'\->|=>'
+    t_BIMP = r'<\->|<=>'
 
     t_PLUS = r'\+'
     t_MINUS = r'\-'

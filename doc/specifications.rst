@@ -92,28 +92,37 @@ below can be parsed by ``tulip.spec.lexyacc``::
          | expr '=' expr
 
          (* negation of `=` *)
+         | expr '/=' expr
          | expr '!=' expr
          | expr '^' expr
 
          (* comparison in arithmetic *)
          | expr '<=' expr
+         | expr '=<' expr
 
          (* comparison in arithmetic *)
          | expr '>=' expr
 
          (* logical negation *)
+         | '~' expr
          | '!' expr
 
          (* conjunction *)
+         | expr '/\' expr
          | expr '&' expr
          | expr '&&' expr
 
          (* disjunction *)
+         | expr '\/' expr
          | expr '|' expr
          | expr '||' expr
+
          (* logical implication *)
+         | expr '=>' expr
          | expr '->' expr
+
          (* logical equivalence *)
+         | expr '<=>' expr
          | expr '<->' expr
 
          (* ternary conditional
@@ -167,22 +176,23 @@ where:
 - ``TRUE`` is case-insensitive ``'true'``
 - ``FALSE`` is case-insensitive ``'false'``
 - ``(*`` and ``*)`` delimit comments to the above grammar
+- a number of operators are of TLA+
 
 The token precedence (lowest to highest) and associativity
 (r = right, l = left, n = none) is:
 
-- **<->** (l)
-- **->** (l)
+- **<=>**, **<->** (l)
+- **=>**, **->** (l)
 - **^** (l)
-- **|** (l)
-- **&** (l)
+- **\/**, **|** (l)
+- **/\**, **&** (l)
 - **[]**, **<>** (l)
 - **U**, **W**, **R** (l)
-- **=**, **!=** (l)
-- **<=**, **>=**, **>** (l)
+- **=**, **/=**, **!=** (l)
+- **<=**, **=<**, **>=**, **>** (l)
 - **+**, **-** (l)
 - **\***, **/** (l)
-- **!** (r)
+- **~**, **!** (r)
 - **X** (r)
 - **'** (l)
 - TRUE, FALSE
