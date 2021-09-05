@@ -58,8 +58,8 @@ class Lexer(object):
         'ite': 'ITE',
         'next': 'NEXT',
         'X': 'NEXT',
-        'false': 'FALSE',
-        'true': 'TRUE',
+        'FALSE': 'FALSE',
+        'TRUE': 'TRUE',
         'G': 'ALWAYS',
         'F': 'EVENTUALLY',
         'U': 'UNTIL',
@@ -85,8 +85,8 @@ class Lexer(object):
         t.value = self.values.get(t.value, t.value)
         t.type = self.reserved.get(t.value, 'NAME')
         # special treatment
-        if t.value.lower() in {'false', 'true'}:
-            t.type = self.reserved[t.value.lower()]
+        if t.value.upper() in {'FALSE', 'TRUE'}:
+            t.type = self.reserved[t.value.upper()]
         return t
 
     def t_ALWAYS(self, t):
