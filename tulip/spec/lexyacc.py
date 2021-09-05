@@ -37,13 +37,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import logging
-logger = logging.getLogger(__name__)
 import warnings
 import ply.lex
 import ply.yacc
 import tulip.spec.ast
 
 
+logger = logging.getLogger(__name__)
 TABMODULE = 'tulip.spec.ltl_parsetab'
 LEX_LOGGER = 'tulip.ltl_lex_log'
 YACC_LOGGER = 'tulip.ltl_yacc_log'
