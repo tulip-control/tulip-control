@@ -32,8 +32,9 @@ R. Ehlers (2010).
 
 [FDLOM16]
 I. Filippidis, S. Dathathri, S.C. Livingston, N. Ozay, and R.M. Murray (2016).
-Control design for hybrid systems with TuLiP:
-The temporal logic planning toolbox.
+`Control design for hybrid systems with TuLiP:
+The temporal logic planning toolbox
+<https://doi.org/10.1109/CCA.2016.7587949>`_.
 In *Proc. of IEEE Multi-Conference on Systems and Control (MSC)*.
 
 [LS11]
