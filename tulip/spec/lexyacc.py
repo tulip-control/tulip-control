@@ -89,8 +89,6 @@ class Lexer(object):
             t.type = self.reserved[t.value.lower()]
         return t
 
-    # t_PRIME  = r'\''
-
     def t_ALWAYS(self, t):
         r'\[\]'
         # use single letter as more readable and efficient
