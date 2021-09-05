@@ -74,38 +74,79 @@ TuLiP LTL syntax
 ----------------
 The LTL syntax defined in `EBNF <https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form>`_ below can be parsed by ``tulip.spec.lexyacc``::
 
-  expr ::= expr '*' expr
-         | expr '/' expr
-         | expr '+' expr
-         | expr '-' expr
-         | expr '<<>>' NUMBER  # truncate
+  expr ::=
+         (* arithmetic operators *)
+         | expr '*' expr  (* multiplication *)
+         | expr '/' expr  (* division *)
+         | expr '+' expr  (* addition *)
+         | expr '-' expr  (* subtraction *)
+         | expr '<<>>' NUMBER  (* truncation of numbers *)
 
-         | expr '=' expr  
+         (* equality in set theory *)
+         | expr '=' expr
+
+         (* negation of `=` *)
          | expr '!=' expr
+         | expr '^' expr
+
+         (* comparison in arithmetic *)
          | expr '<=' expr
+
+         (* comparison in arithmetic *)
          | expr '>=' expr
 
+         (* logical negation *)
          | '!' expr
-         | expr '&' expr | expr '&&' expr
-         | expr '|' expr | expr '||' expr
-         | expr '^' expr # xor
 
+         (* conjunction *)
+         | expr '&' expr
+         | expr '&&' expr
+
+         (* disjunction *)
+         | expr '|' expr
+         | expr '||' expr
+         (* logical implication *)
          | expr '->' expr
+         (* logical equivalence *)
          | expr '<->' expr
-         | '(' 'ite' expr ',' expr ',' expr ')'  # ternary conditional
 
-         | 'X' expr | 'next' expr | expr "'"
-         | '[]' expr | 'G' expr
-         | '<>' expr | 'F' expr
+         (* ternary conditional
+            ("if" expression) *)
+         | '(' 'ite' expr ',' expr ',' expr ')'
 
+         (* "next" action operator *)
+         | expr "'"
+         | 'X' expr
+         | 'next' expr
+
+         (* "always" temporal operator *)
+         | '[]' expr
+         | 'G' expr
+
+         (* "eventually" temporal operator *)
+         | '<>' expr
+         | 'F' expr
+
+         (* "until" temporal operator *)
          | expr 'U' expr
+
+         (* "release" temporal operator *)
          | expr 'R' expr
 
+         (* parentheses *)
          | '(' expr ')'
 
-         | TRUE | FALSE
+         (* Boolean constants *)
+         | TRUE
+         | FALSE
+
+         (* integral numeralic literals *)
          | NUMBER
+
+         (* identifiers *)
          | variable
+
+         (* string literals *)
          | string
 
   variable ::= NAME
@@ -118,6 +159,7 @@ where:
 - NUMBER any non-negative integer
 - TRUE is case-insensitive 'true'
 - FALSE is case-insensitive 'false'
+- ``(*`` and ``*)`` delimit comments to the above grammar
 
 The token precedence (lowest to highest) and associativity (r = right, l = left, n = none) is:
 
