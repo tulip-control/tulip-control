@@ -104,7 +104,9 @@ jobs:
                 python -c 'import dd.cudd'
             - name: Install optional Python packages
               run: |
+                pip install setuptools==57.5.0
                 pip install gr1py
+                pip install -U setuptools
             - name: Install `gr1c`
               run: |
                 export GR1C_VERSION=0.13.0
