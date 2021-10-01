@@ -166,3 +166,61 @@ jobs:
                 # run all tests, including slow hybrid tests, and
                 # alternative game solvers
                 ./run_tests.py --outofsource full
+    docs:
+        name: Build documentation
+        runs-on: ubuntu-20.04
+        if: github.ref == 'refs/heads/main'
+        strategy:
+            matrix:
+                python-version: [3.9]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Install `apt` packages
+              run: |
+                sudo apt update
+                sudo apt install \
+                    dvipng \
+                    texlive-latex-extra \
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies from PyPI
+              run: |
+                pip install -U pip setuptools sphinx
+                pip install .
+            - name: Build
+              run: |
+                cd doc
+                BIN_BRANCH="docs_bin"
+                git fetch origin $BIN_BRANCH
+                git restore --source=origin/$BIN_BRANCH '*.png'
+                make html
+            - name: Push built documentation to `git` branch
+              run: |
+                DOCS_BRANCH="docs_pages"
+                DOCS_BUILD_ROOT="doc/_build/html"
+                git config --global user.name 'GitHub Actions'
+                git config --global user.email '<>'
+                git fetch origin $DOCS_BRANCH
+                git checkout -b $DOCS_BRANCH
+                git status
+                mkdir docs
+                touch docs/.nojekyll
+                cp -R $DOCS_BUILD_ROOT/. docs/
+                git add -f docs
+                git commit -m 'BIN: built documentation files
+
+                committed by GitHub Actions.'
+                # detect changes to the built documentation
+                git diff --exit-code --quiet $DOCS_BRANCH \
+                    origin/$DOCS_BRANCH -- docs \
+                    || ret=$?
+                if [[ "${ret}" -eq 1 ]]; then
+                    echo 'The built documentation changed, \
+                        will now push changes.'
+                    git push -f origin $DOCS_BRANCH;
+                else
+                    echo 'The built documentation did not change.
+                        No git pushing to do.'
+                fi
