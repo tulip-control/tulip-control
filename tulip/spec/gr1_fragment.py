@@ -84,35 +84,34 @@ def check(formula):
 
     dfa.states.add_from({'gf', 'fg', 'g', 'f'})
     dfa.states.initial.add('gf')
-
+    #
     dfa.transitions.add('gf', 'fg', letter='!')
     dfa.transitions.add('fg', 'gf', letter='!')
     dfa.transitions.add('g', 'f', letter='!')
     dfa.transitions.add('f', 'g', letter='!')
-
+    #
     dfa.transitions.add('gf', 'gf', letter='W')
     dfa.transitions.add('gf', 'gf', letter='U_left')
     dfa.transitions.add('gf', 'gf', letter='G')
-
+    #
     dfa.transitions.add('fg', 'fg', letter='U')
     dfa.transitions.add('fg', 'fg', letter='F')
     dfa.transitions.add('fg', 'fg', letter='W_right')
-
+    #
     dfa.transitions.add('gf', 'f', letter='U_right')
     dfa.transitions.add('gf', 'f', letter='F')
-
+    #
     dfa.transitions.add('fg', 'g', letter='W_left')
     dfa.transitions.add('fg', 'g', letter='G')
-
+    #
     dfa.transitions.add('g', 'g', letter='W')
     dfa.transitions.add('g', 'g', letter='G')
-
+    #
     dfa.transitions.add('f', 'f', letter='U')
     dfa.transitions.add('f', 'f', letter='F')
-
     # plot tree automaton
     # dfa.save('dfa.pdf')
-
+    #
     # plot parse tree
     sast.dump_dot(ast, 'ast.dot')
     # sync product of AST with DFA,

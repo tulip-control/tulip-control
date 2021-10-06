@@ -680,7 +680,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 
     # note: verbosity before actions below
     # to avoid screening by possible error caused by action
-
+    #
     # state labeling assigned ?
     if state_labeling is not None:
         for state, ap_label in state_labeling:

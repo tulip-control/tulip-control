@@ -158,7 +158,7 @@ def fts_maximal_example():
     # ----------------------------------------
     # CAUTION: labeling now considered
     # ----------------------------------------
-
+    #
     # MultiDiGraph labeling issue vs multiple same edges resolved as follows:
     #   transition addition is strictly monitored
     #   each transition is identified uniquely with its set of labels (key=values)
@@ -174,7 +174,7 @@ def fts_maximal_example():
     # checking pre-existing CANNOT be overriden,
     # to preserve function semantics
     # check=False used only to add missing states or labels
-
+    #
     # first remove unlabeled, then add new labeled
     fts.transitions.remove('pay', 'select')
     fts.plot()

@@ -490,7 +490,7 @@ def plot_dot(
             logger.debug('Script called by IPython.')
             # Caution!!! : not ordinary dict,
             # but IPython.config.loader.Config
-
+            #
             # qtconsole ?
             if cfg['IPKernelApp']:
                 logger.debug('Within IPython QtConsole.')
