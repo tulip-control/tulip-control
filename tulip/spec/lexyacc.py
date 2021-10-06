@@ -222,8 +222,9 @@ class Parser:
             debuglog=None):
         """Build parser using `ply.yacc`.
 
-        Default table module is `self.tabmodule`.
-        Default logger is `YACC_LOGGER`
+        The default table module is
+        as defined in `self.tabmodule`.
+        The default logger is `YACC_LOGGER`.
         """
         if tabmodule is None:
             tabmodule = self.tabmodule
