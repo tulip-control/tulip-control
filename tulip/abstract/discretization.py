@@ -127,15 +127,16 @@ class AbstractSwitched:
         self.ppp2modes = ppp2modes
 
     def __str__(self):
-        s = 'Abstraction of switched system\n'
-        s += str('common PPP:\n') + str(self.ppp)
-        s += str('common ts:\n') + str(self.ts)
-
+        s = (
+            'Abstraction of switched system\n'
+            f'common PPP:\n{self.ppp}'
+            f'common ts:\n{self.ts}')
+        items = [s]
         for mode, ab in self.modes.items():
-            s += 'mode: ' + str(mode)
-            s += ', with abstraction:\n' + str(ab)
-
-        return s
+            items.append(
+                f'mode: {mode}'
+                f', with abstraction:\n{ab}')
+        return ''.join(items)
 
     def ppp2pwa(self, mode, i):
         """Return original `Region` containing `Region` `i` in `mode`.
