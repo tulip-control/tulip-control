@@ -357,7 +357,8 @@ def add_grid(
                 size_list.append(grid_size)
         else:
             raise Exception(
-                "num_grid_pnts isn't given in a correct format.")
+                '`num_grid_pnts` is not given '
+                'in a correct format.')
     j = 0
     list_grid = dict()
     while j < dim:
@@ -392,9 +393,11 @@ def add_grid(
             rc, xc = pc.cheby_ball(isect)
             if rc > abs_tol / 2:
                 if rc < abs_tol:
-                    print("Warning: "
-                        "One of the regions in the refined PPP is too small"
-                        ", this may cause numerical problems")
+                    print(
+                        'Warning: '
+                        'One of the regions in '
+                        'the refined PPP is too small'
+                        ', this may cause numerical problems')
                 if len(isect) == 0:
                     isect = pc.Region([isect], [])
                 isect.props = ppp.regions[j].props.copy()
