@@ -87,9 +87,9 @@ def ctrl_next(W, pg, player):
             cnext.add(pred)
     return cnext
 
-if __name__ == '__main__':
-    p = trs.automata.ParityGame(c=3)
 
+def _main():
+    p = trs.automata.ParityGame(c=3)
     p.states.add('p0', player=0, color=1)
     p.states.add('p1', player=1, color=0)
     p.states.add('p2', player=1, color=1)
@@ -102,3 +102,6 @@ if __name__ == '__main__':
     print(f'player 0 wins from: W0 = {W0}')
     print(f'player 1 wins from: W1 = {W1}')
 
+
+if __name__ == '__main__':
+    _main()

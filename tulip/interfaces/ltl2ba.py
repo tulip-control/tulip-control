@@ -293,7 +293,7 @@ def call_ltl2ba(formula, prefix=''):
     return ltl2ba_output
 
 
-if __name__ == '__main__':
+def _main():
     logging.basicConfig(level=logging.DEBUG)
     logger.setLevel(level=logging.DEBUG)
     parser = Parser()
@@ -301,3 +301,7 @@ if __name__ == '__main__':
     out = call_ltl2ba(f)
     symbols, g, initial, accepting = parser.parse(out)
     g.save('ba.pdf')
+
+
+if __name__ == '__main__':
+    _main()

@@ -410,7 +410,7 @@ def parse(formula):
     return parser.parse(formula)
 
 
-if __name__ == '__main__':
+def _main():
     h = logging.FileHandler(
         'log.txt',
         mode='w')
@@ -437,3 +437,7 @@ if __name__ == '__main__':
         outputdir=outputdir,
         write_tables=True,
         debug=True)
+
+
+if __name__ == '__main__':
+    _main()
