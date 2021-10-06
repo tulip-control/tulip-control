@@ -118,8 +118,9 @@ def synthesize(
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception(
-                'lily.pl not found in path.\n'
-                'See the Lily docs for setting PERL5LIB and PATH.')
+                '`lily.pl` not found in path.\n'
+                'See the Lily docs for '
+                'setting `PERL5LIB` and `PATH`.')
         else:
             raise
     with open(DOTFILE, 'r') as dotf:
