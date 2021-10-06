@@ -1921,7 +1921,7 @@ def merge_partitions(abstractions):
             - merged_abstraction: `AbstractSwitched`
             - ap_labeling: dict
     """
-    if len(abstractions) == 0:
+    if not abstractions:
         warnings.warn(
             'Abstractions empty, '
             'nothing to merge.')
