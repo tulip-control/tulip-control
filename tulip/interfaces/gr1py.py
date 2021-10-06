@@ -86,7 +86,7 @@ def _spec_to_gr1py(spec):
     if gr1py is None:
         raise ValueError(
             'Import of gr1py interface failed.\n'
-            'Please verify installation of "gr1py".')
+            'Please verify installation of `gr1py`.')
     s = translate(spec, 'gr1c')
     logger.info(
         f'\n{_hl}\n gr1py input:\n {s}\n{_hl}')
