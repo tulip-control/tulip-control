@@ -216,7 +216,8 @@ class FunctionOnLabeledState:
         """
         (state, input_dict) = self.get_state_and_input_dict(input_tuple)
         output_dict = self.get_output_dict(output_tuple)
-        pair = self.get_state_input_output_pair(state, input_dict)
+        pair = self.get_state_input_output_pair(
+            state, input_dict)
         if pair is not None:
             print(
                 "Warning: replacing output at state {} with {}".format(
@@ -228,7 +229,10 @@ class FunctionOnLabeledState:
             return
         self._state_input_output_list.append(
             LabeledStateInputOutputPair(
-                state, input_dict, output_dict, labels)
+                state,
+                input_dict,
+                output_dict,
+                labels)
         )
 
     def save(self, path, transys=None):

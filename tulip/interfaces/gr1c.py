@@ -69,7 +69,9 @@ logger = logging.getLogger(__name__)
 def check_gr1c():
     """Return `True` if `gr1c >= require_version` found in `PATH`."""
     try:
-        v = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
+        v = subprocess.check_output(
+            ["gr1c", "-V"],
+            universal_newlines=True)
     except OSError:
         return False
     v = v.split()[1]
@@ -100,7 +102,9 @@ def get_version():
     @return: `(major, minor, micro)`, a `tuple` of `int`
     """
     try:
-        v_str = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
+        v_str = subprocess.check_output(
+            ["gr1c", "-V"],
+            universal_newlines=True)
     except OSError:
         raise OSError('gr1c not found')
     v_str = v_str.split()[1]
@@ -196,7 +200,8 @@ def _untagdict(
         key_list = []
     for item in items_li:
         # N.B., we will overwrite duplicate keys without warning!
-        di[cast_f_keys(item.attrib["key"])] = cast_f_values(item.attrib["value"])
+        di[cast_f_keys(item.attrib["key"])] = cast_f_values(
+            item.attrib["value"])
         if get_order:
             key_list.append(item.attrib["key"])
     if get_order:
@@ -235,9 +240,11 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     else:
         ns_prefix = '{' + namespace + '}'
     if elem.tag != ns_prefix + 'tulipcon':
-        raise TypeError('root tag should be tulipcon.')
+        raise TypeError(
+            'root tag should be tulipcon.')
     if 'version' not in elem.attrib.keys():
-        raise ValueError('unversioned tulipcon XML string.')
+        raise ValueError(
+            'unversioned tulipcon XML string.')
     if int(elem.attrib['version']) != 1:
         raise ValueError("unsupported tulipcon XML version: "+
             str(elem.attrib["version"]))
@@ -254,8 +261,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
                      "sys_init", "sys_safety", "sys_prog"]:
         if s_elem.find(ns_prefix+spec_tag) is None:
             raise ValueError("invalid specification in tulipcon XML string.")
-        (tag_name, li) = _untaglist(s_elem.find(ns_prefix+spec_tag),
-                                    cast_f=str, namespace=namespace)
+        (tag_name, li) = _untaglist(
+            s_elem.find(ns_prefix + spec_tag),
+            cast_f=str,
+            namespace=namespace)
         li = [v.replace("&lt;", "<") for v in li]
         li = [v.replace("&gt;", ">") for v in li]
         li = [v.replace("&amp;", "&") for v in li]
@@ -270,7 +279,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         return (spec, mach)
     # Assume version 1 of tulipcon XML
     if aut_elem.attrib['type'] != 'basic':
-        raise ValueError('Automaton class only recognizes type "basic".')
+        raise ValueError(
+            'Automaton class only recognizes type "basic".')
     node_list = aut_elem.findall(ns_prefix+"node")
     id_list = []
         # For more convenient searching, and
@@ -294,11 +304,13 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         if tag_name != ns_prefix+"child_list":
             # This really should never happen and may not even be
             # worth checking.
-            raise ValueError("failure of consistency check " +
+            raise ValueError(
+                "failure of consistency check " +
                 "while processing aut XML string.")
-        (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
-                                            cast_f_values=int,
-                                            namespace=namespace)
+        (tag_name, this_state) = _untagdict(
+            node.find(ns_prefix+"state"),
+            cast_f_values=int,
+            namespace=namespace)
         if tag_name != ns_prefix+"state":
             raise ValueError("failure of consistency check " +
                 "while processing aut XML string.")
@@ -307,8 +319,11 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             continue
         id_list.append(this_id)
         logger.info('loaded from gr1c result:\n\t' +str(this_state) )
-        A.add_node(this_id, state=copy.copy(this_state),
-                   mode=mode, rgrad=rgrad)
+        A.add_node(
+            this_id,
+            state=copy.copy(this_state),
+            mode=mode,
+            rgrad=rgrad)
         for next_node in this_child_list:
             A.add_edge(this_id, next_node)
     return A
@@ -462,9 +477,9 @@ def synthesize(spec):
              "-n", init_option,
              "-t", "json"],
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            universal_newlines=True
-        )
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception('gr1c not found in path.')
@@ -630,9 +645,11 @@ class GR1CSession:
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
-        self.p.stdin.write('getindex ' + ' '.join(
-            str(i) for i in state_vector) + ' ' +
-            str(goal_mode) + '\n'
+        self.p.stdin.write(
+            'getindex ' +
+            ' '.join(
+                str(i) for i in state_vector) +
+            ' ' + str(goal_mode) + '\n'
         )
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
@@ -685,11 +702,14 @@ class GR1CSession:
         emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
-        self.p.stdin.write("sysnext "+" ".join(
-            str(i) for i in state_vector
-        )+" "+" ".join(
-            str(i) for i in emove_vector
-        )+" "+str(goal_mode)+"\n")
+        self.p.stdin.write(
+            "sysnext " +
+            " ".join(
+                str(i) for i in state_vector) +
+            " " +
+            " ".join(
+                str(i) for i in emove_vector) +
+            " " + str(goal_mode) + "\n")
         sys_moves = []
         line = self.p.stdout.readline()
         while '---\n' not in line:

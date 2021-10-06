@@ -170,7 +170,8 @@ class Lexer:
               logger `"ltl_lex_log"`
         """
         if debug and debuglog is None:
-            debuglog = logging.getLogger(LEX_LOGGER)
+            debuglog = logging.getLogger(
+                LEX_LOGGER)
         self.lexer = ply.lex.lex(
             module=self,
             debug=debug,
@@ -234,7 +235,8 @@ class Parser:
         if tabmodule is None:
             tabmodule = self.tabmodule
         if debug and debuglog is None:
-            debuglog = logging.getLogger(YACC_LOGGER)
+            debuglog = logging.getLogger(
+                YACC_LOGGER)
         self.parser = ply.yacc.yacc(
             method='LALR',
             module=self,
@@ -264,7 +266,8 @@ class Parser:
             passed to `self.__init__`
         """
         if debuglog is None:
-            debuglog = logging.getLogger(PARSER_LOGGER)
+            debuglog = logging.getLogger(
+                PARSER_LOGGER)
         root = self.parser.parse(
             formula,
             lexer=self.lexer.lexer,
@@ -307,7 +310,8 @@ class Parser:
     # both function and connective
     def p_ternary_conditional(self, p):
         """expr : LPAREN ITE expr COMMA expr COMMA expr RPAREN"""
-        p[0] = self.ast.Operator(p[2], p[3], p[5], p[7])
+        p[0] = self.ast.Operator(
+            p[2], p[3], p[5], p[7])
 
     def p_binary_predicate(self, p):
         """expr : expr EQUALS expr
@@ -374,7 +378,9 @@ def parse(formula):
 
 
 if __name__ == '__main__':
-    h = logging.FileHandler('log.txt', mode='w')
+    h = logging.FileHandler(
+        'log.txt',
+        mode='w')
     h.setLevel(logging.DEBUG)
     log = logging.getLogger(YACC_LOGGER)
     log.setLevel(logging.DEBUG)
@@ -393,5 +399,8 @@ if __name__ == '__main__':
     except:
         print('no "{t}" found'.format(t=tablepyc))
     parser = Parser()
-    parser.build(tabmodule, outputdir=outputdir,
-                 write_tables=True, debug=True)
+    parser.build(
+        tabmodule,
+        outputdir=outputdir,
+        write_tables=True,
+        debug=True)

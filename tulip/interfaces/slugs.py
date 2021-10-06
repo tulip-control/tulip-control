@@ -95,7 +95,10 @@ def synthesize(spec, symbolic=False):
             fin.write(bytes(struct, 'utf-8'))
         except TypeError:  # Try to be compatible with Python 2.7
             fin.write(bytes(struct))
-    realizable, out = _call_slugs(fin.name, synth=True, symbolic=symbolic)
+    realizable, out = _call_slugs(
+        fin.name,
+        synth=True,
+        symbolic=symbolic)
     if not realizable:
         return None
     os.unlink(fin.name)
@@ -143,7 +146,9 @@ def _bitfields_to_ints(bit_state, vrs):
             var=var, min=dom[0], max=dom[1])
         bitvalues = [bit_state[b] for b in bitnames]
         # little-endian
-        val = int(''.join(str(b) for b in reversed(bitvalues)), 2)
+        val = int(
+            ''.join(str(b) for b in reversed(bitvalues)),
+            2)
         int_state[var] = val
     return int_state
 
@@ -177,15 +182,17 @@ def _call_slugs(
         raise Exception('slugs not found in path.')
     if not os.path.isabs(slugs_compiler_path):
         slugs_compiler_path = os.path.abspath(
-            os.path.join(os.path.dirname(slugs_path),
-                         slugs_compiler_path))
+            os.path.join(
+                os.path.dirname(slugs_path),
+                slugs_compiler_path))
     if not os.path.exists(slugs_compiler_path):
         raise Exception('slugs/compiler.py not found.')
     with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
-        subprocess.check_call(['python', slugs_compiler_path, filename],
-                              stdout=slugs_infile,
-                              stderr=subprocess.STDOUT,
-                              universal_newlines=True)
+        subprocess.check_call(
+            ['python', slugs_compiler_path, filename],
+            stdout=slugs_infile,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
     options = [slugs_path, slugs_infile.name]
     if synth:
         if symbolic:

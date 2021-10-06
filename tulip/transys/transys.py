@@ -348,8 +348,12 @@ class FiniteTransitionSystem(LabeledDiGraph):
 
     ```python
     ts.actions |= ['think', 'write']
-    ts.transitions.add('s0', 's1', actions='think')
-    ts.transitions.add('s1', 5, actions='write')
+    ts.transitions.add(
+        's0', 's1',
+        actions='think')
+    ts.transitions.add(
+        's1', 5,
+        actions='write')
     ```
 
     Note that an unlabeled transition:
@@ -666,10 +670,12 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     transitions = trans
     # prepending states with given str
     if prepend_str:
-        logger.debug('Given string:\n\t' + str(prepend_str) + '\n' +
-                     'will be prepended to all states.')
+        logger.debug(
+            'Given string:\n\t' + str(prepend_str) + '\n' +
+            'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
-    initial_states = prepend_with(initial_states, prepend_str)
+    initial_states = prepend_with(
+        initial_states, prepend_str)
 
     ts = FTS()
     ts.name = name
@@ -695,21 +701,26 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # any transition labeling ?
     if actions is None:
         for from_state, to_state in transitions:
-            (from_state, to_state) = prepend_with([from_state, to_state],
-                                                  prepend_str)
-            logger.debug('Added unlabeled edge:\n\t' + str(from_state) +
-                         '--->' + str(to_state) + '\n')
+            (from_state, to_state) = prepend_with(
+                [from_state, to_state],
+                prepend_str)
+            logger.debug(
+                'Added unlabeled edge:\n\t' +
+                str(from_state) + '--->' + str(to_state) + '\n')
             ts.transitions.add(from_state, to_state)
     else:
         ts.actions |= actions
         for from_state, to_state, act in transitions:
-            (from_state, to_state) = prepend_with([from_state, to_state],
-                                                  prepend_str)
+            (from_state, to_state) = prepend_with(
+                [from_state, to_state],
+                prepend_str)
             logger.debug(
                 'Added labeled edge (=transition):\n\t' +
                 str(from_state) + '---[' + str(act) + ']--->' +
                 str(to_state) + '\n')
-            ts.transitions.add(from_state, to_state, actions=act)
+            ts.transitions.add(
+                from_state, to_state,
+                actions=act)
     return ts
 
 
@@ -762,7 +773,10 @@ def line_labeled_with(L, m=0):
     from_states = range(m, m + n - 1)
     to_states = range(m + 1, m + n)
     trans = zip(from_states, to_states)
-    ts = tuple2fts(S, S0, AP, L, Act, trans, prepend_str='s')
+    ts = tuple2fts(
+        S, S0, AP,
+        L, Act, trans,
+        prepend_str='s')
     return ts
 
 
@@ -979,7 +993,9 @@ def _output_fts(ts, transitions, sol):
     ts_simu = FTS(env_actions, sys_actions)
     ts2simu = dict()
     simu2ts = dict()
-    Part_hash = dict(ts2simu=ts2simu, simu2ts=simu2ts)
+    Part_hash = dict(
+        ts2simu=ts2simu,
+        simu2ts=simu2ts)
     n_cells = len(sol)
     for i in range(n_cells):
         simu2ts[i] = sol[i]
@@ -997,7 +1013,9 @@ def _output_fts(ts, transitions, sol):
     AP = ts.aps
     ts_simu.atomic_propositions.add_from(AP)
     for i in range(n_cells):
-        ts_simu.states.add(i, ap=ts.nodes[next(iter(sol[i]))]['ap'])
+        ts_simu.states.add(
+            i,
+            ap=ts.nodes[next(iter(sol[i]))]['ap'])
     for i in range(n_cells):
         for j in range(n_cells):
             if transitions[j, i]:
@@ -1038,7 +1056,10 @@ def simu_abstract(ts, simu_type):
         if ap not in S0:
             S0[ap] = set()
             hash_ap[ap] = set()
-            Part.add_node(n_cells, ap=ap, cov=S0[ap])
+            Part.add_node(
+                n_cells,
+                ap=ap,
+                cov=S0[ap])
                 # hash table S0--->G
             n_cells += 1
         S0[ap].add(node)
@@ -1077,7 +1098,10 @@ def simu_abstract(ts, simu_type):
                     # assume that i != j
                     sol.append(isect)
                     # update transition matrix
-                    transitions = np.pad(transitions, (0, 1), 'constant')
+                    transitions = np.pad(
+                        transitions,
+                        (0, 1),
+                        'constant')
                     transitions[n_cells, :] = 0
                     transitions[:, n_cells] = transitions[:, i]
                     transitions[j, n_cells] = 1
@@ -1087,7 +1111,10 @@ def simu_abstract(ts, simu_type):
                         if i == j:
                             transitions[j, n_cells] = 0
                     # update IJ matrix
-                    IJ = np.pad(IJ, (0, 1), 'constant', constant_values=1)
+                    IJ = np.pad(
+                        IJ, (0, 1),
+                        'constant',
+                        constant_values=1)
                     if simu_type == 'bi':
                         IJ[i, :] = 1
                         IJ[:, i] = 1
@@ -1095,5 +1122,6 @@ def simu_abstract(ts, simu_type):
                 else:
                     transitions[j, k] = 1
         IJ = ((IJ - transitions) > 0).astype(int)
-    [ts_simu, part_hash] = _output_fts(ts, transitions, sol)
+    [ts_simu, part_hash] = _output_fts(
+        ts, transitions, sol)
     return ts_simu, part_hash

@@ -94,7 +94,9 @@ class Lexer:
     t_ignore = ' \t'
 
     def __init__(self):
-        self.lexer = ply.lex.lex(module=self, debug=False)
+        self.lexer = ply.lex.lex(
+            module=self,
+            debug=False)
 
     def t_newline(self, t):
         r'\n+'
@@ -133,8 +135,11 @@ class Parser:
         """Build lexer and parser."""
         self.lexer = Lexer()
         self.tokens = self.lexer.tokens
-        self.parser = ply.yacc.yacc(module=self, tabmodule=TABMODULE,
-                                    write_tables=True, debug=False)
+        self.parser = ply.yacc.yacc(
+            module=self,
+            tabmodule=TABMODULE,
+            write_tables=True,
+            debug=False)
         self.g = None
         self.initial_nodes = None
         self.accepting_nodes = None
@@ -264,7 +269,9 @@ def call_ltl2ba(formula, prefix=''):
     @rtype: tulip.transys.BA
     """
     try:
-        subprocess.call(['ltl2ba', '-h'], stdout=subprocess.PIPE)
+        subprocess.call(
+            ['ltl2ba', '-h'],
+            stdout=subprocess.PIPE)
     except OSError:
         raise Exception('cannot find ltl2ba on path')
     p = subprocess.Popen(
@@ -276,7 +283,8 @@ def call_ltl2ba(formula, prefix=''):
     ltl2ba_output = p.stdout.read()
     logger.info('ltl2ba output:\n\n{s}\n'.format(s=ltl2ba_output))
     if p.returncode != 0:
-        raise Exception('Error when converting LTL to Buchi.')
+        raise Exception(
+            'Error when converting LTL to Buchi.')
     return ltl2ba_output
 
 

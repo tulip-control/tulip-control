@@ -292,12 +292,17 @@ def tuple2ba(
     transitions = trans
     # prepending states with given str
     if prepend_str:
-        logger.debug('Given string:\n\t' + str(prepend_str) + '\n' +
-                     'will be prepended to all states.')
-    states = prepend_with(states, prepend_str)
-    initial_states = prepend_with(initial_states, prepend_str)
-    accepting_states = prepend_with(accepting_states, prepend_str)
-    ba = BuchiAutomaton(atomic_proposition_based=atomic_proposition_based)
+        logger.debug(
+            'Given string:\n\t' + str(prepend_str) + '\n' +
+            'will be prepended to all states.')
+    states = prepend_with(
+        states, prepend_str)
+    initial_states = prepend_with(
+        initial_states, prepend_str)
+    accepting_states = prepend_with(
+        accepting_states, prepend_str)
+    ba = BuchiAutomaton(
+        atomic_proposition_based=atomic_proposition_based)
     ba.name = name
     ba.states.add_from(states)
     ba.states.initial |= initial_states
@@ -308,14 +313,17 @@ def tuple2ba(
         ba.alphabet.add(alphabet_or_ap)
     for transition in transitions:
         (from_state, to_state, guard) = transition
-        [from_state, to_state] = prepend_with([from_state, to_state],
-                                              prepend_str)
+        [from_state, to_state] = prepend_with(
+            [from_state, to_state],
+            prepend_str)
         # convention
         if atomic_proposition_based:
             if guard is None:
                 guard = set()
             guard = str2singleton(guard)
-        ba.transitions.add(from_state, to_state, letter=guard)
+        ba.transitions.add(
+            from_state, to_state,
+            letter=guard)
     return ba
 
 

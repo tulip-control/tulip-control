@@ -138,7 +138,8 @@ class LtiSysDyn:
         try:
             nA, mA = A.shape
         except:
-            raise TypeError('A matrix must be 2d array')
+            raise TypeError(
+                'A matrix must be 2d array')
         if nA != mA:
             raise ValueError('A must be square')
         if domain is not None:
@@ -226,8 +227,9 @@ class LtiSysDyn:
             logger.error('failed to import graphics')
             warn('pyvectorized not found. No plotting.')
             return
-
-        (x, res) = pc.grid_region(self.domain, res=res)
+        (x, res) = pc.grid_region(
+            self.domain,
+            res=res)
         n = self.A.shape[0]
         DA = self.A - np.eye(n)
         v = DA.dot(x) + self.K
@@ -309,7 +311,8 @@ class PwaSysDyn:
             m = list_subsys[0].B.shape[1]  # Input space dimension
             p = list_subsys[0].E.shape[1]  # Disturbance space dimension
             for subsys in list_subsys:
-                uncovered_dom = uncovered_dom.diff(subsys.domain)
+                uncovered_dom = uncovered_dom.diff(
+                    subsys.domain)
                 dims_differ = (
                     n != subsys.A.shape[1] or
                     m != subsys.B.shape[1] or
@@ -332,9 +335,15 @@ class PwaSysDyn:
         # Input time semantics
         _check_time_data(time_semantics, timestep)
         if overwrite_time:
-            _push_time_data(self.list_subsys, time_semantics, timestep)
+            _push_time_data(
+                self.list_subsys,
+                time_semantics,
+                timestep)
         else:
-            _check_time_consistency(list_subsys, time_semantics, timestep)
+            _check_time_consistency(
+                list_subsys,
+                time_semantics,
+                timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
 
@@ -358,7 +367,8 @@ class PwaSysDyn:
             Uset=None,
             Wset=None,
             domain=None):
-        lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
+        lti_sys = LtiSysDyn(
+            A, B, E, K, Uset, Wset, domain)
         return cls([lti_sys], domain)
 
     def plot(
@@ -374,8 +384,11 @@ class PwaSysDyn:
         if ax is None:
             ax, fig = newax()
         for subsystem in self.list_subsys:
-            subsystem.plot(ax, color=np.random.rand(3),
-                           show_domain=show_domain, **kwargs)
+            subsystem.plot(
+                ax,
+                color=np.random.rand(3),
+                show_domain=show_domain,
+                **kwargs)
         return ax
 
 
@@ -478,20 +491,24 @@ class SwitchedSysDyn:
         # `disc_domain_size`, then use them.
         # Otherwise, ignore the labels.
         n_env, n_sys = disc_domain_size
-        self._env_labels = self._check_labels(n_env, env_labels)
-        self._disc_sys_labels = self._check_labels(n_sys, disc_sys_labels)
+        self._env_labels = self._check_labels(
+            n_env, env_labels)
+        self._disc_sys_labels = self._check_labels(
+            n_sys, disc_sys_labels)
         # Check that each dynamics key is a valid mode,
         # i.e., a valid combination of
         # environment and system labels.
         if dynamics is not None:
             modes = self.all_mode_combs
-            undefined_modes = set(dynamics.keys()).difference(modes)
+            undefined_modes = set(
+                dynamics.keys()).difference(modes)
             if undefined_modes:
                 msg = 'SwitchedSysDyn: `dynamics` keys inconsistent'
                 msg += ' with discrete mode labels.\n'
                 msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)
-            missing_modes = set(modes).difference(dynamics.keys())
+            missing_modes = set(modes).difference(
+                dynamics.keys())
             if missing_modes:
                 msg = 'Missing the modes:\n' + str(missing_modes)
                 msg += '\n Make sure you did not forget any modes,\n'
@@ -507,9 +524,15 @@ class SwitchedSysDyn:
         self.cts_ss = cts_ss
         _check_time_data(time_semantics, timestep)
         if overwrite_time:
-            _push_time_data(self.dynamics.values(), time_semantics, timestep)
+            _push_time_data(
+                self.dynamics.values(),
+                time_semantics,
+                timestep)
         else:
-            _check_time_consistency(list(dynamics.values()), time_semantics, timestep)
+            _check_time_consistency(
+                list(dynamics.values()),
+                time_semantics,
+                timestep)
         self.timestep = timestep
         self.time_semantics = time_semantics
 
@@ -567,7 +590,8 @@ class SwitchedSysDyn:
     @property
     def modes(self):
         if self.dynamics is None:
-            warn('No dynamics defined (None).')
+            warn(
+                'No dynamics defined (None).')
             return None
         return self.dynamics.keys()
 
@@ -590,15 +614,23 @@ class SwitchedSysDyn:
             cls,
             list_subsys=[],
             domain=None):
-        pwa_sys = PwaSysDyn(list_subsys, domain)
-        return cls((1, 1), {(0, 0): pwa_sys}, domain)
+        pwa_sys = PwaSysDyn(
+            list_subsys, domain)
+        return cls(
+            (1, 1),
+            {(0, 0): pwa_sys},
+            domain)
 
     @classmethod
     def from_lti(cls, A=[], B=[], E=[], K=[],
                  Uset=None, Wset=None,domain=None):
-        pwa_sys = PwaSysDyn.from_lti(A, B, E, K,
-                                     Uset, Wset, domain)
-        return cls((1,1), {(0,0):pwa_sys}, domain)
+        pwa_sys = PwaSysDyn.from_lti(
+            A, B, E, K,
+            Uset, Wset, domain)
+        return cls(
+            (1, 1),
+            {(0, 0): pwa_sys},
+            domain)
 
 
 def _push_time_data(system_list, time_semantics, timestep):
@@ -617,8 +649,10 @@ def _push_time_data(system_list, time_semantics, timestep):
         # Overwrite LTI in system if
         # the system is piecewise-affine
         if isinstance(system, PwaSysDyn):
-            _push_time_data(system.list_subsys, time_semantics, timestep)
-
+            _push_time_data(
+                system.list_subsys,
+                time_semantics,
+                timestep)
 
 
 def _check_time_data(semantics, timestep):
@@ -634,8 +668,8 @@ def _check_time_data(semantics, timestep):
         raise ValueError('Time semantics must be discrete or ' +
             'sampled (sampled from continuous time system).')
     if ((semantics == 'discrete') and (timestep is not None)):
-        raise ValueError('Discrete semantics must not have a timestep')
-
+        raise ValueError(
+            'Discrete semantics must not have a timestep')
     if timestep is not None:
         error_string = 'Timestep must be a positive real number or unspecified.'
         if timestep <= 0:

@@ -302,7 +302,8 @@ def get_input(
                 try:
                     u, cost = get_input_helper(
                         x0, ssys, P1, P3, N, R, r, Q, ord,
-                        closed_loop=closed_loop, solver=solver
+                        closed_loop=closed_loop,
+                        solver=solver
                     )
                 except _InputHelperLPException as ex:
                     # The end state might consist of several polytopes.
@@ -340,7 +341,8 @@ def get_input(
             r[idx, 0] += -mid_weight * xc
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q, ord,
-            closed_loop=closed_loop, solver=solver
+            closed_loop=closed_loop,
+            solver=solver
         )
     return low_u
 
@@ -484,7 +486,9 @@ def get_input_helper(
             np.hstack((np.zeros((Lu.shape[0], 2)), Lu))
         ))
         h_LP = np.vstack((np.zeros((2 * N * (n + m), 1)), M))
-    sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP, solver=solver)
+    sol = pc.polytope.lpsolve(
+        c_LP.flatten(), G_LP, h_LP,
+        solver=solver)
     if sol['status'] != 0:
         raise _InputHelperLPException(
             'LP solver finished with error code ' +

@@ -62,7 +62,8 @@ def check_realizable(spec):
     init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     return gr1py.solve.check_realizable(
-        tsys, exprtab, init_flags=init_option)
+        tsys, exprtab,
+        init_flags=init_option)
 
 
 def synthesize(spec):
@@ -73,7 +74,8 @@ def synthesize(spec):
     init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     strategy = gr1py.solve.synthesize(
-        tsys, exprtab, init_flags=init_option)
+        tsys, exprtab,
+        init_flags=init_option)
     if strategy is None:
         return None
     s = gr1py.output.dumps_json(tsys.symtab, strategy)
@@ -82,8 +84,9 @@ def synthesize(spec):
 
 def _spec_to_gr1py(spec):
     if gr1py is None:
-        raise ValueError('Import of gr1py interface failed.\n'
-                         'Please verify installation of "gr1py".')
+        raise ValueError(
+            'Import of gr1py interface failed.\n'
+            'Please verify installation of "gr1py".')
     s = translate(spec, 'gr1c')
     logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
     tsys, exprtab = gr1py.cli.loads(s)

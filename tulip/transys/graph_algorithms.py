@@ -92,7 +92,8 @@ def dijkstra_multiple_sources_multiple_targets(
     best_path = []
     for source in source_set:
         (cost, path) = dijkstra_single_source_multiple_targets(
-            graph, source, target_set, cost_key
+            graph, source,
+            target_set, cost_key
         )
         if cost < best_cost:
             best_cost = cost

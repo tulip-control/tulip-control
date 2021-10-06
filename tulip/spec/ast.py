@@ -118,8 +118,9 @@ def make_nodes(opmap=None):
             self.value = value
 
         def __repr__(self):
-            return '{t}({v})'.format(t=type(self).__name__,
-                                     v=repr(self.value))
+            return '{t}({v})'.format(
+                t=type(self).__name__,
+                v=repr(self.value))
 
         def __hash__(self):
             return id(self)

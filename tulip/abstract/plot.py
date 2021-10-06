@@ -112,8 +112,12 @@ def plot_ts_on_partition(
         if only_adjacent:
             if ppp.adj[i, j] == 0:
                 continue
+        plot_transition_arrow(
+            ppp.regions[i],
+            ppp.regions[j],
+            ax,
+            arr_size)
 
-        plot_transition_arrow(ppp.regions[i], ppp.regions[j], ax, arr_size)
 
 def project_strategy_on_partition(ppp, mealy):
     """Project transitions of `ppp` on `mealy`.
@@ -145,8 +149,12 @@ def plot_strategy(ab, mealy):
     @type ab: `AbstractPwa` or `AbstractSwitched`
     @type mealy: `transys.MealyMachine`
     """
-    proj_mealy = project_strategy_on_partition(ab.ppp, mealy)
-    ax = plot_partition(ab.ppp, proj_mealy, color_seed=0)
+    proj_mealy = project_strategy_on_partition(
+        ab.ppp, mealy)
+    ax = plot_partition(
+        ab.ppp,
+        proj_mealy,
+        color_seed=0)
     return ax
 
 
@@ -179,7 +187,10 @@ def plot_trajectory(
         return
     if ax is None:
         ax, fig = newax()
-    plot_partition(plot_numbers=False, ax=ax, show=False)
+    plot_partition(
+        plot_numbers=False,
+        ax=ax,
+        show=False)
     A = ssys.A
     B = ssys.B
     if ssys.K is not None:
@@ -194,7 +205,10 @@ def plot_trajectory(
             np.dot(B, u_seq[i, :]).flatten() +
             K.flatten())
         x_arr = np.vstack([x_arr, x.flatten()])
-    ax.plot(x_arr[:, 0], x_arr[:, 1], 'o-')
+    ax.plot(
+        x_arr[:, 0],
+        x_arr[:, 1],
+        'o-')
     return ax
 
 
@@ -239,8 +253,11 @@ def simulate2d(
     if qinit == '\E \A' or qinit == '\A \E':
         # pick an initial discrete system state given the#
         # initial discrete environment state
-        (nd, out) = ctrl.reaction('Sinit', env_inputs[0])
-        init_edges = ctrl.edges('Sinit', data=True)
+        (nd, out) = ctrl.reaction(
+            'Sinit', env_inputs[0])
+        init_edges = ctrl.edges(
+            'Sinit',
+            data=True)
         for u, v, edge_data in init_edges:
             assert u == 'Sinit', u
             if v == nd:
@@ -250,8 +267,11 @@ def simulate2d(
         assert s0_part == out['loc'], (s0_part, out)
     elif qinit == '\E \E':
         # pick an initial discrete state
-        init_edges = ctrl.edges('Sinit', data=True)
-        u, v, edge_data = next(iter(init_edges))
+        init_edges = ctrl.edges(
+            'Sinit',
+            data=True)
+        u, v, edge_data = next(
+            iter(init_edges))
         assert u == 'Sinit', u
         s0_part = edge_data['loc']
         nd = v
@@ -262,7 +282,9 @@ def simulate2d(
             x_init, disc_dynamics.ppp)
         assert s0_part == d_init['loc'], (s0_part, d_init)
         # find the machine node with `d_init` as discrete state
-        init_edges = ctrl.edges('Sinit', data=True)
+        init_edges = ctrl.edges(
+            'Sinit',
+            data=True)
         for u, v, edge_data in init_edges:
             assert u == 'Sinit', u
             if edge_data == d_init:
@@ -285,7 +307,8 @@ def simulate2d(
     x = [x_init[0]]
     y = [x_init[1]]
     for i in range(T):
-        (nd, out) = ctrl.reaction(nd, env_inputs[i + 1])
+        (nd, out) = ctrl.reaction(
+            nd, env_inputs[i + 1])
         x0 = np.array([x[i * N], y[i * N]])
         start = s0_part
         end = disc_dynamics.ppp2ts.index(out['loc'])

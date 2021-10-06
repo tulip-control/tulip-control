@@ -80,7 +80,8 @@ def fts_maximal_example():
     try:
         fts.states.initial.add('not pay')
     except:
-        warnings.warn('You cannot add an initial state \\notin states.')
+        warnings.warn(
+            'You cannot add an initial state \\notin states.')
 
     # get state info
     print('States:\n\t' +str(fts.states() ) )

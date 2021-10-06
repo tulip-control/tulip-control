@@ -65,7 +65,8 @@ def is_valuation(
         else:
             ok = curvaluation in port_type
         if not ok:
-            raise TypeError('Not a valuation.')
+            raise TypeError(
+                'Not a valuation.')
 
 
 def create_machine_ports(spc_vars):
@@ -618,7 +619,9 @@ class MealyMachine(Transducer):
 
     def reactionpart(self, from_state, inputs):
         """Wraps `reaction()` with `lazy=True`."""
-        return self.reaction(from_state, inputs, lazy=True)
+        return self.reaction(
+            from_state, inputs,
+            lazy=True)
 
     def run(self, from_state=None, input_sequences=None):
         """Guided or interactive run.
@@ -629,10 +632,14 @@ class MealyMachine(Transducer):
         @return: output of `guided_run`, otherwise `None`.
         """
         if input_sequences is None:
-            interactive_run(self, from_state=from_state)
+            interactive_run(
+                self,
+                from_state=from_state)
         else:
-            return guided_run(self, from_state=from_state,
-                              input_sequences=input_sequences)
+            return guided_run(
+                self,
+                from_state=from_state,
+                input_sequences=input_sequences)
 
 
 def guided_run(mealy, from_state=None, input_sequences=None):
@@ -665,7 +672,8 @@ def guided_run(mealy, from_state=None, input_sequences=None):
         raise TypeError('Values must be lists, for: ' + str(non_lists))
     # uniform list len ?
     if len(set(len(x) for x in seqs.values())) > 1:
-        raise ValueError('All input sequences must be of equal length.')
+        raise ValueError(
+            'All input sequences must be of equal length.')
     # note: initial sys state non-determinism not checked
     # initial sys edge non-determinism checked instead (more restrictive)
     if from_state is None:
@@ -680,7 +688,8 @@ def guided_run(mealy, from_state=None, input_sequences=None):
         state, outputs = mealy.reaction(state, inputs)
         states_seq.append(state)
         for k in output_seqs:
-            output_seqs[k].append(outputs[k])
+            output_seqs[k].append(
+                outputs[k])
     return (states_seq, output_seqs)
 
 
@@ -716,14 +725,16 @@ def random_run(mealy, from_state=None, N=10):
         # extend execution trace
         states_seq.append(new_state)
         # extend output traces
-        outputs = project_dict(attr_dict, mealy.outputs)
+        outputs = project_dict(
+            attr_dict, mealy.outputs)
         for k in output_seqs:
             output_seqs[k].append(outputs[k])
         # updates
         old_state = state
         state = new_state
         # printing
-        inputs = project_dict(attr_dict, mealy.inputs)
+        inputs = project_dict(
+            attr_dict, mealy.inputs)
         print(
             'move from\n\t state: ' + str(old_state) +
             '\n\t with input:' + str(inputs) +
@@ -767,8 +778,10 @@ def _interactive_run_step(mealy, state):
     if selected_trans is None:
         return None
     (from_, to_state, attr_dict) = selected_trans
-    inputs = project_dict(attr_dict, mealy.inputs)
-    outputs = project_dict(attr_dict, mealy.outputs)
+    inputs = project_dict(
+        attr_dict, mealy.inputs)
+    outputs = project_dict(
+        attr_dict, mealy.outputs)
     print(
         'Moving from state: ' + str(state) +
         ', to state: ' + str(to_state) + '\n' +
@@ -781,8 +794,10 @@ def _select_transition(mealy, trans):
     msg = 'Found more than 1 outgoing transitions:' + 2 * '\n'
     for i, t in enumerate(trans):
         (from_state, to_state, attr_dict) = t
-        inputs = project_dict(attr_dict, mealy.inputs)
-        outputs = project_dict(attr_dict, mealy.outputs)
+        inputs = project_dict(
+            attr_dict, mealy.inputs)
+        outputs = project_dict(
+            attr_dict, mealy.outputs)
         msg += (
             '\t' + str(i) + ' : ' +
             str(from_state) + ' ---> ' + str(to_state) + '\n' +
@@ -816,7 +831,8 @@ def moore2mealy(moore):
     @rtype: `MealyMachine`
     """
     if not isinstance(moore, MooreMachine):
-        raise TypeError('moore must be a MooreMachine')
+        raise TypeError(
+            'moore must be a MooreMachine')
     mealy = MealyMachine()
     # cp inputs
     for port_name, port_type in moore.inputs.items():
@@ -869,7 +885,8 @@ def mealy2moore(mealy):
     """
     # TODO: check for when Mealy is exactly convertible to Moore
     if not isinstance(mealy, MealyMachine):
-        raise TypeError('moore must be a MealyMachine')
+        raise TypeError(
+            'moore must be a MealyMachine')
     moore = MooreMachine()
     # cp inputs
     for port_name, port_type in mealy.inputs.items():
@@ -985,7 +1002,8 @@ def strip_ports(mealy, names):
     new.add_inputs(trim_dict(mealy.inputs, names))
     new.add_outputs(trim_dict(mealy.outputs, names))
     new.add_nodes_from(mealy)
-    new.states.initial.add_from(mealy.states.initial)
+    new.states.initial.add_from(
+        mealy.states.initial)
     for u, v, d in mealy.edges(data=True):
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)

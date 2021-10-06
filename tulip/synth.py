@@ -285,9 +285,11 @@ def iter2var(states, variables, statevar, bool_states, must):
         'min_one: ' + str(min_one))
     all_str = all(isinstance(x, str) for x in states)
     if bool_states:
-        logger.debug('states modeled as Boolean variables')
+        logger.debug(
+            'states modeled as Boolean variables')
         if not all_str:
-            raise TypeError('If Boolean, all states must be strings.')
+            raise TypeError(
+                'If Boolean, all states must be strings.')
         state_ids = {x: x for x in states}
         variables.update({s: 'boolean' for s in states})
         # single action ?
@@ -329,7 +331,8 @@ def iter2var(states, variables, statevar, bool_states, must):
                     'domain has been extended, because all actions\n\t'
                     'could be False (constraint: min_one = False).')
         else:
-            raise TypeError('Integer and string states must not be mixed.')
+            raise TypeError(
+                'Integer and string states must not be mixed.')
         state_ids = {x: f(x) for x in states}
         variables[statevar] = domain
         constraint = None
@@ -362,17 +365,23 @@ def _fts2spec(
     sys_trans = list()
     sys_vars = {ap: 'boolean' for ap in aps}
     action_ids, constraint = iter2var(
-        actions, sys_vars, actionvar, bool_actions, fts.actions_must)
+        actions, sys_vars,
+        actionvar, bool_actions,
+        fts.actions_must)
     _add_actions(constraint, sys_init, sys_trans)
-    state_ids, constraint = iter2var(states, sys_vars, statevar,
-                                     bool_states, must='xor')
+    state_ids, constraint = iter2var(
+        states, sys_vars,
+        statevar, bool_states,
+        must='xor')
     if constraint is not None:
         sys_trans += constraint
-    sys_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += _sys_init_from_ts(
+        states, state_ids, aps, ignore_initial)
     sys_trans += _sys_trans_from_ts(
         states, state_ids, fts.transitions,
         action_ids=action_ids)
-    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
+    tmp_init, tmp_trans = _ap_trans_from_ts(
+        states, state_ids, aps)
     sys_init += tmp_init
     sys_trans += tmp_trans
     return (sys_vars, sys_init, sys_trans)
@@ -479,7 +488,8 @@ def sys_to_spec(
             logger.debug('Found sys action')
             action_ids, constraint = iter2var(
                 codomain, sys_vars,
-                action_type, bool_actions, ofts.sys_actions_must)
+                action_type, bool_actions,
+                ofts.sys_actions_must)
             _add_actions(constraint, sys_init, sys_trans)
             logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
             sys_action_ids[action_type] = action_ids
@@ -487,27 +497,36 @@ def sys_to_spec(
             logger.debug('Found env action')
             action_ids, constraint = iter2var(
                 codomain, env_vars,
-                action_type, bool_actions, ofts.env_actions_must)
+                action_type, bool_actions,
+                ofts.env_actions_must)
             _add_actions(constraint, env_init, env_trans)
             logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
             env_action_ids[action_type] = action_ids
-    state_ids, constraint = iter2var(states, sys_vars, statevar,
-                                     bool_states, must='xor')
+    state_ids, constraint = iter2var(
+        states, sys_vars,
+        statevar, bool_states,
+        must='xor')
     if constraint is not None:
         sys_trans += constraint
-    sys_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    sys_init += _sys_init_from_ts(
+        states, state_ids, aps, ignore_initial)
     sys_trans += _sys_trans_from_ts(
         states, state_ids, trans,
-        sys_action_ids=sys_action_ids, env_action_ids=env_action_ids)
-    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
+        sys_action_ids=sys_action_ids,
+        env_action_ids=env_action_ids)
+    tmp_init, tmp_trans = _ap_trans_from_ts(
+        states, state_ids, aps)
     sys_init += tmp_init
     sys_trans += tmp_trans
     env_trans += _env_trans_from_sys_ts(
         states, state_ids, trans, env_action_ids)
     return GRSpec(
-        sys_vars=sys_vars, env_vars=env_vars,
-        env_init=env_init, sys_init=sys_init,
-        env_safety=env_trans, sys_safety=sys_trans)
+        sys_vars=sys_vars,
+        env_vars=env_vars,
+        env_init=env_init,
+        sys_init=sys_init,
+        env_safety=env_trans,
+        sys_safety=sys_trans)
 
 
 def env_to_spec(
@@ -559,35 +578,51 @@ def env_to_spec(
         assert action_type not in aps, action_type
         if 'sys' in action_type:
             action_ids, constraint = iter2var(
-                codomain, sys_vars, action_type,
-                bool_actions, ofts.sys_actions_must)
-            _add_actions(constraint, sys_init, sys_trans)
+                codomain, sys_vars,
+                action_type, bool_actions,
+                ofts.sys_actions_must)
+            _add_actions(
+                constraint,
+                sys_init,
+                sys_trans)
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             action_ids, constraint = iter2var(
-                codomain, env_vars, action_type,
-                bool_actions, ofts.env_actions_must)
-            _add_actions(constraint, env_init, env_trans)
+                codomain, env_vars,
+                action_type, bool_actions,
+                ofts.env_actions_must)
+            _add_actions(
+                constraint,
+                env_init,
+                env_trans)
             env_action_ids[action_type] = action_ids
     # some duplication here, because we don't know
     # whether the user will provide a system TS as well
     # and whether that TS will contain all the system actions
     # defined in the environment TS
-    state_ids, constraint = iter2var(states, env_vars, statevar,
-                                     bool_states, must='xor')
+    state_ids, constraint = iter2var(
+        states, env_vars,
+        statevar, bool_states,
+        must='xor')
     if constraint is not None:
         env_trans += constraint
-    env_init += _sys_init_from_ts(states, state_ids, aps, ignore_initial)
+    env_init += _sys_init_from_ts(
+        states, state_ids, aps, ignore_initial)
     env_trans += _env_trans_from_env_ts(
         states, state_ids, trans,
-        env_action_ids=env_action_ids, sys_action_ids=sys_action_ids)
-    tmp_init, tmp_trans = _ap_trans_from_ts(states, state_ids, aps)
+        env_action_ids=env_action_ids,
+        sys_action_ids=sys_action_ids)
+    tmp_init, tmp_trans = _ap_trans_from_ts(
+        states, state_ids, aps)
     env_init += tmp_init
     env_trans += tmp_trans
     return GRSpec(
-        sys_vars=sys_vars, env_vars=env_vars,
-        env_init=env_init, sys_init=sys_init,
-        env_safety=env_trans, sys_safety=sys_trans)
+        sys_vars=sys_vars,
+        env_vars=env_vars,
+        env_init=env_init,
+        sys_init=sys_init,
+        env_safety=env_trans,
+        sys_safety=sys_trans)
 
 
 def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
@@ -607,7 +642,10 @@ def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
         raise Exception(msg)
         init += ['False']
         return init
-    init += [_disj([state_ids[s] for s in states.initial])]
+    init += [
+        _disj(map(
+            state_ids.__getitem__,
+            states.initial))]
     return init
 
 
@@ -708,20 +746,30 @@ def _sys_trans_from_ts(
                             if k in previous}
             next_sys_act = {k: v for k, v in sys_actions.items()
                             if k not in previous}
-            postcond += [_conj_actions(prev_sys_act, sys_action_ids,
-                                       nxt=False)]
-            postcond += [_conj_actions(next_sys_act, sys_action_ids,
-                                       nxt=True)]
+            postcond += [
+                _conj_actions(
+                    prev_sys_act, sys_action_ids,
+                    nxt=False)]
+            postcond += [
+                _conj_actions(
+                    next_sys_act, sys_action_ids,
+                    nxt=True)]
             # if system FTS given
             # in case 'actions in label, then action_ids is a dict,
             # not a dict of dicts, because certainly this came
             # from an FTS, not an OpenFTS
             if 'actions' in previous:
-                postcond += [_conj_action(label, 'actions',
-                                          ids=action_ids, nxt=False)]
+                postcond += [
+                    _conj_action(
+                        label, 'actions',
+                        ids=action_ids,
+                        nxt=False)]
             else:
-                postcond += [_conj_action(label, 'actions',
-                                          ids=action_ids, nxt=True)]
+                postcond += [
+                    _conj_action(
+                        label, 'actions',
+                        ids=action_ids,
+                        nxt=True)]
             cur_str += [_conj(postcond)]
             msg = (
                 'guard to state: ' + str(to_state) +
@@ -816,12 +864,22 @@ def _env_trans_from_env_ts(
             to_state_id = state_ids[to_state]
             postcond = ['X' + _pstr(to_state_id)]
             env_actions = {k: v for k, v in label.items() if 'env' in k}
-            postcond += [_conj_actions(env_actions, env_action_ids, nxt=True)]
+            postcond += [
+                _conj_actions(
+                    env_actions,
+                    env_action_ids,
+                    nxt=True)]
             # remember: this is an environment FTS, so no next for sys
             sys_actions = {k: v for k, v in label.items() if 'sys' in k}
-            postcond += [_conj_actions(sys_actions, sys_action_ids)]
-            postcond += [_conj_action(label, 'actions', nxt=True,
-                                      ids=action_ids)]
+            postcond += [
+                _conj_actions(
+                    sys_actions,
+                    sys_action_ids)]
+            postcond += [
+                _conj_action(
+                    label, 'actions',
+                    nxt=True,
+                    ids=action_ids)]
             # todo: test this clause
             if not sys_actions:
                 found_free = True
@@ -875,13 +933,19 @@ def _ap_trans_from_ts(states, state_ids, aps):
 
 def _sprint_aps(label, aps):
     if 'ap' in label:
-        tmp0 = _conj_intersection(aps, label['ap'], parenth=False)
+        tmp0 = _conj_intersection(
+            aps, label['ap'],
+            parenth=False)
     else:
         tmp0 = ''
     if 'ap' in label:
-        tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
+        tmp1 = _conj_neg_diff(
+            aps, label['ap'],
+            parenth=False)
     else:
-        tmp1 = _conj_neg(aps, parenth=False)
+        tmp1 = _conj_neg(
+            aps,
+            parenth=False)
     if tmp0 and tmp1:
         tmp = tmp0 + ' && ' + tmp1
     else:
@@ -921,8 +985,12 @@ def build_dependent_var_table(fts, statevar):
           - the states "s1", "s2" are labeled with `'p'`
           - `loc` is the string variable used for the state of `fts`.
     """
-    state_ids, __ = iter2var(fts.states, variables=dict(), statevar=statevar,
-                             bool_states=False, must='xor')
+    state_ids, __ = iter2var(
+        fts.states,
+        variables=dict(),
+        statevar=statevar,
+        bool_states=False,
+        must='xor')
     ap2states = map_ap_to_states(fts)
     return {k: _disj(state_ids[x] for x in v)
             for k, v in ap2states.items()}
@@ -1016,7 +1084,9 @@ def synthesize_many(specs, ts=None, ignore_init=None,
             env_spec = env_to_spec(t, ignore, statevar)
             _copy_options_from_ts(env_spec, t, specs)
             specs |= env_spec
-    return _synthesize(specs, solver, rm_deadends=True)
+    return _synthesize(
+        specs, solver,
+        rm_deadends=True)
 
 
 def synthesize(
@@ -1151,7 +1221,9 @@ def _synthesize(specs, solver, rm_deadends):
             'Unknown solver: "{solver}". '
             'Available options are: {options}').format(
                 solver=solver, options=options))
-    return _trim_strategy(strategy, specs, rm_deadends=rm_deadends)
+    return _trim_strategy(
+        strategy, specs,
+        rm_deadends=rm_deadends)
 
 
 def _trim_strategy(strategy, specs, rm_deadends):
@@ -1227,9 +1299,11 @@ def _spec_plus_sys(
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
             statevar=statevar)
-        _copy_options_from_ts(sys_formula, sys, specs)
+        _copy_options_from_ts(
+            sys_formula, sys, specs)
         if specs.qinit == '\A \A':
-            sys_formula.env_init.extend(sys_formula.sys_init)
+            sys_formula.env_init.extend(
+                sys_formula.sys_init)
             sys_formula.sys_init = list()
         specs = specs | sys_formula
         logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
@@ -1244,7 +1318,8 @@ def _spec_plus_sys(
             env, ignore_env_init,
             statevar=statevar)
         if specs.qinit == '\A \A':
-            env_formula.env_init.extend(env_formula.sys_init)
+            env_formula.env_init.extend(
+                env_formula.sys_init)
             env_formula.sys_init = list()
         _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
@@ -1308,9 +1383,14 @@ def strategy2mealy(A, spec):
             d = A.nodes[v]['state']
             d = {k: v for k, v in d.items() if k in all_vars}
             d = _int2str(d, str_vars)
-            mach.transitions.add(u, v, attr_dict=None, check=False, **d)
+            mach.transitions.add(
+                u, v,
+                attr_dict=None,
+                check=False,
+                **d)
 
-            logger.info('node: {v}, state: {d}'.format(v=v, d=d))
+            logger.info(
+                'node: {v}, state: {d}'.format(v=v, d=d))
     # special initial state, for first reaction
     initial_state = 'Sinit'
     mach.states.add(initial_state)
@@ -1321,10 +1401,14 @@ def strategy2mealy(A, spec):
     keys = list(all_vars)
     if hasattr(A, 'initial_nodes'):
         _init_edges_using_initial_nodes(
-            A, mach, keys, all_vars, str_vars, initial_state)
+            A, mach, keys,
+            all_vars, str_vars,
+            initial_state)
     else:
         _init_edges_using_compile_init(
-            spec, A, mach, keys, all_vars, str_vars, initial_state)
+            spec, A, mach, keys,
+            all_vars, str_vars,
+            initial_state)
     n = len(A)
     m = len(mach)
     assert m == n + 1, (n, m)
@@ -1353,7 +1437,10 @@ def _init_edges_using_initial_nodes(
         init_valuations.add(vals)
         d = {k: v for k, v in d.items() if k in all_vars}
         d = _int2str(d, str_vars)
-        mach.transitions.add(initial_state, u, attr_dict=None, **d)
+        mach.transitions.add(
+            initial_state, u,
+            attr_dict=None,
+            **d)
 
 
 def _init_edges_using_compile_init(
@@ -1375,7 +1462,11 @@ def _init_edges_using_compile_init(
         if eval(isinit, tmp):
             var_values = {k: v for k, v in var_values.items() if k in all_vars}
             label = _int2str(var_values, str_vars)
-            mach.transitions.add(initial_state, u, attr_dict=None, check=False, **label)
+            mach.transitions.add(
+                initial_state, u,
+                attr_dict=None,
+                check=False,
+                **label)
             # remember variable values to avoid
             # spurious non-determinism wrt the machine's memory
             #
@@ -1387,9 +1478,13 @@ def _init_edges_using_compile_init(
             # non-uniqueness here would be equivalent to
             # multiple choices for initializing the hidden memory.
             init_valuations.add(vals)
-            logger.debug('found initial state: {u}'.format(u=u))
-        logger.debug('machine vertex: {u}, has var values: {v}'.format(
-                     u=u, v=var_values))
+            logger.debug(
+                'found initial state: {u}'.format(
+                    u=u))
+        logger.debug(
+            'machine vertex: {u}, has var values: {v}'.format(
+                u=u,
+                v=var_values))
 
 
 def _int2str(label, str_vars):

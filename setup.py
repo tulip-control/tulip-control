@@ -56,8 +56,10 @@ def git_version(version):
     # is it release of `version` ?
     try:
         tag = repo.git.describe(
-            match='v[0-9]*', exact_match=True,
-            tags=True, dirty=True)
+            match='v[0-9]*',
+            exact_match=True,
+            tags=True,
+            dirty=True)
     except git.GitCommandError:
         return '{v}.dev0+{sha}'.format(
             v=version, sha=sha)
@@ -73,16 +75,22 @@ def run_setup():
         tabmodule = tulip.spec.lexyacc.TABMODULE.split('.')[-1]
         outputdir = 'tulip/spec'
         parser = tulip.spec.lexyacc.Parser()
-        parser.build(tabmodule, outputdir=outputdir,
-                     write_tables=True,
-                     debug=True, debuglog=logger)
+        parser.build(
+            tabmodule,
+            outputdir=outputdir,
+            write_tables=True,
+            debug=True,
+            debuglog=logger)
         import tulip.interfaces.ltl2ba
         tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
         outputdir = 'tulip/interfaces'
         parser = tulip.interfaces.ltl2ba.Parser()
-        parser.build(tabmodule, outputdir=outputdir,
-                     write_tables=True,
-                     debug=True, debuglog=logger)
+        parser.build(
+            tabmodule,
+            outputdir=outputdir,
+            write_tables=True,
+            debug=True,
+            debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
         print('Failed to build PLY tables: {e}'.format(e=e))

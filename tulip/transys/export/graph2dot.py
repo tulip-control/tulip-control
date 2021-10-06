@@ -77,19 +77,22 @@ def _states2dot_str(
         # state annotation
         node_dot_label = _form_node_label(
             u, d, label_def,
-            label_format, wrap, tikz=tikz
-        )
+            label_format, wrap, tikz=tikz)
 
-        # node_dot_label = fill(str(state), width=wrap)
+        # node_dot_label = fill(
+        #     str(state),
+        #     width=wrap)
         rim_color = d.get('color', 'black')
         if tikz:
-            _state2tikz(graph, to_dot_graph, u,
-                        is_initial, is_accepting, rankdir,
-                        rim_color, d, node_dot_label)
+            _state2tikz(
+                graph, to_dot_graph, u,
+                is_initial, is_accepting, rankdir,
+                rim_color, d, node_dot_label)
         else:
-            _state2dot(graph, to_dot_graph, u,
-                       is_initial, is_accepting,
-                       rim_color, d, node_dot_label)
+            _state2dot(
+                graph, to_dot_graph, u,
+                is_initial, is_accepting,
+                rim_color, d, node_dot_label)
 
 
 def _state2dot(
@@ -107,21 +110,26 @@ def _state2dot(
     filled = '' if fc == 'none' else 'filled'
     if fc == 'gradient':
         # top/bottom colors not supported for dot
-        lc = d.get('left_color', d['top_color'])
-        rc = d.get('right_color', d['bottom_color'])
+        lc = d.get(
+            'left_color',
+            d['top_color'])
+        rc = d.get(
+            'right_color',
+            d['bottom_color'])
         if isinstance(lc, str):
             fillcolor = lc
         elif isinstance(lc, dict):
             fillcolor = list(lc.keys())[0]
         else:
-            raise TypeError('left_color must be str or dict.')
-
+            raise TypeError(
+                'left_color must be str or dict.')
         if isinstance(rc, str):
             fillcolor += ':' + rc
         elif isinstance(rc, dict):
             fillcolor += ':' + list(rc.keys())[0]
         else:
-            raise TypeError('right_color must be str or dict.')
+            raise TypeError(
+                'right_color must be str or dict.')
     else:
         fillcolor = _format_color(fc, 'dot')
     if corners and filled:
@@ -198,7 +206,8 @@ def _format_color(color, prog='tikz'):
     if isinstance(color, str):
         return color
     if not isinstance(color, dict):
-        raise Exception('color must be str or dict')
+        raise Exception(
+            'color must be str or dict')
     if prog == 'tikz':
         s = '!'.join([k + '!' + str(v) for k, v in color.items()])
     elif prog == 'dot':
@@ -206,12 +215,15 @@ def _format_color(color, prog='tikz'):
         try:
             import webcolors
             # mix them
-            result = np.array((0.0, 0.0, 0.0))
+            result = np.array(
+                (0.0, 0.0, 0.0))
             for c, w in color.items():
-                result += w / t * np.array(webcolors.name_to_rgb(c))
+                result += w / t * np.array(
+                    webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
-            logger.warning('failed to import webcolors')
+            logger.warning(
+                'failed to import webcolors')
             s = ':'.join([k + ';' + str(v / t) for k, v in color.items()])
     else:
         raise ValueError('Unknown program: ' + str(prog) + '. '
@@ -234,7 +246,11 @@ def _add_incoming_edge(
         g,
         state):
     phantom_node = 'phantominit' + str(state)
-    g.add_node(phantom_node, label='""', shape='none', width='0')
+    g.add_node(
+        phantom_node,
+        label='""',
+        shape='none',
+        width='0')
     g.add_edge(phantom_node, state)
 
 
@@ -251,7 +267,10 @@ def _form_node_label(state, state_data, label_def,
     if tikz:
         pattern = r'([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
-        state_str = re.sub(pattern, make_subscript, state_str)
+        state_str = re.sub(
+            pattern,
+            make_subscript,
+            state_str)
     # SVG requires breaking the math environment into
     # one math env per line. Just make 1st line math env
     # if latex:
@@ -273,19 +292,26 @@ def _form_node_label(state, state_data, label_def,
         # avoid turning strings to lists,
         # or non-iterables to lists
         if isinstance(label_value, str):
-            label_str = fill(label_value, width=width)
+            label_str = fill(
+                label_value,
+                width=width)
         elif isinstance(label_value, Iterable):
                 # and not str
             s = ', '.join([str(x) for x in label_value])
-            label_str = r'\\{' + fill(s, width=width) + r'\\}'
+            label_str = r'\\{' + fill(
+                s,
+                width=width) + r'\\}'
         else:
-            label_str = fill(str(label_value), width=width)
+            label_str = fill(
+                str(label_value),
+                width=width)
         pieces.append(type_name + sep_type_value + label_str)
     sep_label_sets = label_format['separator']
     node_dot_label += sep_label_sets.join(pieces)
     if tikz:
         # replace LF by latex newline
-        node_dot_label = node_dot_label.replace(r'\\n', r'\\\\ ')
+        node_dot_label = node_dot_label.replace(
+            r'\\n', r'\\\\ ')
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = (
             r'$\\begin{matrix} ' + node_dot_label +
@@ -325,9 +351,11 @@ def _transitions2dot_str(trans, to_dot_graph, tikz=False):
             label_format, label_mask, tikz
         )
         edge_color = edge_data.get('color', 'black')
-        to_dot_graph.add_edge(u, v, key=key,
-                                label=edge_dot_label,
-                                color=edge_color)
+        to_dot_graph.add_edge(
+            u, v,
+            key=key,
+            label=edge_dot_label,
+            color=edge_color)
 
 
 def _form_edge_label(edge_data, label_def,
@@ -383,11 +411,19 @@ def _graph2dot(
     @rtype: str
     """
     dummy_nx_graph = nx.MultiDiGraph()
-    _states2dot_str(graph, dummy_nx_graph, wrap=wrap, tikz=tikz,
-                    rankdir=rankdir)
-    _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
-    dot_graph = _graphics.networkx_to_graphviz(dummy_nx_graph)
-    _place_initial_states(graph, dot_graph, tikz)
+    _states2dot_str(
+        graph, dummy_nx_graph,
+        wrap=wrap,
+        tikz=tikz,
+        rankdir=rankdir)
+    _transitions2dot_str(
+        graph.transitions,
+        dummy_nx_graph,
+        tikz=tikz)
+    dot_graph = _graphics.networkx_to_graphviz(
+        dummy_nx_graph)
+    _place_initial_states(
+        graph, dot_graph, tikz)
     dot_graph.graph_attr['overlap'] = 'false'
     # dot_graph.graph_attr['size'] = '"0.25,1"'
     # dot_graph.graph_attr['ratio'] = '"compress"'
@@ -405,7 +441,10 @@ def graph2dot_str(graph, wrap=10, tikz=False):
     @param wrap: textwrap width
     @rtype: `str`
     """
-    dot_graph = _graph2dot(graph, wrap=wrap, tikz=tikz)
+    dot_graph = _graph2dot(
+        graph,
+        wrap=wrap,
+        tikz=tikz)
     return dot_graph.source
 
 
@@ -489,13 +528,15 @@ def plot_dot(
         # called by IPython ?
         try:
             cfg = get_ipython().config
-            logger.debug('Script called by IPython.')
+            logger.debug(
+                'Script called by IPython.')
             # Caution!!! : not ordinary dict,
             # but IPython.config.loader.Config
             #
             # qtconsole ?
             if cfg['IPKernelApp']:
-                logger.debug('Within IPython QtConsole.')
+                logger.debug(
+                    'Within IPython QtConsole.')
                 display(Image(data=png_str))
                 return True
         except:
@@ -509,10 +550,13 @@ def plot_dot(
         import matplotlib.pyplot as plt
         import matplotlib.image as mpimg
     except:
-        logger.debug('Matplotlib not installed.')
-        logger.warning('Neither IPython QtConsole nor Matplotlib available.')
+        logger.debug(
+            'Matplotlib not installed.')
+        logger.warning(
+            'Neither IPython QtConsole nor Matplotlib available.')
         return None
-    logger.debug('Matplotlib installed.')
+    logger.debug(
+        'Matplotlib installed.')
     if ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(111)
@@ -520,6 +564,8 @@ def plot_dot(
     sio.write(png_str)
     sio.seek(0)
     img = mpimg.imread(sio)
-    ax.imshow(img, aspect='equal')
+    ax.imshow(
+        img,
+        aspect='equal')
     plt.show(block=False)
     return ax

@@ -194,7 +194,8 @@ class AbstractSwitched:
                 axs.append(ax)
         # plot mode partitions
         for mode, ab in self.modes.items():
-            ax = ab.plot(show_ts, only_adjacent, color_seed)
+            ax = ab.plot(
+                show_ts, only_adjacent, color_seed)
             ax.set_title('Abstraction for mode: ' + str(mode))
             axs.append(ax)
         #if isinstance(self.ts, dict):
@@ -405,8 +406,8 @@ class AbstractPwa:
             then some transitions could be hidden.
         @param only_adjacent: `bool`
         """
-        ax = _plot_abstraction(self, show_ts, only_adjacent,
-                               color_seed)
+        ax = _plot_abstraction(
+            self, show_ts, only_adjacent, color_seed)
         return ax
 
     def verify_transitions(self):
@@ -420,8 +421,10 @@ class AbstractPwa:
                 k: v
                 for k, v in self.disc_params.items()
                 if k in params}
-            s0 = solve_feasible(from_region, to_region, sys,
-                                trans_set=trans_set, **disc_params)
+            s0 = solve_feasible(
+                from_region, to_region, sys,
+                trans_set=trans_set,
+                **disc_params)
             msg = str(i) + ' ---> ' + str(j)
             if not from_region <= s0:
                 logger.error('incorrect transition: ' + msg)
@@ -678,8 +681,8 @@ def _discretize_bi(
     IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
-    IJ = reachable_within(trans_length, IJ,
-                          part.adj.toarray())
+    IJ = reachable_within(
+        trans_length, IJ, part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -791,13 +794,16 @@ def _discretize_bi(
         #
         #     assert(False)
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \\cap Pre(sj), '
-                           'so discard intersection')
+            logger.warning(
+                '\t too small: si \\cap Pre(sj), '
+                'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning('\t discarded non-empty intersection: '
-                           'consider reducing min_cell_volume')
+            logger.warning(
+                '\t discarded non-empty intersection: '
+                'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
+            logger.warning(
+                '\t too small: si \\ Pre(sj), so not reached it')
         # We don't want our partitions to
         # be smaller than the disturbance set
         # Could be a problem since cheby
@@ -840,7 +846,10 @@ def _discretize_bi(
                 n_cells - num_new - 1,
                 -1)
             """Update transition matrix"""
-            transitions = np.pad(transitions, (0,num_new), 'constant')
+            transitions = np.pad(
+                transitions,
+                (0, num_new),
+                'constant')
             transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
                 #transitions[:, r] = transitions[:, i]
@@ -863,7 +872,10 @@ def _discretize_bi(
             adj[i, :] = np.zeros([n_cells -num_new])
             adj[:, i] = np.zeros([n_cells -num_new])
             adj[i, i] = 1
-            adj = np.pad(adj, (0, num_new), 'constant')
+            adj = np.pad(
+                adj,
+                (0, num_new),
+                'constant')
             for r in new_idx:
                 adj[i, r] = 1
                 adj[r, i] = 1
@@ -906,7 +918,10 @@ def _discretize_bi(
                         transitions[r, k] = 0
                         transitions[k, r] = 0
             """Update IJ matrix"""
-            IJ = np.pad(IJ, (0,num_new), 'constant')
+            IJ = np.pad(
+                IJ,
+                (0, num_new),
+                'constant')
             adj_k = reachable_within(trans_length, adj, adj)
             sym_adj_change(IJ, adj_k, transitions, i)
             for r in new_idx:
@@ -960,13 +975,19 @@ def _discretize_bi(
         # plot pair under reachability check
         ax2.clear()
         si_tmp.plot(ax=ax2, color='green')
-        sj_tmp.plot(ax2, color='red', hatch='o', alpha=0.5)
+        sj_tmp.plot(
+            ax2, color='red', hatch='o', alpha=0.5)
         plot_transition_arrow(si_tmp, sj_tmp, ax2)
-        S0.plot(ax2, color='none', hatch='/', alpha=0.3)
+        S0.plot(
+            ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         # plot partition
         ax1.clear()
-        plot_partition(tmp_part, transitions.T, ax=ax1, color_seed=23)
+        plot_partition(
+            tmp_part,
+            transitions.T,
+            ax=ax1,
+            color_seed=23)
         # plot dynamics
         ssys.plot(ax1, show_domain=False)
         # plot hatched continuous propositions
@@ -1161,8 +1182,8 @@ def _discretize_dual(
     IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
-    IJ = reachable_within(trans_length, IJ,
-                          part.adj.toarray())
+    IJ = reachable_within(
+        trans_length, IJ, part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -1250,13 +1271,17 @@ def _discretize_dual(
             # not accurate.
             # need to check polytope class
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \\cap Pre(sj), '
-                           'so discard intersection')
+            logger.warning(
+                '\t too small: si \\cap Pre(sj), '
+                'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning('\t discarded non-empty intersection: '
-                           'consider reducing min_cell_volume')
+            logger.warning(
+                '\t discarded non-empty intersection: '
+                'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
+            logger.warning(
+                '\t too small: si \\ Pre(sj), '
+                'so not reached it')
         # indicate if S0 has exists in sol
         check_isect = False
         # We don't want our partitions to be
@@ -1317,13 +1342,18 @@ def _discretize_dual(
                         transitions[new_idx, k] = 0
                         transitions[k, new_idx] = 0
                 """Update transition matrix"""
-                transitions = np.pad(transitions, (0,1), 'constant')
+                transitions = np.pad(
+                    transitions,
+                    (0, 1),
+                    'constant')
                 adj_k = reachable_within(trans_length, adj, adj)
                 # transitions `i` ---> `k` for `k` is
                 # neighbor of `new_idx` should be
                 # kept by `new_idx`
-                transitions[:, new_idx] = np.multiply(transitions[:, i],
-                           adj_k[:, i])
+                transitions[:, new_idx
+                    ] = np.multiply(
+                        transitions[:, i],
+                        adj_k[:, i])
                 # if j and new_idx are neighbor, then add new_idx ---> j
                 if adj_k[j, new_idx] != 0:
                     transitions[j, new_idx] = 1
@@ -1383,13 +1413,19 @@ def _discretize_dual(
         # plot pair under reachability check
         ax2.clear()
         si_tmp.plot(ax=ax2, color='green')
-        sj_tmp.plot(ax2, color='red', hatch='o', alpha=0.5)
+        sj_tmp.plot(
+            ax2, color='red', hatch='o', alpha=0.5)
         plot_transition_arrow(si_tmp, sj_tmp, ax2)
-        S0.plot(ax2, color='none', hatch='/', alpha=0.3)
+        S0.plot(
+            ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         # plot partition
         ax1.clear()
-        plot_partition(tmp_part, transitions.T, ax=ax1, color_seed=23)
+        plot_partition(
+            tmp_part,
+            transitions.T,
+            ax=ax1,
+            color_seed=23)
         # plot dynamics
         ssys.plot(ax1, show_domain=False)
         # plot hatched continuous propositions
@@ -1584,8 +1620,10 @@ def multiproc_get_transitions(
     global logger
     logger = mp.log_to_stderr()
     name = mp.current_process().name
-    print('Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
-    trans = get_transitions(absys, mode, ssys, **params)
+    print(
+        'Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
+    trans = get_transitions(
+        absys, mode, ssys, **params)
     q.put((mode, trans))
     print('Worker: ' + str(name) + 'finished.')
 
@@ -1639,12 +1677,12 @@ def multiproc_discretize_switched(
         mode, t = q.get()
         trans[mode] = t
     # merge the abstractions, creating a common TS
-    merge_abstractions(merged_abstr, trans,
-                       abstractions, modes, mode_nums)
-
+    merge_abstractions(
+        merged_abstr, trans,
+        abstractions, modes, mode_nums)
     if plot:
-        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
-
+        plot_mode_partitions(
+            merged_abstr, show_ts, only_adjacent)
     return merged_abstr
 
 def discretize_switched(
@@ -1704,12 +1742,12 @@ def discretize_switched(
         )
 
     # merge the abstractions, creating a common TS
-    merge_abstractions(merged_abstr, trans,
-                       abstractions, modes, mode_nums)
-
+    merge_abstractions(
+        merged_abstr, trans,
+        abstractions, modes, mode_nums)
     if plot:
-        plot_mode_partitions(merged_abstr, show_ts, only_adjacent)
-
+        plot_mode_partitions(
+            merged_abstr, show_ts, only_adjacent)
     return merged_abstr
 
 def plot_mode_partitions(swab, show_ts, only_adjacent):
@@ -1829,7 +1867,9 @@ def get_transitions(
         IJ = (IJ > 0).astype(int)
     # Initialize output
     n = len(part)
-    transitions = sp.lil_matrix((n, n), dtype=int)
+    transitions = sp.lil_matrix(
+        (n, n),
+        dtype=int)
     # Do the abstraction
     n_checked = 0
     n_found = 0
@@ -1910,8 +1950,8 @@ def merge_partitions(abstractions):
                 raise Exception('merge: partitions have different domains')
             # check equality of original PPP partitions
             if ab1.orig_ppp == ab2.orig_ppp:
-                logger.info('original partitions happen to be equal')
-
+                logger.info(
+                    'original partitions happen to be equal')
     init_mode = list(abstractions.keys())[0]
     all_modes = set(abstractions)
     remaining_modes = all_modes.difference(set([init_mode]))
@@ -2024,8 +2064,9 @@ def merge_partition_pair(
     ap_labeling = dict()
     for i in range(len(old_regions)):
         for j in range(len(part2)):
-            isect = pc.intersect(old_regions[i],
-                                 part2[j])
+            isect = pc.intersect(
+                old_regions[i],
+                part2[j])
             rc, xc = pc.cheby_ball(isect)
             # no intersection ?
             if rc < 1e-5:

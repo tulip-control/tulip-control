@@ -77,9 +77,12 @@ def labeled_digraph2d3(
     @param graph: labeled graph to export
     @type graph: `LabeledDiGraph`
     """
-    file_path = inspect.getfile(inspect.currentframe())
-    dir_path = os.path.dirname(os.path.abspath(file_path))
-    d3_file_name = os.path.join(dir_path, 'd3.v3.min.js')
+    file_path = inspect.getfile(
+        inspect.currentframe())
+    dir_path = os.path.dirname(
+        os.path.abspath(file_path))
+    d3_file_name = os.path.join(
+        dir_path, 'd3.v3.min.js')
     with open(d3_file_name) as d3_file:
         d3_js = d3_file.read()
     s = """
@@ -174,7 +177,9 @@ def labeled_digraph2d3(
             hasattr(graph, '_transition_dot_label_format')):
         transition_label_def = graph._transition_label_def
         transition_label_format = graph._transition_dot_label_format
-        s += _format_label(transition_label_def, transition_label_format)
+        s += _format_label(
+            transition_label_def,
+            transition_label_format)
     else:
         s += '" ";'
     s += """});

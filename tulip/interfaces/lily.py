@@ -99,9 +99,9 @@ def synthesize(
         f = translate(formula, 'wring')
     else:
         T = parse(str(formula))
-        f = translate_ast(T, 'wring').flatten(env_vars=env_vars,
-                                              sys_vars=sys_vars)
-
+        f = translate_ast(T, 'wring').flatten(
+            env_vars=env_vars,
+            sys_vars=sys_vars)
     # dump partition file
     s = '.inputs {inp}\n.outputs {out}'.format(
         inp=' '.join(env_vars),
@@ -111,9 +111,11 @@ def synthesize(
         fid.write(s)
     # call lily
     try:
-        p = subprocess.Popen([LILY, '-f', f, '-syn', IO_PARTITION_FILE],
-                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                             universal_newlines=True)
+        p = subprocess.Popen(
+            [LILY, '-f', f, '-syn', IO_PARTITION_FILE],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
         out = p.stdout.read()
     except OSError as e:
         if e.errno == errno.ENOENT:

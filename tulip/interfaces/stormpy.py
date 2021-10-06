@@ -82,11 +82,13 @@ def get_action_map(stormpy_model, tulip_transys):
     """
     action_map = {}
     for from_state_stormpy in stormpy_model.states:
-        from_state_tulip = to_tulip_state(from_state_stormpy, tulip_transys)
+        from_state_tulip = to_tulip_state(
+            from_state_stormpy, tulip_transys)
         for stormpy_action in from_state_stormpy.actions:
             possible_actions = action_map.get(str(stormpy_action), None)
             if possible_actions is None:
-                action_map[str(stormpy_action)] = list(tulip_transys.actions)
+                action_map[str(stormpy_action)] = list(
+                    tulip_transys.actions)
                 possible_actions = action_map[str(stormpy_action)]
             _update_possible_actions_with_transitions(
                 possible_actions,
@@ -115,8 +117,8 @@ def to_tulip_action(
     matches that of `stormpy_action`.
     """
     if action_map is None:
-        action_map = get_action_map(stormpy_model, tulip_transys)
-
+        action_map = get_action_map(
+            stormpy_model, tulip_transys)
     possible_tulip_action = action_map[str(stormpy_action)]
     if len(possible_tulip_action) == 0:
         raise ValueError(
@@ -138,7 +140,8 @@ def to_tulip_labels(stormpy_state, tulip_transys):
         the set of atomicic propositions
         of `stormpy_state` in `tulip_transys`
     """
-    return tulip_transys.atomic_propositions.intersection(stormpy_state.labels)
+    return tulip_transys.atomic_propositions.intersection(
+        stormpy_state.labels)
 
 
 def to_tulip_state(stormpy_state, tulip_transys):
@@ -280,7 +283,8 @@ def to_prism_file(ts, path):
         str_list = [
             get_prob_str(transition[0])
             + ' : ('
-            + get_state_str(state_list.index(transition[1]), True)
+            + get_state_str(
+                state_list.index(transition[1]), True)
             + ')'
             for transition in transitions
         ]
@@ -315,7 +319,8 @@ def to_prism_file(ts, path):
         f.write('\n')
         # Transitions
         for idx, state in enumerate(state_list):
-            transition_dict = get_transition_dict(ts.transitions.find(state))
+            transition_dict = get_transition_dict(
+                ts.transitions.find(state))
             for action, transitions in transition_dict.items():
                 action_str = ''
                 if type(ts) == MDP:
@@ -390,7 +395,8 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
     assert stormpy_result.has_scheduler
     stormpy_policy = stormpy_result.scheduler
     assert stormpy_policy is not None
-    tulip_policy = FunctionOnLabeledState("state", MDP.action_label)
+    tulip_policy = FunctionOnLabeledState(
+        'state', MDP.action_label)
     action_map = get_action_map(stormpy_model, tulip_transys)
     for state in stormpy_model.states:
         tulip_state = to_tulip_state(state, tulip_transys)
@@ -398,7 +404,9 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
         action = choice.get_deterministic_choice()
         tulip_policy.add(
             tulip_state,
-            to_tulip_action(action, stormpy_model, tulip_transys, action_map),
+            to_tulip_action(
+                action, stormpy_model,
+                tulip_transys, action_map),
             to_tulip_labels(state, tulip_transys),
         )
 
@@ -443,7 +451,8 @@ def _update_possible_actions_with_transitions(
         ):
             if abs(tulip_transition[2][MC.probability_label] - probability) > prob_tol:
                 try:
-                    idx = possible_actions.index(tulip_transition[2][MDP.action_label])
+                    idx = possible_actions.index(
+                        tulip_transition[2][MDP.action_label])
                     possible_actions.pop(idx)
                 except ValueError:
                     pass

@@ -106,7 +106,9 @@ def _add_transition(
                 from_prod_state, to_prod_state, spec, to_ap)
             cost.append(trans_ks_cost)
             fa.transitions.add(
-                from_prod_state, to_prod_state, {"cost": VectorCost(cost)}
+                from_prod_state,
+                to_prod_state,
+                {"cost": VectorCost(cost)}
             )
 
 
@@ -186,7 +188,10 @@ def solve(ks, goal_label, spec):
     accepting_goal_states.add_from(
         set(product(goal_states, spec.get_states())))
     (cost, product_path) = dijkstra_multiple_sources_multiple_targets(
-        wpa, wpa.states.initial, accepting_goal_states, cost_key="cost"
+        wpa,
+        wpa.states.initial,
+        accepting_goal_states,
+        cost_key="cost"
     )
     state_path = [state[0] for state in product_path if state[0] != null_state]
     return (cost, state_path, product_path, wpa)

@@ -133,7 +133,9 @@ def newax(
             curax = fig.add_subplot(nv, nh, i + 1)
             ax.append(curax)
         else:
-            curax = fig.add_subplot(nv, nh, i + 1, projection='3d')
+            curax = fig.add_subplot(
+                nv, nh, i + 1,
+                projection='3d')
             ax.append(curax)
         if curdim > 3:
             warn('ndim > 3, but plot limited to 3.')
@@ -176,7 +178,9 @@ def dom2vec(domain, resolution):
     """
     domain = _grouper(2, domain)
     lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
-    axis_grids = map(lambda_linspace, domain, resolution)
+    axis_grids = map(
+        lambda_linspace,
+        domain, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(map(np.ravel, pnt_coor))
     return q
@@ -228,18 +232,23 @@ def quiver(x, v, ax=None, **kwargs):
     if dim < 2:
         raise Exception('ndim < 2')
     elif dim < 3:
-        h = ax.quiver(x[0, :], x[1, :],
-                      v[0, :], v[1, :], **kwargs)
+        h = ax.quiver(
+            x[0, :], x[1, :],
+            v[0, :], v[1, :],
+            **kwargs)
     else:
         raise NotImplementedError
         from mayavi.mlab import quiver3d
         if ax:
             print('axes arg ignored, mayavi used')
-        h = quiver3d(x[0, :], x[1, :], x[2, :],
-                     v[0, :], v[1, :], v[2, :], **kwargs)
+        h = quiver3d(
+            x[0, :], x[1, :], x[2, :],
+            v[0, :], v[1, :], v[2, :],
+            **kwargs)
     if dim > 3:
-        warn('quiver:ndim #dimensions > 3,' +
-             'plotting only 3D component.')
+        warn(
+            'quiver:ndim #dimensions > 3,' +
+            'plotting only 3D component.')
     return h
 
 

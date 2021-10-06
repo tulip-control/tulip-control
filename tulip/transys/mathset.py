@@ -249,7 +249,8 @@ class MathSet:
                 'For now comparison only to another MathSet.\n'
                 'Got:\n\t' + str(other) + '\n of type: ' +
                 str(type(other)) + ', instead.')
-        same_lists = compare_lists(self._list, other._list)
+        same_lists = compare_lists(
+            self._list, other._list)
         return (self._set == other._set) and same_lists
 
     def __contains__(self, item):
@@ -257,7 +258,8 @@ class MathSet:
             try:
                 return item in self._set
             except:
-                logger.error('UnHashable items within Hashable.')
+                logger.error(
+                    'UnHashable items within Hashable.')
         return item in self._list
 
     def __iter__(self):
@@ -268,10 +270,16 @@ class MathSet:
         return len(self._set) + len(self._list)
 
     def _filter_hashables(self, iterable):
-        return filter(lambda x: isinstance(x, Hashable), iterable)
+        return filter(
+            lambda x:
+                isinstance(x, Hashable),
+            iterable)
 
     def _filter_unhashables(self, iterable):
-        return list(filter(lambda x: not isinstance(x, Hashable), iterable))
+        return list(filter(
+            lambda x:
+                not isinstance(x, Hashable),
+            iterable))
 
     def _delete_all(self):
         self._set = set()
@@ -302,11 +310,13 @@ class MathSet:
                 self._set.add(item)
                 return
             except TypeError:
-                logger.error('UnHashable items within Hashable.')
+                logger.error(
+                    'UnHashable items within Hashable.')
         if item not in self._list:
             self._list.append(item)
         else:
-            logger.warning('item already in MathSet.')
+            logger.warning(
+                'item already in MathSet.')
 
     def add_from(self, iterable):
         """Add multiple elements to mathematical set.
@@ -766,7 +776,8 @@ class PowerSet:
 
     def __eq__(self, other):
         if not isinstance(other, PowerSet):
-            raise TypeError('Can only compare to another PowerSet.')
+            raise TypeError(
+                'Can only compare to another PowerSet.')
 
         return other.math_set == self.math_set
 

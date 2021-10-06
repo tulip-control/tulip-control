@@ -73,11 +73,15 @@ class VectorCost:
         assert len(self) == len(obj)
         return obj
 
-    def __add__(self, obj):
+    def __add__(
+            self,
+            obj):
         obj = self._convert(obj)
         return VectorCost([self[i] + obj[i] for i in range(len(self))])
 
-    def __radd__(self, obj):
+    def __radd__(
+            self,
+            obj):
         return self.__add__(obj)
 
     def __eq__(self, obj):

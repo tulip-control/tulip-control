@@ -67,7 +67,8 @@ def label_is_desired(attr_dict, desired_dict):
     if attr_dict == desired_dict:
         return True
     # different keys ?
-    mismatched_keys = set(attr_dict).symmetric_difference(desired_dict)
+    mismatched_keys = set(attr_dict).symmetric_difference(
+        desired_dict)
     if mismatched_keys:
         return False
     # any labels have symbolic semantics ?
@@ -173,14 +174,18 @@ class States:
 
         which wraps `networkx.MultiDiGraph.add_node`.
         """
-        self.graph.add_node(new_state, attr_dict, check, **attr)
+        self.graph.add_node(
+            new_state, attr_dict, check,
+            **attr)
 
     def add_from(self, new_states, check=True, **attr):
         """Wraps `LabeledDiGraph.add_nodes_from`,
 
         which wraps `networkx.MultiDiGraph.add_nodes_from`.
         """
-        self.graph.add_nodes_from(new_states, check, **attr)
+        self.graph.add_nodes_from(
+            new_states, check,
+            **attr)
 
     def remove(self, state):
         """Remove `state` from states (including initial).
@@ -437,7 +442,9 @@ class Transitions:
         if from_state not in self.graph.states:
             raise Exception('from_state \notin graph')
 
-        same_labeled = self.find([from_state], with_attr_dict=sublabels)
+        same_labeled = self.find(
+            [from_state],
+            with_attr_dict=sublabels)
 
         if same_labeled:
             msg = (
@@ -453,16 +460,22 @@ class Transitions:
         which wraps `networkx.MultiDiGraph.add_edge`.
         """
         # self._breaks_determinism(from_state, labels)
-        self.graph.add_edge(from_state, to_state,
-                            attr_dict=attr_dict, check=check, **attr)
+        self.graph.add_edge(
+            from_state, to_state,
+            attr_dict=attr_dict,
+            check=check,
+            **attr)
 
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
         """Wrapper of `LabeledDiGraph.add_edges_from`,
 
         which wraps `networkx.MultiDiGraph.add_edges_from`.
         """
-        self.graph.add_edges_from(transitions, attr_dict=attr_dict,
-                                  check=check, **attr)
+        self.graph.add_edges_from(
+            transitions,
+            attr_dict=attr_dict,
+            check=check,
+            **attr)
 
     def add_comb(self, from_states, to_states, attr_dict=None,
                  check=True, **attr):
@@ -472,8 +485,11 @@ class Transitions:
         """
         for u in from_states:
             for v in to_states:
-                self.graph.add_edge(u, v, attr_dict=attr_dict,
-                                    check=check, **attr)
+                self.graph.add_edge(
+                    u, v,
+                    attr_dict=attr_dict,
+                    check=check,
+                    **attr)
 
     def remove(self, from_state, to_state, attr_dict=None, **attr):
         """Remove single transition.
@@ -486,7 +502,9 @@ class Transitions:
 
         Wraps `LabeledDiGraph.remove_labeled_edge`.
         """
-        self.graph.remove_labeled_edge(from_state, to_state, attr_dict, **attr)
+        self.graph.remove_labeled_edge(
+            from_state, to_state, attr_dict,
+            **attr)
 
     def remove_from(self, transitions):
         """Remove list of transitions.
@@ -496,7 +514,8 @@ class Transitions:
         - 2-tuple: `(u, v)`, or
         - 3-tuple: `(u, v, data)`
         """
-        self.graph.remove_labeled_edges_from(transitions)
+        self.graph.remove_labeled_edges_from(
+            transitions)
 
     def add_adj(
             self, adj, adj2states, attr_dict=None,
@@ -531,7 +550,8 @@ class Transitions:
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
-            raise Exception('Adjacency matrix must be square.')
+            raise Exception(
+                'Adjacency matrix must be square.')
         # check states exist, before adding any transitions
         for state in adj2states:
             if state not in self.graph:
@@ -545,7 +565,9 @@ class Transitions:
         for i, j in nx_adj.edges():
             si = adj2states[i]
             sj = adj2states[j]
-            self.add(si, sj, attr_dict, check, **attr)
+            self.add(
+                si, sj, attr_dict, check,
+                **attr)
 
     def find(self, from_states=None, to_states=None,
              with_attr_dict=None, typed_only=False, **with_attr):
@@ -610,9 +632,12 @@ class Transitions:
         try:
             with_attr_dict.update(with_attr)
         except:
-            raise TypeError('with_attr_dict must be a dict')
+            raise TypeError(
+                'with_attr_dict must be a dict')
         found_transitions = []
-        u_v_edges = self.graph.edges(nbunch=from_states, data=True)
+        u_v_edges = self.graph.edges(
+            nbunch=from_states,
+            data=True)
         if to_states is not None:
             u_v_edges = [(u, v, d)
                          for u, v, d in u_v_edges
@@ -620,17 +645,23 @@ class Transitions:
         for u, v, attr_dict in u_v_edges:
             ok = True
             if not with_attr_dict:
-                logger.debug('Any label is allowed.')
+                logger.debug(
+                    'Any label is allowed.')
             elif not attr_dict:
-                logger.debug('No labels defined.')
+                logger.debug(
+                    'No labels defined.')
             else:
-                logger.debug('Checking guard.')
+                logger.debug(
+                    'Checking guard.')
                 typed_attr = TypedDict()
-                typed_attr.set_types(self.graph._edge_label_types)
+                typed_attr.set_types(
+                    self.graph._edge_label_types)
                 typed_attr.update(attr_dict)
-                ok = label_is_desired(typed_attr, with_attr_dict)
+                ok = label_is_desired(
+                    typed_attr, with_attr_dict)
             if ok:
-                logger.debug('Transition label matched desired label.')
+                logger.debug(
+                    'Transition label matched desired label.')
                 transition = (u, v, dict(attr_dict))
                 found_transitions.append(transition)
         return found_transitions
@@ -810,8 +841,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
             node_label_types=None,
             edge_label_types=None,
             deterministic=False):
-        node_labeling, node_defaults = self._init_labeling(node_label_types)
-        edge_labeling, edge_defaults = self._init_labeling(edge_label_types)
+        node_labeling, node_defaults = self._init_labeling(
+            node_label_types)
+        edge_labeling, edge_defaults = self._init_labeling(
+            edge_label_types)
 
         self._state_label_def = node_labeling
         self._node_label_defaults = node_defaults
@@ -828,7 +861,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.states = States(self)
 
         # todo: handle accepting states separately
-        self.transitions = Transitions(self, deterministic)
+        self.transitions = Transitions(
+            self, deterministic)
 
         # export properties
         self.dot_node_shape = dict(
@@ -862,7 +896,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         labeling = dict()
         defaults = dict()
         if label_types is None:
-            logger.debug('no label types passed')
+            logger.debug(
+                'no label types passed')
             return labeling, defaults
         if not label_types:
             logger.warning('empty label types: %s' % str(label_types))
@@ -943,17 +978,23 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param check: if True and untyped keys are passed,
             then raise `AttributeError`.
         """
-        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        attr_dict = self._update_attr_dict_with_attr(
+            attr_dict, attr)
         # define typed dict
         typed_attr = TypedDict()
         typed_attr.set_types(self._node_label_types)
-        typed_attr.update(copy.deepcopy(self._node_label_defaults))
+        typed_attr.update(
+            copy.deepcopy(
+                self._node_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        self._check_for_untyped_keys(typed_attr,
-                                     self._node_label_types,
-                                     check)
-        nx.MultiDiGraph.add_node(self, n, **typed_attr)
+        self._check_for_untyped_keys(
+            typed_attr,
+            self._node_label_types,
+            check)
+        nx.MultiDiGraph.add_node(
+            self, n,
+            **typed_attr)
 
     def add_nodes_from(self, nodes, check=True, **attr):
         """Create or label multiple nodes.
@@ -970,7 +1011,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 node, ndict = n
                 attr_dict = attr.copy()
                 attr_dict.update(ndict)
-            self.add_node(node, attr_dict=attr_dict, check=check)
+            self.add_node(
+                node,
+                attr_dict=attr_dict,
+                check=check)
 
     def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
         """Use a `TypedDict` as attribute dict.
@@ -1011,15 +1055,21 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if u not in self._succ:
             raise ValueError('Graph does not have node u: ' + str(u))
         if v not in self._succ:
-            raise ValueError('Graph does not have node v: ' + str(v))
-        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+            raise ValueError(
+                'Graph does not have node v: ' + str(v))
+        attr_dict = self._update_attr_dict_with_attr(
+            attr_dict, attr)
         # define typed dict
         typed_attr = TypedDict()
         typed_attr.set_types(self._edge_label_types)
-        typed_attr.update(copy.deepcopy(self._edge_label_defaults))
+        typed_attr.update(
+            copy.deepcopy(
+                self._edge_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        existing_u_v = self.get_edge_data(u, v, default=dict())
+        existing_u_v = self.get_edge_data(
+            u, v,
+            default=dict())
         if dict() in existing_u_v.values():
             msg = (
                 'Unlabeled transition: '
@@ -1039,9 +1089,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
             logger.warning(msg)
             return
         # self._breaks_determinism(from_state, labels)
-        self._check_for_untyped_keys(typed_attr,
-                                     self._edge_label_types,
-                                     check)
+        self._check_for_untyped_keys(
+            typed_attr,
+            self._edge_label_types,
+            check)
         # the only change from nx in this clause is using TypedDict
         logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
         if key is None:
@@ -1050,10 +1101,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
             keydict = self._adj[u][v]
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            nx.MultiDiGraph.add_edge(self, u, v, key, **datadict)
+            nx.MultiDiGraph.add_edge(
+                self, u, v, key,
+                **datadict)
         else:
             # selfloops work this way without special treatment
-            nx.MultiDiGraph.add_edge(self, u, v, **typed_attr)
+            nx.MultiDiGraph.add_edge(
+                self, u, v,
+                **typed_attr)
 
     def add_edges_from(self, labeled_ebunch, attr_dict=None,
                        check=True, **attr):
@@ -1072,7 +1127,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
           See also `remove_labeled_edges_from`.
         """
-        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        attr_dict = self._update_attr_dict_with_attr(
+            attr_dict, attr)
         # process ebunch
         for e in labeled_ebunch:
             datadict = dict(attr_dict)
@@ -1091,7 +1147,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 raise ValueError(
                     'Edge tuple %s must be a 2-, 3-, or 4-tuple .' % (e,))
             datadict.update(dd)
-            self.add_edge(u, v, key=key, attr_dict=datadict, check=check)
+            self.add_edge(
+                u, v,
+                key=key,
+                attr_dict=datadict,
+                check=check)
 
     def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
         """Remove single labeled edge.
@@ -1105,11 +1165,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
             return
         if v not in self[u]:
             return
-        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        attr_dict = self._update_attr_dict_with_attr(
+            attr_dict, attr)
         rm_keys = {key for key, data in self[u][v].items()
                    if data == attr_dict}
         for key in rm_keys:
-            self.remove_edge(u, v, key=key)
+            self.remove_edge(
+                u, v,
+                key=key)
 
     def remove_labeled_edges_from(self, labeled_ebunch,
                                   attr_dict=None, **attr):
@@ -1137,7 +1200,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
               between `u` and `v` annotated with
               that `attr_dict` are removed.
         """
-        attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
+        attr_dict = self._update_attr_dict_with_attr(
+            attr_dict, attr)
         for e in labeled_ebunch:
             datadict = dict(attr_dict)
             ne = len(e)
@@ -1149,7 +1213,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
             else:
                 raise ValueError(
                     'Edge tuple %s must be a 2- or 3-tuple .' % (e,))
-            self.remove_labeled_edge(u, v, attr_dict=datadict)
+            self.remove_labeled_edge(
+                u, v,
+                attr_dict=datadict)
 
     def has_deadends(self):
         """Return False if all nodes have outgoing edges.
@@ -1182,7 +1248,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def dot_str(self, wrap=10, **kwargs):
         """Return dot string."""
         from tulip.transys.export import graph2dot
-        return graph2dot.graph2dot_str(self, wrap, **kwargs)
+        return graph2dot.graph2dot_str(
+            self, wrap,
+            **kwargs)
 
     def save(self, filename=None, fileformat=None,
              rankdir='LR', prog=None,
@@ -1276,8 +1344,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         from tulip.transys.export import graph2dot
-        graph2dot.save_dot(self, filename, fileformat, rankdir,
-                           prog, wrap, tikz=tikz)
+        graph2dot.save_dot(
+            self, filename,
+            fileformat, rankdir,
+            prog, wrap,
+            tikz=tikz)
         return True
 
     def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
@@ -1308,7 +1379,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         from tulip.transys.export import graph2dot
-        return graph2dot.plot_dot(self, prog, rankdir, wrap, ax=ax)
+        return graph2dot.plot_dot(
+            self, prog, rankdir, wrap, ax=ax)
 
 
 def str2singleton(ap_label):

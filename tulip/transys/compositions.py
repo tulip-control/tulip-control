@@ -128,7 +128,8 @@ def synchronous_parallel(models, transition_attr_operations={}):
     for model in models:
         prod_states.append(set(model.states))
         prod_initials.append(model.states.initial)
-        ts.atomic_propositions.add_from(model.atomic_propositions)
+        ts.atomic_propositions.add_from(
+            model.atomic_propositions)
     #
     # Compute the state of ts: S = S_1 \times ... \times S_n.
     # Also, compute the label at each state (s_1, ..., s_n).
@@ -198,7 +199,8 @@ def apply_policy(model, policy):
     result.states.initial.add_from(model.states.initial)
     result.atomic_propositions.add_from(model.atomic_propositions)
     for state in model.states:
-        result.states[state]["ap"] = copy.deepcopy(model.states[state]["ap"])
+        result.states[state]["ap"] = copy.deepcopy(
+            model.states[state]["ap"])
         action = policy[state]
         for transition in model.transitions.find(state):
             if transition[2][MDP.action_label] != action:
@@ -206,7 +208,9 @@ def apply_policy(model, policy):
             transition_attr = copy.deepcopy(transition[2])
             del transition_attr[MDP.action_label]
             result.transitions.add(
-                transition[0], transition[1], transition_attr)
+                transition[0],
+                transition[1],
+                transition_attr)
     return result
 
 

@@ -59,7 +59,9 @@ def synthesize_enumerated_streett(spec):
         return None
     gr1.make_streett_transducer(z, yij, xijk, aut)
     t2 = time.time()
-    g = enum.action_to_steps(aut, 'env', 'impl', qinit=aut.qinit)
+    g = enum.action_to_steps(
+        aut, 'env', 'impl',
+        qinit=aut.qinit)
     h = _strategy_to_state_annotated(g, aut)
     del z, yij, xijk
     t3 = time.time()

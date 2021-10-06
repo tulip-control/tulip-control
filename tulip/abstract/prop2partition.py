@@ -123,7 +123,9 @@ def prop2part(state_space, cont_props_dict):
                 dum_prop = prop_now.copy()
                 # is dummy a Polytope ?
                 if len(dummy) == 0:
-                    regions[-1] = pc.Region([pc.reduce(dummy)], dum_prop)
+                    regions[-1] = pc.Region(
+                        [pc.reduce(dummy)],
+                        dum_prop)
                 else:
                     # dummy is a Region
                     dummy.props = dum_prop.copy()
@@ -163,10 +165,10 @@ def part2convex(ppp):
     )
     new2old = []
     for i in range(len(ppp.regions)):
-        simplified_reg = pc.union(ppp.regions[i],
-                                  ppp.regions[i],
-                                  check_convex=True)
-
+        simplified_reg = pc.union(
+            ppp.regions[i],
+            ppp.regions[i],
+            check_convex=True)
         for j in range(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg[j]],
@@ -359,7 +361,8 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         if j > 0:
             if j == 1:
                 re_list = list_grid[j - 1]
-                re_list = product_interval(re_list, list_grid[j])
+                re_list = product_interval(
+                    re_list, list_grid[j])
             else:
                 re_list = product_interval(
                     re_list, list_grid[j])
@@ -389,7 +392,9 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 isect.props = ppp.regions[j].props.copy()
                 new_list.append(isect)
                 parent.append(j)
-    adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
+    adj = sp.lil_matrix(
+        (len(new_list), len(new_list)),
+        dtype=np.int8)
     for i in range(len(new_list)):
         adj[i, i] = 1
         for j in range(i + 1, len(new_list)):
@@ -587,7 +592,8 @@ class PropPreservingPartition(pc.MetricPartition):
             color_seed=None):
         """For details see `polytope.plot.plot_partition`."""
         return plot_partition(
-            self, trans, ppp2trans, only_adjacent,
+            self, trans,
+            ppp2trans, only_adjacent,
             ax, plot_numbers, color_seed)
 
     def plot_props(self, ax=None, text_color='yellow'):
@@ -604,8 +610,13 @@ class PropPreservingPartition(pc.MetricPartition):
         ax.set_ylim(l[1,0], u[1,0])
         for prop, poly in self.prop_regions.items():
             isect_poly = poly.intersect(self.domain)
-            isect_poly.plot(ax, color='none', hatch='/')
-            isect_poly.text(prop, ax, color=text_color)
+            isect_poly.plot(
+                ax,
+                color='none',
+                hatch='/')
+            isect_poly.text(
+                prop, ax,
+                color=text_color)
         return ax
 
 

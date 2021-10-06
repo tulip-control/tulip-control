@@ -122,13 +122,15 @@ class GridWorld:
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
         if len(key) != len(self.W.shape):
-            raise ValueError("malformed gridworld key.")
+            raise ValueError(
+                "malformed gridworld key.")
         if (
                 key[0] < -self.W.shape[0] or
                 key[1] < -self.W.shape[1] or
                 key[0] >= self.W.shape[0] or
                 key[1] >= self.W.shape[1]):
-            raise ValueError("gridworld key is out of bounds.")
+            raise ValueError(
+                "gridworld key is out of bounds.")
         if key[0] < 0:
             key = (self.W.shape[0] + key[0], key[1])
         if key[1] < 0:
@@ -158,7 +160,9 @@ class GridWorld:
             return out
 
     def __copy__(self):
-        return GridWorld(self.dumps(), prefix=self.prefix)
+        return GridWorld(
+            self.dumps(),
+            prefix=self.prefix)
 
     def copy(self):
         """Deep-copy GridWorld instance.
@@ -182,13 +186,15 @@ class GridWorld:
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         if len(key) != len(self.W.shape):
-            raise ValueError("malformed gridworld key.")
+            raise ValueError(
+                "malformed gridworld key.")
         if (
                 key[0] < -self.W.shape[0] or
                 key[1] < -self.W.shape[1] or
                 key[0] >= self.W.shape[0] or
                 key[1] >= self.W.shape[1]):
-            raise ValueError("gridworld key is out of bounds.")
+            raise ValueError(
+                "gridworld key is out of bounds.")
         if key[0] < 0:
             key = (self.W.shape[0] + key[0], key[1])
         if key[1] < 0:
@@ -216,7 +222,8 @@ class GridWorld:
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
         if len(coord) != len(self.W.shape):
-            raise ValueError("malformed gridworld coord.")
+            raise ValueError(
+                "malformed gridworld coord.")
         if extend and (coord[0] < 0 or coord[1] < 0
                        or coord[0] > self.W.shape[0] - 1
                        or coord[1] > self.W.shape[1] - 1):
@@ -229,13 +236,15 @@ class GridWorld:
     def mark_occupied(self, coord):
         """Mark cell at coord as statically (permanently) occupied."""
         if self.W is None:
-            raise ValueError("Gridworld is empty; no cells exist.")
+            raise ValueError(
+                "Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 1
 
     def mark_empty(self, coord):
         """Mark cell at coord as empty."""
         if self.W is None:
-            raise ValueError("Gridworld is empty; no cells exist.")
+            raise ValueError(
+                "Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 0
 
     def is_reachable(self, start, stop):
@@ -253,7 +262,8 @@ class GridWorld:
             raise ValueError("Gridworld is empty; no names available.")
 
         if len(start) != len(self.W.shape):
-            raise ValueError("malformed gridworld start coordinate.")
+            raise ValueError(
+                "malformed gridworld start coordinate.")
         if (
                 start[0] < -self.W.shape[0] or
                 start[1] < -self.W.shape[1] or
@@ -266,13 +276,15 @@ class GridWorld:
             start = (start[0], self.W.shape[1] + start[1])
 
         if len(stop) != len(self.W.shape):
-            raise ValueError("malformed gridworld stop coordinate.")
+            raise ValueError(
+                "malformed gridworld stop coordinate.")
         if (
                 stop[0] < -self.W.shape[0] or
                 stop[1] < -self.W.shape[1] or
                 stop[0] >= self.W.shape[0] or
                 stop[1] >= self.W.shape[1]):
-            raise ValueError("gridworld stop coordinate is out of bounds.")
+            raise ValueError(
+                "gridworld stop coordinate is out of bounds.")
         if stop[0] < 0:
             stop = (self.W.shape[0] + stop[0], stop[1])
         if stop[1] < 0:
@@ -466,7 +478,8 @@ class GridWorld:
                 elif self.W[i][j] == 1:
                     out_str += "*"
                 else:
-                    raise ValueError("Unrecognized internal world W encoding.")
+                    raise ValueError(
+                        "Unrecognized internal world W encoding.")
             out_str += "|\n"
         out_str += line_prefix
         if show_grid:
@@ -577,7 +590,8 @@ class GridWorld:
         @param line_prefix: prefix each line with this string.
         """
         if self.W is None:
-            raise ValueError("Gridworld does not exist.")
+            raise ValueError(
+                "Gridworld does not exist.")
         out_str = line_prefix + " ".join([str(i) for i in self.W.shape]) + "\n"
         for i in range(self.W.shape[0]):
             out_str += line_prefix
@@ -592,7 +606,8 @@ class GridWorld:
                 elif self.W[i][j] == 1:
                     out_str += "*"
                 else:
-                    raise ValueError("Unrecognized internal world W encoding.")
+                    raise ValueError(
+                        "Unrecognized internal world W encoding.")
             out_str += "\n"
         return out_str
 
@@ -632,7 +647,8 @@ class GridWorld:
                     size[1] < 1 or
                     offset[0] + size[0] > self.W.shape[0] or
                     offset[1] + size[1] > self.W.shape[1]):
-                raise ValueError("unworkable subworld size, given offset.")
+                raise ValueError(
+                    "unworkable subworld size, given offset.")
             sub = GridWorld(prefix=prefix)
             sub.W = self.W[offset[0]:(
                 offset[0] + size[0]), offset[1]:(offset[1] + size[1])].copy()
@@ -674,17 +690,20 @@ class GridWorld:
         """
         try:
             from polytope import Polytope
-        except ImportError:
-            raise ImportError('GridWorld.dump_ppartition() requires '
-                              'the Python package polytope.')
+        except ImportError as error:
+            raise ImportError(
+                'GridWorld.dump_ppartition() requires '
+                'the Python package polytope.')
         try:
             from tulip.abstract import prop2partition
         except ImportError:
-            raise ImportError('`GridWorld.dump_ppartition()` requires '
-                              'the module `tulip.abstract`.')
+            raise ImportError(
+                '`GridWorld.dump_ppartition()` requires '
+                'the module `tulip.abstract`.')
 
         if self.W is None:
-            raise ValueError("Gridworld does not exist.")
+            raise ValueError(
+                "Gridworld does not exist.")
         domain = Polytope(A=np.array([[0, -1],
                                       [0, 1],
                                       [-1, 0],
@@ -753,7 +772,8 @@ class GridWorld:
         @rtype: `GRSpec`
         """
         if self.W is None:
-            raise ValueError("Gridworld does not exist.")
+            raise ValueError(
+                "Gridworld does not exist.")
         row_low = 0
         row_high = self.W.shape[0]
         col_low = 0
@@ -774,21 +794,30 @@ class GridWorld:
                 spec_trans.append(self.__getitem__(
                     (i, j), nonbool=nonbool) + " -> (")
                 # Normal transitions:
-                spec_trans[-1] += self.__getitem__((i, j),
-                                                   use_next=True,
-                                                   nonbool=nonbool)
+                spec_trans[-1] += self.__getitem__(
+                    (i, j),
+                    use_next=True,
+                    nonbool=nonbool)
                 if i > row_low and self.W[i - 1][j] == 0:
                     spec_trans[-1] += " || " + self.__getitem__(
-                        (i - 1, j), use_next=True, nonbool=nonbool)
+                        (i - 1, j),
+                        use_next=True,
+                        nonbool=nonbool)
                 if j > col_low and self.W[i][j - 1] == 0:
                     spec_trans[-1] += " || " + self.__getitem__(
-                        (i, j - 1), use_next=True, nonbool=nonbool)
+                        (i, j - 1),
+                        use_next=True,
+                        nonbool=nonbool)
                 if i < row_high - 1 and self.W[i + 1][j] == 0:
                     spec_trans[-1] += " || " + self.__getitem__(
-                        (i + 1, j), use_next=True, nonbool=nonbool)
+                        (i + 1, j),
+                        use_next=True,
+                        nonbool=nonbool)
                 if j < col_high - 1 and self.W[i][j + 1] == 0:
                     spec_trans[-1] += " || " + self.__getitem__(
-                        (i, j + 1), use_next=True, nonbool=nonbool)
+                        (i, j + 1),
+                        use_next=True,
+                        nonbool=nonbool)
                 spec_trans[-1] += ")"
 
         # Safety, static
@@ -863,15 +892,17 @@ class GridWorld:
 
         self.offset = orig_offset
         if controlled_dyn:
-            return GRSpec(sys_vars=sys_vars,
-                          sys_init=init_str,
-                          sys_safety=spec_trans,
-                          sys_prog=spec_goal)
+            return GRSpec(
+                sys_vars=sys_vars,
+                sys_init=init_str,
+                sys_safety=spec_trans,
+                sys_prog=spec_goal)
         else:
-            return GRSpec(env_vars=sys_vars,
-                          env_init=init_str,
-                          env_safety=spec_trans,
-                          env_prog=spec_goal)
+            return GRSpec(
+                env_vars=sys_vars,
+                env_init=init_str,
+                env_safety=spec_trans,
+                env_prog=spec_goal)
 
     def scale(self, xf=1, yf=1):
         """Return a new gridworld equivalent to this but scaled by integer
@@ -1050,7 +1081,8 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     gzone = size[1] - int(max(1, zone_width))
         # boundary of right zone
     if izone * size[0] < num_init or gzone * size[0] < num_goals:
-        raise ValueError("Too many initials/goals for grid size")
+        raise ValueError(
+            "Too many initials/goals for grid size")
     if ptop is None:
         ptop = np.random.randint(0, size[0] - passage_width)
     passage = range(ptop, ptop + passage_width)
@@ -1126,7 +1158,8 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
                 center[0] < 0 or
                 center[1] >= num_cols or
                 center[1] < 0):
-            raise ValueError("troll center is outside of gridworld")
+            raise ValueError(
+                "troll center is outside of gridworld")
         t_offset = (max(0, center[0] - radius), max(0, center[1] - radius))
         t_size = [center[0] - t_offset[0] + radius +
                   1, center[1] - t_offset[1] + radius + 1]
@@ -1249,7 +1282,10 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     ax = fig.add_subplot(111)
 
     def init():
-        Z.plot(font_pt=min(288 // Z.W.shape[1], 48), show_grid=True, axes=ax)
+        Z.plot(
+            font_pt=min(288 // Z.W.shape[1], 48),
+            show_grid=True,
+            axes=ax)
 
     def update_line(num, dlist, lines):
         for (p, t), d in zip(lines, dlist):
@@ -1265,14 +1301,23 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         arr = np.array([[x, y] for (y, x) in path]).transpose()
         arr = np.add(arr, jitter * (np.random.rand(*arr.shape) - 0.5))
         data.append(arr)
-        l, = ax.plot([], [], 'o', color=colors[n], markersize=10.0, zorder=2)
-        l_trail, = ax.plot([], [], '-', color=colors[n], zorder=1)
+        l, = ax.plot(
+            [], [], 'o',
+            color=colors[n],
+            markersize=10.0,
+            zorder=2)
+        l_trail, = ax.plot(
+            [], [], '-',
+            color=colors[n],
+            zorder=1)
         lines.append((l, l_trail))
 
     if not save_prefix:
         anim = matplotlib.animation.FuncAnimation(
             fig, update_line, len(paths[0]),
-            init_func=init, fargs=(data, lines), interval=500)
+            init_func=init,
+            fargs=(data, lines),
+            interval=500)
         return anim
     else:
         print("Writing %s000.png - %s%03d.png" %

@@ -74,10 +74,9 @@ def check(formula):
     from tulip import transys as trs
 
     ast = lexyacc.parse(formula)
-
-    dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False,
-                                           deterministic=True)
-
+    dfa = trs.automata.FiniteWordAutomaton(
+        atomic_proposition_based=False,
+        deterministic=True)
     dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
                      'U_left', 'U_right',
                      'W_left', 'W_right'}
@@ -135,21 +134,24 @@ def check(formula):
         elif isinstance(s, sast.Binary):
             op = s.operator
             if op in {'W', 'U'}:
-                t = dfa.transitions.find(q, letter=op)
+                t = dfa.transitions.find(
+                    q,
+                    letter=op)
                 if t:
                     qi, qj, w = t[0]
                     Q.append((s.op_l, qj))
                     Q.append((s.op_r, qj))
                 else:
-                    t = dfa.transitions.find(q, letter=op + '_left')
-
+                    t = dfa.transitions.find(
+                        q,
+                        letter=f'{op}_left')
                     if not t:
                         raise Exception('not in fragment')
                     qi, qj, w = t[0]
                     Q.append((s.op_l, qj))
-
-                    t = dfa.transitions.find(q, letter=op + '_right')
-
+                    t = dfa.transitions.find(
+                        q,
+                        letter=f'{op}_right')
                     if not t:
                         raise Exception('not in fragment')
                     qi, qj, w = t[0]
@@ -184,12 +186,13 @@ def str_to_grspec(f):
     env, sys = t.operands
     d = {'assume': split_gr1(env),
          'assert': split_gr1(sys)}
-    return GRSpec(env_init=d['assume']['init'],
-                  env_safety=d['assume']['G'],
-                  env_prog=d['assume']['GF'],
-                  sys_init=d['assert']['init'],
-                  sys_safety=d['assert']['G'],
-                  sys_prog=d['assert']['GF'])
+    return GRSpec(
+        env_init=d['assume']['init'],
+        env_safety=d['assume']['G'],
+        env_prog=d['assume']['GF'],
+        sys_init=d['assert']['init'],
+        sys_safety=d['assert']['G'],
+        sys_prog=d['assert']['GF'])
 
 
 def split_gr1(f):
@@ -335,9 +338,11 @@ def stability_to_gr1(p, aux='aux'):
     sys_safe = {a + ' -> ' + p,
                 a + ' -> X ' + a}
     sys_prog = {a}
-
-    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
-                  sys_safety=sys_safe, sys_prog=sys_prog)
+    return GRSpec(
+        sys_vars=sys_vars,
+        sys_init=sys_init,
+        sys_safety=sys_safe,
+        sys_prog=sys_prog)
 
 
 def response_to_gr1(p, q, aux='aux'):
@@ -372,9 +377,11 @@ def response_to_gr1(p, q, aux='aux'):
         '(!' + a + ' && !' + q + ') -> X !' + a
     }
     sys_prog = {a}
-
-    return GRSpec(sys_vars=sys_vars,  # sys_init=sys_init,
-                  sys_safety=sys_safe, sys_prog=sys_prog)
+    return GRSpec(
+        sys_vars=sys_vars,
+            # sys_init=sys_init,
+        sys_safety=sys_safe,
+        sys_prog=sys_prog)
 
 
 def eventually_to_gr1(p, aux='aux'):
@@ -407,9 +414,11 @@ def eventually_to_gr1(p, aux='aux'):
         a + ' -> X ' + a
     }
     sys_prog = {a}
-
-    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
-                  sys_safety=sys_safe, sys_prog=sys_prog)
+    return GRSpec(
+        sys_vars=sys_vars,
+        sys_init=sys_init,
+        sys_safety=sys_safe,
+        sys_prog=sys_prog)
 
 
 def until_to_gr1(p, q, aux='aux'):
@@ -448,9 +457,11 @@ def until_to_gr1(p, q, aux='aux'):
         '(!' + a + ') -> ' + p
     }
     sys_prog = {a}
-
-    return GRSpec(sys_vars=sys_vars, sys_init=sys_init,
-                  sys_safety=sys_safe, sys_prog=sys_prog)
+    return GRSpec(
+        sys_vars=sys_vars,
+        sys_init=sys_init,
+        sys_safety=sys_safe,
+        sys_prog=sys_prog)
 
 
 def _paren(x):

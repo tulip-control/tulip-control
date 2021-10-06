@@ -473,9 +473,11 @@ class GRSpec(LTL):
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
 
-        LTL.__init__(self, formula=self.to_canon(),
-                     input_variables=self.env_vars,
-                     output_variables=self.sys_vars)
+        LTL.__init__(
+            self,
+            formula=self.to_canon(),
+            input_variables=self.env_vars,
+            output_variables=self.sys_vars)
 
     def declare(self, *arg, **kw):
         """Declare flexible variables.
@@ -629,10 +631,18 @@ class GRSpec(LTL):
 
     def check_syntax(self):
         """Raise `AssertionError` for misplaced primed variables."""
-        self._assert_no_primed(self.env_init, 'assumed initial condition')
-        self._assert_no_primed(self.sys_init, 'guaranteed initial condition')
-        self._assert_no_primed(self.env_prog, 'liveness assumption')
-        self._assert_no_primed(self.env_prog, 'liveness guarantee')
+        self._assert_no_primed(
+            self.env_init,
+            'assumed initial condition')
+        self._assert_no_primed(
+            self.sys_init,
+            'guaranteed initial condition')
+        self._assert_no_primed(
+            self.env_prog,
+            'liveness assumption')
+        self._assert_no_primed(
+            self.env_prog,
+            'liveness guarantee')
         for f in self.env_safety:
             a = self.ast(f)
             primed = tx.collect_primed_vars(a)

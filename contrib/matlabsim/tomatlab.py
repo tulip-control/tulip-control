@@ -70,8 +70,10 @@ def export(
         elif isinstance(system_dynamics, hybrid.PwaSysDyn):
             dynamics_output = pwa_export(system_dynamics)
             dynamics_output['type'] = 'PwaSysDyn'
-            state_dimension = numpy.shape(system_dynamics.list_subsys[0].A)[1]
-            input_dimension = numpy.shape(system_dynamics.list_subsys[0].B)[1]
+            state_dimension = numpy.shape(
+                system_dynamics.list_subsys[0].A)[1]
+            input_dimension = numpy.shape(
+                system_dynamics.list_subsys[0].B)[1]
         elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
             dynamics_output = switched_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
@@ -81,8 +83,10 @@ def export(
             # piecewise-affine subsystems
             pwa_systems = list(system_dynamics.dynamics.values())
             pwa_system = pwa_systems[0]
-            state_dimension = numpy.shape(pwa_system.list_subsys[0].A)[1]
-            input_dimension = numpy.shape(pwa_system.list_subsys[0].B)[1]
+            state_dimension = numpy.shape(
+                pwa_system.list_subsys[0].A)[1]
+            input_dimension = numpy.shape(
+                pwa_system.list_subsys[0].B)[1]
         else:
             raise TypeError(str(type(system_dynamics)) +
                 ' is not a supported type of system dynamics.')
@@ -90,9 +94,11 @@ def export(
         # Control weights.
         # Set default values if needed.
         if R is None:
-            R = numpy.zeros([state_dimension, state_dimension])
+            R = numpy.zeros(
+                [state_dimension, state_dimension])
         if r is None:
-            r = numpy.zeros([1, state_dimension])
+            r = numpy.zeros(
+                [1, state_dimension])
         if Q is None:
             Q = numpy.eye(input_dimension)
         if mid_weight is None:
@@ -264,8 +270,10 @@ def export_mealy(mealy_machine, is_continuous):
     env_values = list(mealy_machine.inputs.values())
     sys_vars = mealy_machine.outputs.keys()
     sys_values = list(mealy_machine.outputs.values())
-    output['inputs'] = export_mealy_io(env_vars, env_values)
-    output['outputs'] = export_mealy_io(sys_vars, sys_values)
+    output['inputs'] = export_mealy_io(
+        env_vars, env_values)
+    output['outputs'] = export_mealy_io(
+        sys_vars, sys_values)
     # Transitions will be exported as
     # a 2D list of dictionaries. The only
     # purpose of this block here is to

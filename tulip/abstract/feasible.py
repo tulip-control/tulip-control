@@ -134,10 +134,12 @@ def solve_feasible(
     if closed_loop:
         if use_all_horizon:
             return _underapproximate_attractor(
-                P1, P2, ssys, N, trans_set=trans_set)
+                P1, P2, ssys, N,
+                trans_set=trans_set)
         else:
             return _solve_closed_loop_fixed_horizon(
-                P1, P2, ssys, N, trans_set=trans_set)
+                P1, P2, ssys, N,
+                trans_set=trans_set)
     else:
         if use_all_horizon:
             raise ValueError(
@@ -183,7 +185,8 @@ def _solve_closed_loop_fixed_horizon(
         # first step from P1
         if i == 1:
             pinit = p1
-        p2 = solve_open_loop(pinit, p2, ssys, 1, trans_set)
+        p2 = solve_open_loop(
+            pinit, p2, ssys, 1, trans_set)
         p2 = pc.reduce(p2)
         if not pc.is_fulldim(p2):
             return pc.Polytope()
@@ -213,10 +216,13 @@ def _solve_closed_loop_bounded_horizon(
         # first step from P1
         if i == 1:
             pinit = p1
-        p2 = solve_open_loop(pinit, p2, ssys, 1, trans_set)
+        p2 = solve_open_loop(
+            pinit, p2, ssys, 1, trans_set)
         p2 = pc.reduce(p2)
         # running union
-        s = s.union(p2, check_convex=True)
+        s = s.union(
+            p2,
+            check_convex=True)
         s = pc.reduce(s)
         # empty target polytope ?
         if not pc.is_fulldim(p2):
@@ -250,8 +256,11 @@ def _underapproximate_attractor(
         # first step from P1
         if i == 1:
             pinit = p1
-        r = solve_open_loop(pinit, p2, ssys, 1, trans_set)
-        p2 = p2.union(r, check_convex=True)
+        r = solve_open_loop(
+            pinit, p2, ssys, 1, trans_set)
+        p2 = p2.union(
+            r,
+            check_convex=True)
         p2 = pc.reduce(p2)
         # empty target polytope ?
         if not pc.is_fulldim(p2):
@@ -260,11 +269,12 @@ def _underapproximate_attractor(
 
 
 def _print_horizon_warning():
-    print('WARNING: different timing semantics and assumptions '
-          'from the case of fixed horizon. '
-          'Also, depending on dynamics, disconnected polytopes '
-          'can arise, which may cause issues in '
-          'the `polytope` package.')
+    print(
+        'WARNING: different timing semantics and assumptions '
+        'from the case of fixed horizon. '
+        'Also, depending on dynamics, disconnected polytopes '
+        'can arise, which may cause issues in '
+        'the `polytope` package.')
 
 
 def solve_open_loop(
@@ -274,8 +284,10 @@ def solve_open_loop(
     r1 = P1.copy() # Initial set
     r2 = P2.copy() # Terminal set
     # use the max_num_poly largest volumes for reachability
-    r1 = volumes_for_reachability(r1, max_num_poly)
-    r2 = volumes_for_reachability(r2, max_num_poly)
+    r1 = volumes_for_reachability(
+        r1, max_num_poly)
+    r2 = volumes_for_reachability(
+        r2, max_num_poly)
     if len(r1) > 0:
         start_polys = r1
     else:
@@ -288,8 +300,11 @@ def solve_open_loop(
     s0 = pc.Polytope()
     for p1 in start_polys:
         for p2 in target_polys:
-            cur_s0 = poly_to_poly(p1, p2, ssys, N, trans_set)
-            s0 = s0.union(cur_s0, check_convex=True)
+            cur_s0 = poly_to_poly(
+                p1, p2, ssys, N, trans_set)
+            s0 = s0.union(
+                cur_s0,
+                check_convex=True)
     return s0
 
 
@@ -304,7 +319,8 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     if trans_set is None:
         trans_set = p1
     # stack polytope constraints
-    L, M = createLM(ssys, N, p1, trans_set, p2)
+    L, M = createLM(
+        ssys, N, p1, trans_set, p2)
     s0 = pc.Polytope(L, M)
     s0 = pc.reduce(s0)
     # Project polytope s0 onto lower dim
@@ -384,13 +400,17 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     if not np.all(E == 0):
         if not pc.is_fulldim(D):
             E = np.zeros(K.shape)
-    list_len = np.array([P.A.shape[0] for P in list_P])
+    list_len = np.array(
+        [P.A.shape[0]
+         for P in list_P])
     sumlen = np.sum(list_len)
     LUn = np.shape(PU.A)[0]
     Lk = np.zeros([sumlen, n + N * m])
     LU = np.zeros([LUn * N, n + N * m])
     Mk = np.zeros([sumlen, 1])
-    MU = np.tile(PU.b.reshape(PU.b.size, 1), (N, 1))
+    MU = np.tile(
+        PU.b.reshape(PU.b.size, 1),
+        (N, 1))
     Gk = np.zeros([sumlen, p * N])
     GU = np.zeros([LUn * N, p * N])
     K_hat = np.tile(K, (N, 1))
@@ -408,56 +428,85 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
             logger.warning('createLM: Li of type: ' +str(type(Li) ) )
 
         ######### FOR M #########
-        idx = range(sum_vert, sum_vert + Li.A.shape[0])
+        idx = range(
+            sum_vert,
+            sum_vert + Li.A.shape[0])
         Mk[idx, :] = (
             Li.b.reshape(Li.b.size, 1) -
             Li.A.dot(A_k).dot(K_hat))
         ######### FOR G #########
         if i in disturbance_ind:
             idx = np.ix_(
-                range(sum_vert, sum_vert + Li.A.shape[0]),
+                range(
+                    sum_vert,
+                    sum_vert + Li.A.shape[0]),
                 range(Gk.shape[1])
             )
             Gk[idx] = Li.A.dot(A_k).dot(E_diag)
             if (PU.A.shape[1] == m + n) and (i < N):
                 A_k_E_diag = A_k.dot(E_diag)
-                d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
-                idx = np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))
+                d_mult = np.vstack([
+                    np.zeros([m, p * N]),
+                    A_k_E_diag
+                    ])
+                idx = np.ix_(
+                    range(
+                        LUn * i,
+                        LUn * (i + 1)),
+                    range(p * N))
                 GU[idx] = PU.A.dot(d_mult)
         ######### FOR L #########
         AB_line = np.hstack([A_n, A_k.dot(B_diag)])
         idx = np.ix_(
-            range(sum_vert, sum_vert + Li.A.shape[0]),
-            range(0,Lk.shape[1]))
+            range(
+                sum_vert,
+                sum_vert + Li.A.shape[0]),
+            range(
+                0,
+                Lk.shape[1]))
         Lk[idx] = Li.A.dot(AB_line)
         if i >= N:
             continue
         if PU.A.shape[1] == m:
             idx = np.ix_(
-                range(i * LUn, (i + 1) * LUn),
-                range(n + m * i, n + m * (i + 1)))
+                range(
+                    i * LUn,
+                    (i + 1) * LUn),
+                range(
+                    n + m * i,
+                    n + m * (i + 1)))
             LU[idx] = PU.A
         elif PU.A.shape[1] == m + n:
             uk_line = np.zeros([m, n + m * N])
             idx = np.ix_(
                 range(m),
-                range(n + m * i, n + m * (i + 1)))
+                range(
+                    n + m * i,
+                    n + m * (i + 1)))
             uk_line[idx] = np.eye(m)
             A_mult = np.vstack([uk_line, AB_line])
             b_mult = np.zeros([m + n, 1])
             b_mult[range(m, m+n), :] = A_k.dot(K_hat)
             idx = np.ix_(
-                range(i * LUn, (i + 1) * LUn),
+                range(
+                    i * LUn,
+                    (i + 1) * LUn),
                 range(n + m * N))
             LU[idx] = PU.A.dot(A_mult)
             MU[
-                range(i * LUn, (i + 1) * LUn),
+                range(
+                    i * LUn,
+                    (i + 1) * LUn),
                 :] -= PU.A.dot(b_mult)
         ####### Iterate #########
         sum_vert += Li.A.shape[0]
         A_n = A.dot(A_n)
         A_k = A.dot(A_k)
-        idx = np.ix_(range(n), range(i * n, (i + 1) * n))
+        idx = np.ix_(
+            range(n),
+            range(
+                i * n,
+                (i + 1) * n))
         A_k[idx] = np.eye(n)
     # Get disturbance sets
     if not np.all(Gk==0):
@@ -513,12 +562,19 @@ def get_max_extreme(G,D,N):
     DN_extreme = np.zeros([dim * N, nv**N])
     for i in range(nv**N):
         # Last N digits are indices we want!
-        ind = np.base_repr(i, base=nv, padding=N)
+        ind = np.base_repr(
+            i,
+            base=nv,
+            padding=N)
         for j in range(N):
             DN_extreme[
-                range(j * dim, (j + 1) * dim),
+                range(
+                    j * dim,
+                    (j + 1) * dim),
                 i] = D_extreme[int(ind[-j - 1]), :]
-    d_hat = np.amax(np.dot(G,DN_extreme), axis=1)
+    d_hat = np.amax(
+        np.dot(G, DN_extreme),
+        axis=1)
     return d_hat.reshape(d_hat.size, 1)
 
 
@@ -538,7 +594,9 @@ def _block_diag2(A, B):
         A = np.array([A])
     if len(B.shape) == 1:
         B = np.array([B])
-    C = np.zeros((A.shape[0]+B.shape[0], A.shape[1]+B.shape[1]))
+    C = np.zeros(
+        (A.shape[0] + B.shape[0],
+         A.shape[1] + B.shape[1]))
     C[:A.shape[0], :A.shape[1]] = A.copy()
     C[A.shape[0]:, A.shape[1]:] = B.copy()
     return C

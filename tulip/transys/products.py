@@ -419,5 +419,6 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
         (ts_to_state_, transition_label_dict) = state_label_pairs[0]
         transition_label_value = transition_label_dict['ap']
         prod_ba.transitions.add(
-            from_state, to_state, letter=transition_label_value)
+            from_state, to_state,
+            letter=transition_label_value)
     return prod_ba
