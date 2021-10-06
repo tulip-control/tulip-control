@@ -50,20 +50,20 @@ class FAWithPriority:
         self._level = level
 
     def priority(self):
-        """Get the priority of this rule"""
+        """Get the priority of this rule."""
         return self._priority
 
     def automaton(self):
-        """Get the automaton of this rule"""
+        """Get the automaton of this rule."""
         return self._fa
 
     def level(self):
-        """Get the level of this rule"""
+        """Get the level of this rule."""
         return self._level
 
 
 class PrioritizedSpecification:
-    """A class for defining a prioritized safety specification"""
+    """A class for defining a prioritized safety specification."""
 
     def __init__(self):
         self._Psi = []

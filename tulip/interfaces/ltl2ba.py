@@ -114,7 +114,7 @@ class Lexer:
 
 
 class Parser:
-    """Production rules to build parser for ltl2ba output."""
+    """Production rules to build parser for `ltl2ba` output."""
 
     precedence = (
         # ('right', 'UNTIL', 'RELEASE'),
