@@ -383,7 +383,8 @@ def async_prod(self, ts):
     <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
     """
     if not isinstance(ts, FiniteTransitionSystem):
-        raise TypeError('ts must be a FiniteTransitionSystem.')
+        raise TypeError(
+            'ts must be a `FiniteTransitionSystem`.')
     if self.states.mutants or ts.states.mutants:
         mutable = True
     else:

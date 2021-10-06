@@ -414,7 +414,8 @@ class MathSet:
         Raises KeyError if MathSet is empty.
         """
         if not self:
-            raise KeyError('Nothing to pop: MathSet is empty.')
+            raise KeyError(
+                'Nothing to pop: `MathSet` is empty.')
         if self._set and self._list:
             if randint(0, 1):
                 return self._set.pop()
@@ -425,8 +426,9 @@ class MathSet:
         elif self._list and not self._set:
             return self._list.pop()
         else:
-            raise Exception('Bug in empty MathSet: not self above' +
-                            'should not reaching this point.')
+            raise Exception(
+                'Bug in empty `MathSet`: not `self` above '
+                'should not reaching this point.')
 
     def intersection(self, iterable):
         """Return intersection with iterable.
@@ -579,7 +581,7 @@ class CartesianProduct:
         # TODO check ordered
         if not isinstance(element, Iterable):
             raise TypeError(
-                'Argument element must be Iterable, otherwise cannot '
+                'Argument element must be `Iterable`, otherwise cannot '
                 'recover which item in it belongs to which set in the '
                 'Cartesian product.')
         for idx, item in enumerate(element):
@@ -590,7 +592,8 @@ class CartesianProduct:
     def __mul__(self, mathsets):
         """Multiply Cartesian products."""
         if not isinstance(mathsets, list):
-            raise TypeError('mathsets given must be a list of MathSet.')
+            raise TypeError(
+                'mathsets given must be a list of `MathSet`.')
 
     def add(self, mathset):
         self.mathsets += [mathset]
@@ -679,7 +682,8 @@ def is_subset(small_iterable, big_iterable):
                 # avoid object duplication
                 big_iterable = list(big_iterable)
         except:
-            logger.error('Could not convert big_iterable to list.')
+            logger.error(
+                'Could not convert `big_iterable` to `list`.')
 
         for item in small_iterable:
             if item not in big_iterable:
