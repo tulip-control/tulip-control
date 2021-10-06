@@ -193,18 +193,16 @@ class AbstractSwitched:
                     self.ppp, self.ts, self.ppp2ts,
                     edge_label, only_adjacent, ax
                 )
-                axs += [ax]
-
+                axs.append(ax)
         # plot mode partitions
         for mode, ab in self.modes.items():
             ax = ab.plot(show_ts, only_adjacent, color_seed)
             ax.set_title('Abstraction for mode: ' + str(mode))
-            axs += [ax]
-
+            axs.append(ax)
         #if isinstance(self.ts, dict):
         #    for ts in self.ts:
         #        ax = ts.plot()
-        #        axs += [ax]
+        #        axs.append(ax)
         return axs
 
 class AbstractPwa:
@@ -1961,7 +1959,7 @@ def merge_partitions(abstractions):
             parents, ap_labeling
         )
         regions, parents, ap_labeling = r
-        prev_modes += [cur_mode]
+        prev_modes.append(cur_mode)
     new_list = regions
 
     # build adjacency based on spatial adjacencies of
