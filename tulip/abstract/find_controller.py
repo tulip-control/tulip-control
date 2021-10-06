@@ -82,7 +82,7 @@ def assert_cvxopt():
     if solvers is None:
         raise ImportError(
             'Failed to import `cvxopt.solvers`.'
-            'Unable to solve quadratic programming problems.')
+            'Unable to solve quadratic-programming problems.')
 
 
 def get_input(
