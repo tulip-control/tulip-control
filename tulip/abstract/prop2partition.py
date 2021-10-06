@@ -480,7 +480,7 @@ class PropPreservingPartition(pc.MetricPartition):
             self.prop_regions = copy.deepcopy(prop_regions)
         n = len(regions)
         if hasattr(adj, 'shape'):
-            (m, k) = adj.shape
+            m, k = adj.shape
             if m != k:
                 raise ValueError('adj must be square')
             if m != n:

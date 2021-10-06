@@ -314,7 +314,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             raise ValueError(
                 "failure of consistency check " +
                 "while processing aut XML string.")
-        (tag_name, this_state) = _untagdict(
+        tag_name, this_state = _untagdict(
             node.find(f'{ns_prefix}state'),
             cast_f_values=int,
             namespace=namespace)
@@ -511,7 +511,7 @@ def synthesize(spec):
     except:
         logger.error(
             f'failed to write auxiliary file: "{fname}"')
-    (stdoutdata, stderrdata) = p.communicate(s)
+    stdoutdata, stderrdata = p.communicate(s)
     spaces = 30 * ' '
     msg = (
         f'{spaces} gr1c return code: {p.returncode}\n\n'

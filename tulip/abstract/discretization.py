@@ -643,7 +643,7 @@ def _discretize_bi(
     ispwa = isinstance(ssys, PwaSysDyn)
     islti = isinstance(ssys, LtiSysDyn)
     if ispwa:
-        (part, ppp2pwa, part2orig) = pwa_partition(ssys, part)
+        part, ppp2pwa, part2orig = pwa_partition(ssys, part)
     else:
         part2orig = range(len(part))
     # Save original polytopes, require them to be convex
@@ -1142,7 +1142,7 @@ def _discretize_dual(
     ispwa = isinstance(ssys, PwaSysDyn)
     islti = isinstance(ssys, LtiSysDyn)
     if ispwa:
-        (part, ppp2pwa, part2orig) = pwa_partition(ssys, part)
+        part, ppp2pwa, part2orig = pwa_partition(ssys, part)
     else:
         part2orig = range(len(part))
     # Save original polytopes, require them to be convex
@@ -1714,7 +1714,7 @@ def discretize_switched(
             f'Mode Abstraction:\n{absys}\n')
         abstractions[mode] = absys
     # merge their domains
-    (merged_abstr, ap_labeling) = merge_partitions(abstractions)
+    merged_abstr, ap_labeling = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
     logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition
@@ -1785,7 +1785,7 @@ def merge_abstractions(
     sys_ts.atomic_propositions.add_from(aps)
     # copy AP labels from regions to discrete states
     ppp2ts = states
-    for (i, state) in enumerate(ppp2ts):
+    for i, state in enumerate(ppp2ts):
         props =  merged_abstr.ppp[i].props
         sys_ts.states[state]['ap'] = props
     # create mode actions

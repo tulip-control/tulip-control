@@ -575,7 +575,7 @@ def find_discrete_state(x0, part):
         `x0` does not belong to any discrete state.
     @rtype: `int`
     """
-    for (i, region) in enumerate(part):
+    for i, region in enumerate(part):
         if x0 in region:
             return i
     return None
