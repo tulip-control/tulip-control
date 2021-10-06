@@ -234,7 +234,6 @@ class LtiSysDyn:
         except:
             logger.error(
                 'failed to import `graphics`')
-            warn('pyvectorized not found. No plotting.')
             return
         (x, res) = pc.grid_region(
             self.domain,
