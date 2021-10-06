@@ -461,7 +461,8 @@ def get_input_helper(
         ).T
         if solver != None:
             raise Exception(
-                "solver specified but only 'None' allowed for ord = 2")
+                'solver specified, '
+                'but only `None` is allowed for `ord = 2`')
         sol = solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
             raise _InputHelperQPException(
