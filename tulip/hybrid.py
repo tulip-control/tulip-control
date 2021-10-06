@@ -124,18 +124,19 @@ class LtiSysDyn:
             time_semantics=None,
             timestep=None):
         if Uset is None:
-            warn('Uset not given to LtiSysDyn()')
+            warn('Uset not given to `LtiSysDyn()`')
         elif not isinstance(Uset, pc.Polytope):
             raise Exception('`Uset` has to be a Polytope')
         if domain is None:
-            warn("Domain not given to LtiSysDyn()")
+            warn('Domain not given to `LtiSysDyn()`')
         if ((domain is not None) and
             (not (isinstance(domain, pc.Polytope) or
                 isinstance(domain, pc.Region))
             )
         ):
-            raise Exception('`domain` has to be a Polytope or Region')
-
+            raise Exception(
+                '`domain` has to be '
+                'a `Polytope` or `Region`')
         # check dimensions agree
         try:
             nA, mA = A.shape
@@ -146,15 +147,17 @@ class LtiSysDyn:
             raise ValueError('A must be square')
         if domain is not None:
             if domain.dim != mA:
-                raise Exception('domain.dim != A.size[1]')
-
+                raise Exception(
+                    '`domain.dim != A.size[1]`')
         if B is not None:
             try:
                 nB, mB = B.shape
             except:
-                raise TypeError('B matrix must be 2d array')
+                raise TypeError(
+                    '`B` matrix must be 2d array')
             if nA != nB:
-                raise ValueError('A and B must have same number of rows')
+                raise ValueError(
+                    '`A` and `B` must have same number of rows')
             if Uset is not None:
                 if Uset.dim != mB and Uset.dim != mB + nA:
                     raise Exception(
@@ -164,24 +167,29 @@ class LtiSysDyn:
             try:
                 nE, mE = E.shape
             except:
-                raise TypeError('E matrix must be 2d array')
+                raise TypeError(
+                    '`E` matrix must be 2d array')
             if nA != nE:
-                raise ValueError('A and E must have same number of rows')
+                raise ValueError(
+                    '`A` and `E` must have '
+                    'same number of rows')
             if Wset is not None:
                 if Wset.dim != mE:
-                    raise Exception('Wset.dim != E.size[1]')
-
+                    raise Exception(
+                        '`Wset.dim != E.size[1]`')
         if K is not None:
             try:
                 nK, mK = K.shape
             except:
-                raise TypeError('K column vector must be 2d array')
-
+                raise TypeError(
+                    '`K` column vector must be 2d array')
             if nA != nK:
-                raise ValueError('A and K must have same number of rows')
+                raise ValueError(
+                    '`A` and `K` must have '
+                    'same number of rows')
             if mK != 1:
-                raise ValueError('K must be a column vector')
-
+                raise ValueError(
+                    '`K` must be a column vector')
         self.A = A
         self.B = B
         if K is None:
@@ -224,7 +232,8 @@ class LtiSysDyn:
         try:
             from tulip.graphics import newax, quiver
         except:
-            logger.error('failed to import graphics')
+            logger.error(
+                'failed to import `graphics`')
             warn('pyvectorized not found. No plotting.')
             return
         (x, res) = pc.grid_region(
