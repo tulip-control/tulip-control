@@ -561,7 +561,6 @@ def get_max_extreme(G,D,N):
     @param G: The matrix to maximize with respect to
     @param D: Polytope describing the disturbance set
     @param N: Horizon length
-
     @return: d_hat: Array describing the maximum possible
         effect from the disturbance
     """
