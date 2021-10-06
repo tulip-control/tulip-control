@@ -416,8 +416,10 @@ class AbstractPwa:
             j, to_region = self.ts2ppp(to_state)
             trans_set, sys = self.ppp2trans(i)
             params = {'N', 'close_loop', 'use_all_horizon'}
-            disc_params = {k:v for k,v in self.disc_params.items()
-                           if k in params}
+            disc_params = {
+                k: v
+                for k, v in self.disc_params.items()
+                if k in params}
             s0 = solve_feasible(from_region, to_region, sys,
                                 trans_set=trans_set, **disc_params)
             msg = str(i) + ' ---> ' + str(j)
@@ -1917,7 +1919,9 @@ def merge_partitions(abstractions):
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
     parents = {init_mode:list(range(len(regions) ))}
-    ap_labeling = {i:reg.props for i,reg in enumerate(regions)}
+    ap_labeling = {
+        i: reg.props
+        for i, reg in enumerate(regions)}
     for cur_mode in remaining_modes:
         ab2 = abstractions[cur_mode]
         r = merge_partition_pair(

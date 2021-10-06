@@ -152,8 +152,7 @@ def to_tulip_state(stormpy_state, tulip_transys):
     `ValueError` will be raised.
     """
     possible_states = [
-        s
-        for s in tulip_transys.states
+        s for s in tulip_transys.states
         if set(tulip_transys.states[s]["ap"])
         == set(to_tulip_labels(stormpy_state, tulip_transys))
     ]
@@ -190,7 +189,9 @@ def to_tulip_transys(path):
 
     # The list of states and initial states
     state_list = [get_ts_state(s) for s in in_model.states]
-    initial_state_list = [get_ts_state(s) for s in in_model.initial_states]
+    initial_state_list = [
+        get_ts_state(s)
+        for s in in_model.initial_states]
     ts = MC() if in_model.model_type == stormpy.storage.ModelType.DTMC else MDP()
     ts.states.add_from(state_list)
     ts.states.initial.add_from(initial_state_list)
@@ -291,7 +292,8 @@ def to_prism_file(ts, path):
         label_dict = {}
         for label in ts.atomic_propositions:
             label_dict[label] = [
-                state for state in ts.states if label in ts.states[state]["ap"]
+                state for state in ts.states
+                if label in ts.states[state]['ap']
             ]
         return label_dict
     # Use the above functions to describe the model in prism format.
@@ -329,7 +331,8 @@ def to_prism_file(ts, path):
         # Labels
         for label, states in get_label_dict().items():
             state_str = '|'.join(
-                ['(' + get_state_str(state_list.index(s), False) + ')' for s in states]
+                ['(' + get_state_str(state_list.index(s), False) + ')'
+                 for s in states]
             )
             f.write('label "{}" = {};\n'.format(label, state_str))
 

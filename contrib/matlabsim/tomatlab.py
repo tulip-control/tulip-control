@@ -146,7 +146,9 @@ def lti_export(ltisys):
 
 def pwa_export(pwasys):
     """Return piecewise-affine system as Matlab struct."""
-    ltisystems = [lti_export(sub) for sub in pwasys.list_subsys]
+    ltisystems = [
+        lti_export(sub)
+        for sub in pwasys.list_subsys]
     return dict(
         domain=poly_export(pwasys.domain),
         subsystems=ltisystems)
@@ -274,8 +276,12 @@ def export_mealy(mealy_machine, is_continuous):
         if u == SINIT:
             continue
         assert v != SINIT, v
-        evals = {var: str(label[var]) for var in env_vars}
-        svals = {var: str(label[var]) for var in sys_vars}
+        evals = {
+            var: str(label[var])
+            for var in env_vars}
+        svals = {
+            var: str(label[var])
+            for var in sys_vars}
         transition_dict = dict(
             start_state=u,
             end_state=v,
@@ -297,8 +303,12 @@ def export_mealy(mealy_machine, is_continuous):
         assert v != SINIT, v
         trans_dict = dict(
             state=v,
-            inputs={var: str(label[var]) for var in env_vars},
-            outputs={var: str(label[var]) for var in sys_vars},
+            inputs={
+                var: str(label[var])
+                for var in env_vars},
+            outputs={
+                var: str(label[var])
+                for var in sys_vars},
             start_loc=node_to_loc[u])
         init_trans.append(trans_dict)
     output['init_trans'] = init_trans

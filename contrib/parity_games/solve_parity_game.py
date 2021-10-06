@@ -30,8 +30,9 @@ def McNaughton(p):
     sigma = c % 2
     W = {0:set(), 1:set()}
     while True:
-        max_color_pos = {x for x in p if p.nodes[x]['color'] == c}
-
+        max_color_pos = {
+            x for x in p
+            if p.nodes[x]['color'] == c}
         a = attractor(max_color_pos, p, sigma)
         p_ = copy.deepcopy(p)
         p_.states.remove_from(a)

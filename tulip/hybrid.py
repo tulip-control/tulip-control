@@ -547,8 +547,10 @@ class SwitchedSysDyn:
     @property
     def all_mode_combs(self):
         """Return all possible combinations of modes."""
-        modes = [(a,b) for a in self.env_labels
-                           for b in self.disc_sys_labels]
+        modes = [
+            (a, b)
+            for a in self.env_labels
+            for b in self.disc_sys_labels]
         logger.debug('Available modes: ' + str(modes) )
         return modes
 
