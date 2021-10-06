@@ -406,8 +406,8 @@ class GRSpec(LTL):
         @param env_vars: If env_vars is a dictionary, then its keys
             should be variable names, and values are domains of the
             corresponding variable.  Else, if env_vars is an iterable,
-            then assume all environment variables are C{boolean} (or
-            "atomic propositions").  Cf. L{GRSpec} for details.
+            then assume all environment variables are `boolean` (or
+            "atomic propositions").  Cf. `GRSpec` for details.
 
         @type sys_vars: dict or iterable
         @param sys_vars: Mutatis mutandis, env_vars.
@@ -415,7 +415,7 @@ class GRSpec(LTL):
         @param env_init, env_safety, env_prog, sys_init, sys_safety, sys_prog:
             A string or iterable of strings.  An empty string is
             converted to an empty list.  A string is placed in a list.
-            iterables are converted to lists.  Cf. L{GRSpec}.
+            iterables are converted to lists.  Cf. `GRSpec`.
 
         @type moore: bool
         @type plus_one: bool
