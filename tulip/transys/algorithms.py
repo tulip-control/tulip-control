@@ -132,7 +132,8 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
 
     # action labeling is taken care by nx,
     # since transition taken at a time
-    for from_state_id, to_state_id, edge_dict in prod_graph.edges(data=True):
+    edges = prod_graph.edges(data=True)
+    for from_state_id, to_state_id, edge_dict in edges:
         from_state = prod_ids2states(from_state_id, self, other)
         to_state = prod_ids2states(to_state_id, self, other)
         prod_sys.transitions.add(

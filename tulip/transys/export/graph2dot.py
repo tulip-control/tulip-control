@@ -349,9 +349,10 @@ def _transitions2dot_str(trans, to_dot_graph, tikz=False):
     label_def = trans.graph._transition_label_def
     label_format = trans.graph._transition_dot_label_format
     label_mask = trans.graph._transition_dot_mask
-    for (u, v, key, edge_data) in trans.graph.edges(
-        data=True, keys=True
-    ):
+    edges = trans.graph.edges(
+        data=True,
+        keys=True)
+    for (u, v, key, edge_data) in edges:
         edge_dot_label = _form_edge_label(
             edge_data, label_def,
             label_format, label_mask, tikz)
