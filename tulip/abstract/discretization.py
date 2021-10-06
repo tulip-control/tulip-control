@@ -184,7 +184,9 @@ class AbstractSwitched:
                     env_actions=env_mode,
                     sys_actions=sys_mode)
                 ax = _plot_abstraction(
-                    self, show_ts=False, only_adjacent=False,
+                    self,
+                    show_ts=False,
+                    only_adjacent=False,
                     color_seed=color_seed
                 )
                 plot_ts_on_partition(
@@ -949,7 +951,8 @@ def _discretize_bi(
         if debug:
             tmp_part = PropPreservingPartition(
                 domain=part.domain,
-                regions=sol, adj=sp.lil_matrix(adj),
+                regions=sol,
+                adj=sp.lil_matrix(adj),
                 prop_regions=part.prop_regions
             )
             assert(tmp_part.is_partition())
