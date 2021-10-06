@@ -80,11 +80,10 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             f'{_hl}\n')
 
         if not s0s:
-            msg = (
+            warnings.warn(
                 'Transition System has no initial states !\n'
                 '=> Empty product system.\n'
                 'Did you forget to define initial states ?')
-            warnings.warn(msg)
 
         for s0 in s0s:
             logger.debug(f'initial state:\t{s0}')
@@ -223,11 +222,10 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         f'\n{_hl}\n')
 
     if not s0s:
-        msg = (
+        warnings.warn(
             'Transition System has no initial states !\n'
             '=> Empty product system.\n'
             'Did you forget to define initial states ?')
-        warnings.warn(msg)
 
     for s0 in s0s:
         logger.debug(f'initial state:\t{s0}')
