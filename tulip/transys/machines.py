@@ -246,12 +246,14 @@ class Transducer(LabeledDiGraph):
         # self.set_actions = {}
         # state labeling
         self._state_label_def = dict()
-        self._state_dot_label_format = {'type?label': ':',
-                                        'separator': r'\\n'}
+        self._state_dot_label_format = {
+            'type?label': ':',
+            'separator': r'\\n'}
         # edge labeling
         self._transition_label_def = dict()
-        self._transition_dot_label_format = {'type?label': ':',
-                                             'separator': r'\\n'}
+        self._transition_dot_label_format = {
+            'type?label': ':',
+            'separator': r'\\n'}
         self._transition_dot_mask = dict()
         self._state_dot_mask = dict()
         self.default_export_fname = 'fsm'

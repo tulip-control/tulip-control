@@ -69,7 +69,9 @@ def _states2dot_str(
     if hasattr(graph, '_state_dot_label_format'):
         label_format = graph._state_dot_label_format
     else:
-        label_format = {'type?label': '', 'separator': r'\\n'}
+        label_format = {
+            'type?label': '',
+            'separator': r'\\n'}
     for u, d in graph.nodes(data=True):
         # initial state ?
         is_initial = u in states.initial

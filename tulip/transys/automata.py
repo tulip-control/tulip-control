@@ -133,12 +133,14 @@ class FiniteStateAutomaton(LabeledDiGraph):
             self._accepting_type = accepting_states_type
         self.states.accepting = self._accepting
         # used before label value
-        self._transition_dot_label_format = {'letter': '',
-                                             'type?label': '',
-                                             'separator': r'\\n'}
+        self._transition_dot_label_format = {
+            'letter': '',
+            'type?label': '',
+            'separator': r'\\n'}
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal': 'circle',
-                               'accepting': 'doublecircle'}
+        self.dot_node_shape = {
+            'normal': 'circle',
+            'accepting': 'doublecircle'}
         self.default_export_fname = 'fsa'
         self.automaton_type = 'Finite State Automaton'
 

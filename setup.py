@@ -136,7 +136,8 @@ def run_setup():
             'tulip.abstract',
             'tulip.spec',
             'tulip.interfaces'],
-        package_dir={'tulip': 'tulip'},
+        package_dir={
+            'tulip': 'tulip'},
         package_data=package_data)
     # ply failed ?
     if plytable_build_failed:
