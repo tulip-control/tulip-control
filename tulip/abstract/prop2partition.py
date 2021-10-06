@@ -67,6 +67,7 @@ __all__ = [
 
 _hl = 40 * '-'
 
+
 def prop2part(state_space, cont_props_dict):
     """
 
@@ -148,6 +149,7 @@ def prop2part(state_space, cont_props_dict):
     mypartition.adj = pc.find_adjacent_regions(mypartition).copy()
     return mypartition
 
+
 def part2convex(ppp):
     """Refine partition so that cells be convex.
 
@@ -178,6 +180,7 @@ def part2convex(ppp):
             new2old += [i]
     cvxpart.adj = pc.find_adjacent_regions(cvxpart).copy()
     return (cvxpart, new2old)
+
 
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     """This function takes:
@@ -414,7 +417,10 @@ def add_grid(
         adj=adj,
         prop_regions=ppp.prop_regions)
 
+
 #### Helper functions ####
+
+
 def compute_interval(
         low_domain, high_domain, size,
         abs_tol=1e-7):
@@ -429,6 +435,7 @@ def compute_interval(
             list_g.append([i, i + size])
         i = i + size
     return list_g
+
 
 def product_interval(list1, list2):
     """Combine all intervals, for any two interval lists."""

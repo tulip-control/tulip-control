@@ -437,6 +437,7 @@ class AbstractPwa:
                 logger.info(
                     f'correct transition: {msg}')
 
+
 def _plot_abstraction(
         ab,
         show_ts,
@@ -456,6 +457,7 @@ def _plot_abstraction(
         color_seed=color_seed)
     # ax = self.ts.plot()
     return ax
+
 
 def discretize(
         part, ssys,
@@ -1055,6 +1057,7 @@ def _discretize_bi(
         orig_ppp=orig_ppp,
         ppp2orig=ppp2orig,
         disc_params=param)
+
 
 def _discretize_dual(
         part, ssys,

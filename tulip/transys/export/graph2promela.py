@@ -33,6 +33,7 @@
 from __future__ import print_function
 from time import strftime
 
+
 def fts2promela(graph, procname=None):
     """Convert (possibly labeled) state graph to Promela str.
 
