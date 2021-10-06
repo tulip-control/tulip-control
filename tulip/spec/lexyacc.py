@@ -162,10 +162,12 @@ class Lexer:
             **kwargs):
         """Create a lexer.
 
-        @param kwargs: Same arguments as C{ply.lex.lex}:
-
-          - except for C{module} (fixed to C{self})
-          - C{debuglog} defaults to the logger C{"ltl_lex_log"}.
+        @param kwargs: same arguments as
+            for the function `ply.lex.lex`,
+            - except for `module`
+              (fixed to `self`)
+            - `debuglog` defaults to the
+              logger `"ltl_lex_log"`
         """
         if debug and debuglog is None:
             debuglog = logging.getLogger(LEX_LOGGER)
