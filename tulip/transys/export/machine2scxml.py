@@ -74,9 +74,10 @@ def mealy2scxml(mealy):
             n = n - 1
             s += f'{indent(n)}</transition>'
         return s
-    s = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    s += '<scxml xmlns="http://www.w3.org/2005/07/scxml" '
-    s += ' version="1.0" '
+    s = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<scxml xmlns="http://www.w3.org/2005/07/scxml" '
+        ' version="1.0" ')
     if len(mealy.states.initial) != 1:
         raise Exception(
             'Must have exactly 1 initial state.\n'
