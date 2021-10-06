@@ -45,7 +45,6 @@ import polytope as pc
 from polytope.plot import plot_partition, plot_transition_arrow
 
 from tulip.abstract import find_controller
-
 # inline imports:
 #
 # import matplotlib as mpl
@@ -76,22 +75,17 @@ def plot_abstraction_scc(ab, ax=None):
 
     # each connected component of filtered graph is a symbol
     components = nx.strongly_connected_components(ts)
-
     if ax is None:
         ax = mpl.pyplot.subplot()
-
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0,0], u[0,0])
     ax.set_ylim(l[1,0], u[1,0])
-
     for component in components:
         # map to random colors
         red = np.random.rand()
         green = np.random.rand()
         blue = np.random.rand()
-
         color = (red, green, blue)
-
         for state in component:
             i = ppp2ts.index(state)
             ppp[i].plot(ax=ax, color=color)
@@ -110,12 +104,10 @@ def plot_ts_on_partition(ppp, ts, ppp2ts, edge_label, only_adjacent, ax):
     """
     l,u = ppp.domain.bounding_box
     arr_size = (u[0,0]-l[0,0])/50.0
-
     ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
     for from_state, to_state, label in ts.transitions.find(with_attr_dict=edge_label):
         i = ts2ppp[from_state]
         j = ts2ppp[to_state]
-
         if only_adjacent:
             if ppp.adj[i, j] == 0:
                 continue
@@ -133,20 +125,16 @@ def project_strategy_on_partition(ppp, mealy):
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))
-
     for (from_state, to_state, label) in mealy.transitions.find():
         from_label = mealy.states[from_state]
         to_label = mealy.states[to_state]
-
         if 'loc' not in from_label or 'loc' not in to_label:
             continue
-
         from_loc = from_label['loc']
         to_loc = to_label['loc']
-
         proj_adj[from_loc, to_loc] = 1
-
     return proj_adj
+
 
 def plot_strategy(ab, mealy):
     """Plot strategic transitions on PPP.
@@ -186,20 +174,15 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     except:
         logger.error('failed to import graphics.newax')
         return
-
     if ax is None:
         ax, fig = newax()
-
     plot_partition(plot_numbers=False, ax=ax, show=False)
-
     A = ssys.A
     B = ssys.B
-
     if ssys.K is not None:
         K = ssys.K
     else:
         K = np.zeros(x0.shape)
-
     x = x0.flatten()
     x_arr = x0
     for i in range(u_seq.shape[0]):
@@ -208,9 +191,7 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
             np.dot(B, u_seq[i, :] ).flatten() +
             K.flatten())
         x_arr = np.vstack([x_arr, x.flatten()])
-
     ax.plot(x_arr[:,0], x_arr[:,1], 'o-')
-
     return ax
 
 

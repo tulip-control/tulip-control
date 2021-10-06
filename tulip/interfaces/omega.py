@@ -150,15 +150,12 @@ def _grspec_to_automaton(g):
                 'unknown variable type: {v}'.format(v=v))
         d[k] = r
     g.str_to_int()
-
     # reverse mapping by `synth.strategy2mealy`
     a.declare_variables(**d)
     a.varlist.update(
         env=list(g.env_vars.keys()),
         sys=list(g.sys_vars.keys()))
-
     f = g._bool_int.__getitem__
-
     a.init['env'] = _conj(g.env_init, f)
     a.init['sys'] = _conj(g.sys_init, f)
     a.action['env'] = _conj(g.env_safety, f)
@@ -173,11 +170,9 @@ def _grspec_to_automaton(g):
         w2 = ['TRUE']
     a.win['<>[]'] = a.bdds_from(*w1)
     a.win['[]<>'] = a.bdds_from(*w2)
-
     a.moore = g.moore
     a.plus_one = g.plus_one
     a.qinit = g.qinit
-
     return a
 
 

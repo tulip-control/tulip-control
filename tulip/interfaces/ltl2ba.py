@@ -33,6 +33,7 @@
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
+
 import networkx as nx
 import ply.lex
 import ply.yacc

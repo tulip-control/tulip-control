@@ -1,5 +1,5 @@
-"""
-McNaughton's algorithm for solving parity games
+"""McNaughton's algorithm for solving parity games.
+
 
 Reference
 =========
@@ -13,13 +13,13 @@ from __future__ import print_function
 import copy
 from tulip import transys as trs
 
+
 def McNaughton(p):
     """Solve parity game.
 
     @type p: `ParityGame`
     """
     p = copy.deepcopy(p)
-
     if p.has_deadends():
         raise Exception('The GameGraph has sinks !')
 
@@ -49,6 +49,7 @@ def McNaughton(p):
 
         p.states.remove_from(a)
 
+
 def attractor(W, pg, player):
     """Find attractor set.
 
@@ -61,12 +62,12 @@ def attractor(W, pg, player):
     """
     W = set(W)
     Wold = set()
-
     # least fixed point
     while W != Wold:
         Wold = W
         W = W.union(ctrl_next(W, pg, player))
     return W
+
 
 def ctrl_next(W, pg, player):
     """Find controlled predecessor set.
@@ -87,7 +88,6 @@ def ctrl_next(W, pg, player):
             else:
                 print('not in CNext')
                 continue
-
             cnext.add(pred)
     return cnext
 

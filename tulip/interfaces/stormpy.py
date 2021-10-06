@@ -34,9 +34,10 @@
 
 <https://moves-rwth.github.io/stormpy/>
 """
-
 import copy
+
 import stormpy
+
 from tulip.transys import MarkovChain as MC
 from tulip.transys import MarkovDecisionProcess as MDP
 from tulip.transys.mathfunc import FunctionOnLabeledState
@@ -47,7 +48,6 @@ def build_stormpy_model(path):
 
     @type path: a string indicating the path to the `prism` file
     """
-
     prism_program = stormpy.parse_prism_program(path)
     return stormpy.build_model(prism_program)
 

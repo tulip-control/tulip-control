@@ -74,8 +74,12 @@ def dimension(ndarray):
         return ndarray.ndim
     return ndarray.shape[0]
 
-def newax(subplots=(1, 1), fig=None,
-          mode='list', dim=2):
+
+def newax(
+        subplots=(1, 1),
+        fig=None,
+        mode='list',
+        dim=2):
     """Create (possibly multiple) new axes handles.  (DEPRECATED)
 
     @param fig: attach axes to this figure
@@ -108,26 +112,21 @@ def newax(subplots=(1, 1), fig=None,
         subplot_layout = tuple(subplots)
     except:
         subplot_layout = (1, subplots)
-
     # reasonable layout ?
     if len(subplot_layout) != 2:
         raise Exception('newax:'
                         'subplot layout should be 2-tuple or int.')
-
     # which figure ?
     if fig is None:
         fig = plt.figure()
-
     # create subplot(s)
     (nv, nh) = subplot_layout
     n = np.prod(subplot_layout)
-
     try:
         dim = tuple(dim)
     except:
         # all same dim
         dim = [dim] * n
-
     # matplotlib (2D) or mayavi (3D) ?
     ax = []
     for (i, curdim) in enumerate(dim):
@@ -137,18 +136,15 @@ def newax(subplots=(1, 1), fig=None,
         else:
             curax = fig.add_subplot(nv, nh, i + 1, projection='3d')
             ax.append(curax)
-
         if curdim > 3:
             warn('ndim > 3, but plot limited to 3.')
-
     if mode == 'matrix':
         ax = list(_grouper(nh, ax))
-
     # single axes ?
     if subplot_layout == (1, 1):
         ax = ax[0]
-
     return (ax, fig)
+
 
 def dom2vec(domain, resolution):
     """Matrix of column vectors for meshgrid points.  (DEPRECATED)
@@ -184,8 +180,8 @@ def dom2vec(domain, resolution):
     axis_grids = map(lambda_linspace, domain, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(map(np.ravel, pnt_coor))
-
     return q
+
 
 def quiver(x, v, ax=None, **kwargs):
     """Multi-dimensional quiver.  (DEPRECATED)
@@ -227,12 +223,9 @@ def quiver(x, v, ax=None, **kwargs):
         return fields
     except:
         pass
-
     if not ax:
         ax = plt.gca()
-
     dim = dimension(x)
-
     if dim < 2:
         raise Exception('ndim < 2')
     elif dim < 3:
@@ -240,20 +233,16 @@ def quiver(x, v, ax=None, **kwargs):
                       v[0, :], v[1, :], **kwargs)
     else:
         raise NotImplementedError
-
         from mayavi.mlab import quiver3d
-
         if ax:
             print('axes arg ignored, mayavi used')
-
         h = quiver3d(x[0, :], x[1, :], x[2, :],
                      v[0, :], v[1, :], v[2, :], **kwargs)
-
     if dim > 3:
         warn('quiver:ndim #dimensions > 3,' +
              'plotting only 3D component.')
-
     return h
+
 
 def _grouper(n, iterable, fillvalue=None):
     """`grouper(3, 'ABCDEFG', 'x')` --> ABC DEF Gxx."""

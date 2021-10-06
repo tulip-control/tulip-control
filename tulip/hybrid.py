@@ -44,7 +44,6 @@ from pprint import pformat
 
 import numpy as np
 import polytope as pc
-
 # inline imports:
 #
 # from tulip.graphics import newax, quiver

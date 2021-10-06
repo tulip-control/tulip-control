@@ -36,8 +36,10 @@ from __future__ import print_function
 
 import tulip.transys as trs
 
+
 hl = 60*'='
 save_fig = False
+
 
 def fts_minimal_example():
     """Small example, for more see the maximal example."""
