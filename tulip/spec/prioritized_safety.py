@@ -35,8 +35,11 @@ from tulip.transys.automata import FiniteStateAutomaton as FA
 
 
 class FAWithPriority:
-    """A class for defining a rule, represented by a nondeterministic finite automaton,
-    with priority"""
+    """Defines rule, represented by an automaton.
+
+    The rule is represented by a nondeterministic
+    finite automaton, with priority.
+    """
 
     def __init__(self, fa, priority, level):
         assert isinstance(fa, FA)
@@ -151,21 +154,17 @@ class PrioritizedSpecification:
         return [phi for psi in self._Psi for phi in psi]
 
     def get_states(self):
-        """Get the product of the states in all the finite automata
-        """
+        """Get the product of the states in all the finite automata."""
         return product(*[phi.automaton().states for phi in self])
 
     def get_initial_states(self):
-        """Get the product of the initial states of all the finite automata
-        """
+        """Get the product of the initial states of all the finite automata."""
         return product(*[phi.automaton().states.initial for phi in self])
 
     def get_accepting_states(self):
-        """Get the product of the accepting states of all the finite automata
-        """
+        """Get product of the accepting states of all the finite automata."""
         return product(*[phi.automaton().states.accepting for phi in self])
 
     def get_num_levels(self):
-        """Get the number of levels
-        """
+        """Get the number of levels."""
         return len(self._Psi)

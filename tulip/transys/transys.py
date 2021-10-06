@@ -123,8 +123,7 @@ class KripkeStructure(LabeledDiGraph):
 
 
 class WeightedKripkeStructure(KripkeStructure):
-    """KripkeStructure with weight/cost on the transitions
-    """
+    """KripkeStructure with weight/cost on the transitions."""
 
     cost_label = "cost"
 
@@ -139,8 +138,7 @@ class WeightedKripkeStructure(KripkeStructure):
 
 
 class MarkovChain(KripkeStructure):
-    """KripkeStructure with probability on the transitions
-    """
+    """KripkeStructure with probability on the transitions."""
 
     probability_label = "probability"
 

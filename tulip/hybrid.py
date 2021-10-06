@@ -546,8 +546,7 @@ class SwitchedSysDyn:
 
     @property
     def all_mode_combs(self):
-        """Return all possible combinations of modes.
-        """
+        """Return all possible combinations of modes."""
         modes = [(a,b) for a in self.env_labels
                            for b in self.disc_sys_labels]
         logger.debug('Available modes: ' + str(modes) )
@@ -591,9 +590,10 @@ class SwitchedSysDyn:
 
 
 def _push_time_data(system_list, time_semantics, timestep):
-    """Overwrite the time data in system list. Throws warnings if overwriting
-    existing data."""
+    """Overwrite the time data in `system_list`.
 
+    Emits warnings if overwriting existing data.
+    """
     for system in system_list:
         if (system.time_semantics != time_semantics) and (system.time_semantics
             is not None):
@@ -610,14 +610,13 @@ def _push_time_data(system_list, time_semantics, timestep):
 
 
 def _check_time_data(semantics, timestep):
-    """Checks that time semantics and timestep are correctly specified. Raises
-    ValueErrors if that's not the case.
+    """Check whether time semantics and timestep are correct.
 
-    @type semantics: string
+    If not, then raise `ValueError`.
+
+    @type semantics: `str`
     @param timestep: any positive number
-    @type timestep: int or float
-
-    @rtype: None
+    @type timestep: `int` or `float`
     """
     if semantics not in ['sampled', 'discrete', None]:
         raise ValueError('Time semantics must be discrete or ' +
@@ -637,13 +636,14 @@ def _check_time_consistency(
         system_list,
         time_semantics,
         timestep):
-    """Checks that all the dynamical systems in system_list have the same time
-    semantics and timestep. Raises ValueError if not the case.
+    """Assert that all items of `system_list` have same semantics.
 
-    @type system_list: list of L{LtiSysDyn} or L{PwaSysDyn}
-    @rtype: None
+    Checks that all the dynamical systems in `system_list`
+    have the same time semantics and timestep.
+    Raises `ValueError` if not.
+
+    @type system_list: `list` of `LtiSysDyn` or `PwaSysDyn`
     """
-
     # Check that time semantics for all subsystems match
     for ind in range(len(system_list)-1):
         if system_list[ind].timestep != system_list[ind+1].timestep:

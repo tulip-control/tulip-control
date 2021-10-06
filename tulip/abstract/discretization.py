@@ -1451,8 +1451,7 @@ def _discretize_dual(
 
 
 def reachable_within(trans_length, adj_k, adj):
-    """Find cells reachable within trans_length hops.
-    """
+    """Find cells reachable within trans_length hops."""
     if trans_length <= 1:
         return adj_k
     k = 1
@@ -1703,8 +1702,7 @@ def discretize_switched(
     return merged_abstr
 
 def plot_mode_partitions(swab, show_ts, only_adjacent):
-    """Save each mode's partition and final merged partition.
-    """
+    """Save each mode's partition and final merged partition."""
     axs = swab.plot(show_ts, only_adjacent)
     if not axs:
         logger.error('failed to plot the partitions.')

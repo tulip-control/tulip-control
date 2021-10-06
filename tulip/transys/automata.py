@@ -175,8 +175,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
 
 
 class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
-    """FiniteStateAutomaton with weight/cost on the transitinos
-    """
+    """FiniteStateAutomaton with weight/cost on the transitions."""
 
     def __init__(
             self, deterministic=False,

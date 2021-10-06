@@ -407,8 +407,7 @@ def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):
     return list_g
 
 def product_interval(list1, list2):
-    """Helper implementing combination of all intervals for any two interval lists.
-    """
+    """Combine all intervals, for any two interval lists."""
     new_list=list()
     for m in range(len(list1)):
         for n in range(len(list2)):

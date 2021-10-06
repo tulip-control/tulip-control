@@ -339,13 +339,20 @@ def model_checking(
         formula,
         prism_file_path,
         extract_policy=False):
-    """Model check tulip_transys against formula
+    """Model check `tulip_transys` against `formula`.
 
-    @type tulip_transys: either a MarkovChain or MarkovDecisionProcess object.
-    @type formula: a string describing PCTL formula according to Prism format.
-    @type prism_file_path: a string indicating the path to export the intermediate
-        prism file (mostly for debugging purpose)
-    @type extract_policy: boolean that indicates whether to extract policy
+    @type tulip_transys: `MarkovChain` or
+        `MarkovDecisionProcess`
+    @param formula: a string describing PCTL formula
+        according to Prism format
+    @type formula: `str`
+    @param prism_file_path: a string indicating the
+        path to export the intermediate
+        `prism` file (mostly for debugging purposes)
+    @type prism_file_path: `str`
+    @param extract_policy: boolean that indicates
+        whether to extract policy
+    @type extract_policy: `bool`
 
     @return result
         - If `extract_policy == False`,
@@ -416,11 +423,13 @@ def _update_possible_actions_with_transitions(
         from_state_tulip,
         stormpy_transitions,
         prob_tol=1e-6):
-    """Return a subset of possible_actions from from_state_tulip
-    such that the probability of transition to each state matches stormpy_transitions
-    with the given prob_tol
-    """
+    """Return subset of `possible_actions` according to conditions.
 
+    Return a subset of `possible_actions` from
+    `from_state_tulip`, such that the probability of
+    transition to each state matches `stormpy_transitions`
+    with the given `prob_tol`.
+    """
     for stormpy_transition in stormpy_transitions:
         to_state_tulip = to_tulip_state(
             stormpy_model.states[stormpy_transition.column], tulip_transys

@@ -144,7 +144,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         return new_sqs
 
     def add_all_states(self):
-        """Iterate L{add_successors} until all states are added.
+        """Iterate `add_successors` until all states are added.
 
         In other words until the state space
         reaches a fixed point.

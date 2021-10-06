@@ -39,8 +39,7 @@ import inspect
 from networkx.readwrite import json_graph
 
 def _format_label(label_def, label_dot_format):
-    """Format state/edge labels, which pop-up on mouse hover.
-    """
+    """Format state/edge labels, which pop-up on mouse hover."""
     s = '"\\n\\n" +'
     for sublabel_name in label_def:
         shown_name = label_dot_format[sublabel_name]

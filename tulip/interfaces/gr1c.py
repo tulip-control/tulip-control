@@ -310,8 +310,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
 
 
 def _parse_vars(variables, vardict):
-    """Helper for parsing env, sys variables.
-    """
+    """Helper for parsing env, sys variables."""
     domains = []
     for v in variables:
         dom = vardict[v]
