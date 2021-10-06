@@ -75,7 +75,7 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
     input_args = ', '.join(input_vars)
     input_args_str = "'"+"', '".join(input_vars)+"'"
     code = (
-        'class {classname}(object):\n'
+        'class {classname}:\n'
         '{t}"""Mealy transducer.\n'
         '\n'
         '{t}Internal states are integers, the current state\n'
