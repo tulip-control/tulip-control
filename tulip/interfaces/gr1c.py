@@ -665,9 +665,9 @@ class GR1CSession:
             f' {goal_mode}\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
-                loc = line.find(self.prompt)
-                if loc >= 0:
-                    line = line[len(self.prompt):]
+            loc = line.find(self.prompt)
+            if loc >= 0:
+                line = line[len(self.prompt):]
         return int(line[:-1])
 
     def env_next(self, state):
