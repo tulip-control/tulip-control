@@ -377,11 +377,10 @@ class AbstractPwa:
     def _ppp2other_str(self, ppp2other):
         if ppp2other is None:
             return ''
-
-        s = ''
+        c = list()
         for i, other in enumerate(ppp2other):
-            s += '\t\t' + str(i) + ' -> ' + str(other) + '\n'
-        return s
+            c.append(f'\t\t{i} -> {other}\n')
+        return ''.join(c)
 
     def _debug_str_(self):
         return (
