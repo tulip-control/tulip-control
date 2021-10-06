@@ -60,7 +60,15 @@ class AutomatonState(object):
     - `transition`: a list of id's of the AutomatonState objects to
       which this AutomatonState object can transition.
     """
-    def __init__(self, stateid=-1, state={},transition=[]):
+    def __init__(
+            self,
+            stateid=-1,
+            state=None,
+            transition=None):
+        if state is None:
+            state = dict()
+        if transition is None:
+            transition = list()
         self.stateid = stateid
         self.state = copy.copy(state)
         self.transition = transition[:]
