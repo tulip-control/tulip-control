@@ -76,8 +76,8 @@ def plot_abstraction_scc(ab, ax=None):
     if ax is None:
         ax = mpl.pyplot.subplot()
     l, u = ab.ppp.domain.bounding_box
-    ax.set_xlim(l[0,0], u[0,0])
-    ax.set_ylim(l[1,0], u[1,0])
+    ax.set_xlim(l[0, 0], u[0, 0])
+    ax.set_ylim(l[1, 0], u[1, 0])
     for component in components:
         # map to random colors
         red = np.random.rand()
