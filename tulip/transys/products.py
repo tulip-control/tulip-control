@@ -60,6 +60,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
     instead of adding each successor to the visited states
     when it is poped from the queue.
     """
+
     def __init__(self, ba, ts):
         self.ba = ba
         self.ts = ts
