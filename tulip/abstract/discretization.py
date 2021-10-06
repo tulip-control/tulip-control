@@ -1357,7 +1357,8 @@ def _discretize_dual(
                     ] = np.multiply(
                         transitions[:, i],
                         adj_k[:, i])
-                # if j and new_idx are neighbor, then add new_idx ---> j
+                # if `j` and `new_idx` are neighbors,
+                # then add `new_idx` ---> `j`
                 if adj_k[j, new_idx] != 0:
                     transitions[j, new_idx] = 1
                 #
