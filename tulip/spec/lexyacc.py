@@ -139,7 +139,9 @@ class Lexer:
 
     t_XOR = r'\^'
 
-    t_EQUALS = r'='  # a declarative language has no assignment
+    t_EQUALS = r'='
+        # a declarative language
+        # has no assignment
     t_NEQUALS = r'!=|/='
     t_LT = r'<'
     t_LE = r'<=|=<'
