@@ -478,8 +478,9 @@ class RabinPairs:
             self._pairs[pair_index][0].add_from(good_states)
             self._pairs[pair_index][1].add_from(bad_states)
         except IndexError:
-            raise Exception("A pair with pair_index doesn't exist.\n" +
-                            'Create a new one by callign .add.')
+            raise Exception(
+                'A pair with `pair_index` does not exist.\n'
+                'Create a new one by calling `.add`.')
 
     def good(self, index):
         """Return set `L` of "good" states for this pair.
