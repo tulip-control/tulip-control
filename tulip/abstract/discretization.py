@@ -832,7 +832,7 @@ def _discretize_bi(
             # cut difference into connected pieces
             difflist = pc.separate(diff)
             difflist += isect_list[1:]
-#            n_isect = len(isect_list) -1
+            # n_isect = len(isect_list) - 1
             num_new = len(difflist)
             # add each piece, as a new state
             for region in difflist:
