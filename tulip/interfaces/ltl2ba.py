@@ -263,13 +263,13 @@ def call_ltl2ba(formula, prefix=''):
 
     Depends
     =======
-    ltl2ba: http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/
+    `ltl2ba`: <http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/>
 
-    @param formula: LTL formula for input to ltl2ba
-    @type formula: str
+    @param formula: LTL formula for input to `ltl2ba`
+    @type formula: `str`
 
     @return: Buchi Automaton
-    @rtype: tulip.transys.BA
+    @rtype: `tulip.transys.BA`
     """
     try:
         subprocess.call(
