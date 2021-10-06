@@ -310,8 +310,11 @@ class PwaSysDyn:
             p = list_subsys[0].E.shape[1]  # Disturbance space dimension
             for subsys in list_subsys:
                 uncovered_dom = uncovered_dom.diff(subsys.domain)
-                if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or
-                    p!=subsys.E.shape[1]):
+                dims_differ = (
+                    n != subsys.A.shape[1] or
+                    m != subsys.B.shape[1] or
+                    p != subsys.E.shape[1])
+                if dims_differ:
                     raise Exception(
                         'state, input, disturbance '
                         'dimensions have to be the '

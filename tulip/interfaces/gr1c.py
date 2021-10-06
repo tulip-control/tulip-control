@@ -261,8 +261,11 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         li = [v.replace("&amp;", "&") for v in li]
         setattr(spec, spec_tag, li)
     aut_elem = elem.find(ns_prefix+"aut")
-    if aut_elem is None or (
-        (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
+    return_now = (
+        aut_elem is None or (
+        aut_elem.text is None and
+            len(aut_elem.getchildren()) == 0))
+    if return_now:
         mach = None
         return (spec, mach)
     # Assume version 1 of tulipcon XML
