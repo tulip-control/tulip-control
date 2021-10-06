@@ -311,7 +311,9 @@ def export_mealy(mealy_machine, is_continuous):
     init_nodes = mealy_machine.successors(SINIT)
     assert init_nodes, init_nodes
     init_trans = list()
-    for u, v, label in mealy_machine.edges(init_nodes, data=True):
+    edges = mealy_machine.edges(
+        init_nodes, data=True)
+    for u, v, label in edges:
         assert u != SINIT, u
         assert v != SINIT, v
         trans_dict = dict(
