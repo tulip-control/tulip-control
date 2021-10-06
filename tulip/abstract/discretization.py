@@ -1647,9 +1647,14 @@ def multiproc_discretize_switched(
     mode_args = dict()
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
-        mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
-    jobs = [mp.Process(target=multiproc_discretize, args=args)
-            for args in mode_args.values()]
+        mode_args[mode] = (
+            q, mode, ppp,
+            cont_dyn, disc_params[mode])
+    jobs = [
+        mp.Process(
+            target=multiproc_discretize,
+            args=args)
+        for args in mode_args.values()]
     for job in jobs:
         job.start()
     # flush before join:
@@ -1668,9 +1673,13 @@ def multiproc_discretize_switched(
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
         params = disc_params[mode]
-        mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
-    jobs = [mp.Process(target=multiproc_get_transitions, args=args)
-            for args in mode_args.values()]
+        mode_args[mode] = (
+            q, merged_abstr, mode, cont_dyn, params)
+    jobs = [
+        mp.Process(
+            target=multiproc_get_transitions,
+            args=args)
+        for args in mode_args.values()]
     for job in jobs:
         job.start()
     trans = dict()

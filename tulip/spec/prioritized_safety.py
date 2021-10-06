@@ -85,14 +85,14 @@ class PrioritizedSpecification:
         return self
 
     def __next__(self):
-        while self._iter_level < len(self._Psi) and self._iter_index >= len(
-            self._Psi[self._iter_level]
-        ):
+        while (
+                self._iter_level < len(self._Psi) and
+                self._iter_index >= len(self._Psi[self._iter_level])):
             self._iter_index = 0
             self._iter_level += 1
-        if self._iter_level >= len(self._Psi) or self._iter_index >= len(
-            self._Psi[self._iter_level]
-        ):
+        if (
+                self._iter_level >= len(self._Psi) or
+                self._iter_index >= len(self._Psi[self._iter_level])):
             raise StopIteration
         result = self._Psi[self._iter_level][self._iter_index]
         self._iter_index += 1
@@ -120,7 +120,9 @@ class PrioritizedSpecification:
             the level of the rule in the hierarchy
         """
         assert isinstance(fa, FA)
-        assert isinstance(priority, float) or isinstance(priority, int)
+        assert (
+            isinstance(priority, float) or
+            isinstance(priority, int))
         assert isinstance(level, int)
         assert priority > 0
         assert level >= 0
