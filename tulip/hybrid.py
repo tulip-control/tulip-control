@@ -657,10 +657,15 @@ def _push_time_data(system_list, time_semantics, timestep):
     Emits warnings if overwriting existing data.
     """
     for system in system_list:
-        if (system.time_semantics != time_semantics) and (system.time_semantics
-            is not None):
+        overwriting_time_semantics = (
+            system.time_semantics != time_semantics and
+            system.time_semantics is not None)
+        if overwriting_time_semantics:
             warn('Overwriting existing time semantics data.')
-        if (system.timestep != timestep) and (system.timestep is not None):
+        overwriting_timestep_data = (
+            system.timestep != timestep and
+            system.timestep is not None)
+        if overwriting_timestep_data:
             warn('Overwriting existing timestep data.')
         system.time_semantics = time_semantics
         system.timestep = timestep
@@ -710,11 +715,17 @@ def _check_time_consistency(
     """
     # Check that time semantics for all subsystems match
     for ind in range(len(system_list) - 1):
-        if system_list[ind].timestep != system_list[ind+1].timestep:
+        timesteps_differ = (
+            system_list[ind].timestep !=
+            system_list[ind + 1].timestep)
+        if timesteps_differ:
             raise ValueError(
                 'Not all timesteps in given '
                 'systems are the same.')
-        if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
+        time_semantics_differ = (
+            system_list[ind].time_semantics !=
+            system_list[ind + 1].time_semantics)
+        if time_semantics_differ:
             raise ValueError(
                 'Not all time-semantics are the same.')
     # Check that time semantics for all subsystems
