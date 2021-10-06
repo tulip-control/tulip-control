@@ -82,10 +82,10 @@ def check(formula):
     dfa = trs.automata.FiniteWordAutomaton(
         atomic_proposition_based=False,
         deterministic=True)
-    dfa.alphabet |= {'!', 'W', 'U', 'G', 'F',
-                     'U_left', 'U_right',
-                     'W_left', 'W_right'}
-
+    dfa.alphabet |= {
+        '!', 'W', 'U', 'G', 'F',
+        'U_left', 'U_right',
+        'W_left', 'W_right'}
     dfa.states.add_from({'gf', 'fg', 'g', 'f'})
     dfa.states.initial.add('gf')
     #
@@ -336,8 +336,9 @@ def stability_to_gr1(p, aux='aux'):
     v = tx.check_var_name_conflict(p, a0)
     sys_vars = v | {a0}
     sys_init = {'!' + a}
-    sys_safe = {a + ' -> ' + p,
-                a + ' -> X ' + a}
+    sys_safe = {
+        a + ' -> ' + p,
+        a + ' -> X ' + a}
     sys_prog = {a}
     return GRSpec(
         sys_vars=sys_vars,
