@@ -305,7 +305,7 @@ class PwaSysDyn:
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
 
-        if ((domain is not None) and
+        if (domain is not None and
             (not (isinstance(domain, pc.Polytope) or
                 isinstance(domain, pc.Region))
             )
