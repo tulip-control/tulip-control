@@ -134,7 +134,7 @@ def _untaglist(x, cast_f=float,
         elem = ET.fromstring(x)
     else:
         elem = x
-    if (namespace is None) or (len(namespace) == 0):
+    if namespace is None or len(namespace) == 0:
         ns_prefix = ''
     else:
         ns_prefix = '{' + namespace + '}'
@@ -181,7 +181,7 @@ def _untagdict(
         elem = ET.fromstring(x)
     else:
         elem = x
-    if (namespace is None) or (len(namespace) == 0):
+    if namespace is None or len(namespace) == 0:
         ns_prefix = ""
     else:
         ns_prefix = "{"+namespace+"}"
@@ -230,13 +230,13 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         elem = ET.fromstring(x)
     else:
         elem = x
-    if (namespace is None) or (len(namespace) == 0):
+    if namespace is None or len(namespace) == 0:
         ns_prefix = ''
     else:
         ns_prefix = '{' + namespace + '}'
     if elem.tag != ns_prefix + 'tulipcon':
         raise TypeError('root tag should be tulipcon.')
-    if ('version' not in elem.attrib.keys()):
+    if 'version' not in elem.attrib.keys():
         raise ValueError('unversioned tulipcon XML string.')
     if int(elem.attrib['version']) != 1:
         raise ValueError("unsupported tulipcon XML version: "+

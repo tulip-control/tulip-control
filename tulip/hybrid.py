@@ -153,7 +153,7 @@ class LtiSysDyn:
             if nA != nB:
                 raise ValueError('A and B must have same number of rows')
             if Uset is not None:
-                if (Uset.dim != mB) and (Uset.dim != mB + nA):
+                if Uset.dim != mB and Uset.dim != mB + nA:
                     msg = 'Uset.dim != B.size[1]'
                     msg += ' and != B.size[1] + A.size[1]'
                     raise Exception(msg)

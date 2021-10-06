@@ -1953,7 +1953,7 @@ def merge_partitions(abstractions):
                 pi = parents[mode][i]
                 pj = parents[mode][j]
                 part = abstractions[mode].ppp
-                if (part.adj[pi, pj] == 1) or (pi == pj):
+                if part.adj[pi, pj] == 1 or pi == pj:
                     touching = True
                     break
             if not touching:
