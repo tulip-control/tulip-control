@@ -289,12 +289,16 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     """
     if (grid_size!=None)&(num_grid_pnts!=None):
         raise Exception(
-            "add_grid: Only one of the grid size or number of "
-            "grid points parameters is allowed to be given.")
+            'Only one of '
+            'the grid size or number of '
+            'grid points parameters is '
+            'allowed to be given.')
     if (grid_size==None)&(num_grid_pnts==None):
         raise Exception(
-            "add_grid: At least one of the grid size or number of "
-            "grid points parameters must be given.")
+            'At least one of the '
+            'grid size or number of '
+            'grid points parameters '
+            'must be given.')
     dim=len(ppp.domain.A[0])
     domain_bb = ppp.domain.bounding_box
     size_list=list()
@@ -304,14 +308,15 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 size_list=grid_size
             else:
                 raise Exception(
-                    "add_grid: grid_size isn't given in a correct format."
-                )
+                    '`grid_size` is not '
+                    'given in a correct format.')
         elif isinstance( grid_size, float ):
             for i in range(dim):
                 size_list.append(grid_size)
         else:
-            raise Exception("add_grid: "
-                "grid_size isn't given in a correct format.")
+            raise Exception(
+                'grid_size is not given in '
+                'a correct format.')
     else:
         if isinstance( num_grid_pnts, list ):
             if len(num_grid_pnts) == dim:
@@ -322,10 +327,10 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                             ) / num_grid_pnts[i]
                         size_list.append(grid_size)
                     else:
-                        raise Exception("add_grid: "
+                        raise Exception(
                             "num_grid_pnts isn't given in a correct format.")
             else:
-                raise Exception("add_grid: "
+                raise Exception(
                     "num_grid_pnts isn't given in a correct format.")
         elif isinstance( num_grid_pnts, int ):
             for i in range(dim):
@@ -334,7 +339,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                     ) / num_grid_pnts
                 size_list.append(grid_size)
         else:
-            raise Exception("add_grid: "
+            raise Exception(
                 "num_grid_pnts isn't given in a correct format.")
     j=0
     list_grid=dict()

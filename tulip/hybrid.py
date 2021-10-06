@@ -300,8 +300,9 @@ class PwaSysDyn:
                 isinstance(domain, pc.Region))
             )
         ):
-            raise Exception("PwaSysDyn: `domain` has to be a Polytope or Region")
-
+            raise Exception(
+                '`domain` has to be '
+                'a `Polytope` or `Region`')
         if len(list_subsys) > 0:
             uncovered_dom = domain.copy()
             n = list_subsys[0].A.shape[1]  # State space dimension
@@ -311,15 +312,18 @@ class PwaSysDyn:
                 uncovered_dom = uncovered_dom.diff(subsys.domain)
                 if (n!=subsys.A.shape[1] or m!=subsys.B.shape[1] or
                     p!=subsys.E.shape[1]):
-                    raise Exception("PwaSysDyn: state, input, disturbance " +
-                                    "dimensions have to be the same for all " +
-                                     "subsystems")
+                    raise Exception(
+                        'state, input, disturbance '
+                        'dimensions have to be the '
+                        'same for all subsystems')
             if not pc.is_empty(uncovered_dom):
-                raise Exception("PwaSysDyn: subdomains must cover the domain")
+                raise Exception(
+                    'subdomains must cover the domain')
             for x in itertools.combinations(list_subsys, 2):
                 if pc.is_fulldim(x[0].domain.intersect(x[1].domain) ):
-                    raise Exception("PwaSysDyn: subdomains have to be mutually"+
-                        " exclusive")
+                    raise Exception(
+                        'subdomains have to be mutually '
+                        'exclusive')
         self.list_subsys = list_subsys
         self.domain = domain
         # Input time semantics
@@ -458,11 +462,12 @@ class SwitchedSysDyn:
         """
         # check that the continuous domain is specified
         if cts_ss is None:
-            warn('continuous state space not given to SwitchedSysDyn')
+            warn('requires continuous state-space `cts_ss`')
         else:
             if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
-                raise Exception('SwitchedSysDyn: ' +
-                   '`cts_ss` must be a Polytope or Region')
+                raise Exception(
+                   '`cts_ss` must be '
+                   'a `Polytope` or `Region`')
         self.disc_domain_size = disc_domain_size
         # If label numbers agree with
         # `disc_domain_size`, then use them.

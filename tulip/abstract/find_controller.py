@@ -229,9 +229,9 @@ def get_input(
     if r is None:
         r = np.zeros([N * x0.size, 1])
     if (R.shape[0] != R.shape[1]) or (R.shape[0] != N * x0.size):
-        raise Exception("get_input: "
-                        "R must be square and have side N * dim(state space)")
-
+        raise Exception(
+            '`R` must be square and '
+            'have side `N * dim(state space)`')
     if (Q.shape[0] != Q.shape[1]) or (Q.shape[0] != N * ssys.B.shape[1]):
         raise Exception("get_input: "
                         "Q must be square and have side N * dim(input space)")
@@ -244,8 +244,9 @@ def get_input(
                             ' to state s' + str(end)
                             )
     else:
-        print("get_input: "
-              "Warning, no transition matrix found, assuming feasible")
+        print(
+            'Warning: no transition matrix found, '
+            'assuming feasible.')
     if (not conservative) & (orig is None):
         print("List of original proposition preserving "
               "partitions not given, reverting to conservative mode")
@@ -324,7 +325,8 @@ def get_input(
                 low_u = u
                 low_cost = cost
         if low_cost == np.inf:
-            raise Exception("get_input: Did not find any trajectory")
+            raise Exception(
+                'Did not find any trajectory')
     else:
         P3 = P_end
         if mid_weight > 0:
@@ -457,12 +459,10 @@ def get_input_helper(
         ).T
         if solver != None:
             raise Exception(
-                "_get_input_helper: ",
                 "solver specified but only 'None' allowed for ord = 2")
         sol = solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
             raise _InputHelperQPException(
-                'getInputHelper: '
                 'QP solver finished with status ' +
                 str(sol['status']))
         u = np.array(sol['x']).flatten()
@@ -487,7 +487,6 @@ def get_input_helper(
     sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP, solver=solver)
     if sol['status'] != 0:
         raise _InputHelperLPException(
-            'getInputHelper: '
             'LP solver finished with error code ' +
             str(sol['status']))
     var = np.array(sol['x']).flatten()
