@@ -506,8 +506,9 @@ class PropPreservingPartition(pc.MetricPartition):
             if m != k:
                 raise ValueError('adj must be square')
             if m != n:
-                msg = "adj size doesn't agree with number of regions"
-                raise ValueError(msg)
+                raise ValueError(
+                    '`adj` size does not agree '
+                    'with number of regions')
         self.regions = regions[:]
         if check:
             for region in regions:
