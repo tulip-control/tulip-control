@@ -660,7 +660,7 @@ def ppp2ts(part):
     """
     # generate transition system and add transitions
     ofts = trs.FTS()
-    adj = part.adj #sp.lil_matrix
+    adj = part.adj  # `sp.lil_matrix`
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
