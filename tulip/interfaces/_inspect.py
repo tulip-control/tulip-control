@@ -68,8 +68,7 @@ def print_env():
             'Can be installed by compiling and linking the Cython bindings '
             'of `dd` to CUDD.\n')
     else:
-        s = 'Found Cython module `dd.cudd` as:\n    {dd_cudd}\n.'.format(
-            dd_cudd=dd_cudd)
+        s = f'Found Cython module `dd.cudd` as:\n    {dd_cudd}\n.'
     c.append(s)
     s = _format_python_package_message(
         'omega', omega_int.omega, 'https://pypi.python.org/pypi/omega')
@@ -93,8 +92,7 @@ def print_env():
             'Could not import module `cvxopt.glpk`.\n'
             'Can be installed by compiling and linking `cvxopt` to GLPK.\n')
     else:
-        s = 'Found module `cvxopt.glpk` as:\n    {cvxopt_glpk}\n.'.format(
-            cvxopt_glpk=cvxopt_glpk)
+        s = f'Found module `cvxopt.glpk` as:\n    {cvxopt_glpk}\n.'
     c.append(s)
     s = _format_python_package_message(
         'polytope', polytope, 'https://pypi.python.org/pypi/polytope')
@@ -125,14 +123,12 @@ def _format_python_package_message(name, package, url):
     """Return a `str` reporting information about package."""
     if package is None:
         s = (
-            'Could not import Python package `{name}`.\n'
-            'Can be installed from:\n    `{url}`\n').format(
-                name=name, url=url)
+            f'Could not import Python package `{name}`.\n'
+            f'Can be installed from:\n    `{url}`\n')
     else:
         s = (
-            'Found Python package `{name}` as:\n'
-            '    {gr1py}\n').format(
-                name=name, gr1py=package)
+            f'Found Python package `{name}` as:\n'
+            f'    {package}\n')
     return s
 
 

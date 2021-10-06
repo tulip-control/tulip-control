@@ -198,7 +198,7 @@ def write_case(enviroment, system, f, verbosem):
     """
     # for each case
     for i in range(queue.qsize()):
-        f.write('\tcase '+str(i)+'\n')
+        f.write(f'\tcase {i}\n')
         # for each condition within each case
         temp = queue.get()
         ef = 0
@@ -214,23 +214,27 @@ def write_case(enviroment, system, f, verbosem):
                     count=enviroment.qsize()
                     temp1=enviroment.get()
                     if count == l + 1:
-                        f.write(temp1+' == '+temp2[1][temp1])
+                        f.write(
+                            f'{temp1} == {temp2[1][temp1]}')
                     else:
-                        f.write(temp1+' == '+temp2[1][temp1]+' && ')
+                        f.write(
+                            f'{temp1} == {temp2[1][temp1]} && ')
                     enviroment.put(temp1)
                 f.write('\n')
                 if verbosem == 1:
-                    f.write('\t\t\tstate = '+str(temp2[0])+';\n')
+                    f.write(f'\t\t\tstate = {temp2[0]};\n')
                 elif verbosem == 0:
-                    f.write('\t\t\tstate = '+str(temp2[0])+'\n')
+                    f.write(f'\t\t\tstate = {temp2[0]}\n')
                 else:
                     raise Exception
                 for l in range(system.qsize()):
                     temp1=system.get()
                     if verbosem==1:
-                        f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+';\n')
+                        f.write(
+                            f'\t\t\t{temp1} = {temp2[1][temp1]};\n')
                     elif verbosem==0:
-                        f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+'\n')
+                        f.write(
+                            f'\t\t\t{temp1} = {temp2[1][temp1]}\n')
                     else:
                         raise Exception
                     system.put(temp1)
@@ -240,9 +244,9 @@ def write_case(enviroment, system, f, verbosem):
             for l in range(system.qsize()):
                 temp1 = system.get()
                 if verbosem == 1:
-                    f.write('\t\t'+temp1+' = '+temp[1][temp1]+';\n')
+                    f.write(f'\t\t{temp1} = {temp[1][temp1]};\n')
                 elif verbosem == 0:
-                    f.write('\t\t'+temp1+' = '+temp[1][temp1]+'\n')
+                    f.write(f'\t\t{temp1} = {temp[1][temp1]}\n')
                 else:
                     raise Exception
                 system.put(temp1)
@@ -252,9 +256,9 @@ def write_case(enviroment, system, f, verbosem):
             for l in range(system.qsize()):
                 temp1 = system.get()
                 if verbosem == 1:
-                    f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+';\n')
+                    f.write(f'\t\t\t{temp1} = {temp[1][temp1]};\n')
                 elif verbosem == 0:
-                    f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+'\n')
+                    f.write(f'\t\t\t{temp1} = {temp[1][temp1]}\n')
                 else:
                     raise Exception
                 system.put(temp1)
@@ -266,9 +270,9 @@ def write_case(enviroment, system, f, verbosem):
     for l in range(system.qsize()):
         temp1 = system.get()
         if verbosem==1:
-            f.write('\t\t'+temp1+' = 0;\n')
+            f.write(f'\t\t{temp1} = 0;\n')
         elif verbosem==0:
-            f.write('\t\t'+temp1+' = 0\n')
+            f.write(f'\t\t{temp1} = 0\n')
         else:
             raise Exception
         system.put(temp1)
@@ -295,7 +299,7 @@ def write_case_no(enviroment, system, f, verbosem):
     for i in range(queue.qsize()):
         # for each condition within each case
         temp = queue.get()
-        f.write('\tcase '+str(temp[0])+'\n')
+        f.write(f'\tcase {temp[0])}\n')
         ef = 0
         for k in range(queue2.qsize()):
             temp2 = queue2.get()
@@ -309,23 +313,25 @@ def write_case_no(enviroment, system, f, verbosem):
                     count = enviroment.qsize()
                     temp1 = enviroment.get()
                     if count == l + 1:
-                        f.write(temp1+' == '+temp2[1][temp1])
+                        f.write(
+                            f'{temp1} == {temp2[1][temp1]}')
                     else:
-                        f.write(temp1+' == '+temp2[1][temp1]+' && ')
+                        f.write(
+                            f'{temp1} == {temp2[1][temp1]} && ')
                     enviroment.put(temp1)
                 f.write('\n')
                 if verbosem==1:
-                    f.write('\t\t\tstate = '+str(k)+';\n')
+                    f.write(f'\t\t\tstate = {k};\n')
                 elif verbosem==0:
-                    f.write('\t\t\tstate = '+str(k)+'\n')
+                    f.write(f'\t\t\tstate = {k}\n')
                 else:
                     raise Exception
                 for l in range(system.qsize()):
                     temp1=system.get()
                     if verbosem==1:
-                        f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+';\n')
+                        f.write(f'\t\t\t{temp1} = {temp2[1][temp1]};\n')
                     elif verbosem==0:
-                        f.write('\t\t\t'+temp1+' = '+temp2[1][temp1]+'\n')
+                        f.write(f'\t\t\t{temp1} = {temp2[1][temp1]}\n')
                     else:
                         raise Exception
                     system.put(temp1)
@@ -335,9 +341,11 @@ def write_case_no(enviroment, system, f, verbosem):
             for l in range(system.qsize()):
                 temp1=system.get()
                 if verbosem==1:
-                    f.write('\t\t'+temp1+' = '+temp[1][temp1]+';\n')
+                    f.write(
+                        f'\t\t{temp1} = {temp[1][temp1]};\n')
                 elif verbosem==0:
-                    f.write('\t\t'+temp1+' = '+temp[1][temp1]+'\n')
+                    f.write(
+                        f'\t\t{temp1} = {temp[1][temp1]}\n')
                 else:
                     raise Exception
                 system.put(temp1)
@@ -347,9 +355,11 @@ def write_case_no(enviroment, system, f, verbosem):
             for l in range(system.qsize()):
                 temp1=system.get()
                 if verbosem==1:
-                    f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+';\n')
+                    f.write(
+                        f'\t\t\t{temp1} = {temp[1][temp1]};\n')
                 elif verbosem==0:
-                    f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+'\n')
+                    f.write(
+                        f'\t\t\t{temp1} = {temp[1][temp1]}\n')
                 else:
                     raise Exception
                 system.put(temp1)
@@ -361,9 +371,9 @@ def write_case_no(enviroment, system, f, verbosem):
     for l in range(system.qsize()):
         temp1 = system.get()
         if verbosem == 1:
-            f.write('\t\t'+temp1+' = 0;\n')
+            f.write(f'\t\t{temp1} = 0;\n')
         elif verbosem == 0:
-            f.write('\t\t'+temp1+' = 0\n')
+            f.write(f'\t\t{temp1} = 0\n')
         else:
             raise Exception
         system.put(temp1)
@@ -376,16 +386,16 @@ queue2 = _queue.Queue()
 enviroment = _queue.Queue()
 system = _queue.Queue()
 try:
-    load_file(sys.argv[1]+'.aut')
-    read_variables(sys.argv[1]+'.smv')
+    load_file(f'{sys.argv[1]}.aut')
+    read_variables(f'{sys.argv[1]}.smv')
     q=question('Shall there be a semicolon printed after each variable assignment? [Y/n]')
     q2=question('Shall the script exclude no successors? [Y/n]')
     if q:
         verbosem = 1
     else:
         verbosem = 0
-    if not os.path.isfile(sys.argv[2]+'.m'):
-        f=open(sys.argv[2]+'.m','w')
+    if not os.path.isfile(f'{sys.argv[2]}.m'):
+        f = open(f'{sys.argv[2]}.m', 'w')
         write_startline(enviroment, system, f)
         if q2:
             for i in range(queue.qsize()):
@@ -400,7 +410,9 @@ try:
         f.close()
         if queue.get()[0] == -1:
             raise IOError
-        print('MATLAB script written to '+sys.argv[2]+'.m'+' with success\n')
+        print(
+            'MATLAB script written to '
+            f'`{sys.argv[2]}.m` with success\n')
     else:
         print('Enter a matlab filename that does not exist.')
 except IOError:

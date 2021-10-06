@@ -143,15 +143,25 @@ class FiniteStateAutomaton(LabeledDiGraph):
         return self._accepting
 
     def __str__(self):
+        states = pformat(
+            self.states(data=False),
+            indent=3)
+        initial_states = pformat(
+            self.states.initial,
+            indent=3)
+        accepting_states = pformat(
+            self.states.accepting,
+            indent=3)
+        newlines = 2 * '\n'
         s = (
-            _hl + '\n' + self.automaton_type + ': ' +
-            self.name + '\n' + _hl + '\n' +
-            'States:\n' +
-            pformat(self.states(data=False), indent=3) + 2 * '\n' +
-            'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n' +
-            'Accepting States:\n' +
-            pformat(self.states.accepting, indent=3) + 2 * '\n')
+            f'{_hl}\n{self.automaton_type}: '
+            f'{self.name}\n{_hl}\n'
+            'States:\n'
+            f'{states}{newlines}'
+            'Initial States:\n'
+            f'{initial_states}{newlines}'
+            'Accepting States:\n'
+            f'{accepting_states}{newlines}')
         if self.atomic_proposition_based:
             s += 'Input Alphabet Letters (\\in 2^AP):\n\t'
         else:
@@ -159,9 +169,9 @@ class FiniteStateAutomaton(LabeledDiGraph):
                 s += ('Input Alphabet Letters:\n\t' +
                       str(self.alphabet) + 2 * '\n')
         s += (
-            'Transitions & labeling w/ Input Letters:\n' +
+            'Transitions and labeling with Input Letters:\n' +
             pformat(self.transitions(data=True), indent=3) +
-            '\n' + _hl + '\n')
+            f'\n{_hl}\n')
         return s
 
     def remove_node(self, node):
@@ -293,7 +303,7 @@ def tuple2ba(
     # prepending states with given str
     if prepend_str:
         logger.debug(
-            'Given string:\n\t' + str(prepend_str) + '\n' +
+            f'Given string:\n\t{prepend_str}\n'
             'will be prepended to all states.')
     states = prepend_with(
         states, prepend_str)
@@ -384,11 +394,14 @@ class RabinPairs:
         self._pairs = []
 
     def __str__(self):
-        s = 'L = Good states, U = Bad states\n' + 30 * '-' + '\n'
+        dashes = 30 * '-'
+        s = (
+            'L = Good states, U = Bad states\n'
+            f'{dashes}\n')
         for index, (good, bad) in enumerate(self._pairs):
             s += (
-                'Pair: ' + str(index) + ', L = ' + str(good) +
-                ', U = ' + str(bad) + '\n')
+                f'Pair: {index}, L = {good}' +
+                f', U = {bad}\n')
         return s
 
     def __getitem__(self, index):
@@ -551,9 +564,10 @@ class ParityGame(GameGraph):
             '-----------\n'
             'n: node, p: player, c: color\n\n')
         for node, attr in self.states(data=True):
-            s += 'nd = {node}, p = {player}, c = {color}\n'.format(
-                npde=node, player=attr['player'], color=attr['color'])
-        s += '\n{t}'.format(t=self.transitions)
+            player = attr['player']
+            color = attr['color']
+            s += f'nd = {node}, p = {player}, c = {color}\n'
+        s += f'\n{self.transitions}'
         return s
 
     @property

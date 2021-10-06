@@ -133,19 +133,18 @@ def _state2dot(
     else:
         fillcolor = _format_color(fc, 'dot')
     if corners and filled:
-        node_style = '"' + corners + ', ' + filled + '"'
+        node_style = f'"{corners}, {filled}"'
     elif corners:
-        node_style = '"' + corners + '"'
+        node_style = f'"{corners}"'
     else:
-        node_style = '"' + filled + '"'
-
+        node_style = f'"{filled}"'
     to_dot_graph.add_node(
         state,
         label=node_dot_label,
         shape=shape,
         style=node_style,
         color=rim_color,
-        fillcolor='"' + fillcolor + '"')
+        fillcolor=f'"{fillcolor}"')
 
 
 def _state2tikz(
@@ -164,7 +163,7 @@ def _state2tikz(
     else:
         raise ValueError('Unknown rankdir')
     if is_initial:
-        style += ', initial by arrow, ' + init_dir + ', initial text='
+        style += f', initial by arrow, {init_dir}, initial text='
     if is_accepting:
         style += ', accepting'
     if graph.dot_node_shape['normal'] == 'rectangle':
@@ -181,7 +180,8 @@ def _state2tikz(
              'left_color', 'right_color'}
         for x in s:
             if x in d:
-                style += ', ' + x + ' = ' + _format_color(d[x], 'tikz')
+                style += f', {x} = ' + _format_color(
+                    d[x], 'tikz')
     elif fill is not None:
         # not gradient
         style += ', fill = ' + _format_color(fill, 'tikz')
@@ -209,7 +209,9 @@ def _format_color(color, prog='tikz'):
         raise Exception(
             'color must be str or dict')
     if prog == 'tikz':
-        s = '!'.join([k + '!' + str(v) for k, v in color.items()])
+        s = '!'.join(
+            f'{k}!{v}'
+            for k, v in color.items())
     elif prog == 'dot':
         t = sum(color.values())
         try:
@@ -224,10 +226,13 @@ def _format_color(color, prog='tikz'):
         except:
             logger.warning(
                 'failed to import webcolors')
-            s = ':'.join([k + ';' + str(v / t) for k, v in color.items()])
+            s = ':'.join(
+                f'{k};{v / t}'
+                for k, v in color.items())
     else:
-        raise ValueError('Unknown program: ' + str(prog) + '. '
-                         "Available options are: 'dot' or 'tikz'.")
+        raise ValueError(
+            f'Unknown program: {prog}. '
+            "Available options are: 'dot' or 'tikz'.")
     return s
 
 
@@ -237,7 +242,7 @@ def _place_initial_states(trs_graph, pd_graph, tikz):
     init_subg.graph_attr['rank'] = 'source'
     for node in trs_graph.states.initial:
         init_subg.node(str(node))
-        phantom_node = 'phantominit' + str(node)
+        phantom_node = f'phantominit{node}'
         init_subg.node(str(phantom_node))
     pd_graph.subgraph(init_subg)
 
@@ -245,7 +250,7 @@ def _place_initial_states(trs_graph, pd_graph, tikz):
 def _add_incoming_edge(
         g,
         state):
-    phantom_node = 'phantominit' + str(state)
+    phantom_node = f'phantominit{state}'
     g.add_node(
         phantom_node,
         label='""',
@@ -274,7 +279,7 @@ def _form_node_label(state, state_data, label_def,
     # SVG requires breaking the math environment into
     # one math env per line. Just make 1st line math env
     # if latex:
-    #    state_str = '$' + state_str + '$'
+    #    state_str = f'${state_str}$'
     #    state_str = fill(state_str, width=width)
     node_dot_label = state_str
     # newline between state name and label, only if state is labeled
@@ -314,7 +319,7 @@ def _form_node_label(state, state_data, label_def,
             r'\\n', r'\\\\ ')
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = (
-            r'$\\begin{matrix} ' + node_dot_label +
+            rf'$\\begin{{matrix}} {node_dot_label}'
             r'\\end{matrix}$'
         )
     return node_dot_label
@@ -395,7 +400,7 @@ def _form_edge_label(edge_data, label_def,
                   label_str + sep_label_sets)
     if tikz:
         label = r'\\begin{matrix}' + label + r'\\end{matrix}'
-    label = '"' + label + '"'
+    label = f'"{label}"'
     return label
 
 
@@ -511,7 +516,7 @@ def plot_dot(
     if not isinstance(graph, nx.Graph):
         raise TypeError(
             'graph not networkx class.' +
-            'Got instead: ' + str(type(graph)))
+            f'Got instead: {type(graph)}')
     dot_graph = _graphics.networkx_to_graphviz(graph)
     dot_graph.graph_attr['rankdir'] = rankdir
     dot_graph.graph_attr['splines'] = 'true'

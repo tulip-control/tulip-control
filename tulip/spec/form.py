@@ -112,10 +112,10 @@ class LTL:
         self.check_vars()
 
     def __repr__(self):
-        return ("LTL('{f}', input_variables={inputv}, " +
-                'output_variables={outv})').format(f=self.formula,
-                                                   inputv=self.input_variables,
-                                                   outv=self.output_variables)
+        return (
+            f"LTL('{self.formula}', "
+            f"input_variables={self.input_variables}, " +
+            f"output_variables={self.output_variables})")
 
     def __str__(self):
         return str(self.formula)
@@ -124,7 +124,7 @@ class LTL:
         if d == 'boolean':
             return d
         elif isinstance(d, tuple) and len(d) == 2:
-            return '[' + str(d[0]) + ', ' + str(d[1]) + ']'
+            return f'[{d[0]}, {d[1]}]'
         elif hasattr(d, '__iter__'):
             return '{' + ', '.join([str(e) for e in d]) + '}'
         else:
@@ -145,12 +145,12 @@ class LTL:
         if self.input_variables:
             output += 'INPUT:\n'
             for k, v in self.input_variables.items():
-                output += str(k) + ' : ' + self._domain_str(v) + ';\n'
+                output += f'{k} : {self._domain_str(v)};\n'
         if self.output_variables:
             output += '\nOUTPUT:\n'
             for k, v in self.output_variables.items():
-                output += str(k) + ' : ' + self._domain_str(v) + ';\n'
-        return output + '\n%%\n' + self.formula
+                output += f'{k} : {self._domain_str(v)};\n'
+        return f'{output}\n%%\n{self.formula}'
 
     def check_vars(self):
         """Raise Exception if variabe definitions are invalid.
@@ -164,8 +164,9 @@ class LTL:
         common_vars = {x for x in self.input_variables
                        if x in self.output_variables}
         if common_vars:
-            raise Exception('Env and sys have variables in common: ' +
-                            str(common_vars))
+            raise Exception(
+                'Env and sys have variables in '
+                f'common: {common_vars}')
 
     def check_form(self, check_undeclared_identifiers=False):
         """Verify formula syntax and type-check variable domains.
@@ -519,24 +520,16 @@ class GRSpec(LTL):
         target.update(d)
 
     def __repr__(self):
-        args = (',\n\n'.join([
-                'env_vars={ev}',
-                'sys_vars={sv}',
-                'env_init={ei}',
-                'sys_init={si}',
-                'env_safety={es}',
-                'sys_safety={ss}',
-                'env_prog={ep}',
-                'sys_prog={sp}']).format(
-                ev=repr(self.env_vars),
-                sv=repr(self.sys_vars),
-                ei=repr(self.env_init),
-                si=repr(self.sys_init),
-                es=repr(self.env_safety),
-                ss=repr(self.sys_safety),
-                ep=repr(self.env_prog),
-                sp=repr(self.sys_prog)))
-        return '{cls}({args})'.format(cls=type(self).__name__, args=args)
+        args = ',\n\n'.join([
+                f'env_vars={self.env_vars!r}',
+                f'sys_vars={self.sys_vars!r}',
+                f'env_init={self.env_init!r}',
+                f'sys_init={self.sys_init!r}',
+                f'env_safety={self.env_safety!r}',
+                f'sys_safety={self.sys_safety!r}',
+                f'env_prog={self.env_prog!r}',
+                f'sys_prog={self.sys_prog!r}'])
+        return f'{type(self).__name__}({args})'
 
     def __str__(self):
         return self.to_canon()
@@ -569,14 +562,14 @@ class GRSpec(LTL):
         output = 'ENVIRONMENT VARIABLES:\n'
         if self.env_vars:
             for k, v in self.env_vars.items():
-                output += '\t' + str(k) + '\t' + str(v) + '\n'
+                output += f'\t{k}\t{v}\n'
         else:
             output += '\t(none)\n'
 
         output += '\nSYSTEM VARIABLES:\n'
         if self.sys_vars:
             for k, v in self.sys_vars.items():
-                output += '\t' + str(k) + '\t' + str(v) + '\n'
+                output += f'\t{k}\t{v}\n'
         else:
             output += '\t(none)\n'
 
@@ -587,21 +580,21 @@ class GRSpec(LTL):
             output += (
                 '    INITIAL\n\t  ' +
                 '\n\t& '.join([
-                    '(' + f + ')' for f in self.env_init
+                    f'({f})' for f in self.env_init
                 ]) + '\n'
             )
         if self.env_safety:
             output += (
                 '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
-                    '(' + f + ')' for f in self.env_safety
+                    f'({f})' for f in self.env_safety
                 ]) + '\n'
             )
         if self.env_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
-                    '(' + f + ')' for f in self.env_prog
+                    f'({f})' for f in self.env_prog
                 ]) + '\n'
             )
 
@@ -610,21 +603,21 @@ class GRSpec(LTL):
             output += (
                 '    INITIAL\n\t  ' +
                 '\n\t& '.join([
-                    '(' + f + ')' for f in self.sys_init
+                    f'({f})' for f in self.sys_init
                 ]) + '\n'
             )
         if self.sys_safety:
             output += (
                 '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
-                    '(' + f + ')' for f in self.sys_safety
+                    f'({f})' for f in self.sys_safety
                 ]) + '\n'
             )
         if self.sys_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
-                    '(' + f + ')' for f in self.sys_prog
+                    f'({f})' for f in self.sys_prog
                 ]) + '\n'
             )
         return output
@@ -649,9 +642,9 @@ class GRSpec(LTL):
             for var in primed:
                 if var in self.sys_vars:
                     raise AssertionError(
-                        'Syntax error: ' +
-                        'primed system variable "{var}"'.format(var=var) +
-                        ' found in env safety: {f}'.format(f=f))
+                        'Syntax error: '
+                        f'primed system variable "{var}"'
+                        f' found in env safety: {f}')
 
     def _assert_no_primed(self, formulae, name):
         """Raise `AssertionError` if primed vars in `formulae`."""
@@ -660,9 +653,9 @@ class GRSpec(LTL):
             primed = tx.collect_primed_vars(a)
             if primed:
                 raise AssertionError(
-                    'Syntax error: ' +
-                    'primed variables: {primed}'.format(primed=primed) +
-                    ' found in {name}: {f}'.format(f=f, name=name))
+                    'Syntax error: '
+                    f'primed variables: {primed}'
+                    f' found in {name}: {f}')
 
     def copy(self):
         """Return a copy of `self`."""
@@ -738,7 +731,7 @@ class GRSpec(LTL):
         # Put the parts together, simplifying in special cases
         if guarantee:
             if assumption:
-                return '(' + assumption + ') -> (' + guarantee + ')'
+                return f'({assumption}) -> ({guarantee})'
             else:
                 return guarantee
         else:
@@ -801,17 +794,17 @@ class GRSpec(LTL):
         for side, clauses in init.items():
             if no_str:
                 clauses = [self._bool_int[x] for x in clauses]
-            logger.info('clauses to compile: ' + str(clauses))
+            logger.info(f'clauses to compile: {clauses}')
             c = [ts.translate_ast(self.ast(x), 'python').flatten()
                  for x in clauses]
-            logger.info('after translation to python: ' + str(c))
+            logger.info(f'after translation to python: {c}')
             s = _conj(c, op='and')
             if not s:
                 s = 'True'
             pyinit[side] = s
-        s = 'not ({assumption}) or ({assertion})'.format(
-            assumption=pyinit['env'],
-            assertion=pyinit['sys'])
+        assumption = pyinit['env']
+        guarantee = pyinit['sys']
+        s = f'not ({assumption}) or ({guarantee})'
         return compile(s, '<string>', 'eval')
 
     def str_to_int(self):
@@ -829,10 +822,10 @@ class GRSpec(LTL):
         for p in self._parts:
             for x in getattr(self, p):
                 if self._bool_int.get(x) in self._ast:
-                    logger.debug(str(x) + ' is in _bool_int cache')
+                    logger.debug(f'{x} is in _bool_int cache')
                     continue
                 else:
-                    logger.debug(str(x) + ' is not in _bool_int cache')
+                    logger.debug(f'{x} is not in _bool_int cache')
                 # get AST
                 a = self.ast(x)
                 # create AST copy with int and bool vars only
@@ -855,11 +848,11 @@ class GRSpec(LTL):
         if logger.getEffectiveLevel() <= logging.DEBUG:
             logger.debug('current cache of ASTs:\n' +
                          pprint.pformat(self._ast) + 3 * '\n')
-            logger.debug('check if: ' + str(x) + ', is in cache.')
+            logger.debug(f'check if: {x}, is in cache.')
         if x in self._ast:
-            logger.debug(str(x) + ' is already in cache')
+            logger.debug(f'{x} is already in cache')
         else:
-            logger.info('AST cache does not contain:\n\t' + str(x) +
+            logger.info(f'AST cache does not contain:\n\t{x}'
                         '\nNeed to parse.')
             self.parse()
         return self._ast[x]
@@ -878,9 +871,9 @@ class GRSpec(LTL):
             s = getattr(self, p)
             for x in s:
                 if x in self._ast:
-                    logger.debug(str(x) + ' is already in cache')
+                    logger.debug(f'{x} is already in cache')
                     continue
-                logger.debug('parse: ' + str(x))
+                logger.debug(f'parse: {x}')
                 tree = self.parser.parse(x)
                 g = tx.Tree.from_recursive_ast(tree)
                 tx.check_for_undefined_identifiers(g, vardoms)
@@ -904,23 +897,26 @@ class GRSpec(LTL):
             s.difference_update({self._bool_int.get(x) for x in w})
         for x in s:
             cache.pop(x)
-        logger.info('cleaned ' + str(len(s)) + ' cached elements.\n')
+        logger.info(f'cleaned {len(s)} cached elements.\n')
 
 
 def replace_dependent_vars(spec, bool2form):
-    logger.debug('replacing dependent variables using map:\n\t' +
-                 str(bool2form))
+    logger.debug(
+        'replacing dependent variables '
+        f'using the map:\n\t{bool2form}')
     vs = dict(spec.env_vars)
     vs.update(spec.sys_vars)
-    logger.debug('variables:\n\t' + str(vs))
+    logger.debug(f'variables:\n\t{vs}')
     bool2subtree = dict()
     for boolvar, formula in bool2form.items():
-        logger.debug('checking var: ' + str(boolvar))
+        logger.debug(f'checking var: {boolvar}')
         if boolvar in vs:
             assert vs[boolvar] == 'boolean'
-            logger.debug(str(boolvar) + ' is indeed Boolean')
+            logger.debug(
+                f'{boolvar} is indeed Boolean')
         else:
-            logger.debug('spec does not contain var: ' + str(boolvar))
+            logger.debug(
+                f'spec does not contain var: {boolvar}')
         tree = parser.parse(formula)
         bool2subtree[boolvar] = tx.Tree.from_recursive_ast(tree)
     for s in {'env_init', 'env_safety', 'env_prog',
@@ -928,16 +924,18 @@ def replace_dependent_vars(spec, bool2form):
         part = getattr(spec, s)
         new = []
         for clause in part:
-            logger.debug('replacing in clause:\n\t' + clause)
+            logger.debug(
+                f'replacing in clause:\n\t{clause}')
             tree = spec.ast(clause)
             g = tx.Tree.from_recursive_ast(tree)
             tx.sub_bool_with_subtree(g, bool2subtree)
             f = g.to_recursive_ast().flatten()
             new.append(f)
-            logger.debug('caluse tree after replacement:\n\t' + f)
+            logger.debug(
+                f'caluse tree after replacement:\n\t{f}')
         setattr(spec, s, new)
 
 
 def _conj(iterable, unary='', op='&&'):
-    return ' {op} '.format(op=op).join(
-        ['{u}({s})'.format(u=unary, s=s) for s in iterable])
+    return f' {op} '.join(
+        f'{unary}({s})' for s in iterable)

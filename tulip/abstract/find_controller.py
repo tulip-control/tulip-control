@@ -239,10 +239,9 @@ def get_input(
         start_state = start
         end_state = end
         if end_state not in ofts.states.post(start_state):
-            raise Exception('get_input: '
-                            'no transition from state s' + str(start) +
-                            ' to state s' + str(end)
-                            )
+            raise Exception(
+                f'no transition from state s{start}'
+                f' to state s{end}')
     else:
         print(
             'Warning: no transition matrix found, '
@@ -315,12 +314,11 @@ def get_input(
                     # region are unreachable, in which case it seems likely that
                     # there is something wrong with the abstraction routine.
                     logger.info(repr(ex))
-                    logger.info((
-                        "Failed to find control action from continuous "
-                        "state {x0} in discrete state {start} "
-                        "to a target polytope in the discrete state {end}.\n"
-                        "Target polytope:\n{P3}").format(
-                            x0=x0, start=start, end=end, P3=P3))
+                    logger.info(
+                        'Failed to find control action from continuous '
+                        f'state {x0} in discrete state {start} '
+                        f'to a target polytope in the discrete state {end}.\n'
+                        f'Target polytope:\n{P3}')
                 r[idx, 0] += mid_weight * xc
             if cost < low_cost:
                 low_u = u

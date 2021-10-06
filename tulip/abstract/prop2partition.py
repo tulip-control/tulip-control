@@ -478,8 +478,9 @@ class PropPreservingPartition(pc.MetricPartition):
                 # vs hasattr, which would look like normal selection
                 prop_regions.keys
             except:
-                msg = 'prop_regions must be dict.'
-                msg += 'Got instead: ' + str(type(prop_regions))
+                raise TypeError(
+                    '`prop_regions` must be `dict`.'
+                    f'Got instead: {type(prop_regions)}')
                 raise TypeError(msg)
             self.prop_regions = copy.deepcopy(prop_regions)
         n = len(regions)
@@ -494,11 +495,10 @@ class PropPreservingPartition(pc.MetricPartition):
         if check:
             for region in regions:
                 if not region <= domain:
-                    msg = 'Partition: Region:\n\n' + str(region) + '\n'
-                    msg += 'is not subset of given domain:\n\t'
-                    msg += str(domain)
-                    raise ValueError(msg)
-
+                    raise ValueError(
+                        f'Partition: Region:\n\n{region}\n'
+                        'is not subset of given domain:\n\t'
+                        f'{domain}')
             self.is_symbolic()
         self.domain = domain
         super(PropPreservingPartition, self).__init__(domain)
@@ -521,13 +521,14 @@ class PropPreservingPartition(pc.MetricPartition):
             logging.warning(msg)
             return
         for region in self.regions:
-            if not region.props <= set(self.prop_regions):
-                msg = 'Partitions: Region labeled with propositions:\n\t'
-                msg += str(region.props) + '\n'
-                msg += 'not all of which are in the '
-                msg += 'continuous atomic propositions:\n\t'
-                msg += str(set(self.prop_regions) )
-                raise ValueError(msg)
+            if region.props <= set(self.prop_regions):
+                continue
+            raise ValueError(
+                'Partitions: Region labeled with propositions:\n\t'
+                f'{region.props}\n'
+                'not all of which are in the '
+                'continuous atomic propositions:\n\t'
+                f'{set(self.prop_regions)}')
 
     def preserves_predicates(self):
         """Return `True` if each `Region` <= Predicates for the
@@ -568,12 +569,12 @@ class PropPreservingPartition(pc.MetricPartition):
             _hl + 2 * '\n' +
             f'Domain: {self.domain}\n')
         for j, region in enumerate(self.regions):
-            s += 'Region: ' + str(j) +'\n'
+            s += f'Region: {j}\n'
             if self.prop_regions is not None:
                 s += '\t Propositions: '
                 active_props = ' '.join(region.props)
                 if active_props:
-                    s += active_props + '\n'
+                    s += f'{active_props}\n'
                 else:
                     s += '{}\n'
             s += str(region)

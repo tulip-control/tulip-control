@@ -103,7 +103,8 @@ class Lexer:
         t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
-        logger.warning("Illegal character '%s'" % t.value[0])
+        logger.warning(
+            f'Illegal character `{t.value[0]}`')
         t.lexer.skip(1)
 
     def t_name(self, t):
@@ -206,19 +207,19 @@ class Parser:
 
     def p_expr_paren(self, p):
         """expr : LPAREN expr RPAREN"""
-        p[0] = '({expr})'.format(expr=p[2])
+        p[0] = f'({p[2]})'
 
     def p_and(self, p):
         """expr : expr AND expr"""
-        p[0] = '({x} and {y})'.format(x=p[1], y=p[3])
+        p[0] = f'({p[1]} and {p[3]})'
 
     def p_or(self, p):
         """expr : expr OR expr"""
-        p[0] = '({x} or {y})'.format(x=p[1], y=p[3])
+        p[0] = f'({p[1]} or {p[3]})'
 
     def p_not(self, p):
         """expr : NOT expr"""
-        p[0] = '(not {expr})'.format(expr=p[2])
+        p[0] = f'(not {p[2]})'
 
     def p_number(self, p):
         """expr : NUMBER"""
@@ -247,7 +248,8 @@ class Parser:
         """empty :"""
 
     def p_error(self, p):
-        logger.error('Syntax error at ' + p.value)
+        logger.error(
+            f'Syntax error at {p.value}')
 
 
 def call_ltl2ba(formula, prefix=''):
@@ -275,13 +277,16 @@ def call_ltl2ba(formula, prefix=''):
     except OSError:
         raise Exception('cannot find ltl2ba on path')
     p = subprocess.Popen(
-        [prefix + 'ltl2ba', '-f', '"{f}"'.format(f=formula)],
+        [f'{prefix}ltl2ba',
+         '-f',
+         f'"{formula}"'],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         universal_newlines=True)
     p.wait()
     ltl2ba_output = p.stdout.read()
-    logger.info('ltl2ba output:\n\n{s}\n'.format(s=ltl2ba_output))
+    logger.info(
+        f'ltl2ba output:\n\n{ltl2ba_output}\n')
     if p.returncode != 0:
         raise Exception(
             'Error when converting LTL to Buchi.')

@@ -88,8 +88,9 @@ def export(
             input_dimension = numpy.shape(
                 pwa_system.list_subsys[0].B)[1]
         else:
-            raise TypeError(str(type(system_dynamics)) +
-                ' is not a supported type of system dynamics.')
+            raise TypeError(
+                f'{type(system_dynamics)} is not '
+                'a supported type of system dynamics.')
         output['system_dynamics'] = dynamics_output
         # Control weights.
         # Set default values if needed.
@@ -257,7 +258,7 @@ def export_mealy(mealy_machine, is_continuous):
     state_list = list()
     for u in mealy_machine.nodes():
         if u == SINIT:
-            print('Skipping state "{s}".'.format(s=SINIT))
+            print(f'Skipping state "{SINIT}".')
             continue
         state_dict = dict(name=u)
         # For a continuous system, export the 'loc' variable

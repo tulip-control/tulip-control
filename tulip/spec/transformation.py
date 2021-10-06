@@ -102,7 +102,7 @@ class Tree(nx.MultiDiGraph):
                 self.add_edge(u, v, key=i)
                 self._recurse(v)
         else:
-            raise Exception('unknown node type: {u}'.format(u=u))
+            raise Exception(f'unknown node type: {u}')
         return u
 
     def to_recursive_ast(self, u=None):
@@ -177,8 +177,8 @@ def ast_to_labeled_graph(tree, detailed):
         else:
             raise TypeError(
                 'AST node must be Operator or Terminal, '
-                'got instead: {u}'.format(u=u) +
-                ', of type: {t}'.format(t=type(u)))
+                f'got instead: {u}'
+                f', of type: {type(u)}')
         # show both repr and AST node class in each vertex
         if detailed:
             label += '\n' + str(type(u).__name__)
@@ -209,11 +209,11 @@ def check_for_undefined_identifiers(tree, domains):
     for u in tree:
         if u.type == 'var' and u.value not in domains:
             var = u.value
+            tr = tree.to_recursive_ast()
             raise ValueError(
-                ('Undefined variable "{var}" missing from '
-                 'symbol table:\n\t{doms}\n'
-                 'in subformula:\n\t{f}').format(
-                     var=var, f=tree.to_recursive_ast(), doms=domains))
+                f'Undefined variable "{var}" missing from '
+                f'symbol table:\n\t{domains}\n'
+                f'in subformula:\n\t{tr}')
 
         if u.type not in {'str', 'num'}:
             continue
@@ -226,30 +226,27 @@ def check_for_undefined_identifiers(tree, domains):
 
             if not isinstance(dom, list):
                 raise Exception(
-                    ('String constant "{c}" assigned to non-string '
-                     'variable "{var}" with domain:\n\t{dom}').format(
-                         var=var, c=c, dom=dom))
+                    f'String constant "{c}" assigned to non-string '
+                    f'variable "{var}" with domain:\n\t{dom}')
 
             if c.value not in domains[var.value]:
                 raise ValueError(
-                    ('String constant "{c}" is not in the domain '
-                     'of variable "{var}"').format(var=var, c=c))
+                    f'String constant "{c}" is not in the domain '
+                    f'of variable "{var}"')
 
         if c.type == 'num':
             dom = domains[var]
 
             if not isinstance(dom, tuple):
                 raise Exception(
-                    ('Number: {c}, assigned to non-integer ' + str(c) +
-                     'variable "{var}" with domain:\n\t{dom}').format(
-                         var=var, c=c, dom=dom))
+                    f'Number: {c}, assigned to non-integer {c}'
+                    f'variable "{var}" with domain:\n\t{dom}')
 
             if not dom[0] <= c.value <= dom[1]:
                 raise Exception(
-                    ('Integer variable "{var}", is assigned the '
-                     'value: {c}, that is out of its domain:'
-                     '{dom[0]} ... {dom[1]}').format(
-                         var=var, c=c, dom=dom))
+                    f'Integer variable "{var}", is assigned the '
+                    f'value: {c}, that is out of its domain:'
+                    f'{dom[0]} ... {dom[1]}')
 
 
 def sub_values(tree, var_values):
@@ -421,7 +418,7 @@ def _check_var_conflicts(s, variables):
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
     if vars_redefined:
-        raise Exception('Variables redefined: {v}'.format(v=vars_redefined))
+        raise Exception(f'Variables redefined: {vars_redefined}')
     # check conflicts with values of arbitrary finite data types
     for var, domain in variables.items():
         # not arbitrary finite type ?
@@ -431,7 +428,7 @@ def _check_var_conflicts(s, variables):
         conflicting_values = {x for x in s if x in domain}
         if conflicting_values:
             raise Exception(
-                'Values redefined: {v}'.format(v=conflicting_values))
+                f'Values redefined: {conflicting_values}')
 
 
 def check_var_name_conflict(f, varname):
@@ -439,7 +436,7 @@ def check_var_name_conflict(f, varname):
     g = Tree.from_recursive_ast(t)
     v = {x.value for x in g.variables}
     if varname in v:
-        raise ValueError('var name "{v}" already used'.format(v=varname))
+        raise ValueError(f'var name "{varname}" already used')
     return v
 
 

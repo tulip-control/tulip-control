@@ -103,7 +103,7 @@ def synthesis_test():
     # Check properties
     safety = '!("h4" & "a4") & !("red" & ("a8" | "a4"))'
     reach = '"a9"'
-    formula = "Pmax=? [ ({}) U ({}) ]".format(safety, reach)
+    formula = f"Pmax=? [ ({safety}) U ({reach}) ]"
 
     # Construct policy
     (result, policy) = stormpy_int.model_checking(

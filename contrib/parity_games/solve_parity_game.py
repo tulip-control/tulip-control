@@ -23,8 +23,7 @@ def McNaughton(p):
     if p.has_deadends():
         raise Exception('The GameGraph has sinks !')
     c = p.max_color
-    print('highest color occurring in P: c = ' + str(c))
-
+    print(f'highest color occurring in P: c = {c}')
     if c is 0 or len(p) == 0:
         return (set(p), set())
     sigma = c % 2
@@ -98,6 +97,6 @@ if __name__ == '__main__':
     p.transitions.add('p2', 'p2')
     print(p)
     W0, W1 = McNaughton(p)
+    print(f'player 0 wins from: W0 = {W0}')
+    print(f'player 1 wins from: W1 = {W1}')
 
-    print('player 0 wins from: W0 = ' + str(W0))
-    print('player 1 wins from: W1 = ' + str(W1))

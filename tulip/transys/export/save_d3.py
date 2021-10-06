@@ -45,8 +45,8 @@ def _format_label(label_def, label_dot_format):
         shown_name = label_dot_format[sublabel_name]
         kv_sep = label_dot_format['type?label']
         sep = label_dot_format['separator']
-        s += '"' + shown_name + kv_sep + '" '
-        s += '+d.' + str(sublabel_name) + '+"' + sep + '" +'
+        s += f'"{shown_name}{kv_sep}" '
+        s += f'+d.{sublabel_name}+"{sep}" +'
     s += '" ";'
     return s
 

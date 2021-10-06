@@ -64,7 +64,7 @@ def make_jtlv_nodes():
 
     class Str(nodes.Str):
         def flatten(self, **kw):
-            return '({c})'.format(c=self)
+            return f'({self})'
 
     class Var(nodes.Var):
         def flatten(self, env_vars=None, sys_vars=None, **kw):
@@ -74,8 +74,9 @@ def make_jtlv_nodes():
             elif v in sys_vars:
                 player = 's'
             else:
-                raise ValueError('{v} neither env nor sys var'.format(v))
-            return '({player}.{value})'.format(player=player, value=v)
+                raise ValueError(
+                    f'{v} neither env nor sys var')
+            return f'({player}.{v})'
 
     nodes.Str = Str
     nodes.Var = Var
@@ -95,8 +96,8 @@ def make_gr1c_nodes(opmap=None):
 
     class Var(nodes.Var):
         def flatten(self, prime=None, **kw):
-            return '{v}{prime}'.format(
-                v=self.value, prime="'" if prime else '')
+            prm = "'" if prime else ''
+            return f'{self.value}{prm}'
 
     class Unary(nodes.Unary):
         def flatten(self, *arg, **kw):
@@ -155,13 +156,13 @@ def make_wring_nodes():
                     this_type = sys_vars[self.value]
                 else:
                     raise TypeError(
-                        '"{v}" is not defined as a variable in {t1} nor {t2}'.format(
-                            v=self.value, t1=env_vars, t2=sys_vars))
+                        f'"{self.value}" is not defined '
+                        f'as a variable in {env_vars} nor {sys_vars}')
 
                 if this_type != 'boolean':
-                    raise TypeError('"{v}" is not Boolean, but {type}'.format(
-                        v=self.val, type=this_type))
-            return '({var}=1)'.format(var=self.value)
+                    raise TypeError(
+                        f'"{self.val}" is not Boolean, but {this_type}')
+            return f'({self.value}=1)'
 
     nodes.Var = Var
     return nodes
@@ -177,15 +178,15 @@ def make_python_nodes():
 
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '((not ({l})) or {r})'.format(
-                l=self.operands[0].flatten(),
-                r=self.operands[1].flatten())
+            l = self.operands[0].flatten()
+            r = self.operands[1].flatten()
+            return f'((not ({l})) or {r})'
 
     class BiImp(nodes.Binary):
         def flatten(self, *arg, **kw):
-            return '({l} == {r})'.format(
-                l=self.operands[0].flatten(),
-                r=self.operands[1].flatten())
+            l = self.operands[0].flatten()
+            r = self.operands[1].flatten()
+            return f'({l} == {r})'
 
     nodes.Imp = Imp
     nodes.BiImp = BiImp
@@ -227,7 +228,7 @@ def _jtlv_str(m, comment, prefix='[]<>'):
         return ''
     w = list()
     for x in m:
-        logger.debug('translate clause: ' + str(x))
+        logger.debug(f'translate clause: {x}')
         if not x:
             continue
         # collapse any whitespace between any
@@ -236,9 +237,9 @@ def _jtlv_str(m, comment, prefix='[]<>'):
             c = re.sub(r'next\s*\(', 'next(', x)
         else:
             c = x
-        w.append('\t{prefix}({formula})'.format(prefix=prefix, formula=c))
-    return '-- {comment}\n{formula}'.format(
-        comment=comment, formula=' & \n'.join(w))
+        w.append(f'\t{prefix}({c})')
+    formula = ' & \n'.join(w)
+    return f'-- {comment}\n{formula}'
 
 
 def _to_gr1c(d):
@@ -258,7 +259,7 @@ def _to_gr1c(d):
                 output += ' %s [%d, %d]' % (var, int_dom[0], int_dom[1])
             else:
                 raise ValueError(
-                    'Domain "{dom}" not supported by gr1c.'.format(dom=dom))
+                    f'Domain "{dom}" not supported by gr1c.')
         return output
 
     logger.info('translate to gr1c...')
@@ -285,34 +286,34 @@ def _to_wring(d):
     """
     assumption = ''
     if d['env_init']:
-        assumption += ' * '.join(['('+f+')' for f in d['env_init']])
+        assumption += ' * '.join([f'({f})' for f in d['env_init']])
     if d['env_safety']:
         if len(assumption) > 0:
             assumption += ' * '
-        assumption += ' * '.join(['G('+f+')' for f in d['env_safety']])
+        assumption += ' * '.join([f'G({f})' for f in d['env_safety']])
     if d['env_prog']:
         if len(assumption) > 0:
             assumption += ' * '
-        assumption += ' * '.join(['G(F('+f+'))' for f in d['env_prog']])
+        assumption += ' * '.join([f'G(F({f}))' for f in d['env_prog']])
 
     guarantee = ''
     if d['sys_init']:
-        guarantee += ' * '.join(['('+f+')' for f in d['sys_init']])
+        guarantee += ' * '.join([f'({f})' for f in d['sys_init']])
     if d['sys_safety']:
         if len(guarantee) > 0:
             guarantee += ' * '
-        guarantee += ' * '.join(['G('+f+')' for f in d['sys_safety']])
+        guarantee += ' * '.join([f'G({f})' for f in d['sys_safety']])
     if d['sys_prog']:
         if len(guarantee) > 0:
             guarantee += ' * '
-        guarantee += ' * '.join(['G(F('+f+'))' for f in d['sys_prog']])
+        guarantee += ' * '.join([f'G(F({f}))' for f in d['sys_prog']])
 
     # Put the parts together, simplifying in special cases
     if guarantee:
         if assumption:
-            return '((' + assumption + ') -> (' + guarantee + '))'
+            return f'(({assumption}) -> ({guarantee}))'
         else:
-            return '(' + guarantee + ')'
+            return f'({guarantee})'
     else:
         return 'G(1)'
 
@@ -331,10 +332,9 @@ def convert_domain(dom):
 
 def _gr1c_str(s, name='SYSGOAL', prefix='[]<>'):
     if not s:
-        return '{name}:;\n'.format(name=name)
-    f = '\n& '.join([
-        prefix + '({u})'.format(u=x) for x in s])
-    return '{name}: {f};\n'.format(name=name, f=f)
+        return f'{name}:;\n'
+    f = '\n& '.join(f'{prefix}({x})' for x in s)
+    return f'{name}: {f};\n'
 
 
 def _to_slugs(d):
@@ -357,10 +357,10 @@ def _to_slugs(d):
 
 def _slugs_str(r, name, sep='\n'):
     if not r:
-        return '[{name}]\n'.format(name=name)
-    sep = ' {sep} '.format(sep=sep)
+        return f'[{name}]\n'
+    sep = f' {sep} '
     f = sep.join(x for x in r if x)
-    return '[{name}]\n{f}\n\n'.format(name=name, f=f)
+    return f'[{name}]\n{f}\n\n'
 
 
 def _format_slugs_vars(vardict, name):
@@ -369,12 +369,12 @@ def _format_slugs_vars(vardict, name):
         if dom == 'boolean':
             a.append(var)
         elif isinstance(dom, tuple) and len(dom) == 2:
-            a.append('{var}: {min}...{max}'.format(
-                var=var, min=dom[0], max=dom[1])
-            )
+            a.append(f'{var}: {dom[0]}...{dom[1]}')
         else:
-            raise ValueError('unknown domain type: {dom}'.format(dom=dom))
-    return '[{name}]\n{vars}\n\n'.format(name=name, vars='\n'.join(a))
+            raise ValueError(
+                f'unknown domain type: {dom}')
+    vars = '\n'.join(a)
+    return f'[{name}]\n{vars}\n\n'
 
 
 to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs,
@@ -434,8 +434,8 @@ def _ast_to_lang(u, nodes):
         xyz = [_ast_to_lang(x, nodes) for x in u.operands]
         return cls(u.operator, *xyz)
     else:
-        raise TypeError('Unknown node type "{t}"'.format(
-            t=type(u).__name__))
+        raise TypeError(
+            f'Unknown node type "{type(u).__name__}"')
 
 
 def _ast_to_python(u, nodes):
@@ -444,7 +444,7 @@ def _ast_to_python(u, nodes):
         return cls(u.value)
     elif not hasattr(u, 'operands'):
         raise TypeError(
-            'AST node: {u}'.format(u=type(u).__name__) +
+            f'AST node: {type(u).__name__}'
             ', is neither terminal nor operator.')
     elif len(u.operands) == 1:
         assert u.operator == '!'
@@ -462,4 +462,4 @@ def _ast_to_python(u, nodes):
                    _ast_to_python(u.operands[1], nodes))
     else:
         raise ValueError(
-            'Operator: {u}, is neither unary nor binary.'.format(u=u))
+            f'Operator: {u}, is neither unary nor binary.')

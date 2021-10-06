@@ -332,7 +332,7 @@ def simulate2d(
             point, disc_dynamics.ppp)
         s0_loc = disc_dynamics.ppp2ts[s0_part]
         assert s0_loc == out['loc'], (s0_loc, out['loc'])
-        print('outputs:\n    {out}\n'.format(out=out))
+        print(f'outputs:\n    {out}\n')
     if show_traj:
         from matplotlib import pyplot as plt
         plt.plot(x, label='x')

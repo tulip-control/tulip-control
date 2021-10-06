@@ -93,8 +93,7 @@ def synthesize(
     all_vars.update(sys_vars)
     if not all(v == 'boolean' for v in all_vars.values()):
         raise TypeError(
-            'all variables should be Boolean:\n{v}'.format(v=all_vars))
-
+            f'all variables should be Boolean:\n{all_vars}')
     if isinstance(formula, GRSpec):
         f = translate(formula, 'wring')
     else:
@@ -103,10 +102,9 @@ def synthesize(
             env_vars=env_vars,
             sys_vars=sys_vars)
     # dump partition file
-    s = '.inputs {inp}\n.outputs {out}'.format(
-        inp=' '.join(env_vars),
-        out=' '.join(sys_vars)
-    )
+    inp = ' '.join(env_vars)
+    out = ' '.join(sys_vars)
+    s = f'.inputs {inp}\n.outputs {out}'
     with open(IO_PARTITION_FILE, 'w') as fid:
         fid.write(s)
     # call lily

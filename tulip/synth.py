@@ -58,8 +58,9 @@ logger = logging.getLogger(__name__)
 _hl = '\n' + 60 * '-'
 
 
+
 def _pstr(s):
-    return '(' + str(s) + ')'
+    return f'({s})'
 
 
 def _disj(set0):
@@ -91,11 +92,11 @@ def _conj_intersection(set0, set1, parenth=True):
 def _conj_neg(set0, parenth=True):
     if parenth:
         return ' && '.join([
-            '!(' + str(x) + ')'
+            f'!({x})'
             for x in set0])
     else:
         return ' && '.join([
-            '!' + str(x)
+            f'!{x}'
             for x in set0])
 
 
@@ -118,7 +119,7 @@ def mutex(iterable):
     if not iterable or len(iterable) <= 1:
         return list()
     return [_conj([
-        '!(' + str(x) + ') || (' + _conj_neg_diff(iterable, [x]) + ')'
+        f'!({x}) || ({_conj_neg_diff(iterable, [x])})'
         for x in iterable])]
 
 
@@ -168,7 +169,7 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     if action == '':
         return ''
     if nxt:
-        return ' X' + _pstr(action)
+        return f' X{_pstr(action)}'
     else:
         return _pstr(action)
 
@@ -179,8 +180,11 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     Includes solver expression substitution.
     See also `_conj_action`.
     """
-    logger.debug('conjunction of actions: ' + str(actions_dict))
-    logger.debug('mapping to solver equivalents: ' + str(solver_expr))
+    logger.debug(
+        f'conjunction of actions: {actions_dict}')
+    logger.debug(
+        'mapping to solver equivalents: '
+        f'{solver_expr}')
     if not actions_dict:
         logger.debug('actions_dict empty, returning empty string\n')
         return ''
@@ -189,11 +193,14 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
                    for type_name, action_value in actions_dict.items()]
     else:
         actions = actions_dict
-    logger.debug('after substitution: ' + str(actions))
+    logger.debug(
+        f'after substitution: {actions}')
     conjuncted_actions = _conj(actions)
-    logger.debug('conjuncted actions: ' + str(conjuncted_actions) + '\n')
+    logger.debug(
+        'conjuncted actions: '
+        f'{conjuncted_actions}\n')
     if nxt:
-        return ' X' + _pstr(conjuncted_actions)
+        return f' X{_pstr(conjuncted_actions)}'
     else:
         return _pstr(conjuncted_actions)
 
@@ -263,8 +270,10 @@ def iter2var(states, variables, statevar, bool_states, must):
     if not states:
         logger.debug('empty container, so empty dict for solver expr')
         return dict(), None
-    logger.debug('mapping domain: ' + str(states) + '\n\t'
-                 'to expression understood by a GR(1) solver.')
+    logger.debug(
+        f'mapping domain: {states}\n'
+        '\tto expression understood by '
+        'a GR(1) solver.')
     assert must in {'mutex', 'xor', None}
     # options for modeling actions
     if must in {'mutex', 'xor'}:
@@ -281,8 +290,8 @@ def iter2var(states, variables, statevar, bool_states, must):
         bool_states = True
     logger.debug(
         'options for modeling actions:\n\t'
-        'mutex: ' + str(use_mutex) + '\n\t'
-        'min_one: ' + str(min_one))
+        f'mutex: {use_mutex}\n'
+        f'\tmin_one: {min_one}')
     all_str = all(isinstance(x, str) for x in states)
     if bool_states:
         logger.debug(
@@ -305,8 +314,9 @@ def iter2var(states, variables, statevar, bool_states, must):
     else:
         logger.debug('states not modeled as Booleans')
         if statevar in variables:
-            raise ValueError('state variable: ' + str(statevar) +
-                             ' already exists in: ' + str(variables))
+            raise ValueError(
+                f'state variable: {statevar}'
+                f' already exists in: {variables}')
         all_int = all(isinstance(x, int) for x in states)
         if all_int:
             logger.debug('all states are integers')
@@ -315,17 +325,18 @@ def iter2var(states, variables, statevar, bool_states, must):
                 n = max(states)
             else:
                 n = max(states) + 1
-            f = lambda x: statevar + ' = ' + str(x)
+            f = lambda x: f'{statevar} = {x}'
             domain = (min(states), n)
-            logger.debug('created solver variable: ' + str(statevar) +
-                         '\n\t with domain: ' + str(domain))
+            logger.debug(
+                f'created solver variable: {statevar}'
+                f'\n\t with domain: {domain}')
         elif all_str:
             logger.debug('all states are strings')
             assert use_mutex
-            f = lambda x: statevar + ' = "' + str(x) + '"'
+            f = lambda x: f'{statevar} = "{x}"'
             domain = list(states)
             if not min_one:
-                domain += [statevar + 'none']
+                domain += [f'{statevar}none']
 
                 logger.debug(
                     'domain has been extended, because all actions\n\t'
@@ -336,17 +347,19 @@ def iter2var(states, variables, statevar, bool_states, must):
         state_ids = {x: f(x) for x in states}
         variables[statevar] = domain
         constraint = None
+    tabs = 2 * '\t'
     logger.debug(
-        'for tulip variable: ' + str(statevar) + '\n'
+        f'for tulip variable: {statevar}\n'
         'the map from [tulip action values] ---> '
-        '[solver expressions] is:\n' + 2 * '\t' + str(state_ids))
+        '[solver expressions] is:\n'
+        f'{tabs}{state_ids}')
     return state_ids, constraint
 
 
 def _add_actions(constraint, init, trans):
     if constraint is None:
         return
-    trans += ['X (' + constraint[0] + ')']
+    trans += [f'X ({constraint[0]})']
     init += constraint
 
 
@@ -460,7 +473,9 @@ def sys_to_spec(
     @rtype: `GRSpec`
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
-        raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
+        raise TypeError(
+            'ofts must be FTS, '
+            f'got instead: {type(ofts)}')
     assert ofts.owner == 'sys'
     aps = ofts.aps
     states = ofts.states
@@ -481,8 +496,8 @@ def sys_to_spec(
         assert not set(codomain).intersection(states), (codomain, states)
         assert action_type not in states, action_type
         assert action_type not in aps, action_type
-        msg = 'action_type:\n\t' + str(action_type) + '\n'
-        msg += 'with codomain:\n\t' + str(codomain)
+        msg = f'action_type:\n\t{action_type}\n'
+        msg += f'with codomain:\n\t{codomain}'
         logger.debug(msg)
         if 'sys' in action_type:
             logger.debug('Found sys action')
@@ -491,7 +506,9 @@ def sys_to_spec(
                 action_type, bool_actions,
                 ofts.sys_actions_must)
             _add_actions(constraint, sys_init, sys_trans)
-            logger.debug('Updating sys_action_ids with:\n\t' + str(action_ids))
+            logger.debug(
+                'Updating sys_action_ids with:\n'
+                f'\t{action_ids}')
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
             logger.debug('Found env action')
@@ -500,7 +517,9 @@ def sys_to_spec(
                 action_type, bool_actions,
                 ofts.env_actions_must)
             _add_actions(constraint, env_init, env_trans)
-            logger.debug('Updating env_action_ids with:\n\t' + str(action_ids))
+            logger.debug(
+                'Updating env_action_ids with:\n'
+                f'\t{action_ids}')
             env_action_ids[action_type] = action_ids
     state_ids, constraint = iter2var(
         states, sys_vars,
@@ -554,7 +573,9 @@ def env_to_spec(
     `sys_open_fts2spec`
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
-        raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
+        raise TypeError(
+            'ofts must be FTS, '
+            f'got instead: {type(ofts)}')
     assert ofts.owner == 'env'
     aps = ofts.aps
     states = ofts.states
@@ -714,24 +735,31 @@ def _sys_trans_from_ts(
         from_state_id = state_ids[from_state]
         precond = _pstr(from_state_id)
         cur_trans = trans.find([from_state])
-        msg = ('from state: ' + str(from_state) +
-               ', the available transitions are:\n\t' + str(cur_trans))
+        msg = (
+            f'from state: {from_state}'
+            ', the available transitions are:\n'
+            f'\t{cur_trans}')
         logger.debug(msg)
         # no successor states ?
         if not cur_trans:
-            logger.debug('state: ' + str(from_state) + ' is deadend !')
-            sys_trans += [precond + ' -> X(False)']
+            logger.debug(
+                f'state: {from_state} is deadend !')
+            sys_trans += [
+                f'{precond} -> X(False)']
             continue
         cur_str = list()
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
-            postcond = ['X' + _pstr(to_state_id)]
-            logger.debug('label = ' + str(label))
+            postcond = [
+                f'X{_pstr(to_state_id)}']
+            logger.debug(
+                f'label = {label}')
             if 'previous' in label:
                 previous = label['previous']
             else:
                 previous = set()
-            logger.debug('previous = ' + str(previous))
+            logger.debug(
+                f'previous = {previous}')
             env_actions = {k: v for k, v in label.items() if 'env' in k}
             prev_env_act = {k: v for k, v in env_actions.items()
                             if k in previous}
@@ -772,11 +800,12 @@ def _sys_trans_from_ts(
                         nxt=True)]
             cur_str += [_conj(postcond)]
             msg = (
-                'guard to state: ' + str(to_state) +
-                ', with state_id: ' + str(to_state_id) +
-                ', has post-conditions: ' + str(postcond))
+                f'guard to state: {to_state}'
+                f', with state_id: {to_state_id}'
+                f', has post-conditions: {postcond}')
             logger.debug(msg)
-        sys_trans += [precond + ' -> (' + _disj(cur_str) + ')']
+        sys_trans += [
+            f'{precond} -> ({_disj(cur_str)})']
     return sys_trans
 
 
@@ -807,7 +836,7 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         if not cur_trans:
             # nothing modeled for env, since sys has X(False) anyway
             # for action_type, codomain_map in env_action_ids.items():
-            # env_trans += [precond + ' -> X(' + s + ')']
+            # env_trans += [f'{precond} -> X({s})']
             continue
         # collect possible next env actions
         next_env_action_combs = set()
@@ -815,18 +844,23 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
             env_actions = {k: v for k, v in label.items() if 'env' in k}
             if not env_actions:
                 continue
-            logger.debug('env_actions: ' + str(env_actions))
-            logger.debug('env_action_ids: ' + str(env_action_ids))
-            env_action_comb = _conj_actions(env_actions, env_action_ids)
-            logger.debug('env_action_comb: ' + str(env_action_comb))
+            logger.debug(
+                f'env_actions: {env_actions}')
+            logger.debug(
+                f'env_action_ids: {env_action_ids}')
+            env_action_comb = _conj_actions(
+                env_actions, env_action_ids)
+            logger.debug(
+                f'env_action_comb: {env_action_comb}')
             next_env_action_combs.add(env_action_comb)
         next_env_actions = _disj(next_env_action_combs)
-        logger.debug('next_env_actions: ' + str(next_env_actions))
+        logger.debug(
+            f'next_env_actions: {next_env_actions}')
         # no next env actions ?
         if not next_env_actions:
             continue
-        env_trans += [precond + ' -> X(' +
-                      next_env_actions + ')']
+        env_trans += [
+            f'{precond} -> X({next_env_actions})']
     return env_trans
 
 
@@ -848,7 +882,7 @@ def _env_trans_from_env_ts(
         cur_trans = trans.find([from_state])
         # no successor states ?
         if not cur_trans:
-            env_trans += [precond + ' -> X(False)']
+            env_trans += [f'{precond} -> X(False)']
             msg = (
                 'Environment dead-end found.\n'
                 'If sys can force env to dead-end,\n'
@@ -862,7 +896,7 @@ def _env_trans_from_env_ts(
         # not conditioned on the previous system output ?
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
-            postcond = ['X' + _pstr(to_state_id)]
+            postcond = [f'X{_pstr(to_state_id)}']
             env_actions = {k: v for k, v in label.items() if 'env' in k}
             postcond += [
                 _conj_actions(
@@ -896,11 +930,13 @@ def _env_trans_from_env_ts(
                 conj = _conj_neg(codomain.values())
                 cur_list += [conj]
                 msg = (
-                    'for action_type: ' + str(action_type) + '\n' +
-                    'with codomain: ' + str(codomain) + '\n' +
-                    'the negated conjunction is: ' + str(conj))
+                    f'for action_type: {action_type}\n'
+                    f'with codomain: {codomain}\n'
+                    f'the negated conjunction is: {conj}')
                 logger.debug(msg)
-        env_trans += [_pstr(precond) + ' -> (' + _disj(cur_list) + ')']
+        env_trans += [
+            f'{_pstr(precond)} -> '
+            f'({_disj(cur_list)})']
     return env_trans
 
 
@@ -919,7 +955,8 @@ def _ap_trans_from_ts(states, state_ids, aps):
         ap_str = _sprint_aps(label, aps)
         if not ap_str:
             continue
-        init += ['!(' + _pstr(state_id) + ') || (' + ap_str + ')']
+        init += [
+            f'!({_pstr(state_id)}) || ({ap_str})']
     # transitions of labels
     for state in states:
         label = states[state]
@@ -927,7 +964,8 @@ def _ap_trans_from_ts(states, state_ids, aps):
         tmp = _sprint_aps(label, aps)
         if not tmp:
             continue
-        trans += ['X((' + str(state_id) + ') -> (' + tmp + '))']
+        trans += [
+            f'X(({state_id}) -> ({tmp}))']
     return (init, trans)
 
 
@@ -947,9 +985,9 @@ def _sprint_aps(label, aps):
             aps,
             parenth=False)
     if tmp0 and tmp1:
-        tmp = tmp0 + ' && ' + tmp1
+        tmp = f'{tmp0} && {tmp1}'
     else:
-        tmp = tmp0 + tmp1
+        tmp = f'{tmp0}{tmp1}'
     return tmp
 
 
@@ -1217,10 +1255,9 @@ def _synthesize(specs, solver, rm_deadends):
         strategy = omega_int.synthesize_enumerated_streett(specs)
     else:
         options = {'gr1c', 'gr1py', 'omega', 'slugs'}
-        raise Exception((
-            'Unknown solver: "{solver}". '
-            'Available options are: {options}').format(
-                solver=solver, options=options))
+        raise Exception(
+            f'Unknown solver: "{solver}". '
+            f'Available options are: {options}')
     return _trim_strategy(
         strategy, specs,
         rm_deadends=rm_deadends)
@@ -1241,8 +1278,8 @@ def _trim_strategy(strategy, specs, rm_deadends):
         return None
     ctrl = strategy2mealy(strategy, specs)
     logger.debug(
-        'Mealy machine has: n = {n} states.'.format(
-            n=len(ctrl.states)))
+        'Mealy machine has: '
+        f'n = {len(ctrl.states)} states.')
     if rm_deadends:
         ctrl.remove_deadends()
     return ctrl
@@ -1306,7 +1343,10 @@ def _spec_plus_sys(
                 sys_formula.sys_init)
             sys_formula.sys_init = list()
         specs = specs | sys_formula
-        logger.debug('sys TS:\n' + str(sys_formula.pretty()) + _hl)
+        pp_formula = sys_formula.pretty()
+        logger.debug(
+            'sys TS:\n'
+            f'{pp_formula}{_hl}')
     if env is not None:
         if hasattr(env, 'state_varname'):
             statevar = sys.state_varname
@@ -1323,8 +1363,12 @@ def _spec_plus_sys(
             env_formula.sys_init = list()
         _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
-        logger.debug('env TS:\n' + str(env_formula.pretty()) + _hl)
-    logger.info('Overall Spec:\n' + str(specs.pretty()) + _hl)
+        logger.debug(
+            'env TS:\n'
+            f'{env_formula.pretty()}{_hl}')
+    logger.info(
+        'Overall Spec:\n'
+        f'{specs.pretty()}{_hl}')
     return specs
 
 
@@ -1390,7 +1434,7 @@ def strategy2mealy(A, spec):
                 **d)
 
             logger.info(
-                'node: {v}, state: {d}'.format(v=v, d=d))
+                f'node: {v}, state: {d}')
     # special initial state, for first reaction
     initial_state = 'Sinit'
     mach.states.add(initial_state)
@@ -1413,14 +1457,18 @@ def strategy2mealy(A, spec):
     m = len(mach)
     assert m == n + 1, (n, m)
     if not mach.successors('Sinit'):
+        newlines = 2 * '\n'
+        nodes = pprint.pformat(
+            A.nodes(data=True))
         raise Exception(
             'The machine obtained from the strategy '
             'does not have any initial states !\n'
             'The strategy is:\n'
-            'vertices:' + pprint.pformat(A.nodes(data=True)) + 2 * '\n' +
-            'edges:\n' + str(A.edges()) + 2 * '\n' +
-            'and the machine:\n' + str(mach) + 2 * '\n' +
-            'and the specification is:\n' + str(spec.pretty()) + 2 * '\n')
+            f'vertices:{nodes}{newlines}'
+            f'edges:\n{A.edges()}{newlines}'
+            f'and the machine:\n{mach}{newlines}'
+            'and the specification is:\n'
+            f'{spec.pretty()}{newlines}')
     return mach
 
 
@@ -1479,12 +1527,10 @@ def _init_edges_using_compile_init(
             # multiple choices for initializing the hidden memory.
             init_valuations.add(vals)
             logger.debug(
-                'found initial state: {u}'.format(
-                    u=u))
+                f'found initial state: {u}')
         logger.debug(
-            'machine vertex: {u}, has var values: {v}'.format(
-                u=u,
-                v=var_values))
+            f'machine vertex: {u}, '
+            f'has var values: {var_values}')
 
 
 def _int2str(label, str_vars):

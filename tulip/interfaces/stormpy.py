@@ -55,22 +55,18 @@ def build_stormpy_model(path):
 def print_stormpy_model(model):
     """Print the `stormpy` model"""
     print(
-        "Model type {}, number of states {}, number of transitins {}".format(
-            model.model_type, model.nr_states, model.nr_transitions
-        )
-    )
+        f'Model type {model.model_type}, '
+        f'number of states {model.nr_states}, '
+        f'number of transitins {model.nr_transitions}')
     for state in model.states:
         for action in state.actions:
             for transition in action.transitions:
                 print(
-                    "  From state {}, labels {}, action {}, with probability {:.4f}, go to state {}".format(
-                        state,
-                        state.labels,
-                        action,
-                        transition.value(),
-                        transition.column,
-                    )
-                )
+                    f'  From state {state}, '
+                    f'labels {state.labels}, '
+                    f'action {action}, '
+                    f'with probability {transition.value():.4f}, '
+                    f'go to state {transition.column}')
 
 
 def get_action_map(stormpy_model, tulip_transys):
@@ -122,11 +118,8 @@ def to_tulip_action(
     possible_tulip_action = action_map[str(stormpy_action)]
     if len(possible_tulip_action) == 0:
         raise ValueError(
-            "Cannot find an action on tulip_transys corresponding to {}".format(
-                stormpy_action
-            )
-        )
-
+            'Cannot find an action on '
+            f'`tulip_transys` corresponding to {stormpy_action}')
     return possible_tulip_action[0]
 
 
@@ -161,10 +154,8 @@ def to_tulip_state(stormpy_state, tulip_transys):
     ]
     if len(possible_states) != 1:
         raise ValueError(
-            "Cannot find a unique state corresponding to label {}".format(
-                stormpy_state.labels
-            )
-        )
+            'Cannot find a unique state '
+            f'corresponding to label {stormpy_state.labels}')
     return possible_states[0]
 
 
@@ -181,8 +172,7 @@ def to_tulip_transys(path):
     # (typically represented by an integer) to
     # state on the tulip transition system.
     def get_ts_state(in_model_state):
-        return "s" + str(in_model_state)
-
+        return f's{in_model_state}'
     # Only allow DTMC and MDP models
     in_model = build_stormpy_model(path)
     assert (
@@ -267,7 +257,7 @@ def to_prism_file(ts, path):
         return transition_dict
     # Return a properly formatted string for the given probability
     def get_prob_str(prob):
-        return "{:.4f}".format(prob)
+        return f'{prob:.4f}'
     # Return a string representing the
     # state with the given index and whether
     # it is primed (primed in prism file
@@ -309,13 +299,11 @@ def to_prism_file(ts, path):
             f.write('dtmc')
         # The set of states and initial state
         f.write('\n\nmodule sys_model\n')
+        init = state_list.index(list(ts.states.initial)[0])
         f.write(
-            "    {} : [0..{}] init {};\n".format(
-                state_var,
-                len(ts.states) - 1,
-                state_list.index(list(ts.states.initial)[0]),
-            )
-        )
+            f'    {state_var} : '
+            f'[0..{len(ts.states) - 1}] '
+            f'init {init};\n')
         f.write('\n')
         # Transitions
         for idx, state in enumerate(state_list):
@@ -324,14 +312,11 @@ def to_prism_file(ts, path):
             for action, transitions in transition_dict.items():
                 action_str = ''
                 if type(ts) == MDP:
-                    action_str = "act" + str(action_list.index(action))
+                    action_str = f'act{action_list.index(action)}'
                 f.write(
-                    "    [{}] {} -> {};\n".format(
-                        action_str,
-                        get_state_str(idx, False),
-                        get_transition_str(transitions),
-                    )
-                )
+                    f'    [{action_str}] '
+                    f'{get_state_str(idx, False)} '
+                    f'-> {get_transition_str(transitions)};\n')
         f.write('\nendmodule\n\n')
         # Labels
         for label, states in get_label_dict().items():
@@ -339,7 +324,8 @@ def to_prism_file(ts, path):
                 ['(' + get_state_str(state_list.index(s), False) + ')'
                  for s in states]
             )
-            f.write('label "{}" = {};\n'.format(label, state_str))
+            f.write(
+                f'label "{label}" = {state_str};\n')
 
 
 def model_checking(

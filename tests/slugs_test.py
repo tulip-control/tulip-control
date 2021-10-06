@@ -33,7 +33,7 @@ def bitfields_to_ints_test():
     for n in range(30):
         bits = list(bin(n).lstrip('0b').zfill(6))
         bits.reverse()  # little-endian
-        d = {'a@{i}'.format(i=i): v for i, v in enumerate(bits)}
+        d = {f'a@{i}': v for i, v in enumerate(bits)}
         d['a@0.0.30'] = d.pop('a@0')
         t = {'a': (0, 30)}
         print(d)

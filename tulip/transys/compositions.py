@@ -278,5 +278,4 @@ def _get_apply_policy_model_type(model):
     if type(model) == MDP:
         return MC
     raise TypeError(
-        'Cannot apply policy for model of type {m}'.format(
-            m=type(model)))
+        f'Cannot apply policy for model of type {type(model)}')

@@ -66,10 +66,11 @@ def compare_lists(list1, list2):
     @rtype: bool
     """
     if not isinstance(list1, list):
-        raise TypeError('Not a list, instead list1:\n\t' + str(list1))
-
+        raise TypeError(
+            f'Not a list, instead list1:\n\t{list1}')
     if not isinstance(list2, list):
-        raise TypeError('Not a list, instead list2:\n\t' + str(list2))
+        raise TypeError(
+            f'Not a list, instead list2:\n\t{list2}')
     dummy_list = list(list1)
     same_lists = True
     for item in list2:
@@ -144,11 +145,13 @@ class MathSet:
         self.add_from(iterable)
 
     def __repr__(self):
-        return 'MathSet(' + pformat(list(self._set) + self._list) + ')'
+        return (
+            f'MathSet({pformat(list(self._set))}'
+            f'{self._list})')
 
     def _debug_repr(self):
         set_str = ', '.join([repr(i) for i in self._set])
-        return 'MathSet({' + set_str + '} +' + str(self._list) + ')'
+        return f'MathSet({{{set_str}}} +{self._list})'
 
     def __or__(self, other):
         """Union with another mathematical set.
@@ -228,11 +231,11 @@ class MathSet:
 
     def __sub__(self, rm_items):
         s = MathSet(self)
-        print('s = ' + str(s))
+        print(f'{s =}')
         print(rm_items)
         for item in rm_items:
             if item in s:
-                print('Removing...: ' + str(item))
+                print(f'Removing...: {(item)}')
                 s.remove(item)
         return s
 
@@ -247,8 +250,8 @@ class MathSet:
         if not isinstance(other, MathSet):
             raise TypeError(
                 'For now comparison only to another MathSet.\n'
-                'Got:\n\t' + str(other) + '\n of type: ' +
-                str(type(other)) + ', instead.')
+                f'Got:\n\t{other}\n of type: '
+                f'{type(other)}, instead.')
         same_lists = compare_lists(
             self._list, other._list)
         return (self._set == other._set) and same_lists
@@ -349,7 +352,7 @@ class MathSet:
         if not isinstance(iterable, Iterable):
             raise TypeError(
                 'Can only add elements to MathSet from Iterable.\n'
-                'Got:\n\t' + str(iterable) + '\n instead.')
+                f'Got:\n\t{iterable}\n instead.')
         if isinstance(iterable, MathSet):
             self._set |= set(iterable._set)
             self._list = list(unique(self._list + iterable._list))
@@ -397,7 +400,8 @@ class MathSet:
                 self._set.remove(item)
                 return
             except:
-                logger.debug('item: ' + str(item) + ', contains unhashables.')
+                logger.debug(
+                    f'item: {item}, contains unhashables.')
         self._list.remove(item)
 
     def pop(self):
@@ -496,15 +500,18 @@ class SubSet(MathSet):
         self._superset = superset
         super(SubSet, self).__init__([])
         if not isinstance(superset, Container):
-            raise TypeError('superset must be Iterable,\n'
-                            'Got instead:\n\t' + str(superset))
+            raise TypeError(
+                'superset must be Iterable,\n'
+                f'Got instead:\n\t{superset}')
 
     def __repr__(self):
-        return 'SubSet(' + pformat(list(self._set) + self._list) + ')'
+        return (
+            f'SubSet({pformat(list(self._set))}'
+            f'{self._list})')
 
     def _debug_repr(self):
         set_str = ', '.join([repr(i) for i in self._set])
-        return 'SubSet({' + set_str + '} +' + str(self._list) + ')'
+        return f'SubSet({{{set_str}}} +{self._list})'
 
     @property
     def superset(self):
@@ -529,8 +536,8 @@ class SubSet(MathSet):
             raise Exception(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
-                'FYI: new element:\n\t' + str(new_element) + '\n'
-                'and superset:\n\t' + str(self._superset))
+                f'FYI: new element:\n\t{new_element}\n'
+                f'and superset:\n\t{self._superset}')
         super(SubSet, self).add(new_element)
 
     def add_from(self, new_elements):
@@ -551,9 +558,10 @@ class SubSet(MathSet):
         `add`, `__ior__`
         """
         if not is_subset(new_elements, self._superset):
-            raise Exception('All new_elements:\n\t' + str(new_elements) +
-                            '\nshould already be \\in ' +
-                            'self.superset = ' + str(self._superset))
+            raise Exception(
+                f'All new_elements:\n\t{new_elements}'
+                '\nshould already be \\in '
+                f'self.superset = {self._superset}')
         super(SubSet, self).add_from(new_elements)
 
 
@@ -634,21 +642,24 @@ def is_subset(small_iterable, big_iterable):
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
     if not isinstance(big_iterable, (Iterable, Container)):
-        raise TypeError('big_iterable must be either Iterable or Container, '
-                        'otherwise subset relation undefined.\n'
-                        'Got:\n\t' + str(big_iterable) + '\ninstead.')
+        raise TypeError(
+            'big_iterable must be either Iterable or Container, '
+            'otherwise subset relation undefined.\n'
+            f'Got:\n\t{big_iterable}\ninstead.')
     if not isinstance(small_iterable, Iterable):
-        raise TypeError('small_iterable must be Iterable, '
-                        'otherwise subset relation undefined.\n'
-                        'Got:\n\t' + str(small_iterable) + '\ninstead.')
+        raise TypeError(
+            'small_iterable must be Iterable, '
+            'otherwise subset relation undefined.\n'
+            f'Got:\n\t{small_iterable}\ninstead.')
     # nxor
     if isinstance(small_iterable, str) != isinstance(big_iterable, str):
-        raise TypeError('Either both or none of small_iterable, '
-                        'big_iterable should be strings.\n'
-                        'Otherwise subset relation between string '
-                        'and non-string may introduce bugs.\nGot:\n\t' +
-                        str(small_iterable) + ',\t' + str(big_iterable) +
-                        '\ninstead.')
+        raise TypeError(
+            'Either both or none of `small_iterable`, '
+            '`big_iterable` should be strings.\n'
+            'Otherwise subset relation between string '
+            'and non-string may introduce bugs.\nGot:\n\t'
+            f'{small_iterable},\t{big_iterable}'
+            '\ninstead.')
     try:
         # first, avoid object duplication
         if not isinstance(small_iterable, set):
@@ -749,13 +760,14 @@ class PowerSet:
         return self()
 
     def __repr__(self):
-        return 'PowerSet(' + str(self.math_set) + ' )'
+        return f'PowerSet({self.math_set} )'
 
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
         if not isinstance(item, Iterable):
-            raise Exception('Not iterable:\n\t' + str(item) + ',\n'
-                            'this is a powerset, so it contains (math) sets.')
+            raise Exception(
+                f'Not iterable:\n\t{item},\n'
+                'this is a powerset, so it contains (math) sets.')
 
         return is_subset(item, self.math_set)
 
@@ -767,8 +779,9 @@ class PowerSet:
 
     def __add__(self, other):
         if not isinstance(other, PowerSet):
-            raise TypeError('Addition defined only between PowerSets.\n'
-                            'Got instead:\n\t other = ' + str(other))
+            raise TypeError(
+                'Addition defined only between PowerSets.\n'
+                f'Got instead:\n\t other = {other}')
         list1 = self.math_set
         list2 = other.math_set
         union = list1 | list2
@@ -785,8 +798,8 @@ class PowerSet:
         if name == 'math_set' and not isinstance(value, MathSet):
             msg = (
                 'PowerSet.math_set must be of class MathSet.\n'
-                'Got instead:\n\t' + str(value) +
-                '\nof class:\nt\t' + str(type(value)))
+                f'Got instead:\n\t{value}'
+                f'\nof class:\nt\t{type(value)}')
             raise Exception(msg)
         object.__setattr__(self, name, value)
 
@@ -835,21 +848,22 @@ class TypedDict(dict):
                     valid_y = False
         if not valid_y:
             msg = (
-                'key: ' + str(i) + ', cannot be'
-                ' assigned value: ' + str(y) + '\n'
+                f'key: {i}, cannot be'
+                f' assigned value: {y}\n'
                 'Admissible values are:\n\t'
-                + str(self.allowed_values[i]))
+                f'{self.allowed_values[i]}')
             raise ValueError(msg)
         super(TypedDict, self).__setitem__(i, y)
 
     def __str__(self):
-        return 'TypedDict(' + dict.__str__(self) + ')'
+        return f'TypedDict({dict.__str__(self)})'
 
     def update(self, *args, **kwargs):
         if args:
             if len(args) > 1:
-                raise TypeError("update expected at most 1 arguments, "
-                                "got %d" % len(args))
+                raise TypeError(
+                    'update expected at most 1 arguments, '
+                    f'got {len(args)}')
             other = dict(args[0])
             for key in other:
                 self[key] = other[key]

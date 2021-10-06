@@ -138,25 +138,25 @@ class GridWorld:
         if nonbool:
             if use_next:
                 return (
-                    "((X (" + str(self.prefix) +
-                    "_r = " + str(key[0] + self.offset[0]) +
-                    ")) && (X (" + str(self.prefix) +
-                    "_c = " + str(key[1] + self.offset[1]) + ")))")
+                    f'((X ({self.prefix}'
+                    f'_r = {key[0] + self.offset[0]}'
+                    f')) && (X ({self.prefix}'
+                    f'_c = {key[1] + self.offset[1]})))')
             else:
                 return (
-                    "((" + str(self.prefix) +
-                    "_r = " + str(key[0] + self.offset[0]) +
-                    ") && (" + str(self.prefix) +
-                    "_c = " + str(key[1] + self.offset[1]) + "))")
+                    f'(({self.prefix}'
+                    f'_r = {key[0] + self.offset[0]}'
+                    f') && ({self.prefix}'
+                    f'_c = {key[1] + self.offset[1]}))')
         else:
             if use_next:
                 out = 'X '
             else:
                 out = ''
             out += (
-                str(self.prefix) + "_" +
-                str(key[0] + self.offset[0]) + "_" +
-                str(key[1] + self.offset[1]))
+                f'{self.prefix}_'
+                f'{key[0] + self.offset[0]}_'
+                f'{key[1] + self.offset[1]}')
             return out
 
     def __copy__(self):
@@ -201,15 +201,19 @@ class GridWorld:
             key = (key[0], self.W.shape[1] + key[1])
         output = dict()
         if nonbool:
-            output[self.prefix + "_r"] = key[0] + offset[0]
-            output[self.prefix + "_c"] = key[1] + offset[1]
+            output[f'{self.prefix}_r'] = key[0] + offset[0]
+            output[f'{self.prefix}_c'] = key[1] + offset[1]
         else:
             for i in range(self.W.shape[0]):
                 for j in range(self.W.shape[1]):
-                    output[self.prefix + "_" +
-                           str(i + offset[0]) + "_" + str(j + offset[1])] = 0
-            output[self.prefix + "_" +
-                   str(key[0] + offset[0]) + "_" + str(key[1] + offset[1])] = 1
+                    output[
+                        f'{self.prefix}_'
+                        f'{i + offset[0]}_'
+                        f'{j + offset[1]}'] = 0
+            output[
+                f'{self.prefix}_'
+                f'{key[0] + offset[0]}_'
+                f'{key[1] + offset[1]}'] = 1
         return output
 
     def is_empty(self, coord, extend=False):
@@ -555,7 +559,7 @@ class GridWorld:
                     else:
                         raise ValueError(
                             'unrecognized row symbol "' +
-                            str(line[j]) + '".')
+                            f'{line[j]}".')
                 row_index += 1
             else:
                 # Still looking for gridworld size in the given string
@@ -721,7 +725,7 @@ class GridWorld:
                 if nonbool:
                     cell_var = self.__getitem__((i, j))
                 else:
-                    cell_var = self.prefix + "_" + str(i) + "_" + str(j)
+                    cell_var = f'{self.prefix}_{i}_{j}'
                 # adjacency[i]
                 cells[cell_var] = Polytope(
                         A=np.array(
@@ -840,7 +844,7 @@ class GridWorld:
                         self.W[outer_ind[0]][outer_ind[1]] == 1):
                     continue
                 if outer_ind == (-1, -1):
-                    conj.append(self.prefix + "_n_n'")
+                    conj.append(f"{self.prefix}_n_n'")
                 else:
                     conj.append(
                         self.__getitem__(
@@ -854,7 +858,7 @@ class GridWorld:
                             outer_ind == inner_ind):
                         continue
                     if inner_ind == (-1, -1):
-                        conj.append("(!X " + self.prefix + "_n_n)")
+                        conj.append(f"(!X {self.prefix}_n_n)")
                     else:
                         conj.append(
                             "(!" +
@@ -866,8 +870,9 @@ class GridWorld:
             spec_trans.append("\n|| ".join(disj))
 
         if nonbool:
-            sys_vars = {self.prefix + "_r": (0, self.W.shape[0] - 1),
-                        self.prefix + "_c": (0, self.W.shape[1] - 1)}
+            sys_vars = {
+                f"{self.prefix}_r": (0, self.W.shape[0] - 1),
+                f"{self.prefix}_c": (0, self.W.shape[1] - 1)}
         else:
             sys_vars = set()
             for i in range(row_low, row_high):
@@ -881,7 +886,7 @@ class GridWorld:
             initspec = []
             for loc in self.init_list:
                 mutex = [self.__getitem__((loc[0], loc[1]), nonbool=nonbool)]
-                mutex.extend(["!" + ovar for ovar in sys_vars if ovar !=
+                mutex.extend([f"!{ovar}" for ovar in sys_vars if ovar !=
                               self.__getitem__(loc, nonbool=nonbool)])
                 initspec.append("(" + " && ".join(mutex) + ")")
         init_str = " || ".join(initspec)
@@ -1108,7 +1113,9 @@ def unoccupied(size, prefix="Y"):
     """
     if len(size) < 2:
         raise TypeError("invalid gridworld size.")
-    return GridWorld(str(size[0]) + " " + str(size[1]), prefix="Y")
+    return GridWorld(
+        f'{size[0]} {size[1]}',
+        prefix="Y")
 
 
 def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
@@ -1206,19 +1213,18 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
                         j < Xi[0][1] + Xi[1].size()[1]):
                     if nonbool:
                         Xivar = (
-                            "((X " + Xi[1].prefix +
-                            "_r = " + str(i - Xi[0][0]) +
-                            ") & (X " + Xi[1].prefix + "_c = " +
-                            str(j - Xi[0][1]) + "))")
+                            f'((X {Xi[1].prefix}'
+                            f'_r = {i - Xi[0][0]}'
+                            f') & (X {Xi[1].prefix}_c = '
+                            f'{j - Xi[0][1]}))')
                     else:
                         Xivar = (
-                            "X " + Xi[1].prefix +
-                            "_" + str(i) + "_" + str(j))
+                            f'X {Xi[1].prefix}'
+                            f'_{i}_{j}')
                     spec.sys_safety.append(
                         "!(" + Y.__getitem__(
                             (i, j), nonbool=nonbool, use_next=True) +
-                        " && " + Xivar + ")")
-
+                        f" && {Xivar})")
     if get_moves_lists:
         return (spec, moves_N)
     return spec
@@ -1320,8 +1326,10 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
             interval=500)
         return anim
     else:
-        print("Writing %s000.png - %s%03d.png" %
-              (save_prefix, save_prefix, len(paths[0])-1))
+        print(
+            f'Writing {save_prefix}000.png - '
+            f'{save_prefix}%03d.png' %
+              len(paths[0]) - 1)
         for n in range(len(paths[0])):
             update_line(n, data, lines)
         return None

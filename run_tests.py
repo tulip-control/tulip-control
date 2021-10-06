@@ -75,7 +75,7 @@ Besides what is below, OPTIONS... are passed on to `pytest`.
 
 class ArgParser(argparse.ArgumentParser):
     def error(self, message):
-        sys.stderr.write('error: {m}\n'.format(m=message))
+        sys.stderr.write(f'error: {message}\n')
         self.print_help()
         sys.exit(1)
 
@@ -128,8 +128,8 @@ def main():
         '--continue-on-collection-errors',
         '-c', config_file,
         ])
-    print('calling pytest with arguments:\n{args}'.format(
-        args=pprint.pformat(pytest_args)))
+    args = pprint.pformat(pytest_args)
+    print(f'calling pytest with arguments:\n{args}')
     ret = pytest.main(pytest_args)
     # return the exit value of `pytest`,
     # to inform CI runs whether all tests passed
@@ -146,9 +146,9 @@ def _test_files(tests_dir, basenames):
             'Try calling this script with the "-h" flag.')
         exit(1)
     if excludefiles:
+        omit = os.path.join(tests_dir, omit)
         more_args.extend(
-            '--ignore-glob={omit}'.format(
-                omit=os.path.join(tests_dir, omit))
+            f'--ignore-glob={omit}'
             for omit in excludefiles)
     return more_args, testfiles
 
@@ -182,8 +182,7 @@ def _add_files_matching_basename(
     match = _filter_filenames(basename, available)
     if len(match) > 1:
         raise ValueError(
-            'ambiguous base name: `{b}`, matches: {m}'.format(
-                b=basename, m=match))
+            f'ambiguous base name: `{basename}`, matches: {match}')
     if not match:
         return
     filename = match[0]
@@ -212,7 +211,7 @@ def _filter_filenames(basename, available):
 
 def _map_basename_to_filename(
         basename, testfiles, excludefiles, more_args, tests_dir):
-    filename = '{base}_test.py'.format(base=basename)
+    filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
     if os.path.exists(path):
         testfiles.append(filename)
@@ -222,7 +221,7 @@ def _map_basename_to_filename(
         more_args.append(basename)
         return
     base = basename[1:]
-    filename = '{base}_test.py'.format(base=base)
+    filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
     if os.path.exists(path):
         excludefiles.append(filename)
@@ -239,10 +238,9 @@ def _test_family(testfamily):
     elif testfamily.lower() == 'full':
         testfiles = list()
     else:
-        print('Unrecognized test family: "{f}"'.format(
-            f=testfamily))
+        print(f'Unrecognized test family: "{testfamily}"')
         sys.exit(1)
-    testfiles = [name + '.py' for name in testfiles]
+    testfiles = [f'{name}.py' for name in testfiles]
     return testfiles
 
 

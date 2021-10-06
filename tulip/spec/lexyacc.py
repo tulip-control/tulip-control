@@ -152,7 +152,9 @@ class Lexer:
         t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
-        warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
+        warnings.warn(
+            'Unknown character '
+            f'`{t.value[0]}`')
         t.lexer.skip(1)
 
     def build(
@@ -273,7 +275,9 @@ class Parser:
             lexer=self.lexer.lexer,
             debug=debuglog)
         if root is None:
-            raise Exception('failed to parse:\n\t{f}'.format(f=formula))
+            raise Exception(
+                'failed to parse:\n'
+                f'\t{formula}')
         return root
 
     def p_nullary_connective(self, p):
@@ -366,9 +370,10 @@ class Parser:
             if tok is None:
                 break
             s.append(tok.value)
+        s = ' '.join(s)
         raise Exception(
-            'Syntax error at "{p}"\n'.format(p=p.value) +
-            'remaining input:\n{s}\n'.format(s=' '.join(s)))
+            f'Syntax error at "{p.value}"\n' +
+            f'remaining input:\n{s}\n')
 
 
 def parse(formula):
@@ -388,16 +393,16 @@ if __name__ == '__main__':
     import os
     tabmodule = TABMODULE.split('.')[-1]
     outputdir = './'
-    tablepy = tabmodule + '.py'
-    tablepyc = tabmodule + '.pyc'
+    tablepy = f'{tabmodule}.py'
+    tablepyc = f'{tabmodule}.pyc'
     try:
         os.remove(tablepy)
     except:
-        print('no "{t}" found'.format(t=tablepy))
+        print(f'no "{tablepy}" found')
     try:
         os.remove(tablepyc)
     except:
-        print('no "{t}" found'.format(t=tablepyc))
+        print(f'no "{tablepyc}" found')
     parser = Parser()
     parser.build(
         tabmodule,

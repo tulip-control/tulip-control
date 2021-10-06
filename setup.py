@@ -17,12 +17,11 @@ PROJECT_URLS = {
     'Documentation': 'https://tulip-control.sourceforge.io/doc/',
     'API Documentation': 'https://tulip-control.sourceforge.io/api-doc/',
     'Source Code': 'https://github.com/tulip-control/tulip-control'}
-VERSION_FILE = '{name}/_version.py'.format(name=NAME)
+VERSION_FILE = f'{NAME}/_version.py'
 MAJOR = 1
 MINOR = 4
 MICRO = 0
-VERSION = '{major}.{minor}.{micro}'.format(
-    major=MAJOR, minor=MINOR, micro=MICRO)
+VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 VERSION_TEXT = (
     '# This file was generated from setup.py\n'
     "version = '{version}'\n")
@@ -50,8 +49,7 @@ def git_version(version):
     repo.git.status()
     sha = repo.head.commit.hexsha
     if repo.is_dirty():
-        return '{v}.dev0+{sha}.dirty'.format(
-            v=version, sha=sha)
+        return f'{version}.dev0+{sha}.dirty'
     # commit is clean
     # is it release of `version` ?
     try:
@@ -61,8 +59,7 @@ def git_version(version):
             tags=True,
             dirty=True)
     except git.GitCommandError:
-        return '{v}.dev0+{sha}'.format(
-            v=version, sha=sha)
+        return f'{version}.dev0+{sha}'
     assert tag == 'v' + version, (tag, version)
     return version
 
@@ -93,7 +90,7 @@ def run_setup():
             debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
-        print('Failed to build PLY tables: {e}'.format(e=e))
+        print(f'Failed to build PLY tables: {e}')
         plytable_build_failed = True
     # version
     try:
@@ -156,17 +153,17 @@ def install_cvxopt():
         "pip", "download",
         "-d", "temp",
         "--no-deps",
-        "polytope=={ver}".format(ver=ver)])
+        f"polytope=={ver}"])
     # Extract the tar archive
     subprocess.check_call([
         "tar", "xzf",
-        "temp/polytope-{ver}.tar.gz".format(ver=ver),
+        f"temp/polytope-{ver}.tar.gz",
         "-C", "temp"])
     # Install cvxopt according to requirements file provided by polytope
     subprocess.check_call([
         sys.executable, "-m",
         "pip", "install",
-        "-r", "temp/polytope-{ver}/requirements/extras.txt".format(ver=ver)])
+        "-r", f"temp/polytope-{ver}/requirements/extras.txt"])
 
 
 if __name__ == '__main__':

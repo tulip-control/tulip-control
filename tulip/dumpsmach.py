@@ -121,36 +121,28 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
         for (_, w, d), ifw in zip(M.edges(u, data=True), ifs()):
             if M.inputs:
                 guard = ' and '.join(
-                    '({k} == {v})'.format(k=k, v=v)
+                    f'({k} == {v})'
                     for k, v in proj(d, M.inputs))
             else:
                 guard = 'True'
             outputs = ''.join(
-                '{t4}output["{k}"] = {v}\n'.format(k=k, v=v, t4=4*tab)
+                f'{4 * tab}output["{k}"] = {v}\n'
                 for k, v in proj(d, M.outputs))
-            edges.append((
-                '{t3}{ifw} {guard}:\n'
-                '{t4}self.state = {target_id}\n'
+            target_id = node_to_int[w]
+            edges.append(
+                f'{3 * tab}{ifw} {guard}:\n'
+                f'{4 * tab}self.state = {target_id}\n'
                 '\n'
-                '{outputs}').format(
-                    t3=3*tab,
-                    t4=4*tab,
-                    ifw=ifw,
-                    guard=guard,
-                    target_id=node_to_int[w],
-                    outputs=outputs))
+                f'{outputs}')
         # handle invalid inputs or dead-end
         if edges and M.inputs:
-            edges.append((
-                '{t3}else:\n'
-                '{t4}self._error({input_args})\n').format(
-                    t3=3*tab,
-                    t4=4*tab,
-                    input_args=input_args))
+            edges.append(
+                f'{3 * tab}else:\n'
+                f'{4 * tab}self._error({input_args})\n')
         elif not edges:
             edges.append(
-                '{t}raise Exception("Reached dead-end state !")\n'.format(
-                    t=3*tab))
+                f'{3 * tab}raise Exception('
+                '"Reached dead-end state !")\n')
         # each state
         c.append((
             '{t2}{ifu} self.state == {node_id}:\n'

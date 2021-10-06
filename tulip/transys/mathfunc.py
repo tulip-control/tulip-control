@@ -49,13 +49,13 @@ class LabeledStateInputOutputPair:
         self.labels = labels
 
     def __str__(self):
-        ret = "(state=" + str(self.state) + ",label=" + str(self.labels)
+        ret = f'(state={self.state},label={self.labels}'
         for key, val in self.input_dict.items():
-            ret += "," + str(key) + "=" + str(val)
+            ret += f',{key}={val}'
         ret += ") -> ("
         output_str_list = []
         for key, val in self.output_dict.items():
-            output_str_list.append(str(key) + "=" + str(val))
+            output_str_list.append(f'{key}={val}')
         ret += ",".join(output_str_list) + ")"
         return ret
 
@@ -146,7 +146,7 @@ class FunctionOnLabeledState:
         pair = self.get_state_input_output_pair(state, input_dict)
         if pair is None:
             raise KeyError(
-                "Input tuple {i} does not exist".format(i=input_tuple))
+                f"Input tuple {input_tuple} does not exist")
         return self.get_output_tuple(pair.output_dict)
 
     def get_state_and_input_dict(self, input_tuple):
@@ -220,10 +220,8 @@ class FunctionOnLabeledState:
             state, input_dict)
         if pair is not None:
             print(
-                "Warning: replacing output at state {} with {}".format(
-                    state, output_tuple
-                )
-            )
+                'Warning: replacing output at '
+                f'state {state} with {output_tuple}')
             pair.output_dict = output_dict
             pair.labels = labels
             return

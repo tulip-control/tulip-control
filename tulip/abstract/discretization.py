@@ -198,7 +198,8 @@ class AbstractSwitched:
         for mode, ab in self.modes.items():
             ax = ab.plot(
                 show_ts, only_adjacent, color_seed)
-            ax.set_title('Abstraction for mode: ' + str(mode))
+            ax.set_title(
+                f'Abstraction for mode: {mode}')
             axs.append(ax)
         #if isinstance(self.ts, dict):
         #    for ts in self.ts:
@@ -301,19 +302,18 @@ class AbstractPwa:
 
     def __str__(self):
         return (
-            str(self.ppp) +
-            str(self.ts) +
+            f'{self.ppp}{self.ts}' +
             30 * '-' + '\n'
-            'Map PPP Regions ---> TS states:\n' +
-            self._ppp2other_str(self.ppp2ts) + '\n'
-            'Map PPP Regions ---> PWA PPP Regions:\n' +
-            self._ppp2other_str(self._ppp2pwa) + '\n'
-            'Map PPP Regions ---> PWA Subsystems:\n' +
-            self._ppp2other_str(self._ppp2sys) + '\n'
-            'Map PPP Regions ---> Original PPP Regions:\n' +
-            self._ppp2other_str(self._ppp2orig) + '\n'
-            'Discretization Options:\n\t' +
-            pprint.pformat(self.disc_params) + '\n')
+            'Map PPP Regions ---> TS states:\n'
+            f'{self._ppp2other_str(self.ppp2ts)}\n'
+            'Map PPP Regions ---> PWA PPP Regions:\n'
+            f'{self._ppp2other_str(self._ppp2pwa)}\n'
+            'Map PPP Regions ---> PWA Subsystems:\n'
+            f'{self._ppp2other_str(self._ppp2sys)}\n'
+            'Map PPP Regions ---> Original PPP Regions:\n'
+            f'{self._ppp2other_str(self._ppp2orig)}\n'
+            'Discretization Options:\n\t'
+            f'{pprint.pformat(self.disc_params)}\n')
 
     def ts2ppp(self, state):
         region_index = self.ppp2ts.index(state)
@@ -383,15 +383,13 @@ class AbstractPwa:
         return s
 
     def _debug_str_(self):
-        s = str(self.ppp)
-        s += str(self.ts)
-
-        s += '(PWA + Prop)-Preserving Partition'
-        s += str(self.pwa_ppp)
-
-        s += 'Original Prop-Preserving Partition'
-        s += str(self.orig_ppp)
-        return s
+        return (
+            f'{self.ppp}'
+            f'{self.ts}'
+            '(PWA + Prop)-Preserving Partition'
+            f'{self.pwa_ppp}'
+            'Original Prop-Preserving Partition'
+            f'{self.orig_ppp}')
 
     def plot(
             self,
@@ -427,15 +425,17 @@ class AbstractPwa:
                 from_region, to_region, sys,
                 trans_set=trans_set,
                 **disc_params)
-            msg = str(i) + ' ---> ' + str(j)
+            msg = f'{i} ---> {j}'
             if not from_region <= s0:
-                logger.error('incorrect transition: ' + msg)
-
+                logger.error(
+                    f'incorrect transition: {msg}')
                 isect = from_region.intersect(s0)
                 ratio = isect.volume /from_region.volume
-                logger.error('intersection volume: ' + str(ratio) + ' %')
+                logger.error(
+                    f'intersection volume: {ratio} %')
             else:
-                logger.info('correct transition: ' + msg)
+                logger.info(
+                    f'correct transition: {msg}')
 
 def _plot_abstraction(
         ab,
@@ -560,8 +560,7 @@ def discretize(
             plot_every)
     else:
         raise ValueError(
-            'Unknown simulation type: "{st}"'.format(
-            st=simu_type))
+            f'Unknown simulation type: "{simu_type}"')
     return AbstractPwa
 
 
@@ -681,7 +680,8 @@ def _discretize_bi(
             rd = 0.
     # Initialize matrix for pairs to check
     IJ = part.adj.copy().toarray()
-    logger.debug("\n Starting IJ: \n" + str(IJ) )
+    logger.debug(
+        f'\n Starting IJ: \n{IJ}')
     # next line omitted in discretize_overlap
     IJ = reachable_within(
         trans_length, IJ, part.adj.toarray())
@@ -745,20 +745,21 @@ def _discretize_bi(
             trans_set = orig_list[orig[i]]
         S0 = solve_feasible(
             si, sj, ss, N, closed_loop,
-            use_all_horizon, trans_set, max_num_poly
+            use_all_horizon, trans_set,
+            max_num_poly
         )
-        msg = '\n Working with partition cells: {i}, {j}'.format(i=i,
-                                                j=j)
-        logger.info(msg)
-        msg = '\t{i} (#polytopes = {num}), and:\n'.format(i=i,
-                                                num=len(si))
-        msg += '\t{j} (#polytopes = {num})\n'.format(j=j,
-                                                num=len(sj))
+        logger.info(
+            f'\n Working with partition cells: {i}, {j}')
+        msg = (
+            f'\t{i} (#polytopes = {len(si)}), and:\n'
+            f'\t{j} (#polytopes = {len(sj)})\n')
         if ispwa:
-            msg += '\t with active subsystem: '
-            msg += '{sys}\n'.format(sys=subsys_list[i])
-        msg += '\t Computed reachable set S0 with volume: '
-        msg += '{vol}\n'.format(vol=S0.volume)
+            msg += (
+                '\t with active subsystem: '
+                f'{subsys_list[i]}\n')
+        msg += (
+            '\t Computed reachable set S0 with volume: '
+            f'{S0.volume}\n')
         logger.debug(msg)
         #logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
@@ -894,9 +895,9 @@ def _discretize_bi(
                         adj[k, r] = 1
             msg = ''
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg += '\t\n Adding states {i} and '.format(i=i)
+                msg += f'\t\n Adding states {i} and '
                 for r in new_idx:
-                    msg += '{r} and '.format(r=r)
+                    msg += f'{r} and '
                 msg += '\n'
                 logger.debug(msg)
             for k in np.setdiff1d(old_adj, [i,n_cells-1]):
@@ -929,21 +930,20 @@ def _discretize_bi(
             for r in new_idx:
                 sym_adj_change(IJ, adj_k, transitions, r)
             if logger.getEffectiveLevel() <= logging.DEBUG:
-                msg = '\n\n Updated adj: \n{adj}'.format(adj=adj)
-                msg += '\n\n Updated trans: \n{trans}'.format(trans=
-                                              transitions)
-                msg += '\n\n Updated IJ: \n{IJ}'.format(IJ=IJ)
-                logger.debug(msg)
-            logger.info('Divided region: {i}\n'.format(i=i))
+                logger.debug(
+                    f'\n\n Updated adj: \n{adj}'
+                    f'\n\n Updated trans: \n{transitions}'
+                    f'\n\n Updated IJ: \n{IJ}')
+            logger.info(f'Divided region: {i}\n')
         elif vol2 < abs_tol:
-            logger.info('Found: {i} ---> {j}\n'.format(i=i, j=j))
+            logger.info(f'Found: {i} ---> {j}\n')
             transitions[j,i] = 1
         else:
             if logger.level <= logging.DEBUG:
-                msg = '\t Unreachable: {i} --X--> {j}\n'.format(i=i, j=j)
-                msg += '\t\t diff vol: {vol2}\n'.format(vol2=vol2)
-                msg += '\t\t intersect vol: {vol1}\n'.format(vol1=vol1)
-                logger.debug(msg)
+                logger.debug(
+                    f'\t Unreachable: {i} --X--> {j}\n'
+                    f'\t\t diff vol: {vol2}\n'
+                    f'\t\t intersect vol: {vol1}\n')
             else:
                 logger.info('\t unreachable\n')
             transitions[j,i] = 0
@@ -959,8 +959,9 @@ def _discretize_bi(
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
         progress += [progress_ratio]
-        msg = '\t total # polytopes: {n_cells}\n'.format(n_cells=n_cells)
-        msg += '\t progress ratio: {pr}\n'.format(pr=progress_ratio)
+        msg = (
+            f'\t total # polytopes: {n_cells}\n'
+            f'\t progress ratio: {progress_ratio}\n')
         logger.info(msg)
         iter_count += 1
         # no plotting ?
@@ -1002,8 +1003,9 @@ def _discretize_bi(
         ax2.set_xlim(l[0,0], u[0,0])
         ax2.set_ylim(l[1,0], u[1,0])
         if save_img:
-            fname = 'movie' +str(iter_count).zfill(3)
-            fname += '.' + file_extension
+            fname = (
+                f'movie{str(iter_count).zfill(3)}'
+                f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
     new_part = PropPreservingPartition(
@@ -1038,8 +1040,8 @@ def _discretize_bi(
         max_num_poly=max_num_poly)
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
-    msg = 'Total abstraction time: {time}[sec]'.format(time=
-             end_time - start_time)
+    time = end_time - start_time
+    msg = f'Total abstraction time: {time}[sec]'
     print(msg)
     logger.info(msg)
     if save_img and plt is not None:
@@ -1183,7 +1185,7 @@ def _discretize_dual(
             rd = 0.
     # Initialize matrix for pairs to check
     IJ = part.adj.copy().toarray()
-    logger.debug("\n Starting IJ: \n" + str(IJ) )
+    logger.debug(f'\n Starting IJ: \n{IJ}')
     # next line omitted in discretize_overlap
     IJ = reachable_within(
         trans_length, IJ, part.adj.toarray())
@@ -1251,18 +1253,18 @@ def _discretize_dual(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set, max_num_poly
         )
-        msg = '\n Working with partition cells: {i}, {j}'.format(i=i,
-                                                j=j)
-        logger.info(msg)
-        msg = '\t{i} (#polytopes = {num}), and:\n'.format(i=i,
-                                                num=len(si))
-        msg += '\t{j} (#polytopes = {num})\n'.format(j=j,
-                                                num=len(sj))
+        logger.info(
+            f'\n Working with partition cells: {i}, {j}')
+        msg = (
+            f'\t{i} (#polytopes = {len(si)}), and:\n'
+            f'\t{j} (#polytopes = {len(sj)})\n')
         if ispwa:
-            msg += '\t with active subsystem: '
-            msg += '{sys}\n'.format(sys=subsys_list[i])
-        msg += '\t Computed reachable set S0 with volume: '
-        msg += '{vol}\n'.format(vol=S0.volume)
+            msg += (
+                '\t with active subsystem: '
+                f'{subsys_list[i]}\n')
+        msg += (
+            '\t Computed reachable set S0 with volume: '
+            f'{S0.volume}\n')
         logger.debug(msg)
         # logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
@@ -1302,9 +1304,9 @@ def _discretize_dual(
             # existed in current partitions
             for idx in range(len(sol)):
                 if(sol[idx] == isect):
-                    logger.info('Found: {idx} ---> {j} '.format(idx=idx,
-                                j=j))
-                    logger.info('intersection exists.\n')
+                    logger.info(
+                        f'Found: {idx} ---> {j} '
+                        'intersection exists.\n')
                     transitions[j, idx] = 1
                     check_isect = True
             if not check_isect:
@@ -1328,11 +1330,9 @@ def _discretize_dual(
                 adj[new_idx, new_idx] = 1
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-                msg = ''
                 if logger.getEffectiveLevel() <= logging.DEBUG:
-                    msg += '\t\n Adding states {new_idx}\n'.format(new_idx=
-                                               new_idx)
-                    logger.debug(msg)
+                    logger.debug(
+                        f'\t\n Adding states {new_idx}\n')
                 for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                     # Every "old" neighbor must be the neighbor
                     # of at least one of the new
@@ -1365,21 +1365,20 @@ def _discretize_dual(
                 sym_adj_change(IJ, adj_k, transitions, i)
                 sym_adj_change(IJ, adj_k, transitions, new_idx)
                 if logger.getEffectiveLevel() <= logging.DEBUG:
-                    msg = '\n\n Updated adj: \n{adj}'.format(adj=adj)
-                    msg += '\n\n Updated trans: \n{trans}'.format(trans=
-                                                  transitions)
-                    msg += '\n\n Updated IJ: \n{IJ}'.format(IJ=IJ)
-                    logger.debug(msg)
-                logger.info('Divided region: {i}\n'.format(i=i))
+                    logger.debug(
+                        f'\n\n Updated adj: \n{adj}'
+                        f'\n\n Updated trans: \n{transitions}'
+                        f'\n\n Updated IJ: \n{IJ}')
+                logger.info(f'Divided region: {i}\n')
         elif vol2 < abs_tol:
-            logger.info('Found: {i} ---> {j}\n'.format(i=i, j=j))
+            logger.info(f'Found: {i} ---> {j}\n')
             transitions[j, i] = 1
         else:
             if logger.level <= logging.DEBUG:
-                msg = '\t Unreachable: {i} --X--> {j}\n'.format(i=i, j=j)
-                msg += '\t\t diff vol: {vol2}\n'.format(vol2=vol2)
-                msg += '\t\t intersect vol: {vol1}\n'.format(vol1=vol1)
-                logger.debug(msg)
+                logger.debug(
+                    f'\t Unreachable: {i} --X--> {j}\n'
+                    f'\t\t diff vol: {vol2}\n'
+                    f'\t\t intersect vol: {vol1}\n')
             else:
                 logger.info('\t unreachable\n')
             transitions[j, i] = 0
@@ -1394,9 +1393,9 @@ def _discretize_dual(
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
         progress += [progress_ratio]
-        msg = '\t total # polytopes: {n_cells}\n'.format(n_cells=n_cells)
-        msg += '\t progress ratio: {pr}\n'.format(pr=progress_ratio)
-        logger.info(msg)
+        logger.info(
+            f'\t total # polytopes: {n_cells}\n'
+            f'\t progress ratio: {progress_ratio}\n')
         iter_count += 1
         # needs to be removed later
         # if(iter_count>=700):
@@ -1440,8 +1439,9 @@ def _discretize_dual(
         ax2.set_xlim(l[0, 0], u[0, 0])
         ax2.set_ylim(l[1, 0], u[1, 0])
         if save_img:
-            fname = 'movie' +str(iter_count).zfill(3)
-            fname += '.' + file_extension
+            fname = (
+                f'movie{str(iter_count).zfill(3)}'
+                f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
     new_part = PropPreservingPartition(
@@ -1476,8 +1476,8 @@ def _discretize_dual(
         max_num_poly=max_num_poly)
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
-    msg = 'Total abstraction time: {t} [sec]'.format(
-        t=end_time - start_time)
+    dt = end_time - start_time
+    msg = f'Total abstraction time: {dt} [sec]'
     print(msg)
     logger.info(msg)
     if save_img and plt is not None:
@@ -1610,11 +1610,11 @@ def multiproc_discretize(
     global logger
     logger = mp.log_to_stderr()
     name = mp.current_process().name
-    print('Abstracting mode: ' + str(mode) + ', on: ' + str(name))
-
+    print(
+        f'Abstracting mode: {mode}, on: {name}')
     absys = discretize(ppp, cont_dyn, **disc_params)
     q.put((mode, absys))
-    print('Worker: ' + str(name) + 'finished.')
+    print(f'Worker: {name} finished.')
 
 
 def multiproc_get_transitions(
@@ -1624,11 +1624,12 @@ def multiproc_get_transitions(
     logger = mp.log_to_stderr()
     name = mp.current_process().name
     print(
-        'Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
+        'Merged transitions for '
+        f'mode: {mode}, on: {name}')
     trans = get_transitions(
         absys, mode, ssys, **params)
     q.put((mode, trans))
-    print('Worker: ' + str(name) + 'finished.')
+    print(f'Worker: {name} finished.')
 
 
 def multiproc_discretize_switched(
@@ -1664,8 +1665,7 @@ def multiproc_discretize_switched(
     # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
-    logger.info('Merged partition has: ' + str(n) + ', states')
-
+    logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
@@ -1720,20 +1720,19 @@ def discretize_switched(
     abstractions = dict()
     for mode in modes:
         logger.debug(30 * '-' + '\n')
-        logger.info('Abstracting mode: ' + str(mode))
+        logger.info(f'Abstracting mode: {mode}')
         cont_dyn = hybrid_sys.dynamics[mode]
         absys = discretize(
             ppp, cont_dyn,
             **disc_params[mode]
         )
-        logger.debug('Mode Abstraction:\n' + str(absys) +'\n')
-
+        logger.debug(
+            f'Mode Abstraction:\n{absys}\n')
         abstractions[mode] = absys
     # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
-    logger.info('Merged partition has: ' + str(n) + ', states')
-
+    logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition
     trans = dict()
     for mode in modes:
@@ -1766,12 +1765,11 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
         plot_annot(ax)
     # save mode partitions
     for ax, mode in zip(axs[:n], swab.modes):
-        fname = 'merged_' + str(mode) + '.pdf'
+        fname = f'merged_{mode}.pdf'
         ax.figure.savefig(fname)
-
     # save merged partition
     for ax, mode in zip(axs[n:], swab.modes):
-        fname = 'part_' + str(mode) + '.pdf'
+        fname = f'part_{mode}.pdf'
         ax.figure.savefig(fname)
 
 
@@ -1795,9 +1793,7 @@ def merge_abstractions(
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
-
-    logger.info('APs: ' + str(aps))
-
+    logger.info(f'APs: {aps}')
     sys_ts = trs.FTS()
     # create stats
     n = len(merged_abstr.ppp)
@@ -1882,9 +1878,7 @@ def get_transitions(
         i = ind[1][0]
         j = ind[0][0]
         IJ[j,i] = 0
-
-        logger.debug('checking transition: ' + str(i) + ' -> ' + str(j))
-
+        logger.debug(f'checking transition: {i} -> {j}')
         si = part[i]
         sj = part[j]
         # Use original cell as trans_set
@@ -1904,11 +1898,11 @@ def get_transitions(
             transitions[i, j] = 0
             msg = '\t Not feasible transition.'
         logger.debug(msg)
-    logger.info('Checked: ' + str(n_checked))
-    logger.info('Found: ' + str(n_found))
+    logger.info(f'Checked: {n_checked}')
+    logger.info(f'Found: {n_found}')
     assert n_checked != 0, 'would divide '
-    logger.info('Survived merging: ' + str(float(n_found) / n_checked) + ' % ')
-
+    logger.info(
+        f'Survived merging: {float(n_found) / n_checked} % ')
     return transitions
 
 
@@ -1958,11 +1952,9 @@ def merge_partitions(abstractions):
     init_mode = list(abstractions.keys())[0]
     all_modes = set(abstractions)
     remaining_modes = all_modes.difference(set([init_mode]))
-
-    print('init mode: ' + str(init_mode))
-    print('all modes: ' + str(all_modes))
-    print('remaining modes: ' + str(remaining_modes))
-
+    print(f'init mode: {init_mode}')
+    print(f'all modes: {all_modes}')
+    print(f'remaining modes: {remaining_modes}')
     # initialize iteration data
     prev_modes = [init_mode]
    	# Create a list of merged-together regions
@@ -2074,9 +2066,8 @@ def merge_partition_pair(
             # no intersection ?
             if rc < 1e-5:
                 continue
-            logger.info('merging region: A' + str(i) +
-                        ', with: B' + str(j))
-
+            logger.info(
+                f'merging region: A{i}, with: B{j}')
             # if Polytope, make it Region
             if len(isect) == 0:
                 isect = pc.Region([isect])
@@ -2091,10 +2082,8 @@ def merge_partition_pair(
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
             ap_label_2 = ab2.ts.states[j]['ap']
-
-            logger.debug('AP label 1: ' + str(ap_label_1))
-            logger.debug('AP label 2: ' + str(ap_label_2))
-
+            logger.debug(f'AP label 1: {ap_label_1}')
+            logger.debug(f'AP label 2: {ap_label_2}')
             # original partitions may be
             # different if `pwa_partition` used
             # but must originate from same

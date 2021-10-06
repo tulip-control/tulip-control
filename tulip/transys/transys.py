@@ -107,19 +107,28 @@ class KripkeStructure(LabeledDiGraph):
         self._transition_dot_mask = dict()
 
     def __str__(self):
-        s = (
-            'Kripke Structure: ' + self.name + '\n' +
-            _hl + '\n' +
-            'Atomic Propositions (APs):\n\t' +
-            pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
-            'States labeled with sets of APs:\n' +
-            _dumps_states(self) + 2 * '\n' +
-            'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n' +
-            'Transitions:\n' +
-            pformat(self.transitions(), indent=3) +
-            '\n' + _hl + '\n')
-        return s
+        newlines = 2 * '\n'
+        props = pformat(
+            self.atomic_propositions,
+            indent=3)
+        states = _dumps_states(self)
+        initial_states = pformat(
+            self.states.initial,
+            indent=3)
+        transitions = pformat(
+            self.transitions(),
+            indent=3)
+        return (
+            f'Kripke Structure: {self.name}\n{_hl}\n'
+            'Atomic Propositions (APs):\n'
+            f'\t{props}{newlines}'
+            'States labeled with sets of APs:\n'
+            f'{states}{newlines}'
+            'Initial States:\n'
+            f'{initial_states}{newlines}'
+            'Transitions:\n'
+            f'{transitions}\n'
+            f'{_hl}\n')
 
 
 class WeightedKripkeStructure(KripkeStructure):
@@ -516,8 +525,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
         else:
             t = 'closed'
         s = (
-            _hl + '\nFinite Transition System (' + t + '): ' +
-            self.name + '\n' + _hl + '\n' +
+            f'{_hl}\nFinite Transition System ({t}): '
+            f'{self.name}\n{_hl}\n'
             'Atomic Propositions (APs):\n' +
             pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
@@ -528,13 +537,13 @@ class FiniteTransitionSystem(LabeledDiGraph):
         for action_type, codomain in self.actions.items():
             if 'sys' in action_type:
                 s += (
-                    'System Action Type: ' + str(action_type) +
-                    ', with possible values: ' + str(codomain) + '\n' +
+                    f'System Action Type: {action_type}'
+                    f', with possible values: {codomain}\n' +
                     pformat(codomain, indent=3) + 2 * '\n')
             elif 'env' in action_type:
                 s += (
-                    'Environment Action Type: ' + str(action_type) +
-                    ', with possible values:\n\t' + str(codomain) + '\n' +
+                    f'Environment Action Type: {action_type}'
+                    f', with possible values:\n\t{codomain}\n' +
                     pformat(codomain, indent=3) + 2 * '\n')
             else:
                 s += (
@@ -545,7 +554,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         s += (
             'Transitions labeled with sys and env actions:\n' +
             pformat(self.transitions(data=True), indent=3) +
-            '\n' + _hl + '\n')
+            f'\n{_hl}\n')
         return s
 
     @property
@@ -671,7 +680,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     # prepending states with given str
     if prepend_str:
         logger.debug(
-            'Given string:\n\t' + str(prepend_str) + '\n' +
+            f'Given string:\n\t{prepend_str}\n'
             'will be prepended to all states.')
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(
@@ -695,8 +704,9 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                 ap_label = set()
             ap_label = str2singleton(ap_label)
             state = prepend_str + str(state)
-            logger.debug('Labeling state:\n\t' + str(state) + '\n' +
-                         'with label:\n\t' + str(ap_label) + '\n')
+            logger.debug(
+                f'Labeling state:\n\t{state}\n'
+                f'with label:\n\t{ap_label}\n')
             ts.states[state]['ap'] = ap_label
     # any transition labeling ?
     if actions is None:
@@ -705,8 +715,8 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                 [from_state, to_state],
                 prepend_str)
             logger.debug(
-                'Added unlabeled edge:\n\t' +
-                str(from_state) + '--->' + str(to_state) + '\n')
+                f'Added unlabeled edge:\n'
+                f'\t{from_state} ---> {to_state}\n')
             ts.transitions.add(from_state, to_state)
     else:
         ts.actions |= actions
@@ -716,8 +726,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
                 prepend_str)
             logger.debug(
                 'Added labeled edge (=transition):\n\t' +
-                str(from_state) + '---[' + str(act) + ']--->' +
-                str(to_state) + '\n')
+                f'{from_state} ---[{act}]---> {to_state}\n')
             ts.transitions.add(
                 from_state, to_state,
                 actions=act)
@@ -814,7 +823,7 @@ def cycle_labeled_with(L):
           - `s_N ---> s_0`
     """
     ts = line_labeled_with(L)
-    last_state = 's' + str(len(L) - 1)
+    last_state = f's{len(L) - 1}'
     ts.transitions.add(last_state, 's0')
     # trans += [(n-1, 0)]
     #     # close cycle
@@ -851,12 +860,12 @@ def _dumps_states(g):
     nodes = g
     a = []
     for u in nodes:
-        s = '\t State: {u}, AP: {ap}\n'.format(
-            u=u, ap=g.nodes[u]['ap']) + ', '.join([
-                '{k}: {v}'.format(k=k, v=v)
-                for k, v in g.nodes[u].items()
-                if k != 'ap'])
-        a.append(s)
+        ap = g.nodes[u]['ap']
+        kv = ', '.join(
+            f'{k}: {v}'
+            for k, v in g.nodes[u].items()
+            if k != 'ap')
+        a.append(f'\t State: {u}, AP: {ap}\n{kv}')
     return ''.join(a)
 
 

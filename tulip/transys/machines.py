@@ -336,7 +336,7 @@ class MooreMachine(Transducer):
     def __str__(self):
         """Get informal string representation."""
         s = (
-            _hl + '\nMoore Machine: ' + self.name + '\n' + _hl + '\n' +
+            f'{_hl}\nMoore Machine: {self.name}\n{_hl}\n' +
             'State Variables:\n\t(name : type)\n' +
             _print_ports(self.state_vars) +
             'Input Ports:\n\t(name : type)\n' +
@@ -345,24 +345,25 @@ class MooreMachine(Transducer):
             _print_ports(self.outputs) +
             'States & State Var Values: (state : outputs : vars)\n')
         for state, label_dict in self.states(data=True):
-            s += '\t' + str(state) + ' :\n'
+            s += f'\t{state} :\n'
             # split into vars and outputs
             var_values = {k: v for k, v in label_dict.items()
                           if k in self.state_vars}
             output_values = {k: v for k, v in label_dict.items()
                              if k in self.outputs}
-            s += (_print_label(var_values) + ' : ' +
-                  _print_label(output_values))
+            s += (
+                f'{_print_label(var_values)} : '
+                f'{_print_label(output_values)}')
         s += (
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n')
         s += 'Transitions & Labels: (from --> to : label)\n'
         for from_state, to_state, label_dict in self.transitions(data=True):
             s += (
-                '\t' + str(from_state) + ' ---> ' +
-                str(to_state) + ' :\n' +
+                f'\t{from_state} ---> '
+                f'{to_state} :\n' +
                 _print_label(label_dict))
-        s += _hl + '\n'
+        s += f'{_hl}\n'
         return s
 
     def add_outputs(self, new_outputs, masks=None):
@@ -478,13 +479,14 @@ class MealyMachine(Transducer):
     def __str__(self):
         """Get informal string representation."""
         s = (
-            _hl + '\nMealy Machine: ' + self.name + '\n' + _hl + '\n' +
+            f'{_hl}\nMealy Machine: {self.name}\n{_hl}\n' +
             'State Variables:\n\t(name : type)\n' +
             _print_ports(self.state_vars))
         s += 'States & State Var Values:\n'
         for state, label_dict in self.states(data=True):
-            s += ('\t' + str(state) + ' :\n' +
-                  _print_label(label_dict))
+            s += (
+                f'\t{state} :\n'
+                f'{_print_label(label_dict)}')
         s += (
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n' +
@@ -495,10 +497,10 @@ class MealyMachine(Transducer):
             'Transitions & Labels: (from --> to : label)\n')
         for from_state, to_state, label_dict in self.transitions(data=True):
             s += (
-                '\t' + str(from_state) + ' ---> ' +
-                str(to_state) + ' :\n' +
+                f'\t{from_state} ---> '
+                f'{to_state} :\n' +
                 _print_label(label_dict))
-        s += _hl + '\n'
+        s += f'{_hl}\n'
         return s
 
     def _save(self, path, fileformat):
@@ -601,19 +603,19 @@ class MealyMachine(Transducer):
             if len(enabled_trans) == 0:
                 if len(some_possibilities) == 0:
                     raise Exception(
-                        'state {from_state} is a dead-end. '
+                        f'state {from_state} is a dead-end. '
                         'There are no possible inputs from '
-                        'it.'.format(from_state=from_state))
+                        'it.')
                 else:
                     raise Exception(
                         'not a valid input, '
                         'some possible inputs include: '
-                        '{t}'.format(t=some_possibilities))
+                        f'{some_possibilities}')
             else:
                 raise Exception(
                     'must be input-deterministic, '
                     'found enabled transitions: '
-                    '{t}'.format(t=enabled_trans))
+                    f'{enabled_trans}')
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
 
@@ -665,11 +667,15 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     seqs = input_sequences  # abbrv
     missing_ports = set(mealy.inputs).difference(seqs)
     if missing_ports:
-        raise ValueError('missing input port(s): ' + missing_ports)
+        raise ValueError(
+            'missing input port(s): '
+            f'{missing_ports}')
     # dict of lists ?
     non_lists = {k: v for k, v in seqs.items() if not isinstance(v, list)}
     if non_lists:
-        raise TypeError('Values must be lists, for: ' + str(non_lists))
+        raise TypeError(
+            'Values must be lists, '
+            f'for: {non_lists}')
     # uniform list len ?
     if len(set(len(x) for x in seqs.values())) > 1:
         raise ValueError(
@@ -736,10 +742,11 @@ def random_run(mealy, from_state=None, N=10):
         inputs = project_dict(
             attr_dict, mealy.inputs)
         print(
-            'move from\n\t state: ' + str(old_state) +
-            '\n\t with input:' + str(inputs) +
-            '\n\t to state: ' + str(new_state) +
-            '\n\t reacting by producing output: ' + str(outputs))
+            f'move from\n\t state: {old_state}'
+            f'\n\t with input: {inputs}'
+            f'\n\t to state: {new_state}'
+            '\n\t reacting by producing '
+            f'output: {outputs}')
     return (states_seq, output_seqs)
 
 
@@ -754,7 +761,8 @@ def interactive_run(mealy, from_state=None):
     else:
         state = from_state
     while True:
-        print('\n Current state: ' + str(state))
+        print(
+            f'\n Current state: {state}')
         if _interactive_run_step(mealy, state) is None:
             break
 
@@ -783,10 +791,10 @@ def _interactive_run_step(mealy, state):
     outputs = project_dict(
         attr_dict, mealy.outputs)
     print(
-        'Moving from state: ' + str(state) +
-        ', to state: ' + str(to_state) + '\n' +
-        'given inputs: ' + str(inputs) + '\n' +
-        'reacting with outputs: ' + str(outputs))
+        f'Moving from state: {state}'
+        f', to state: {to_state}\n'
+        f'given inputs: {inputs}\n'
+        f'reacting with outputs: {outputs}')
     return True
 
 
@@ -799,11 +807,10 @@ def _select_transition(mealy, trans):
         outputs = project_dict(
             attr_dict, mealy.outputs)
         msg += (
-            '\t' + str(i) + ' : ' +
-            str(from_state) + ' ---> ' + str(to_state) + '\n' +
-            '\t inputs:' + str(inputs) +
-            '\t outputs:' + str(outputs) +
-            '\n\n')
+            f'\t{i} : '
+            f'{from_state} ---> {to_state}\n'
+            f'\t inputs: {inputs}'
+            f'\t outputs: {outputs}\n\n')
     msg += (
         '\n' +
         'Select from the available transitions above\n' +
@@ -963,8 +970,7 @@ def _create_state_str(mealy_state, output, moore,
         if moore.states[s] == output:
             return s
     # create new
-    n = len(moore)
-    s = 's' + str(n)
+    s = f's{len(moore)}'
     moore.states.add(s, output)
     moore2mealy_states[s] = mealy_state
     mealy2moore_states[mealy_state].add(s)

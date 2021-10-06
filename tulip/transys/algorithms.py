@@ -72,7 +72,7 @@ def ltl2ba(formula):
     ba.add_edges_from(g.edges(data=True))
     ba.initial_nodes = initial
     ba.accepting_sets = accepting
-    logger.info('Resulting automaton:\n\n{ba}\n'.format(ba=ba))
+    logger.info(f'Resulting automaton:\n\n{ba}\n')
     return ba
 
 
@@ -341,11 +341,10 @@ def add(self, other):
     @rtype: `FiniteTransitionSystem`
     """
     if not isinstance(other, FiniteTransitionSystem):
-        msg = (
+        raise TypeError(
             'other class must be FiniteTransitionSystem.\n'
-            'Got instead:\n\t' + str(other) +
-            '\nof type:\n\t' + str(type(other)))
-        raise TypeError(msg)
+            f'Got instead:\n\t{other}'
+            f'\nof type:\n\t{type(other)}')
     self.atomic_propositions |= other.atomic_propositions
     self.actions |= other.actions
     # add extra states & their labels

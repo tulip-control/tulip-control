@@ -65,13 +65,13 @@ def synthesize_enumerated_streett(spec):
     h = _strategy_to_state_annotated(g, aut)
     del z, yij, xijk
     t3 = time.time()
-    log.info((
-        'Winning set computed in {win} sec.\n'
-        'Symbolic strategy computed in {sym} sec.\n'
-        'Strategy enumerated in {enu} sec.').format(
-            win=t1 - t0,
-            sym=t2 - t1,
-            enu=t3 - t2))
+    win = t1 - t0
+    sym = t2 - t1
+    enu = t3 - t2
+    log.info(
+        f'Winning set computed in {win} sec.\n'
+        f'Symbolic strategy computed in {sym} sec.\n'
+        f'Strategy enumerated in {enu} sec.')
     return h
 
 
@@ -103,8 +103,7 @@ def _int_bounds(aut):
         assert t in int_types, t
         dom = d['dom']
         p, q = dom
-        e = "({p} <= {var}) & ({var} <= {q})".format(
-            p=p, q=q, var=var)
+        e = f'({p} <= {var}) & ({var} <= {q})'
         v = aut.add_expr(e)
         u = bdd.apply('and', u, v)
     return u
@@ -152,7 +151,7 @@ def _grspec_to_automaton(g):
             r = v
         else:
             raise ValueError(
-                'unknown variable type: {v}'.format(v=v))
+                f'unknown variable type: {v}')
         d[k] = r
     g.str_to_int()
     # reverse mapping by `synth.strategy2mealy`
@@ -166,7 +165,7 @@ def _grspec_to_automaton(g):
     a.action['env'] = _conj(g.env_safety, f)
     a.action['sys'] = _conj(g.sys_safety, f)
     if g.env_prog:
-        w1 = ['!({s})'.format(s=s) for s in map(f, g.env_prog)]
+        w1 = [f'!({s})' for s in map(f, g.env_prog)]
     else:
         w1 = ['FALSE']
     if g.sys_prog:

@@ -75,13 +75,16 @@ class GBAutomaton(nx.DiGraph):
     def dumpdot(self):
         output = 'digraph A {\n'
         for node, ndata in self.nodes(data=True):
-            output += (str(node) + ' [label="' + str(node) + '\\n'
-                       + 'acceptance sets: {'
-                       + ','.join([str(ac) for ac in ndata['acceptance_sets']])
-                       + '}' + '"]\n')
+            output += (
+                f'{node} [label="{node}\\n'
+                'acceptance sets: {' +
+                ','.join([str(ac) for ac in ndata['acceptance_sets']]) +
+                '}"]\n')
         for u, v, edata in self.edges(data=True):
-            output += (str(u) + ' -> ' + str(v)
-                       + ' [label="' + edata['gate'] + '"]\n')
+            label = edata['gate']
+            output += (
+                f'{u} -> {v}'
+                f' [label="{label}"]\n')
         output += '}\n'
         return output
 
@@ -170,7 +173,7 @@ def readlbt(gbastr):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or "-h" in sys.argv:
-        print("Usage: "+sys.argv[0]+" FILE")
+        print(f'Usage: {sys.argv[0]} FILE')
         exit(1)
 
     if sys.argv[1] == "-":  # Read from stdin

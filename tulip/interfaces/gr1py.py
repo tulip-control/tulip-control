@@ -88,6 +88,7 @@ def _spec_to_gr1py(spec):
             'Import of gr1py interface failed.\n'
             'Please verify installation of "gr1py".')
     s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1py input:\n {s}\n{hl}'.format(s=s, hl=_hl))
+    logger.info(
+        f'\n{_hl}\n gr1py input:\n {s}\n{_hl}')
     tsys, exprtab = gr1py.cli.loads(s)
     return tsys, exprtab

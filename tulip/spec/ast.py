@@ -112,15 +112,14 @@ def make_nodes(opmap=None):
                 value + 'a'
             except TypeError:
                 raise TypeError(
-                    'value must be a string, got: {v}'.format(
-                        v=value))
+                    f'value must be a string, got: {value}')
             self.type = 'terminal'
             self.value = value
 
         def __repr__(self):
-            return '{t}({v})'.format(
-                t=type(self).__name__,
-                v=repr(self.value))
+            t = type(self).__name__
+            v = repr(self.value)
+            return f'{t}({v})'
 
         def __hash__(self):
             return id(self)
@@ -163,8 +162,7 @@ def make_nodes(opmap=None):
                 operator + 'a'
             except TypeError:
                 raise TypeError(
-                    'operator must be string, got: {op}'.format(
-                        op=operator))
+                    f'operator must be string, got: {operator}')
             self.type = 'operator'
             self.operator = operator
             self.operands = list(operands)
@@ -172,10 +170,12 @@ def make_nodes(opmap=None):
         # ''.join would be faster, but __repr__ is for debugging,
         # not for flattening, so readability takes precedence
         def __repr__(self):
-            return '{t}({op}, {xyz})'.format(
-                t=type(self).__name__,
-                op=repr(self.operator),
-                xyz=', '.join(repr(x) for x in self.operands))
+            t = type(self).__name__
+            op = repr(self.operator)
+            xyz = ', '.join(
+                repr(x)
+                for x in self.operands)
+            return f'{t}({op}, {xyz})'
 
         # more readable recursive counterpart of __repr__
         # depth allows limiting recursion to see a shallower view
@@ -184,10 +184,11 @@ def make_nodes(opmap=None):
                 depth = depth - 1
             if depth == 0:
                 return '...'
-            return '({op} {xyz})'.format(
-                op=self.operator,
-                xyz=' '.join(x.__str__(depth=depth)
-                             for x in self.operands))
+            op = self.operator
+            xyz = ' '.join(
+                x.__str__(depth=depth)
+                for x in self.operands)
+            return f'({op} {xyz})'
 
         def __len__(self):
             return 1 + sum(len(x) for x in self.operands)
@@ -253,11 +254,11 @@ def make_fol_nodes(opmap=None):
                 value + 'a'
             except TypeError:
                 raise TypeError(
-                    'value must be string, got: {v}'.format(v=value))
+                    f'value must be string, got: {value}')
             if value.lower() not in {'true', 'false'}:
                 raise TypeError(
                     'value must be "true" or "false" '
-                    '(case insensitive), got: {v}'.format(v=value))
+                    f'(case insensitive), got: {value}')
             self.value = 'True' if (value.lower() == 'true') else 'False'
             self.type = 'bool'
 

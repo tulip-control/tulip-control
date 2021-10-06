@@ -85,7 +85,8 @@ def _assert_gr1c():
     if check_gr1c():
         return
     raise Exception(
-        '`gr1c >= {v}` not found in the PATH.\n'.format(v=GR1C_MIN_VERSION) +
+        f'`gr1c >= {GR1C_MIN_VERSION}` '
+        'not found in the PATH.\n'
         'Unless an alternative synthesis tool is installed,\n'
         'it will not be possible to realize GR(1) specifications.\n'
         'Consult installation instructions for gr1c at:\n'
@@ -114,8 +115,11 @@ def get_version():
         minor = int(minor)
         micro = int(micro)
     except ValueError:
-        raise ValueError('gr1c version string is not recognized: '+str(v_str))
+        raise ValueError(
+            '`gr1c` version string '
+            f'is not recognized: {v_str}')
     return (major, minor, micro)
+
 
 def _untaglist(x, cast_f=float,
                namespace=DEFAULT_NAMESPACE):
@@ -145,7 +149,7 @@ def _untaglist(x, cast_f=float,
     # Extract list
     if cast_f is None:
         cast_f = str
-    litems = elem.findall(ns_prefix+'litem')
+    litems = elem.findall(f'{ns_prefix}litem')
     if len(litems) > 0:
         li = [cast_f(k.attrib['value']) for k in litems]
     elif elem.text is None:
@@ -247,7 +251,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             'unversioned tulipcon XML string.')
     if int(elem.attrib['version']) != 1:
         raise ValueError("unsupported tulipcon XML version: "+
-            str(elem.attrib["version"]))
+            f'{elem.attrib["version"]}')
     # Extract discrete variables and LTL specification
     (tag_name, env_vardict, env_vars) = _untagdict(elem.find(
         ns_prefix+"env_vars"), get_order=True)
@@ -255,7 +259,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         ns_prefix+"sys_vars"), get_order=True)
     env_vars = _parse_vars(env_vars, env_vardict)
     sys_vars = _parse_vars(sys_vars, sys_vardict)
-    s_elem = elem.find(ns_prefix+"spec")
+    s_elem = elem.find(f'{ns_prefix}spec')
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
                      "sys_init", "sys_safety", "sys_prog"]:
@@ -281,7 +285,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     if aut_elem.attrib['type'] != 'basic':
         raise ValueError(
             'Automaton class only recognizes type "basic".')
-    node_list = aut_elem.findall(ns_prefix+"node")
+    node_list = aut_elem.findall(f'{ns_prefix}node')
     id_list = []
         # For more convenient searching, and
         # to catch redundancy
@@ -289,36 +293,40 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     A.env_vars = env_vars
     A.sys_vars = sys_vars
     for node in node_list:
-        this_id = int(node.find(ns_prefix+"id").text)
-        #this_name = node.find(ns_prefix+"anno").text  # Assume version 1
-        (tag_name, this_name_list) = _untaglist(node.find(ns_prefix+"anno"),
-                                                cast_f=int)
+        this_id = int(node.find(f'{ns_prefix}id').text)
+        # this_name = node.find(f'{ns_prefix}anno').text
+        #     # Assume version 1
+        (tag_name, this_name_list) = _untaglist(
+            node.find(f'{ns_prefix}anno'),
+            cast_f=int)
         if len(this_name_list) == 2:
             (mode, rgrad) = this_name_list
         else:
             (mode, rgrad) = (-1, -1)
         (tag_name, this_child_list) = _untaglist(
-            node.find(ns_prefix+"child_list"),
-            cast_f=int
-        )
-        if tag_name != ns_prefix+"child_list":
+            node.find(f'{ns_prefix}child_list'),
+            cast_f=int)
+        if tag_name != f'{ns_prefix}child_list':
             # This really should never happen and may not even be
             # worth checking.
             raise ValueError(
                 "failure of consistency check " +
                 "while processing aut XML string.")
         (tag_name, this_state) = _untagdict(
-            node.find(ns_prefix+"state"),
+            node.find(f'{ns_prefix}state'),
             cast_f_values=int,
             namespace=namespace)
-        if tag_name != ns_prefix+"state":
+        if tag_name != f'{ns_prefix}state':
             raise ValueError("failure of consistency check " +
                 "while processing aut XML string.")
         if this_id in id_list:
-            logger.warning("duplicate nodes found: "+str(this_id)+"; ignoring...")
+            logger.warning(
+                f'duplicate nodes found: {this_id}; '
+                'ignoring...')
             continue
         id_list.append(this_id)
-        logger.info('loaded from gr1c result:\n\t' +str(this_state) )
+        logger.info(
+            f'loaded from `gr1c` result:\n\t{this_state}')
         A.add_node(
             this_id,
             state=copy.copy(this_state),
@@ -337,21 +345,19 @@ def _parse_vars(variables, vardict):
         if dom[0] == "[":
             end_ind = dom.find("]")
             if end_ind < 0:
-                raise ValueError((
-                    'invalid domain for variable "{v}":  {dom}'
-                    ).format(v=v, dom=dom))
+                raise ValueError(
+                    f'invalid domain for variable "{v}":  {dom}')
             dom_parts = dom[1:end_ind].split(",")
             if len(dom_parts) != 2:
-                raise ValueError((
-                    'invalid domain for variable "{v}":  {dom}'
-                    ).format(v=v, dom=dom))
+                raise ValueError(
+                    f'invalid domain for variable "{v}":  {dom}')
             domains.append((int(dom_parts[0]), int(dom_parts[1])))
         elif dom == 'boolean':
             domains.append('boolean')
         else:
-            raise ValueError((
-                'unrecognized type of domain for variable "{v}":  {dom}'
-                ).format(v=v, dom=dom))
+            raise ValueError(
+                'unrecognized type of domain '
+                f'for variable "{v}":  {dom}')
     variables = dict([
         (v, domains[i])
         for i, v in enumerate(variables)
@@ -406,15 +412,15 @@ def check_syntax(spec_str):
     except TypeError:  # Try to be compatible with Python 2.7
         f.write(bytes(spec_str))
     f.seek(0)
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
-                         stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         universal_newlines=True)
+    p = subprocess.Popen(
+        [f'{GR1C_BIN_PREFIX}gr1c', '-s'],
+        stdin=f,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True)
     p.wait()
-
-    logger.debug('gr1c returncode: ' + str(p.returncode) )
-    logger.debug('gr1c stdout: ' + p.stdout.read() )
-
+    logger.debug(f'gr1c returncode: {p.returncode}')
+    logger.debug(f'gr1c stdout: {p.stdout.read()}')
     if p.returncode == 0:
         return True
     else:
@@ -441,14 +447,17 @@ def check_realizable(spec):
         f.write(bytes(s))
     f.seek(0)
     logger.info('starting realizability check')
-    p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-n", init_option, "-r"],
-                         stdin=f,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         universal_newlines=True)
+    p = subprocess.Popen(
+        [f'{GR1C_BIN_PREFIX}gr1c',
+         '-n',
+         init_option,
+         '-r'],
+        stdin=f,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        universal_newlines=True)
     p.wait()
-
-    logger.info('gr1c input:\n' + s +_hl)
-
+    logger.info(f'`gr1c` input:\n{s}{_hl}')
     if p.returncode == 0:
         return True
     else:
@@ -473,9 +482,11 @@ def synthesize(spec):
     init_option = select_options(spec)
     try:
         p = subprocess.Popen(
-            [GR1C_BIN_PREFIX + "gr1c",
-             "-n", init_option,
-             "-t", "json"],
+            [f'{GR1C_BIN_PREFIX}gr1c',
+             '-n',
+             init_option,
+             '-t',
+             'json'],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
@@ -486,25 +497,23 @@ def synthesize(spec):
         else:
             raise
     s = translate(spec, 'gr1c')
-    logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
-
+    logger.info(f'\n{_hl}\n gr1c input:\n {s}\n{_hl}')
     # to make debugging by manually running gr1c easier
     fname = 'spec.gr1c'
     try:
         if logger.getEffectiveLevel() < logging.DEBUG:
             with open(fname, 'w') as f:
                 f.write(s)
-            logger.debug('wrote input to file "{f}"'.format(f=fname))
+            logger.debug(
+                f'wrote input to file "{fname}"')
     except:
-        logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
+        logger.error(
+            f'failed to write auxiliary file: "{fname}"')
     (stdoutdata, stderrdata) = p.communicate(s)
+    spaces = 30 * ' '
     msg = (
-        ('{spaces} gr1c return code: {c}\n\n'
-         '{spaces} gr1c stdout, stderr:\n {out}\n\n').format(
-             c=p.returncode, out=stdoutdata, spaces=30 * ' '
-        )
-    )
-
+        f'{spaces} gr1c return code: {p.returncode}\n\n'
+        f'{spaces} gr1c stdout, stderr:\n {stdoutdata}\n\n')
     if p.returncode == 0:
         logger.debug(msg)
         strategy = load_aut_json(stdoutdata)
@@ -539,8 +548,7 @@ def select_options(spec):
         init_option = 'ONE_SIDE_INIT'
     else:
         raise ValueError(
-            'unknown option `qinit = {qinit}`.'.format(
-                qinit=spec.qinit))
+            f'unknown option `qinit = {spec.qinit}`.')
     # The option `ALL_INIT` corresponds to:
     #   \A x, y:  EnvInit(x, y) /\ SysInit(x, y)
     # `ONE_SIDE_INIT` is used above for this case
@@ -566,13 +574,13 @@ def load_mealy(filename, fformat='tulipxml'):
     elif fformat.lower() == 'json':
         strategy = load_aut_json(s)
     else:
-        ValueError('gr1c.load_mealy() : Unrecognized file format, "'
-                   +str(fformat)+'"')
-
+        ValueError(
+            '`gr1c.load_mealy()`: '
+            f'Unrecognized file format, "{fformat}"')
     logger.debug(
-        'Loaded strategy with nodes: \n' + str(strategy.nodes()) +
-        '\nand edges: \n' + str(strategy.edges())
-    )
+        'Loaded strategy with nodes: \n'
+        f'{strategy.nodes()}\n'
+        f'and edges: \n{strategy.edges()}')
     return strategy
 
 
@@ -606,13 +614,15 @@ class GR1CSession:
         self.env_vars = env_vars[:]
         self.prompt = prompt
         if self.spec_filename is not None:
-            self.p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c",
-                                       "-i", self.spec_filename],
-                                      stdin=subprocess.PIPE,
-                                      stdout=subprocess.PIPE,
-                                      stderr=subprocess.STDOUT,
-                                      bufsize=0,
-                                      universal_newlines=True)
+            self.p = subprocess.Popen(
+                [f'{GR1C_BIN_PREFIX}gr1c',
+                 '-i',
+                 self.spec_filename],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=0,
+                universal_newlines=True)
         else:
             self.p = None
 
@@ -637,9 +647,9 @@ class GR1CSession:
             return False
 
     def getindex(self, state, goal_mode):
-        if goal_mode < 0 or goal_mode > self.numgoals() - 1:
+        if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError(
-                "Invalid goal mode requested: " + str(goal_mode))
+                f'Invalid goal mode requested: {goal_mode}')
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
@@ -649,7 +659,7 @@ class GR1CSession:
             'getindex ' +
             ' '.join(
                 str(i) for i in state_vector) +
-            ' ' + str(goal_mode) + '\n'
+            f' {goal_mode}\n'
         )
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
@@ -693,7 +703,8 @@ class GR1CSession:
         method.
         """
         if goal_mode < 0 or goal_mode > self.numgoals() - 1:
-            raise ValueError("Invalid goal mode requested: " + str(goal_mode))
+            raise ValueError(
+                f'Invalid goal mode requested: {goal_mode}')
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
@@ -709,7 +720,7 @@ class GR1CSession:
             " " +
             " ".join(
                 str(i) for i in emove_vector) +
-            " " + str(goal_mode) + "\n")
+            f' {goal_mode}\n')
         sys_moves = []
         line = self.p.stdout.readline()
         while '---\n' not in line:
@@ -799,8 +810,9 @@ class GR1CSession:
             self.spec_filename = spec_filename
         if self.spec_filename is not None:
             self.p = subprocess.Popen(
-                [GR1C_BIN_PREFIX+"gr1c",
-                "-i", self.spec_filename],
+                [f'{GR1C_BIN_PREFIX}gr1c',
+                 '-i',
+                 self.spec_filename],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,

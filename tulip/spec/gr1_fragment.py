@@ -118,8 +118,7 @@ def check(formula):
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
-        logger.info('visiting: ' + str(s) + ', ' + str(q))
-
+        logger.info(f'visiting: {s}, {q}')
         if isinstance(s, sast.Unary):
             op = s.operator
             if op in {'!', 'G', 'F'}:
@@ -270,10 +269,9 @@ def split_gr1(f):
             op = has_operator(u, g, ops)
             if op is None:
                 continue
-            raise AssertionError((
-                'found inadmissible operator "{op}" '
-                'in "{f}" formula').format(
-                    op=op, f=u))
+            raise AssertionError(
+                f'found inadmissible operator "{op}" '
+                f'in "{u}" formula')
     # conjoin (except for progress)
     init = ' & '.join(u.flatten() for u in reversed(d['init']))
     d['init'] = [init]
@@ -368,14 +366,13 @@ def response_to_gr1(p, q, aux='aux'):
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
-    s = p + ' -> <> ' + q
+    s = f'{p} -> <> {q}'
     v = tx.check_var_name_conflict(s, a0)
     sys_vars = v | {a0}
     # sys_init = {a}
     sys_safe = {
-        '(' + p + ' && !' + q + ') -> X !' + a,
-        '(!' + a + ' && !' + q + ') -> X !' + a
-    }
+        f'({p} && !{q}) -> X !{a}',
+        f'(!{a} && !{q}) -> X !{a}'}
     sys_prog = {a}
     return GRSpec(
         sys_vars=sys_vars,
@@ -410,9 +407,8 @@ def eventually_to_gr1(p, aux='aux'):
     sys_vars = v | {a0}
     sys_init = {'!(' + a + ')'}
     sys_safe = {
-        '(!' + p + ' && !' + a + ') -> X !' + a,
-        a + ' -> X ' + a
-    }
+        f'(!{p} && !{a}) -> X !{a}',
+        f'{a} -> X {a}'}
     sys_prog = {a}
     return GRSpec(
         sys_vars=sys_vars,
@@ -465,12 +461,11 @@ def until_to_gr1(p, q, aux='aux'):
 
 
 def _paren(x):
-    return '({x})'.format(x=x)
+    return f'({x})'
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     s = '(a U b) && []a && <>a && <>a && []<>(<>z)'
     parsed_formula = check(s)
-
-    print('Parsing result: ' + str(parsed_formula))
+    print(f'Parsing result: {parsed_formula}')

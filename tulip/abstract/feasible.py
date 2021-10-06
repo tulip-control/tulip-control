@@ -425,8 +425,8 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     for i in range(N + 1):
         Li = list_P[i]
         if not isinstance(Li, pc.Polytope):
-            logger.warning('createLM: Li of type: ' +str(type(Li) ) )
-
+            logger.warning(
+                f'createLM: Li of type: {type(Li)}')
         ######### FOR M #########
         idx = range(
             sum_vert,
@@ -517,9 +517,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
     M = np.vstack([Mk, MU]) - D_hat
-    msg = 'Computed S0 polytope: L x <= M, where:\n\t L = \n'
-    msg += str(L) +'\n\t M = \n' + str(M) +'\n'
-    logger.debug(msg)
+    logger.debug(
+        'Computed S0 polytope: '
+        '`L x <= M`, where:\n'
+        '\t`L = \n`'
+        f'{L}\n\t M = \n{M}\n')
     return L,M
 
 

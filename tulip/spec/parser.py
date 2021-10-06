@@ -59,7 +59,10 @@ def parse(formula, full_operators=False):
     spec = parsers['ply'].parse(formula)
     # did ply fail merely printing warnings ?
     if spec is None:
-        raise Exception('Parsing formula:\n{f}\nfailed'.format(f=formula))
+        raise Exception(
+            'Parsing formula:\n'
+            f'{formula}\n'
+            'failed')
     return spec
 
 
@@ -74,5 +77,8 @@ def _replace_full_name_operators(formula):
     Substitution is case-insensitive.
     """
     for name, symbol in ast.FULL_OPERATOR_NAMES.items():
-        formula = re.sub(r'(?i)\b' + name + r'\b', symbol, formula)
+        formula = re.sub(
+            rf'(?i)\b{name}\b',
+            symbol,
+            formula)
     return formula

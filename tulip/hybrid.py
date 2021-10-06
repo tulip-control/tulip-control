@@ -206,13 +206,13 @@ class LtiSysDyn:
 
     def __str__(self):
         n = 3
-        output = 'A =\n' + _indent(str(self.A), n)
-        output += '\nB =\n' + _indent(str(self.B), n)
-        output += '\nE =\n' + _indent(str(self.E), n)
-        output += '\nK =\n' + _indent(str(self.K), n)
-        output += '\nUset =\n' + _indent(str(self.Uset), n)
-        output += '\nWset =\n' + _indent(str(self.Wset), n)
-        return output
+        return (
+            f'A =\n{_indent(str(self.A), n)}'
+            f'\nB =\n{_indent(str(self.B), n)}'
+            f'\nE =\n{_indent(str(self.E), n)}'
+            f'\nK =\n{_indent(str(self.K), n)}'
+            f'\nUset =\n{_indent(str(self.Uset), n)}'
+            f'\nWset =\n{_indent(str(self.Wset), n)}')
 
     def plot(
             self,
@@ -348,13 +348,19 @@ class PwaSysDyn:
         self.time_semantics = time_semantics
 
     def __str__(self):
-        s = 'Piecewise-Affine System Dynamics\n'
-        s += 30 * '-' + 2*'\n'
-        s += 3*' ' + 'Domain:\n\n'
-        s += _indent(str(self.domain), n=6) + '\n'
+        newlines = 2 * '\n'
+        dashes = 30 * '-'
+        spaces = 3 * ' '
+        s = (
+            'Piecewise-Affine System Dynamics\n'
+            f'{dashes}{newlines}'
+            f'{spaces}Domain:\n\n' +
+            _indent(str(self.domain), n=6) + '\n')
         for i, sys in enumerate(self.list_subsys):
-            s += 3*' ' + 'Subsystem: ' + str(i) +'\n'
-            s += _indent(str(sys), n=6)
+            sys_str = _indent(str(sys), n=6)
+            s += (
+                f'{spaces}Subsystem: {i}\n'
+                f'{sys_str}')
         return s
 
     @classmethod
@@ -503,22 +509,25 @@ class SwitchedSysDyn:
             undefined_modes = set(
                 dynamics.keys()).difference(modes)
             if undefined_modes:
-                msg = 'SwitchedSysDyn: `dynamics` keys inconsistent'
-                msg += ' with discrete mode labels.\n'
-                msg += 'Undefined modes:\n' + str(undefined_modes)
-                raise ValueError(msg)
+                raise ValueError(
+                    '`dynamics` keys are inconsistent'
+                    ' with discrete-mode labels.\n'
+                    f'Undefined modes:\n{undefined_modes}')
             missing_modes = set(modes).difference(
                 dynamics.keys())
             if missing_modes:
-                msg = 'Missing the modes:\n' + str(missing_modes)
-                msg += '\n Make sure you did not forget any modes,\n'
-                msg += 'otherwise this is fine.'
-                warn(msg)
-
-            if not all([isinstance(sys, PwaSysDyn)
-                        for sys in dynamics.values()]):
-                msg = 'For each mode dynamics must be PwaSysDyn.\n'
-                msg += 'Got instead: ' +str(type(sys))
+                warn(
+                    f'Missing the modes:\n{missing_modes}'
+                    '\n Make sure you did not '
+                    'forget any modes,\n'
+                    'otherwise this is fine.')
+            if not all(
+                    [isinstance(sys, PwaSysDyn)
+                    for sys in dynamics.values()]):
+                raise Exception(
+                    'For each mode, the dynamics '
+                    'must be `PwaSysDyn`.\n'
+                    f'Got instead: {type(sys)}')
                 raise Exception(msg)
         self.dynamics = dynamics
         self.cts_ss = cts_ss
@@ -538,23 +547,31 @@ class SwitchedSysDyn:
 
     def __str__(self):
         n_env, n_sys = self.disc_domain_size
-
-        s = 'Hybrid System Dynamics\n'
-        s += 30 * '-' + '\n'
-
-        s += 'Modes:\n'
-        s += 4*' ' + 'Environment (' + str(n_env) + ' modes):\n'
-        s += 6*' ' + pformat(self.env_labels, indent=3) + 2*'\n'
-        s += 4*' ' + 'System: (' + str(n_sys) + ' modes)\n'
-        s += 6*' ' + pformat(self.disc_sys_labels, indent=3) + 2*'\n'
-
-        s += 'Continuous State Space:\n\n'
-        s += _indent(str(self.cts_ss), 4) + '\n'
-
-        s += 'Dynamics:\n'
+        newlines = 2 * '\n'
+        dashes = 30 * '-'
+        spaces_4 = 4 * ' '
+        spaces_6 = 6 * ' '
+        s = (
+            'Hybrid System Dynamics\n'
+            f'{dashes}\n'
+            'Modes:\n'
+            f'{spaces_4}Environment ({n_env} modes):\n'
+            + spaces_6 + pformat(
+                self.env_labels, indent=3)
+                + newlines
+            + spaces_4 + f'System: ({n_sys} modes)\n'
+            + spaces_6 + pformat(
+                self.disc_sys_labels, indent=3)
+                + newlines
+            + 'Continuous State Space:\n\n'
+            + _indent(str(self.cts_ss), 4) + '\n'
+            'Dynamics:\n')
         for mode, pwa in self.dynamics.items():
-            s += 4*' ' + 'mode: ' + str(mode) + '\n'
-            s += 4*' ' + 'dynamics:\n' + _indent(str(pwa), 8) +'\n\n'
+            s += (
+                f'{spaces_4}mode: {mode}\n' +
+                f'{spaces_4}dynamics:\n'
+                    + _indent(str(pwa), 8)
+                    + newlines)
         return s
 
     def _check_labels(self, n, labels):
@@ -572,8 +589,9 @@ class SwitchedSysDyn:
                 warn(msg)
                 return None
         except:
-            warn('Environment labels of type: ' +
-                 type(labels) + 'have no len()')
+            warn(
+                'Environment labels of type: '
+                f'{labels} have no `len()`')
             return None
         return labels
 
@@ -584,7 +602,7 @@ class SwitchedSysDyn:
             (a, b)
             for a in self.env_labels
             for b in self.disc_sys_labels]
-        logger.debug('Available modes: ' + str(modes) )
+        logger.debug(f'Available modes: {modes}')
         return modes
 
     @property

@@ -121,11 +121,10 @@ def synthesize(spec, symbolic=False):
         h.add_node(u, state=int_state)
     for u, v in g.edges():
         h.add_edge(u, v)
+    nodes = '\n  '.join(str(x) for x in h.nodes(data=True))
     logger.debug(
-        ('loaded strategy with vertices:\n  {v}\n'
-         'and edges:\n {e}\n').format(
-            v='\n  '.join(str(x) for x in h.nodes(data=True)),
-            e=h.edges()))
+        f'loaded strategy with vertices:\n  {nodes}\n'
+        f'and edges:\n {h.edges()}\n')
     return h
 
 
@@ -140,10 +139,9 @@ def _bitfields_to_ints(bit_state, vrs):
         if dom == 'boolean':
             int_state[var] = bit_state[var]
             continue
-        bitnames = ['{var}@{i}'.format(var=var, i=i)
+        bitnames = [f'{var}@{i}'
                     for i in range(dom[1].bit_length())]
-        bitnames[0] = '{var}@0.{min}.{max}'.format(
-            var=var, min=dom[0], max=dom[1])
+        bitnames[0] = f'{var}@0.{dom[0]}.{dom[1]}'
         bitvalues = [bit_state[b] for b in bitnames]
         # little-endian
         val = int(
@@ -226,9 +224,9 @@ def _call_slugs(
             raise
     out, err = p.communicate()
     msg = (
-        '\n slugs return code: {c}\n\n'.format(c=p.returncode) +
-        '\n slugs stderr: {c}\n\n'.format(c=err) +
-        '\n slugs stdout:\n\n {out}\n\n'.format(out=out))
+        f'\n slugs return code: {p.returncode}\n\n'
+        f'\n slugs stderr: {err}\n\n'
+        f'\n slugs stdout:\n\n {out}\n\n')
     logger.debug(msg)
     # error ?
     if p.returncode != 0:
