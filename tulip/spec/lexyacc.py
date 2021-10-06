@@ -117,7 +117,6 @@ class Lexer:
 
     def t_ALWAYS(self, t):
         r'\[\]'
-        # use single letter as more readable and efficient
         t.value = 'G'
         return t
 

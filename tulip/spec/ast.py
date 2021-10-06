@@ -167,8 +167,6 @@ def make_nodes(opmap=None):
             self.operator = operator
             self.operands = list(operands)
 
-        # ''.join would be faster, but __repr__ is for debugging,
-        # not for flattening, so readability takes precedence
         def __repr__(self):
             t = type(self).__name__
             op = repr(self.operator)
@@ -177,7 +175,6 @@ def make_nodes(opmap=None):
                 for x in self.operands)
             return f'{t}({op}, {xyz})'
 
-        # more readable recursive counterpart of __repr__
         # depth allows limiting recursion to see a shallower view
         def __str__(self, depth=None):
             if depth is not None:
@@ -200,7 +197,6 @@ def make_nodes(opmap=None):
                 ', '.join(x.flatten(*arg, **kw) for x in self.operands),
                 ')'])
 
-    # Distinguish operators by arity
     class Unary(Operator):
         pass
 
@@ -267,8 +263,6 @@ def make_fol_nodes(opmap=None):
 
     class Num(nodes.Terminal):
         """A 0-ary function."""
-        # self.value is str,
-        # use int(self.value) if you need to
 
         def __init__(self, value):
             super(Num, self).__init__(value)
