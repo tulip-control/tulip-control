@@ -339,7 +339,8 @@ class Parser:
 
     # both function and connective
     def p_ternary_conditional(self, p):
-        """expr : LPAREN ITE expr COMMA expr COMMA expr RPAREN"""
+        ("""expr : LPAREN ITE expr """
+         """COMMA expr COMMA expr RPAREN""")
         p[0] = self.ast.Operator(
             p[2], p[3], p[5], p[7])
 
