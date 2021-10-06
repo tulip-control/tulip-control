@@ -142,7 +142,7 @@ def newax(
                 projection='3d')
             ax.append(curax)
         if curdim > 3:
-            warn('ndim > 3, but plot limited to 3.')
+            warn('`ndim > 3`, but plot limited to 3.')
     if mode == 'matrix':
         ax = list(_grouper(nh, ax))
     # single axes ?
