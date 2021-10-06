@@ -27,7 +27,7 @@ def McNaughton(p):
     if c is 0 or len(p) == 0:
         return (set(p), set())
     sigma = c % 2
-    W = {0:set(), 1:set()}
+    W = {0: set(), 1: set()}
     while True:
         max_color_pos = {
             x for x in p
