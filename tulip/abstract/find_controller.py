@@ -251,8 +251,10 @@ def get_input(
             'Warning: no transition matrix found, '
             'assuming feasible.')
     if not conservative and orig is None:
-        print("List of original proposition preserving "
-              "partitions not given, reverting to conservative mode")
+        print(
+            'List of original proposition-preserving '
+            'partitions not given, '
+            'reverting to conservative mode.')
         conservative = True
     P_start = regions[start]
     P_end = regions[end]
