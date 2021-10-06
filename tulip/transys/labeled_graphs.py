@@ -650,7 +650,7 @@ class Transitions:
             with_attr_dict.update(with_attr)
         except:
             raise TypeError(
-                'with_attr_dict must be a dict')
+                '`with_attr_dict` must be a `dict`')
         found_transitions = []
         u_v_edges = self.graph.edges(
             nbunch=from_states,

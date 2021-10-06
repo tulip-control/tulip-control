@@ -178,14 +178,14 @@ def _call_slugs(
             slugs_path = os.path.join(exe_path, 'slugs')
             break
     if slugs_path is None:
-        raise Exception('slugs not found in path.')
+        raise Exception('`slugs` not found in path.')
     if not os.path.isabs(slugs_compiler_path):
         slugs_compiler_path = os.path.abspath(
             os.path.join(
                 os.path.dirname(slugs_path),
                 slugs_compiler_path))
     if not os.path.exists(slugs_compiler_path):
-        raise Exception('slugs/compiler.py not found.')
+        raise Exception('`slugs/compiler.py` not found.')
     with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
         subprocess.check_call(
             ['python', slugs_compiler_path, filename],
