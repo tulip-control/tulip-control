@@ -1605,8 +1605,8 @@ def multiproc_discretize(
 
 
 def multiproc_get_transitions(
-    q, absys, mode, ssys, params
-):
+        q, absys, mode,
+        ssys, params):
     global logger
     logger = mp.log_to_stderr()
     name = mp.current_process().name

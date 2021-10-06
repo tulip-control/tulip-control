@@ -63,11 +63,10 @@ __all__ = [
 
 
 def is_feasible(
-    from_region, to_region, sys, N,
-    closed_loop=True,
-    use_all_horizon=False,
-    trans_set=None
-):
+        from_region, to_region, sys, N,
+        closed_loop=True,
+        use_all_horizon=False,
+        trans_set=None):
     """Return `True` if `to_region` is reachable `from_region`.
 
     For details read function `solve_feasible`.
@@ -78,11 +77,14 @@ def is_feasible(
         trans_set)
     return from_region <= S0
 
-def solve_feasible(
-    P1, P2, ssys, N=1, closed_loop=True,
-    use_all_horizon=False, trans_set=None, max_num_poly=5
-):
 
+def solve_feasible(
+        P1, P2, ssys,
+        N=1,
+        closed_loop=True,
+        use_all_horizon=False,
+        trans_set=None,
+        max_num_poly=5):
     r"""Compute `S0 \subseteq trans_set` from which `P2` is `N`-reachable.
 
     `N`-reachable means reachable in horizon `N`.
@@ -153,7 +155,8 @@ def solve_feasible(
 
 
 def _solve_closed_loop_fixed_horizon(
-        P1, P2, ssys, N, trans_set=None):
+        P1, P2, ssys, N,
+        trans_set=None):
     """Underapproximate states in `P1` that can reach `P2`.
 
     Underapproximate states in polytope `P1` that
@@ -234,7 +237,8 @@ def _solve_closed_loop_bounded_horizon(
 
 
 def _underapproximate_attractor(
-        P1, P2, ssys, N, trans_set=None):
+        P1, P2, ssys, N,
+        trans_set=None):
     """Underapproximate `N`-step attractor of `P2`.
 
     Underapproximates the `N`-step attractor
@@ -278,9 +282,9 @@ def _print_horizon_warning():
 
 
 def solve_open_loop(
-    P1, P2, ssys, N,
-    trans_set=None, max_num_poly=5
-):
+        P1, P2, ssys, N,
+        trans_set=None,
+        max_num_poly=5):
     r1 = P1.copy() # Initial set
     r2 = P2.copy() # Terminal set
     # use the max_num_poly largest volumes for reachability
@@ -343,8 +347,12 @@ def volumes_for_reachability(part, max_num_poly):
     part = pc.Region(temp, [])
     return part
 
-def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
+def createLM(
+        ssys, N, list_P,
+        Pk=None,
+        PN=None,
+        disturbance_ind=None):
     r"""Compute the components of the polytope:
 
     ```

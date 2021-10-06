@@ -265,7 +265,12 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         prop_regions = ppp.prop_regions)
     return (new_ppp, subsys_list, parents)
 
-def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
+
+def add_grid(
+        ppp,
+        grid_size=None,
+        num_grid_pnts=None,
+        abs_tol=1e-10):
     """Refine proposition-preserving partition using grids.
 
     This function takes a proposition-preserving
@@ -410,9 +415,11 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         prop_regions=ppp.prop_regions)
 
 #### Helper functions ####
-def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):
     """Helper implementing intervals computation for each dimension.
     """
+def compute_interval(
+        low_domain, high_domain, size,
+        abs_tol=1e-7):
     list_g = list()
     i = low_domain
     while True:
@@ -463,10 +470,13 @@ class PropPreservingPartition(pc.MetricPartition):
     ========
     `prop2part`
     """
-    def __init__(self,
-        domain=None, regions=[],
-        adj=None, prop_regions=None, check=True
-    ):
+    def __init__(
+            self,
+            domain=None,
+            regions=[],
+            adj=None,
+            prop_regions=None,
+            check=True):
         #super(PropPreservingPartition, self).__init__(adj)
         if prop_regions is None:
             self.prop_regions = None

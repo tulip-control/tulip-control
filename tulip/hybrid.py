@@ -653,8 +653,15 @@ class SwitchedSysDyn:
             domain)
 
     @classmethod
-    def from_lti(cls, A=[], B=[], E=[], K=[],
-                 Uset=None, Wset=None,domain=None):
+    def from_lti(
+            cls,
+            A=[],
+            B=[],
+            E=[],
+            K=[],
+            Uset=None,
+            Wset=None,
+            domain=None):
         pwa_sys = PwaSysDyn.from_lti(
             A, B, E, K,
             Uset, Wset, domain)
@@ -664,7 +671,10 @@ class SwitchedSysDyn:
             domain)
 
 
-def _push_time_data(system_list, time_semantics, timestep):
+def _push_time_data(
+        system_list,
+        time_semantics,
+        timestep):
     """Overwrite the time data in `system_list`.
 
     Emits warnings if overwriting existing data.

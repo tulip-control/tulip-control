@@ -88,8 +88,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
             self, deterministic=False,
             accepting_states_type=None,
             atomic_proposition_based=True,
-            symbolic=False,
-    ):
+            symbolic=False):
         """Initialize FiniteStateAutomaton.
 
         Additional keyword arguments are
