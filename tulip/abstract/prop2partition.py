@@ -38,7 +38,6 @@ from __future__ import division
 from __future__ import print_function
 
 import logging
-logger = logging.getLogger(__name__)
 
 import warnings
 import copy
@@ -66,6 +65,7 @@ __all__ = [
 
 
 _hl = 40 * '-'
+logger = logging.getLogger(__name__)
 
 
 def prop2part(state_space, cont_props_dict):
