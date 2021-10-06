@@ -453,7 +453,9 @@ def _plot_abstraction(
         ts = None
         ppp2ts = None
     ax = ab.ppp.plot(
-        ts, ppp2ts, only_adjacent=only_adjacent,
+        ts,
+        ppp2ts,
+        only_adjacent=only_adjacent,
         color_seed=color_seed)
     # ax = self.ts.plot()
     return ax
