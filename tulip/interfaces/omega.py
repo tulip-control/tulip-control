@@ -174,6 +174,7 @@ def _grspec_to_automaton(g):
         w2 = ['TRUE']
     a.win['<>[]'] = a.bdds_from(*w1)
     a.win['[]<>'] = a.bdds_from(*w2)
+    # attributes for spec type
     a.moore = g.moore
     a.plus_one = g.plus_one
     a.qinit = g.qinit
