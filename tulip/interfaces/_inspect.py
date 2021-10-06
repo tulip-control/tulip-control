@@ -58,10 +58,12 @@ def print_env():
         s = 'Did not find `gr1c` in `$PATH`.\n'
     c.append(s)
     s = _format_python_package_message(
-        'gr1py', gr1py_int.gr1py, 'https://pypi.python.org/pypi/gr1py')
+        'gr1py', gr1py_int.gr1py,
+        'https://pypi.python.org/pypi/gr1py')
     c.append(s)
     s = _format_python_package_message(
-        'dd', dd, 'https://pypi.python.org/pypi/dd')
+        'dd', dd,
+        'https://pypi.python.org/pypi/dd')
     c.append(s)
     if dd_cudd is None:
         s = (
@@ -72,16 +74,20 @@ def print_env():
         s = f'Found Cython module `dd.cudd` as:\n    {dd_cudd}\n.'
     c.append(s)
     s = _format_python_package_message(
-        'omega', omega_int.omega, 'https://pypi.python.org/pypi/omega')
+        'omega', omega_int.omega,
+        'https://pypi.python.org/pypi/omega')
     c.append(s)
     s = _format_python_package_message(
-        'numpy', numpy, 'https://pypi.python.org/pypi/numpy')
+        'numpy', numpy,
+        'https://pypi.python.org/pypi/numpy')
     c.append(s)
     s = _format_python_package_message(
-        'scipy', scipy, 'https://pypi.python.org/pypi/scipy')
+        'scipy', scipy,
+        'https://pypi.python.org/pypi/scipy')
     c.append(s)
     s = _format_python_package_message(
-        'cvxopt', cvxopt, 'https://pypi.python.org/pypi/cvxopt')
+        'cvxopt', cvxopt,
+        'https://pypi.python.org/pypi/cvxopt')
     c.append(s)
     if _check_glpsol():
         s = 'Found GLPK solver `glpsol` in `$PATH`.\n'
