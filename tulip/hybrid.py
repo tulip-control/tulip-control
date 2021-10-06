@@ -190,8 +190,7 @@ class LtiSysDyn:
             else:
                 self.K = K
         else:
-            self.K = K.reshape(K.size,1)
-
+            self.K = K.reshape(K.size, 1)
         if E is None and (len(A) != 0):
             self.E = np.zeros([mA, 1])
             self.Wset = pc.Polytope()

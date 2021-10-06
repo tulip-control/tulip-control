@@ -716,8 +716,8 @@ def _discretize_bi(
     # List of how many "new" regions
     # have been created for each region
     # and a `list` of original number of neighbors
-    #num_new_reg = np.zeros(len(orig_list))
-    #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    # num_new_reg = np.zeros(len(orig_list))
+    # num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
     progress = list()
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -865,13 +865,13 @@ def _discretize_bi(
                 transitions[j, i] = 1
                 # `sol[j]` is reachable from
                 # each piece of `S0 \cap sol[i]`
-                #for k in range(n_cells-n_isect-2, n_cells):
+                # for k in range(n_cells - n_isect - 2, n_cells):
                 #    transitions[j, k] = 1
             """Update adjacency matrix"""
             old_adj = np.nonzero(adj[i, :])[0]
             # reset new adjacencies
-            adj[i, :] = np.zeros([n_cells -num_new])
-            adj[:, i] = np.zeros([n_cells -num_new])
+            adj[i, :] = np.zeros([n_cells - num_new])
+            adj[:, i] = np.zeros([n_cells - num_new])
             adj[i, i] = 1
             adj = np.pad(
                 adj,
@@ -898,7 +898,7 @@ def _discretize_bi(
                     msg += f'{r} and '
                 msg += '\n'
                 logger.debug(msg)
-            for k in np.setdiff1d(old_adj, [i,n_cells-1]):
+            for k in np.setdiff1d(old_adj, [i,n_cells - 1]):
                 # Every "old" neighbor must be the neighbor
                 # of at least one of the new
                 if pc.is_adjacent(sol[i], sol[k]):
@@ -935,7 +935,7 @@ def _discretize_bi(
             logger.info(f'Divided region: {i}\n')
         elif vol2 < abs_tol:
             logger.info(f'Found: {i} ---> {j}\n')
-            transitions[j,i] = 1
+            transitions[j, i] = 1
         else:
             if logger.level <= logging.DEBUG:
                 logger.debug(
@@ -944,7 +944,7 @@ def _discretize_bi(
                     f'\t\t intersect vol: {vol1}\n')
             else:
                 logger.info('\t unreachable\n')
-            transitions[j,i] = 0
+            transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
             tmp_part = PropPreservingPartition(
@@ -954,7 +954,7 @@ def _discretize_bi(
                 prop_regions=part.prop_regions)
             assert(tmp_part.is_partition())
         n_cells = len(sol)
-        progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
+        progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
         progress += [progress_ratio]
         msg = (
             f'\t total # polytopes: {n_cells}\n'
@@ -996,8 +996,8 @@ def _discretize_bi(
         # scale view based on domain,
         # not only the current polytopes si, sj
         l,u = part.domain.bounding_box
-        ax2.set_xlim(l[0,0], u[0,0])
-        ax2.set_ylim(l[1,0], u[1,0])
+        ax2.set_xlim(l[0, 0], u[0, 0])
+        ax2.set_ylim(l[1, 0], u[1, 0])
         if save_img:
             fname = (
                 f'movie{str(iter_count).zfill(3)}'
