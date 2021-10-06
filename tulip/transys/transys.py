@@ -433,7 +433,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
     `cycle_labeled_with`
     """
 
-    def __init__(self, env_actions=None, sys_actions=None):
+    def __init__(
+            self,
+            env_actions=None,
+            sys_actions=None):
         """Instantiate finite transition system.
 
         @param env_actions: environment (uncontrolled) actions,

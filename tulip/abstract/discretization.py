@@ -111,9 +111,12 @@ class AbstractSwitched:
     In each mode, a `PwaSysDyn` is active.
     """
     def __init__(
-        self, ppp=None, ts=None, ppp2ts=None,
-        modes=None, ppp2modes=None
-    ):
+            self,
+            ppp=None,
+            ts=None,
+            ppp2ts=None,
+            modes=None,
+            ppp2modes=None):
         if modes is None:
             modes = dict()
 
@@ -163,7 +166,10 @@ class AbstractSwitched:
         ab = self.modes[mode]
         return ab.ppp2sys(region_idx)
 
-    def plot(self, show_ts=False, only_adjacent=False):
+    def plot(
+            self,
+            show_ts=False,
+            only_adjacent=False):
         """Plot mode partitions and merged partition, if one exists.
 
         For details read `AbstractPwa.plot`.
@@ -265,11 +271,17 @@ class AbstractPwa:
        as a special case.
     """
     def __init__(
-        self, ppp=None, ts=None, ppp2ts=None,
-        pwa=None, pwa_ppp=None, ppp2pwa=None, ppp2sys=None,
-        orig_ppp=None, ppp2orig=None,
-        disc_params=None
-    ):
+            self,
+            ppp=None,
+            ts=None,
+            ppp2ts=None,
+            pwa=None,
+            pwa_ppp=None,
+            ppp2pwa=None,
+            ppp2sys=None,
+            orig_ppp=None,
+            ppp2orig=None,
+            disc_params=None):
         if disc_params is None:
             disc_params = dict()
 
@@ -393,8 +405,11 @@ class AbstractPwa:
         s += str(self.orig_ppp)
         return s
 
-    def plot(self, show_ts=False, only_adjacent=False,
-             color_seed=None):
+    def plot(
+            self,
+            show_ts=False,
+            only_adjacent=False,
+            color_seed=None):
         """Plot partition and optionally feasible transitions.
 
         @param show_ts: plot feasible transitions on partition

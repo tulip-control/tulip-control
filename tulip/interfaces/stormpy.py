@@ -100,7 +100,11 @@ def get_action_map(stormpy_model, tulip_transys):
     return action_map
 
 
-def to_tulip_action(stormpy_action, stormpy_model, tulip_transys, action_map=None):
+def to_tulip_action(
+        stormpy_action,
+        stormpy_model,
+        tulip_transys,
+        action_map=None):
     """Return action of `tulip_transys` on model.
 
     Get an action of `tulip_transys` that

@@ -154,7 +154,11 @@ class Lexer:
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))
         t.lexer.skip(1)
 
-    def build(self, debug=False, debuglog=None, **kwargs):
+    def build(
+            self,
+            debug=False,
+            debuglog=None,
+            **kwargs):
         """Create a lexer.
 
         @param kwargs: Same arguments as C{ply.lex.lex}:
@@ -195,7 +199,8 @@ class Parser:
         ('left', 'PRIME'),
         ('nonassoc', 'TRUE', 'FALSE'))
 
-    def __init__(self, ast=None, lexer=None):
+    def __init__(
+            self, ast=None, lexer=None):
         if ast is None:
             ast = tulip.spec.ast.nodes
         if lexer is None:
@@ -205,8 +210,13 @@ class Parser:
         self.tokens = self.lexer.tokens
         self.build()
 
-    def build(self, tabmodule=None, outputdir='', write_tables=False,
-              debug=False, debuglog=None):
+    def build(
+            self,
+            tabmodule=None,
+            outputdir='',
+            write_tables=False,
+            debug=False,
+            debuglog=None):
         """Build parser using `ply.yacc`.
 
         Default table module is `self.tabmodule`.

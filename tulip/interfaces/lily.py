@@ -57,7 +57,10 @@ IO_PARTITION_FILE = 'io_partition.txt'
 DOTFILE = 'ltl2vl-synthesis.dot'
 
 
-def synthesize(formula, env_vars=None, sys_vars=None):
+def synthesize(
+        formula,
+        env_vars=None,
+        sys_vars=None):
     """Return Moore transducer if `formula` is realizable.
 
     Variable `dict`s have variable names as keys and their type as

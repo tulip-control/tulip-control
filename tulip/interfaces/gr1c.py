@@ -153,8 +153,13 @@ def _untaglist(x, cast_f=float,
 
     return (elem.tag, li)
 
-def _untagdict(x, cast_f_keys=None, cast_f_values=None,
-               namespace=DEFAULT_NAMESPACE, get_order=False):
+
+def _untagdict(
+        x,
+        cast_f_keys=None,
+        cast_f_values=None,
+        namespace=DEFAULT_NAMESPACE,
+        get_order=False):
     """Extract dictionary from given tulipcon XML tag (string).
 
     Use functions `cast_f_keys` and `cast_f_values` for type-casting
@@ -584,7 +589,11 @@ class GR1CSession:
     Unless otherwise indicated, command methods return `True` on
     success, `False` if error.
     """
-    def __init__(self, spec_filename, sys_vars, env_vars=[], prompt=">>> "):
+
+    def __init__(
+            self, spec_filename, sys_vars,
+            env_vars=[],
+            prompt=">>> "):
         self.spec_filename = spec_filename
         self.sys_vars = sys_vars[:]
         self.env_vars = env_vars[:]

@@ -54,7 +54,10 @@ def _format_label(label_def, label_dot_format):
 
     return s
 
-def labeled_digraph2d3(graph, html_file_name='index.html'):
+
+def labeled_digraph2d3(
+        graph,
+        html_file_name='index.html'):
     """Export to SVG embedded in HTML, animated with d3.js
 
     Example

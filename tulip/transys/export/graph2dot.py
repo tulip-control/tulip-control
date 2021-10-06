@@ -54,8 +54,12 @@ import tulip.graphics as _graphics
 logger = logging.getLogger(__name__)
 
 
-def _states2dot_str(graph, to_dot_graph, wrap=10,
-                    tikz=False, rankdir='TB'):
+def _states2dot_str(
+        graph,
+        to_dot_graph,
+        wrap=10,
+        tikz=False,
+        rankdir='TB'):
     """Copy nodes to given graph, with attributes for dot export."""
     # TODO generate LaTeX legend table for edge labels
 
@@ -95,9 +99,10 @@ def _states2dot_str(graph, to_dot_graph, wrap=10,
                        rim_color, d, node_dot_label)
 
 
-def _state2dot(graph, to_dot_graph, state,
-               is_initial, is_accepting,
-               rim_color, d, node_dot_label):
+def _state2dot(
+        graph, to_dot_graph, state,
+        is_initial, is_accepting,
+        rim_color, d, node_dot_label):
     if is_initial:
         _add_incoming_edge(to_dot_graph, state)
 
@@ -149,9 +154,10 @@ def _state2dot(graph, to_dot_graph, state,
         fillcolor='"' + fillcolor + '"')
 
 
-def _state2tikz(graph, to_dot_graph, state,
-                is_initial, is_accepting, rankdir,
-                rim_color, d, node_dot_label):
+def _state2tikz(
+        graph, to_pydot_graph, state,
+        is_initial, is_accepting, rankdir,
+        rim_color, d, node_dot_label):
     style = 'state'
 
     if rankdir == 'LR':

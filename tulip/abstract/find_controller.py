@@ -82,11 +82,14 @@ def assert_cvxopt():
 
 
 def get_input(
-    x0, ssys, abstraction,
-    start, end,
-    R=None, r=None, Q=None,
-    ord=1, mid_weight=0.0, solver=None
-):
+        x0, ssys, abstraction,
+        start, end,
+        R=None,
+        r=None,
+        Q=None,
+        ord=1,
+        mid_weight=0.0,
+        solver=None):
     r"""Compute continuous control input for discrete transition.
 
     Computes a continuous control input sequence
@@ -353,9 +356,10 @@ def get_input(
 
 
 def get_input_helper(
-    x0, ssys, P1, P3, N, R, r, Q, ord=1,
-    closed_loop=True, solver=None
-):
+        x0, ssys, P1, P3, N, R, r, Q,
+        ord=1,
+        closed_loop=True,
+        solver=None):
     r"""Compute sequence of control inputs.
 
     Computes the sequence `u_seq` such that:

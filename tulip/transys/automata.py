@@ -184,8 +184,7 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
             self, deterministic=False,
             accepting_states_type=None,
             atomic_proposition_based=True,
-            symbolic=False
-    ):
+            symbolic=False):
         edge_label_types = [
             {'name': 'cost',
              'values': ValidTransitionCost(),
@@ -207,8 +206,9 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
     a = FiniteWordAutomaton(deterministic=True)
     ```
     """
-    def __init__(self, deterministic=False,
-                 atomic_proposition_based=True):
+    def __init__(
+            self, deterministic=False,
+            atomic_proposition_based=True):
         super(FiniteWordAutomaton, self).__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based)
@@ -232,8 +232,7 @@ class BuchiAutomaton(OmegaAutomaton):
     def __init__(
             self, deterministic=False,
             atomic_proposition_based=True,
-            symbolic=False
-    ):
+            symbolic=False):
         super(BuchiAutomaton, self).__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based,
@@ -248,8 +247,11 @@ class BA(BuchiAutomaton):
         super(BA, self).__init__(**args)
 
 
-def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
-             atomic_proposition_based=True):
+def tuple2ba(
+        S, S0, Sa, Sigma_or_AP, trans,
+        name='ba',
+        prepend_str=None,
+        atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by

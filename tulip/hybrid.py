@@ -115,10 +115,17 @@ class LtiSysDyn:
     `SwitchedSysDyn`,
     `polytope.Polytope`
     """
-    def __init__(self, A=None, B=None, E=None, K=None,
-                 Uset=None,Wset=None, domain=None, time_semantics=None,
-                 timestep=None):
-
+    def __init__(
+            self,
+            A=None,
+            B=None,
+            E=None,
+            K=None,
+            Uset=None,
+            Wset=None,
+            domain=None,
+            time_semantics=None,
+            timestep=None):
         if Uset is None:
             warn('Uset not given to LtiSysDyn()')
         elif not isinstance(Uset, pc.Polytope):
@@ -215,8 +222,13 @@ class LtiSysDyn:
         output += '\nWset =\n' + _indent(str(self.Wset), n)
         return output
 
-    def plot(self, ax=None, color=np.random.rand(3), show_domain=True,
-             res=(5, 5), **kwargs):
+    def plot(
+            self,
+            ax=None,
+            color=np.random.rand(3),
+            show_domain=True,
+            res=(5, 5),
+            **kwargs):
         try:
             from tulip.graphics import newax, quiver
         except:
@@ -272,8 +284,13 @@ class PwaSysDyn:
     `SwitchedSysDyn`,
     `polytope.Polytope`
     """
-    def __init__(self, list_subsys=[], domain=None, time_semantics=None,
-                 timestep=None, overwrite_time=True):
+    def __init__(
+            self,
+            list_subsys=[],
+            domain=None,
+            time_semantics=None,
+            timestep=None,
+            overwrite_time=True):
         """Constructor.
 
         @type overwrite_time: `bool`
@@ -344,12 +361,23 @@ class PwaSysDyn:
         return s
 
     @classmethod
-    def from_lti(cls, A=[], B=[], E=[], K=[],
-                 Uset=None, Wset=None,domain=None):
+    def from_lti(
+            cls,
+            A=[],
+            B=[],
+            E=[],
+            K=[],
+            Uset=None,
+            Wset=None,
+            domain=None):
         lti_sys = LtiSysDyn(A,B,E,K,Uset,Wset,domain)
         return cls([lti_sys], domain)
 
-    def plot(self, ax=None, show_domain=True, **kwargs):
+    def plot(
+            self,
+            ax=None,
+            show_domain=True,
+            **kwargs):
         try:
             from tulip.graphics import newax
         except:
@@ -427,10 +455,16 @@ class SwitchedSysDyn:
     `PwaSysDyn`,
     `polytope.Region`
     """
-    def __init__(self, disc_domain_size=(1,1),
-                 dynamics=None, cts_ss=None,
-                 env_labels=None, disc_sys_labels=None, time_semantics=None,
-                 timestep=None, overwrite_time=True):
+    def __init__(
+            self,
+            disc_domain_size=(1, 1),
+            dynamics=None,
+            cts_ss=None,
+            env_labels=None,
+            disc_sys_labels=None,
+            time_semantics=None,
+            timestep=None,
+            overwrite_time=True):
         """Constructor.
 
         @type overwrite_time: `bool`
@@ -573,7 +607,10 @@ class SwitchedSysDyn:
             return self._disc_sys_labels
 
     @classmethod
-    def from_pwa(cls, list_subsys=[], domain=None):
+    def from_pwa(
+            cls,
+            list_subsys=[],
+            domain=None):
         pwa_sys = PwaSysDyn(list_subsys,domain)
         return cls((1,1), {(0,0):pwa_sys}, domain)
 

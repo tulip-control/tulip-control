@@ -88,8 +88,11 @@ class LTL:
     2; otherwise it is ambiguous with finite_set.
     """
 
-    def __init__(self, formula=None, input_variables=None,
-                 output_variables=None):
+    def __init__(
+            self,
+            formula=None,
+            input_variables=None,
+            output_variables=None):
         """Instantiate an LTL object.
 
         Any non-None arguments are saved to the corresponding
