@@ -141,6 +141,7 @@ def _lily_strategy2moore(
 
     Caution
     =======
+
     The resulting transducer is symboic,
     in that the guards denote conjunctions,
     *not* subsets of ports.
