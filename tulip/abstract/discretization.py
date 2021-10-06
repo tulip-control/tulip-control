@@ -646,7 +646,7 @@ def _discretize_bi(
             ppp2pwa = [ppp2pwa[i] for i in new2old]
 
         remove_trans = False # already allowed in nonconservative
-        orig_list = []
+        orig_list = list()
         for poly in part:
             if len(poly) == 0:
                 orig_list.append(poly.copy())
@@ -1113,7 +1113,7 @@ def _discretize_dual(
         if ispwa:
             ppp2pwa = [ppp2pwa[i] for i in new2old]
         remove_trans = False # already allowed in nonconservative
-        orig_list = []
+        orig_list = list()
         for poly in part:
             if len(poly) == 0:
                 orig_list.append(poly.copy())
@@ -2024,8 +2024,7 @@ def merge_partition_pair(
     part2 = ab2.ppp
 
     modes = prev_modes + [cur_mode]
-
-    new_list = []
+    new_list = list()
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
 

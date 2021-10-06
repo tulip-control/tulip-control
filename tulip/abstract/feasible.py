@@ -331,7 +331,7 @@ def volumes_for_reachability(part, max_num_poly):
         vol_list[i] = part[i].volume
 
     ind = np.argsort(-vol_list)
-    temp = []
+    temp = list()
     for i in ind[range(max_num_poly) ]:
         temp.append(part[i] )
 

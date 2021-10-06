@@ -377,7 +377,7 @@ def get_input_helper(
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
 
-    list_P = []
+    list_P = list()
     if closed_loop:
         temp_part = P3
         list_P.append(P3)

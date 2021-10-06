@@ -48,7 +48,7 @@ def mathset_test():
     s.remove([1,2] )
     assert([1,2] not in s)
     assert(s._set == {1,2} )
-    assert(s._list == [])
+    assert(s._list == list())
     assert(len(s) == 2)
 
     for item in s:
@@ -122,7 +122,7 @@ class MathSet_operations_test(object):
 
 @pytest.mark.parametrize('iterable,expected',
     [(range(3), set([0, 1, 2])),
-     ([], set()),
+     (list(), set()),
      ([1, 1, -1], set([1, -1])),
      ([[1, 2], 3, 3], [[1, 2], 3]),
      ('Dessert!!', set('Desert!'))])
@@ -140,7 +140,7 @@ def contains_multiple_test():
 def test_tuple():
     s = MathSet((1,2))
     assert(s._set == {1,2})
-    assert(s._list == [])
+    assert(s._list == list())
 
 def subset_test():
     a = SubSet([1,2,3,4, {1:2} ] )

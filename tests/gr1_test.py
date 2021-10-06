@@ -20,13 +20,13 @@ def test_split_gr1():
     d = gr1.split_gr1(f)
     assert d['init'] == ['( x > 0 ) & ( ( y + 1 ) < 2 )'], d
     assert d['G'] == [''], d
-    assert d['GF'] == [], d
+    assert d['GF'] == list(), d
     # safety
     f = '[]((x > 0) & (z = 3 + y))'
     d = gr1.split_gr1(f)
     assert d['init'] == [''], d
     assert d['G'] == ['( ( x > 0 ) & ( z = ( 3 + y ) ) )'], d
-    assert d['GF'] == [], d
+    assert d['GF'] == list(), d
     # recurrence
     f = '[]<>(x > 0)'
     d = gr1.split_gr1(f)

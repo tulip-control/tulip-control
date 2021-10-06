@@ -376,7 +376,7 @@ class GRSpec(LTL):
       specifies the progress requirement.
 
     An empty list for any formula
-    (e.g., if `env_init = []`)
+    (e.g., if `env_init = list()`)
     is marked as `True` in the specification.
 
     This corresponds to the constant Boolean function,
