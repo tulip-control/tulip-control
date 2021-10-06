@@ -141,7 +141,7 @@ class Parser:
         self.symbols = None
 
     def parse(self, ltl2ba_output):
-        """Return a Buchi automaton from parsing C{ltl2ba_output}.
+        """Return a Buchi automaton from parsing `ltl2ba_output`.
 
         @return: Buchi automaton as a 3-`tuple` containing:
           - `dict` mapping symbols to types (all `"boolean"`)
