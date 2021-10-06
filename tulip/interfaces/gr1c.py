@@ -258,8 +258,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         ns_prefix+"env_vars"), get_order=True)
     (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
         ns_prefix+"sys_vars"), get_order=True)
+    # variables
     env_vars = _parse_vars(env_vars, env_vardict)
     sys_vars = _parse_vars(sys_vars, sys_vardict)
+    # specification
     s_elem = elem.find(f'{ns_prefix}spec')
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
