@@ -847,7 +847,8 @@ def _discretize_bi(
                 n_cells - 1,
                 n_cells - num_new - 1,
                 -1)
-            """Update transition matrix"""
+            #
+            # Update transition matrix
             transitions = np.pad(
                 transitions,
                 (0, num_new),
@@ -868,7 +869,8 @@ def _discretize_bi(
                 # each piece of `S0 \cap sol[i]`
                 # for k in range(n_cells - n_isect - 2, n_cells):
                 #    transitions[j, k] = 1
-            """Update adjacency matrix"""
+            #
+            # Update adjacency matrix
             old_adj = np.nonzero(adj[i, :])[0]
             # reset new adjacencies
             adj[i, :] = np.zeros([n_cells - num_new])
@@ -919,7 +921,8 @@ def _discretize_bi(
                         # between non-neighbors
                         transitions[r, k] = 0
                         transitions[k, r] = 0
-            """Update IJ matrix"""
+            #
+            # Update IJ matrix
             IJ = np.pad(
                 IJ,
                 (0, num_new),
@@ -1315,7 +1318,8 @@ def _discretize_dual(
                 sol.append(isect_list[0])
                 n_cells = len(sol)
                 new_idx = n_cells-1
-                """Update adjacency matrix"""
+                #
+                # Update adjacency matrix
                 old_adj = np.nonzero(adj[i, :])[0]
                 adj = np.pad(adj, (0, 1), 'constant')
                 # cell i and new_idx are adjacent
@@ -1338,7 +1342,7 @@ def _discretize_dual(
                         # between non-neighbors
                         transitions[new_idx, k] = 0
                         transitions[k, new_idx] = 0
-                """Update transition matrix"""
+                # Update transition matrix
                 transitions = np.pad(
                     transitions,
                     (0, 1),
@@ -1354,7 +1358,8 @@ def _discretize_dual(
                 # if j and new_idx are neighbor, then add new_idx ---> j
                 if adj_k[j, new_idx] != 0:
                     transitions[j, new_idx] = 1
-                """Update IJ matrix"""
+                #
+                # Update IJ matrix
                 IJ = np.pad(IJ, (0, 1), 'constant')
                 sym_adj_change(IJ, adj_k, transitions, i)
                 sym_adj_change(IJ, adj_k, transitions, new_idx)
