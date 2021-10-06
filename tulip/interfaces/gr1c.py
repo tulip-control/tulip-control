@@ -631,7 +631,7 @@ class GR1CSession:
         for ind in range(len(self.sys_vars)):
             state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write('getindex ' + ' '.join(
-            [str(i) for i in state_vector]) + ' ' +
+            str(i) for i in state_vector) + ' ' +
             str(goal_mode) + '\n'
         )
         line = self.p.stdout.readline()
@@ -686,9 +686,9 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write("sysnext "+" ".join(
-            [str(i) for i in state_vector]
+            str(i) for i in state_vector
         )+" "+" ".join(
-            [str(i) for i in emove_vector]
+            str(i) for i in emove_vector
         )+" "+str(goal_mode)+"\n")
         sys_moves = []
         line = self.p.stdout.readline()
@@ -721,10 +721,10 @@ class GR1CSession:
         self.p.stdin.write(
             "sysnexta " +
             " ".join(
-                [str(i) for i in state_vector]) +
+                str(i) for i in state_vector) +
             " " +
             " ".join(
-                [str(i) for i in emove_vector]) +
+                str(i) for i in emove_vector) +
             "\n"
         )
         sys_moves = []
