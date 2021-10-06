@@ -1919,9 +1919,10 @@ def merge_partitions(abstractions):
             p1 = ab1.ppp
             p2 = ab2.ppp
             if p1.prop_regions != p2.prop_regions:
-                msg = 'merge: partitions have different sets '
-                msg += 'of continuous propositions'
-                raise Exception(msg)
+                raise Exception(
+                    'merge: partitions have '
+                    'different sets of '
+                    'continuous propositions')
             if (
                     not (p1.domain.A == p2.domain.A).all() or
                     not (p1.domain.b == p2.domain.b).all()):
@@ -2073,8 +2074,9 @@ def merge_partition_pair(
             # have different AP labels,
             # checked here
             if ap_label_1 != ap_label_2:
-                msg = 'Inconsistent AP labels between intersecting regions\n'
-                msg += 'of partitions of switched system.'
-                raise Exception(msg)
+                raise Exception(
+                    'Inconsistent AP labels between '
+                    'intersecting regions of \n'
+                    'partitions of switched system.')
             ap_labeling[idx] = ap_label_1
     return new_list, parents, ap_labeling

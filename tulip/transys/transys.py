@@ -486,11 +486,11 @@ class FiniteTransitionSystem(LabeledDiGraph):
         # name, codomain, *rest = x
         actions = {x['name']: x['values'] for x in edge_label_types}
         if 'actions' in actions:
-            msg = '"actions" cannot be used as an action type name,\n'
-            msg += 'because if an attribute for this action type'
-            msg += 'is requested,\n then it will conflict with '
-            msg += 'the dict storing all action types.'
-            raise ValueError(msg)
+            raise ValueError(
+                '"actions" cannot be used as an action type name,\n'
+                'because if an attribute for this action type'
+                'is requested,\n then it will conflict with '
+                'the dict storing all action types.')
         self.actions = actions
         self.atomic_propositions = self.ap
         self.aps = self.atomic_propositions

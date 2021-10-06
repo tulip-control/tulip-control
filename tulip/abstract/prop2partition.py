@@ -226,9 +226,11 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
                 if rc < abs_tol:
-                    msg = 'One of the regions in the refined PPP is '
-                    msg += 'too small, this may cause numerical problems'
-                    warnings.warn(msg)
+                    warnings.warn(
+                        'One of the regions in '
+                        'the refined PPP is '
+                        'too small, this may cause '
+                        'numerical problems')
                 # not Region yet, but Polytope ?
                 if len(isect) == 0:
                     isect = pc.Region([isect])
@@ -510,8 +512,8 @@ class PropPreservingPartition(pc.MetricPartition):
         Symbols = Atomic Propositions
         """
         if self.prop_regions is None:
-            msg = 'No continuous propositions defined.'
-            logging.warning(msg)
+            logging.warning(
+                'No continuous propositions defined.')
             return
         for region in self.regions:
             if region.props <= set(self.prop_regions):

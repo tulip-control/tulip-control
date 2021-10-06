@@ -155,10 +155,9 @@ class LtiSysDyn:
                 raise ValueError('A and B must have same number of rows')
             if Uset is not None:
                 if Uset.dim != mB and Uset.dim != mB + nA:
-                    msg = 'Uset.dim != B.size[1]'
-                    msg += ' and != B.size[1] + A.size[1]'
-                    raise Exception(msg)
-
+                    raise Exception(
+                        '`Uset.dim != B.size[1]`'
+                        ' and `!= B.size[1] + A.size[1]`')
         if E is not None:
             try:
                 nE, mE = E.shape
@@ -582,11 +581,12 @@ class SwitchedSysDyn:
         try:
             # is length correct ?
             if len(labels) != n:
-                msg = 'number of environment labels is inconsistent'
-                msg += ' with discrete domain size.\n'
-                msg += 'Ignoring given environment labels.\n'
-                msg += 'Defaulting to integer labels.'
-                warn(msg)
+                warn(
+                    'number of environment labels '
+                    'is inconsistent with discrete '
+                    'domain size.\n'
+                    'Ignoring given environment labels.\n'
+                    'Defaulting to integer labels.')
                 return None
         except:
             warn(
