@@ -69,10 +69,9 @@ class LabeledStateInputOutputPair(object):
             transys.states[self.state]["ap"]
             if transys is not None else self.labels
         )
-        ret = {
-            "state": self.state,
-            "labels": labels,
-        }
+        ret = dict(
+            state=self.state,
+            labels=labels)
         for key, val in self.input_dict.items():
             ret[str(key)] = val
         for key, val in self.output_dict.items():

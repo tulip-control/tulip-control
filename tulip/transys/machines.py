@@ -253,7 +253,8 @@ class Transducer(LabeledDiGraph):
 
         LabeledDiGraph.__init__(self)
 
-        self.dot_node_shape = {'normal': 'ellipse'}
+        self.dot_node_shape = dict(
+            normal='ellipse')
         self.default_export_fname = 'fsm'
 
     def add_inputs(self, new_inputs, masks=None):
@@ -330,7 +331,8 @@ class MooreMachine(Transducer):
     def __init__(self):
         """Instantiate a Moore state machine."""
         Transducer.__init__(self)
-        self.dot_node_shape = {'normal': 'ellipse'}
+        self.dot_node_shape = dict(
+            normal='ellipse')
         self.default_export_fname = 'moore'
 
     def __str__(self):
@@ -410,11 +412,20 @@ class MealyMachine(Transducer):
     So instead of the previous `m.transitions.add`, we can use:
 
     ```python
-    label = {'tick':p, 'go':p, 'stop':a}
+    label = dict(
+        tick=p,
+        go=p,
+        stop=a)
     m.transitions.add('red', 'green', **label)
-    label = {'tick':p, 'go':a, 'stop':p}
+    label = dict(
+        tick=p,
+        go=a,
+        stop=p)
     m.transitions.add('green', 'yellow', **label)
-    label = {'tick':p, 'go':a, 'stop':p}
+    label = dict(
+        tick=p,
+        go=a,
+        stop=p)
     m.transitions.add('yellow', 'red', **label)
     ```
 
@@ -422,7 +433,10 @@ class MealyMachine(Transducer):
     order of the sublabels does not matter:
 
     ```python
-    label = {'go':p, 'tick':p, 'stop':a}
+    label = dict(
+        go=p,
+        tick=p,
+        stop=a)
     m.transitions.add('red', 'green', **label)
     ```
 
@@ -459,7 +473,8 @@ class MealyMachine(Transducer):
     def __init__(self):
         Transducer.__init__(self)
         # will point to selected values of self._transition_label_def
-        self.dot_node_shape = {'normal': 'ellipse'}
+        self.dot_node_shape = dict(
+            normal='ellipse')
         self.default_export_fname = 'mealy'
 
     def __str__(self):

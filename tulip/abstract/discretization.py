@@ -175,8 +175,9 @@ class AbstractSwitched(object):
         if self.ppp is not None:
             for mode in self.modes:
                 env_mode, sys_mode = mode
-                edge_label = {'env_actions':env_mode,
-                              'sys_actions':sys_mode}
+                edge_label = dict(
+                    env_actions=env_mode,
+                    sys_actions=sys_mode)
 
                 ax = _plot_abstraction(
                     self, show_ts=False, only_adjacent=False,
@@ -983,15 +984,14 @@ def _discretize_bi(
     for state, region in zip(ofts_states, sol):
         state_prop = region.props.copy()
         ofts.states.add(state, ap=state_prop)
-    param = {
-        'N':N,
-        'trans_length':trans_length,
-        'closed_loop':closed_loop,
-        'conservative':conservative,
-        'use_all_horizon':use_all_horizon,
-        'min_cell_volume':min_cell_volume,
-        'max_num_poly':max_num_poly
-    }
+    param = dict(
+        N=N,
+        trans_length=trans_length,
+        closed_loop=closed_loop,
+        conservative=conservative,
+        use_all_horizon=use_all_horizon,
+        min_cell_volume=min_cell_volume,
+        max_num_poly=max_num_poly)
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
     msg = 'Total abstraction time: {time}[sec]'.format(time=
@@ -1392,15 +1392,14 @@ def _discretize_dual(
     for state, region in zip(ofts_states, sol):
         state_prop = region.props.copy()
         ofts.states.add(state, ap=state_prop)
-    param = {
-        'N':N,
-        'trans_length':trans_length,
-        'closed_loop':closed_loop,
-        'conservative':conservative,
-        'use_all_horizon':use_all_horizon,
-        'min_cell_volume':min_cell_volume,
-        'max_num_poly':max_num_poly
-    }
+    param = dict(
+        N=N,
+        trans_length=trans_length,
+        closed_loop=closed_loop,
+        conservative=conservative,
+        use_all_horizon=use_all_horizon,
+        min_cell_volume=min_cell_volume,
+        max_num_poly=max_num_poly)
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
     msg = 'Total abstraction time: {t} [sec]'.format(
@@ -1644,7 +1643,7 @@ def discretize_switched(
     @rtype: `AbstractSwitched`
     """
     if disc_params is None:
-        disc_params = {'N':1, 'trans_length':1}
+        disc_params = dict(N=1, trans_length=1)
 
     logger.info('discretizing hybrid system')
 
@@ -1775,12 +1774,12 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
         sys_ts.env_actions.add_from(env_actions)
     else:
         actions_per_mode = {
-            (e,s):{'env_actions':str(e), 'sys_actions':str(s)}
-            for e,s in modes
-        }
+            (e, s): dict(
+                env_actions=str(e),
+                sys_actions=str(s))
+            for e, s in modes}
         sys_ts.env_actions.add_from([str(e) for e,s in modes])
         sys_ts.sys_actions.add_from([str(s) for e,s in modes])
-
     for mode in modes:
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]

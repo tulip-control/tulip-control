@@ -111,10 +111,13 @@ class FiniteStateAutomaton(LabeledDiGraph):
                 alphabet = set()
         self.alphabet = alphabet
 
-        edge_label_types = [
-            {'name': 'letter',
-             'values': alphabet,
-             'setter': True}]
+        edge_label_types = [dict(
+            name=
+                'letter',
+            values=
+                alphabet,
+            setter=
+                True)]
         super(FiniteStateAutomaton, self).__init__(
             edge_label_types=edge_label_types)
         # accepting states
@@ -528,10 +531,13 @@ class ParityGame(GameGraph):
     """
 
     def __init__(self, c=2):
-        node_label_types = [{
-            'name': 'color',
-            'values': list(range(c)),
-            'default': 0}]
+        node_label_types = [dict(
+            name=
+                'color',
+            values=
+                list(range(c)),
+            default=
+                0)]
         super(ParityGame, self).__init__(node_label_types, [])
 
     def __str__(self):

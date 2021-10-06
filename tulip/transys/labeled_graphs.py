@@ -831,7 +831,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.transitions = Transitions(self, deterministic)
 
         # export properties
-        self.dot_node_shape = {'normal': 'circle'}
+        self.dot_node_shape = dict(
+            normal='circle')
         self.default_layout = 'dot'
 
     def add_label_types(self, label_types, is_edge):
@@ -1018,7 +1019,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.update(copy.deepcopy(self._edge_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        existing_u_v = self.get_edge_data(u, v, default={})
+        existing_u_v = self.get_edge_data(u, v, default=dict())
         if dict() in existing_u_v.values():
             msg = (
                 'Unlabeled transition: '

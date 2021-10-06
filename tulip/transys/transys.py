@@ -83,10 +83,11 @@ class KripkeStructure(LabeledDiGraph):
     def __init__(self):
         ap_labels = PowerSet()
         node_label_types = [
-            {'name': 'ap',
-             'values': ap_labels,
-             'setter': ap_labels.math_set,
-             'default': set()}]
+            dict(
+                name='ap',
+                values=ap_labels,
+                setter=ap_labels.math_set,
+                default=set())]
         super(KripkeStructure, self).__init__(node_label_types)
         self.atomic_propositions = self.ap
         # dot formatting
@@ -94,7 +95,8 @@ class KripkeStructure(LabeledDiGraph):
             'ap': '',
             'type?label': '',
             'separator': r'\\n'}
-        self.dot_node_shape = {'normal': 'rectangle'}
+        self.dot_node_shape = dict(
+            normal='rectangle')
         self._state_dot_label_format = {
             'ap': '',
             'type?label': '',
@@ -128,10 +130,10 @@ class WeightedKripkeStructure(KripkeStructure):
 
     def __init__(self):
         edge_label_types = [
-            {'name': self.cost_label,
-             'values': ValidTransitionCost(),
-             'setter': True}
-        ]
+            dict(
+                name=self.cost_label,
+                values=ValidTransitionCost(),
+                setter=True)]
         super(WeightedKripkeStructure, self).__init__()
         super(WeightedKripkeStructure, self).add_label_types(edge_label_types, True)
 
@@ -156,10 +158,10 @@ class MarkovChain(KripkeStructure):
 
     def __init__(self):
         edge_label_types = [
-            {'name': self.probability_label,
-             'values': MarkovChain.ValidProbability(),
-             'setter': True}
-        ]
+            dict(
+                name=self.probability_label,
+                values=MarkovChain.ValidProbability(),
+                setter=True)]
         super(MarkovChain, self).__init__()
         super(MarkovChain, self).add_label_types(edge_label_types, True)
 
@@ -458,10 +460,11 @@ class FiniteTransitionSystem(LabeledDiGraph):
         edge_label_types = action_types
         ap_labels = PowerSet()
         node_label_types = [
-            {'name': 'ap',
-             'values': ap_labels,
-             'setter': ap_labels.math_set,
-             'default': set()}]
+            dict(
+                name='ap',
+                values=ap_labels,
+                setter=ap_labels.math_set,
+                default=set())]
         super(FiniteTransitionSystem, self).__init__(
             node_label_types, edge_label_types)
         # make them available also via an "actions" dicts
@@ -490,7 +493,9 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'type?label': ':',  # todo: '' if no env
             'separator': r'\\n'}
         self._transition_dot_mask = dict()
-        self.dot_node_shape = {'normal': 'box'}  # todo: rectangle if no env
+        self.dot_node_shape = dict(
+            normal='box')
+            # todo: rectangle if no env
         self.default_export_fname = 'fts'
 
     def __str__(self):
@@ -919,7 +924,8 @@ class LabeledGameGraph(GameGraph):
             'ap': '',
             'type?label': '',
             'separator': r'\\n'}
-        self.dot_node_shape = {'normal': 'rectangle'}
+        self.dot_node_shape = dict(
+            normal='rectangle')
 
 
 def _pre(graph, list_n):
