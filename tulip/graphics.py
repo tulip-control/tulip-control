@@ -117,8 +117,10 @@ def newax(
         subplot_layout = (1, subplots)
     # reasonable layout ?
     if len(subplot_layout) != 2:
-        raise Exception('newax:'
-                        'subplot layout should be 2-tuple or int.')
+        raise Exception(
+            'newax:'
+            'subplot layout should be '
+            '2-`tuple` or `int`.')
     # which figure ?
     if fig is None:
         fig = plt.figure()
