@@ -415,11 +415,10 @@ def add_grid(
         prop_regions=ppp.prop_regions)
 
 #### Helper functions ####
-    """Helper implementing intervals computation for each dimension.
-    """
 def compute_interval(
         low_domain, high_domain, size,
         abs_tol=1e-7):
+    """Compute intervals for each dimension."""
     list_g = list()
     i = low_domain
     while True:
