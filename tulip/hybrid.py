@@ -396,7 +396,8 @@ class PwaSysDyn:
         try:
             from tulip.graphics import newax
         except:
-            logger.error('failed to import graphics')
+            logger.error(
+                'failed to import `tulip.graphics`')
             return
         if ax is None:
             ax, fig = newax()
