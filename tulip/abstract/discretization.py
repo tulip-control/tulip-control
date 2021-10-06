@@ -283,12 +283,12 @@ class AbstractPwa:
         self.ppp = ppp
         self.ts = ts
         self.ppp2ts = ppp2ts
-
+        # pwa
         self.pwa = pwa
         self.pwa_ppp = pwa_ppp
         self._ppp2pwa = ppp2pwa
         self._ppp2sys = ppp2sys
-
+        # mapping
         self.orig_ppp = orig_ppp
         self._ppp2orig = ppp2orig
         # original_regions -> pwa_ppp
