@@ -121,7 +121,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
                 alphabet,
             setter=
                 True)]
-        super(FiniteStateAutomaton, self).__init__(
+        super().__init__(
             edge_label_types=edge_label_types)
         # accepting states
         if accepting_states_type is None:
@@ -187,7 +187,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
         """
         # intercept to remove also from accepting states
         self.accepting.remove(node)
-        super(FiniteStateAutomaton, self).remove_node(node)
+        super().remove_node(node)
 
 
 class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
@@ -203,10 +203,13 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
              'values': ValidTransitionCost(),
              'setter': True}
         ]
-        super(WeightedFiniteStateAutomaton, self).__init__(
-            deterministic, accepting_states_type, atomic_proposition_based, symbolic
-        )
-        super(WeightedFiniteStateAutomaton, self).add_label_types(edge_label_types, True)
+        super().__init__(
+            deterministic,
+            accepting_states_type,
+            atomic_proposition_based,
+            symbolic)
+        super().add_label_types(
+            edge_label_types, True)
 
 
 class FiniteWordAutomaton(FiniteStateAutomaton):
@@ -222,7 +225,7 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
     def __init__(
             self, deterministic=False,
             atomic_proposition_based=True):
-        super(FiniteWordAutomaton, self).__init__(
+        super().__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based)
         self.automaton_type = 'Finite-Word Automaton'
@@ -238,7 +241,7 @@ def dfa2nfa(dfa):
 
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, *args, **kwargs):
-        super(OmegaAutomaton, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 class BuchiAutomaton(OmegaAutomaton):
@@ -246,7 +249,7 @@ class BuchiAutomaton(OmegaAutomaton):
             self, deterministic=False,
             atomic_proposition_based=True,
             symbolic=False):
-        super(BuchiAutomaton, self).__init__(
+        super().__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based,
             symbolic=symbolic)
@@ -257,7 +260,7 @@ class BA(BuchiAutomaton):
     """Alias to `BuchiAutomaton`."""
 
     def __init__(self, **args):
-        super(BA, self).__init__(**args)
+        super().__init__(**args)
 
 
 def tuple2ba(
@@ -510,7 +513,7 @@ class RabinAutomaton(OmegaAutomaton):
 
     def __init__(self, deterministic=False,
                  atomic_proposition_based=False):
-        super(RabinAutomaton, self).__init__(
+        super().__init__(
             deterministic=deterministic,
             accepting_states_type=RabinPairs,
             atomic_proposition_based=atomic_proposition_based)
@@ -526,7 +529,7 @@ class DRA(RabinAutomaton):
     """
 
     def __init__(self, atomic_proposition_based=True):
-        super(DRA, self).__init__(
+        super().__init__(
             deterministic=True,
             atomic_proposition_based=atomic_proposition_based)
         self.automaton_type = 'Deterministic Rabin Automaton'
@@ -563,7 +566,8 @@ class ParityGame(GameGraph):
                 list(range(c)),
             default=
                 0)]
-        super(ParityGame, self).__init__(node_label_types, [])
+        super().__init__(
+            node_label_types, [])
 
     def __str__(self):
         s = (

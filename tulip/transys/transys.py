@@ -92,7 +92,7 @@ class KripkeStructure(LabeledDiGraph):
                 values=ap_labels,
                 setter=ap_labels.math_set,
                 default=set())]
-        super(KripkeStructure, self).__init__(node_label_types)
+        super().__init__(node_label_types)
         self.atomic_propositions = self.ap
         # dot formatting
         self._state_dot_label_format = {
@@ -146,8 +146,9 @@ class WeightedKripkeStructure(KripkeStructure):
                 name=self.cost_label,
                 values=ValidTransitionCost(),
                 setter=True)]
-        super(WeightedKripkeStructure, self).__init__()
-        super(WeightedKripkeStructure, self).add_label_types(edge_label_types, True)
+        super().__init__()
+        super().add_label_types(
+            edge_label_types, True)
 
 
 class MarkovChain(KripkeStructure):
@@ -173,8 +174,9 @@ class MarkovChain(KripkeStructure):
                 name=self.probability_label,
                 values=MarkovChain.ValidProbability(),
                 setter=True)]
-        super(MarkovChain, self).__init__()
-        super(MarkovChain, self).add_label_types(edge_label_types, True)
+        super().__init__()
+        super().add_label_types(
+            edge_label_types, True)
 
 
 class MarkovDecisionProcess(MarkovChain):
@@ -192,8 +194,9 @@ class MarkovDecisionProcess(MarkovChain):
              'values': MathSet(),
              'setter': True}
         ]
-        super(MarkovDecisionProcess, self).__init__()
-        super(MarkovDecisionProcess, self).add_label_types(edge_label_types, True)
+        super().__init__()
+        super().add_label_types(
+            edge_label_types, True)
         self.actions = self.action
 
 
@@ -484,7 +487,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 values=ap_labels,
                 setter=ap_labels.math_set,
                 default=set())]
-        super(FiniteTransitionSystem, self).__init__(
+        super().__init__(
             node_label_types, edge_label_types)
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
@@ -901,8 +904,9 @@ class GameGraph(LabeledDiGraph):
             'name': 'player',
             'values': {0, 1},
             'default': 0}]
-        super(GameGraph, self).__init__(node_label_types,
-                                        edge_label_types)
+        super().__init__(
+            node_label_types,
+            edge_label_types)
 
     def player_states(self, n):
         """Return states controlled by player `n`.
@@ -951,7 +955,7 @@ class LabeledGameGraph(GameGraph):
              'values': ap_labels,
              'setter': ap_labels.math_set,
              'default': set()}]
-        super(LabeledGameGraph, self).__init__(node_label_types)
+        super().__init__(node_label_types)
         self.atomic_propositions = self.ap
         # dot formatting
         self._state_dot_label_format = {

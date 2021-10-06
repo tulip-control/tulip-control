@@ -482,7 +482,7 @@ class PropPreservingPartition(pc.MetricPartition):
             adj=None,
             prop_regions=None,
             check=True):
-        #super(PropPreservingPartition, self).__init__(adj)
+        # super().__init__(adj)
         if prop_regions is None:
             self.prop_regions = None
         else:
