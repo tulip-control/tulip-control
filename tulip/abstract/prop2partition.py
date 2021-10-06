@@ -212,8 +212,10 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     @rtype: `(PropPreservingPartition, list, list)`
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
-        raise Exception('pwa system is not defined everywhere ' +
-                        'in state space')
+        raise Exception(
+            'piecewise-affine system '
+            'is not defined everywhere in '
+            'the state-space')
     # for each subsystem's domain, cut it into pieces
     # each piece is the intersection with
     # a unique Region in ppp.regions
@@ -328,10 +330,12 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                         size_list.append(grid_size)
                     else:
                         raise Exception(
-                            "num_grid_pnts isn't given in a correct format.")
+                            '`num_grid_pnts` is not '
+                            'given in a correct format.')
             else:
                 raise Exception(
-                    "num_grid_pnts isn't given in a correct format.")
+                    '`num_grid_pnts` is not given '
+                    'in a correct format.')
         elif isinstance( num_grid_pnts, int ):
             for i in range(dim):
                 grid_size=(
