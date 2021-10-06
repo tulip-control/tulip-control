@@ -961,7 +961,7 @@ def _discretize_bi(
             assert(tmp_part.is_partition())
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
-        progress += [progress_ratio]
+        progress.append(progress_ratio)
         msg = (
             f'\t total # polytopes: {n_cells}\n'
             f'\t progress ratio: {progress_ratio}\n')
@@ -1392,7 +1392,7 @@ def _discretize_dual(
             assert(tmp_part.is_partition())
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
-        progress += [progress_ratio]
+        progress.append(progress_ratio)
         logger.info(
             f'\t total # polytopes: {n_cells}\n'
             f'\t progress ratio: {progress_ratio}\n')
