@@ -104,8 +104,8 @@ def plot_ts_on_partition(
     @type edge_label: `dict`
     """
     l,u = ppp.domain.bounding_box
-    arr_size = (u[0,0]-l[0,0])/50.0
-    ts2ppp = {v:k for k,v in enumerate(ppp2ts)}
+    arr_size = (u[0, 0] - l[0, 0]) / 50.0
+    ts2ppp = {v: k for k, v in enumerate(ppp2ts)}
     for from_state, to_state, label in ts.transitions.find(with_attr_dict=edge_label):
         i = ts2ppp[from_state]
         j = ts2ppp[to_state]
@@ -191,10 +191,10 @@ def plot_trajectory(
     for i in range(u_seq.shape[0]):
         x = (
             np.dot(A, x).flatten() +
-            np.dot(B, u_seq[i, :] ).flatten() +
+            np.dot(B, u_seq[i, :]).flatten() +
             K.flatten())
         x_arr = np.vstack([x_arr, x.flatten()])
-    ax.plot(x_arr[:,0], x_arr[:,1], 'o-')
+    ax.plot(x_arr[:, 0], x_arr[:, 1], 'o-')
     return ax
 
 

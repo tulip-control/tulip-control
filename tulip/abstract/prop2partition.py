@@ -211,7 +211,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         - map of `new_ppp.regions` to `ppp.regions`
     @rtype: `(PropPreservingPartition, list, list)`
     """
-    if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
+    if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain)):
         raise Exception(
             'piecewise-affine system '
             'is not defined everywhere in '
@@ -301,18 +301,18 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             'grid size or number of '
             'grid points parameters '
             'must be given.')
-    dim=len(ppp.domain.A[0])
+    dim = len(ppp.domain.A[0])
     domain_bb = ppp.domain.bounding_box
-    size_list=list()
-    if grid_size!=None:
-        if isinstance( grid_size, list ):
+    size_list = list()
+    if grid_size != None:
+        if isinstance(grid_size, list):
             if len(grid_size) == dim:
-                size_list=grid_size
+                size_list = grid_size
             else:
                 raise Exception(
                     '`grid_size` is not '
                     'given in a correct format.')
-        elif isinstance( grid_size, float ):
+        elif isinstance(grid_size, float):
             for i in range(dim):
                 size_list.append(grid_size)
         else:
@@ -320,12 +320,13 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 'grid_size is not given in '
                 'a correct format.')
     else:
-        if isinstance( num_grid_pnts, list ):
+        if isinstance(num_grid_pnts, list):
             if len(num_grid_pnts) == dim:
                 for i in range(dim):
-                    if isinstance( num_grid_pnts[i], int ):
+                    if isinstance( num_grid_pnts[i], int):
                         grid_size=(
-                                float(domain_bb[1][i]) -float(domain_bb[0][i])
+                                float(domain_bb[1][i]) -
+                                float(domain_bb[0][i])
                             ) / num_grid_pnts[i]
                         size_list.append(grid_size)
                     else:
@@ -336,43 +337,47 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 raise Exception(
                     '`num_grid_pnts` is not given '
                     'in a correct format.')
-        elif isinstance( num_grid_pnts, int ):
+        elif isinstance(num_grid_pnts, int):
             for i in range(dim):
                 grid_size=(
-                        float(domain_bb[1][i])-float(domain_bb[0][i])
+                        float(domain_bb[1][i]) -
+                        float(domain_bb[0][i])
                     ) / num_grid_pnts
                 size_list.append(grid_size)
         else:
             raise Exception(
                 "num_grid_pnts isn't given in a correct format.")
-    j=0
-    list_grid=dict()
-    while j<dim:
+    j = 0
+    list_grid = dict()
+    while j < dim:
         list_grid[j] = compute_interval(
             float(domain_bb[0][j]),
             float(domain_bb[1][j]),
             size_list[j],
             abs_tol
         )
-        if j>0:
-            if j==1:
-                re_list=list_grid[j-1]
-                re_list=product_interval(re_list, list_grid[j])
+        if j > 0:
+            if j == 1:
+                re_list = list_grid[j - 1]
+                re_list = product_interval(re_list, list_grid[j])
             else:
-                re_list=product_interval(re_list, list_grid[j])
-        j+=1
+                re_list = product_interval(
+                    re_list, list_grid[j])
+        j += 1
     new_list = []
     parent = []
     for i in range(len(re_list)):
-        temp_list=list()
-        j=0
-        while j<dim*2:
-            temp_list.append([re_list[i][j],re_list[i][j+1]])
-            j=j+2
+        temp_list = list()
+        j = 0
+        while j < dim * 2:
+            temp_list.append(
+                [re_list[i][j],
+                re_list[i][j + 1]])
+            j = j + 2
         for j in range(len(ppp.regions)):
             tmp = pc.box2poly(temp_list)
             isect = tmp.intersect(ppp.regions[j], abs_tol)
-            #if pc.is_fulldim(isect):
+            # if pc.is_fulldim(isect):
             rc, xc = pc.cheby_ball(isect)
             if rc > abs_tol / 2:
                 if rc < abs_tol:
@@ -386,41 +391,41 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 parent.append(j)
     adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
     for i in range(len(new_list)):
-        adj[i,i] = 1
-        for j in range(i+1, len(new_list)):
+        adj[i, i] = 1
+        for j in range(i + 1, len(new_list)):
             if (ppp.adj[parent[i], parent[j]] == 1 or
                     parent[i] == parent[j]):
                 if pc.is_adjacent(new_list[i], new_list[j]):
-                    adj[i,j] = 1
-                    adj[j,i] = 1
+                    adj[i, j] = 1
+                    adj[j, i] = 1
     return PropPreservingPartition(
-        domain = ppp.domain,
-        regions = new_list,
-        adj = adj,
-        prop_regions = ppp.prop_regions
+        domain=ppp.domain,
+        regions=new_list,
+        adj=adj,
+        prop_regions=ppp.prop_regions
     )
 
 #### Helper functions ####
 def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):
     """Helper implementing intervals computation for each dimension.
     """
-    list_g=list()
-    i=low_domain
+    list_g = list()
+    i = low_domain
     while True:
-        if (i+size+abs_tol)>=high_domain:
-            list_g.append([i,high_domain])
+        if (i + size + abs_tol) >= high_domain:
+            list_g.append([i, high_domain])
             break
         else:
-            list_g.append([i,i+size])
-        i=i+size
+            list_g.append([i, i + size])
+        i = i + size
     return list_g
 
 def product_interval(list1, list2):
     """Combine all intervals, for any two interval lists."""
-    new_list=list()
+    new_list = list()
     for m in range(len(list1)):
         for n in range(len(list2)):
-            new_list.append(list1[m]+list2[n])
+            new_list.append(list1[m] + list2[n])
     return new_list
 
 ################################

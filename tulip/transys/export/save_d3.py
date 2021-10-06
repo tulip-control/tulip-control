@@ -45,8 +45,8 @@ def _format_label(label_def, label_dot_format):
         shown_name = label_dot_format[sublabel_name]
         kv_sep = label_dot_format['type?label']
         sep = label_dot_format['separator']
-        s += '"' +shown_name +kv_sep +'" '
-        s += '+d.' +str(sublabel_name) +'+"' +sep+'" +'
+        s += '"' + shown_name + kv_sep + '" '
+        s += '+d.' + str(sublabel_name) + '+"' + sep + '" +'
     s += '" ";'
     return s
 
@@ -78,7 +78,7 @@ def labeled_digraph2d3(
     @type graph: `LabeledDiGraph`
     """
     file_path = inspect.getfile(inspect.currentframe())
-    dir_path = os.path.dirname(os.path.abspath(file_path) )
+    dir_path = os.path.dirname(os.path.abspath(file_path))
     d3_file_name = os.path.join(dir_path, 'd3.v3.min.js')
     d3_file = open(d3_file_name)
     d3_js = d3_file.read()
@@ -148,7 +148,7 @@ def labeled_digraph2d3(
         # better error msg for numpy array
         import json
         data = json_graph.node_link_data(graph)
-        s += json.dumps(data, default=lambda x: str(x) )
+        s += json.dumps(data, default=lambda x: str(x))
     s += ';'
     s += """
     function draw(graph){

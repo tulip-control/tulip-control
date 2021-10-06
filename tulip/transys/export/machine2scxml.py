@@ -59,10 +59,10 @@ def mealy2scxml(mealy):
     @rtype: SCXML `str`
     """
     def indent(n):
-        return '\n' +n*'\t'
+        return '\n' + n * '\t'
     def transitions_str(from_state, mealy):
         s = ''
-        trans = mealy.transitions.find([from_state] )
+        trans = mealy.transitions.find([from_state])
         n = 2
         for (from_state_, to_state, sublabel_dict) in trans:
             s += indent(n) +'<transition '

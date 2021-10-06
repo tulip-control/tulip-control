@@ -450,7 +450,7 @@ def _plot_abstraction(
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
     )
-    #ax = self.ts.plot()
+    # ax = self.ts.plot()
     return ax
 
 def discretize(
@@ -635,8 +635,10 @@ def _discretize_bi(
     """
     start_time = os.times()[0]
     orig_ppp = part
-    min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
-        *np.finfo(np.double).eps)
+    min_cell_volume = (
+        min_cell_volume /
+        np.finfo(np.double).eps *
+        np.finfo(np.double).eps)
     ispwa = isinstance(ssys, PwaSysDyn)
     islti = isinstance(ssys, LtiSysDyn)
     if ispwa:
@@ -653,7 +655,8 @@ def _discretize_bi(
         # map new regions to pwa subsystems
         if ispwa:
             ppp2pwa = [ppp2pwa[i] for i in new2old]
-        remove_trans = False # already allowed in nonconservative
+        remove_trans = False
+            # already allowed in nonconservative
         orig_list = list()
         for poly in part:
             if len(poly) == 0:
@@ -832,7 +835,10 @@ def _discretize_bi(
                 if ispwa:
                     subsys_list.append(subsys_list[i])
             n_cells = len(sol)
-            new_idx = range(n_cells-1, n_cells-num_new-1, -1)
+            new_idx = range(
+                n_cells - 1,
+                n_cells - num_new - 1,
+                -1)
             """Update transition matrix"""
             transitions = np.pad(transitions, (0,num_new), 'constant')
             transitions[i, :] = np.zeros(n_cells)
@@ -931,7 +937,7 @@ def _discretize_bi(
                 regions=sol, adj=sp.lil_matrix(adj),
                 prop_regions=part.prop_regions
             )
-            assert(tmp_part.is_partition() )
+            assert(tmp_part.is_partition())
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
         progress += [progress_ratio]
@@ -1113,8 +1119,9 @@ def _discretize_dual(
     """
     start_time = os.times()[0]
     orig_ppp = part
-    min_cell_volume = (min_cell_volume /np.finfo(np.double).eps
-        *np.finfo(np.double).eps)
+    min_cell_volume = (
+        min_cell_volume / np.finfo(np.double).eps
+        * np.finfo(np.double).eps)
     ispwa = isinstance(ssys, PwaSysDyn)
     islti = isinstance(ssys, LtiSysDyn)
     if ispwa:
@@ -1126,13 +1133,13 @@ def _discretize_dual(
         orig_list = None
         orig = [0]
     else:
-        (part, new2old) = part2convex(part) # convexify
+        (part, new2old) = part2convex(part)  # convexify
         part2orig = [part2orig[i] for i in new2old]
-
         # map new regions to pwa subsystems
         if ispwa:
             ppp2pwa = [ppp2pwa[i] for i in new2old]
-        remove_trans = False # already allowed in nonconservative
+        remove_trans = False
+            # already allowed in nonconservative
         orig_list = list()
         for poly in part:
             if len(poly) == 0:
@@ -1188,8 +1195,8 @@ def _discretize_dual(
     # List of how many "new" regions
     # have been created for each region
     # and a `list` of original number of neighbors
-    #num_new_reg = np.zeros(len(orig_list))
-    #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
+    # num_new_reg = np.zeros(len(orig_list))
+    # num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
     progress = list()
     # Do the abstraction
     while np.sum(IJ) > 0:
@@ -1202,8 +1209,8 @@ def _discretize_dual(
         sj = sol[j]
         si_tmp = deepcopy(si)
         sj_tmp = deepcopy(sj)
-        #num_new_reg[i] += 1
-        #print(num_new_reg)
+        # num_new_reg[i] += 1
+        # print(num_new_reg)
         if ispwa:
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
@@ -1233,13 +1240,15 @@ def _discretize_dual(
         msg += '\t Computed reachable set S0 with volume: '
         msg += '{vol}\n'.format(vol=S0.volume)
         logger.debug(msg)
-        #logger.debug(r'si \cap s0')
+        # logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug(r'si \ s0')
+        # logger.debug(r'si \ s0')
         rsi, xd = pc.cheby_ball(si)
-        vol2 = si.volume-vol1 # not accurate. need to check polytope class
+        vol2 = si.volume - vol1
+            # not accurate.
+            # need to check polytope class
         if vol1 <= min_cell_volume:
             logger.warning('\t too small: si \\cap Pre(sj), '
                            'so discard intersection')
@@ -1348,17 +1357,17 @@ def _discretize_dual(
                 regions=sol, adj=sp.lil_matrix(adj),
                 prop_regions=part.prop_regions
             )
-            assert(tmp_part.is_partition() )
+            assert(tmp_part.is_partition())
         n_cells = len(sol)
-        progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
+        progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
         progress += [progress_ratio]
         msg = '\t total # polytopes: {n_cells}\n'.format(n_cells=n_cells)
         msg += '\t progress ratio: {pr}\n'.format(pr=progress_ratio)
         logger.info(msg)
         iter_count += 1
         # needs to be removed later
-#        if(iter_count>=700):
-#            break
+        # if(iter_count>=700):
+        # break
         # no plotting ?
         if not plotit:
             continue
@@ -1389,8 +1398,8 @@ def _discretize_dual(
         # scale view based on domain,
         # not only the current polytopes si, sj
         l,u = part.domain.bounding_box
-        ax2.set_xlim(l[0,0], u[0,0])
-        ax2.set_ylim(l[1,0], u[1,0])
+        ax2.set_xlim(l[0, 0], u[0, 0])
+        ax2.set_ylim(l[1, 0], u[1, 0])
         if save_img:
             fname = 'movie' +str(iter_count).zfill(3)
             fname += '.' + file_extension
@@ -1458,7 +1467,7 @@ def reachable_within(trans_length, adj_k, adj):
         return adj_k
     k = 1
     while k < trans_length:
-        adj_k = (np.dot(adj_k, adj)!=0).astype(int)
+        adj_k = (np.dot(adj_k, adj) != 0).astype(int)
         k += 1
     adj_k = (adj_k > 0).astype(int)
     return adj_k
@@ -1669,7 +1678,7 @@ def discretize_switched(
     # discretize each abstraction separately
     abstractions = dict()
     for mode in modes:
-        logger.debug(30*'-'+'\n')
+        logger.debug(30 * '-' + '\n')
         logger.info('Abstracting mode: ' + str(mode))
         cont_dyn = hybrid_sys.dynamics[mode]
         absys = discretize(
@@ -1760,21 +1769,19 @@ def merge_abstractions(
         props =  merged_abstr.ppp[i].props
         sys_ts.states[state]['ap'] = props
     # create mode actions
-    sys_actions = [str(s) for e,s in modes]
-    env_actions = [str(e) for e,s in modes]
+    sys_actions = [str(s) for e, s in modes]
+    env_actions = [str(e) for e, s in modes]
     # no env actions ?
     if mode_nums[0] == 0:
         actions_per_mode = {
-            (e,s):{'sys_actions':str(s)}
-            for e,s in modes
-        }
+            (e, s): {'sys_actions': str(s)}
+            for e, s in modes}
         sys_ts.sys_actions.add_from(sys_actions)
     elif mode_nums[1] == 0:
         # no sys actions
         actions_per_mode = {
-            (e,s):{'env_actions':str(e)}
-            for e,s in modes
-        }
+            (e, s): {'env_actions': str(e)}
+            for e, s in modes}
         sys_ts.env_actions.add_from(env_actions)
     else:
         actions_per_mode = {
@@ -1918,7 +1925,7 @@ def merge_partitions(abstractions):
    	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
-    parents = {init_mode:list(range(len(regions) ))}
+    parents = {init_mode:list(range(len(regions)))}
     ap_labeling = {
         i: reg.props
         for i, reg in enumerate(regions)}
@@ -1952,9 +1959,9 @@ def merge_partitions(abstractions):
             if not touching:
                 continue
             if pc.is_adjacent(reg_i, reg_j):
-                adj[i,j] = 1
-                adj[j,i] = 1
-        adj[i,i] = 1
+                adj[i, j] = 1
+                adj[j, i] = 1
+        adj[i, i] = 1
     ppp = PropPreservingPartition(
         domain=ab0.ppp.domain,
         regions=new_list,

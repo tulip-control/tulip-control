@@ -186,7 +186,7 @@ def _untagdict(
     else:
         ns_prefix = "{"+namespace+"}"
     # Extract dictionary
-    items_li = elem.findall(ns_prefix+"item")
+    items_li = elem.findall(ns_prefix + "item")
     if cast_f_keys is None:
         cast_f_keys = str
     if cast_f_values is None:
@@ -260,7 +260,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         li = [v.replace("&gt;", ">") for v in li]
         li = [v.replace("&amp;", "&") for v in li]
         setattr(spec, spec_tag, li)
-    aut_elem = elem.find(ns_prefix+"aut")
+    aut_elem = elem.find(ns_prefix + "aut")
     return_now = (
         aut_elem is None or (
         aut_elem.text is None and
@@ -403,7 +403,7 @@ def check_syntax(spec_str):
     if p.returncode == 0:
         return True
     else:
-        logger.info(p.stdout.read() )
+        logger.info(p.stdout.read())
         return False
 
 
@@ -437,7 +437,7 @@ def check_realizable(spec):
     if p.returncode == 0:
         return True
     else:
-        logger.info(p.stdout.read() )
+        logger.info(p.stdout.read())
         return False
 
 
@@ -612,7 +612,7 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
-            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+            state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'winning ' +
             ' '.join(str(i) for i in state_vector) + '\n')
@@ -629,7 +629,7 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
-            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+            state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write('getindex ' + ' '.join(
             [str(i) for i in state_vector]) + ' ' +
             str(goal_mode) + '\n'
@@ -675,13 +675,13 @@ class GR1CSession:
         Format of given `state` and `env_move` is same as for `iswinning`
         method.
         """
-        if goal_mode < 0 or goal_mode > self.numgoals()-1:
-            raise ValueError("Invalid goal mode requested: "+str(goal_mode))
+        if goal_mode < 0 or goal_mode > self.numgoals() - 1:
+            raise ValueError("Invalid goal mode requested: " + str(goal_mode))
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
-            state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
+            state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]

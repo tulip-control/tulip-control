@@ -92,7 +92,7 @@ def fts2promela(graph, procname=None):
         s += '\t fi;\n\n'
         return s
     def get_label_of(state, graph):
-        state_label_pairs = graph.states.find([state] )
+        state_label_pairs = graph.states.find([state])
         (state_, ap_label) = state_label_pairs[0]
         print('state:\t' +str(state) )
         print('ap label:\t' +str(ap_label) )
@@ -100,7 +100,7 @@ def fts2promela(graph, procname=None):
     if procname is None:
         procname = graph.name
     s = '/*\n * Promela file generated with TuLiP\n'
-    s += ' * Date: '+str(strftime('%x %X %z') ) +'\n */\n\n'
+    s += ' * Date: ' + str(strftime('%x %X %z')) + '\n */\n\n'
     for ap in graph.atomic_propositions:
         # convention "!" means negation
         if ap not in {None, True}:
@@ -117,12 +117,12 @@ def fts2promela(graph, procname=None):
         out_transitions = graph.transitions.find(
             {state}, as_dict=True
         )
-        s += str(state).replace(' ', '_') +':'
+        s += str(state).replace(' ', '_') + ':'
         s += trans2promela(out_transitions, graph,
                            ap_alphabet)
     s += '}\n'
     return s
 
-#def mealy2promela():
-#    """Convert Mealy machine to Promela str.
-#    """
+
+# def mealy2promela():
+#     """Convert Mealy machine to Promela str."""

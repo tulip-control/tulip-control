@@ -51,8 +51,8 @@ __all__ = [
 
 def _indent(s, n):
     s = s.split('\n')
-    w = n*' '
-    return w + ('\n'+w).join(s)
+    w = n * ' '
+    return w + ('\n' + w).join(s)
 
 
 class LtiSysDyn:
@@ -323,7 +323,7 @@ class PwaSysDyn:
                 raise Exception(
                     'subdomains must cover the domain')
             for x in itertools.combinations(list_subsys, 2):
-                if pc.is_fulldim(x[0].domain.intersect(x[1].domain) ):
+                if pc.is_fulldim(x[0].domain.intersect(x[1].domain)):
                     raise Exception(
                         'subdomains have to be mutually '
                         'exclusive')
@@ -467,7 +467,9 @@ class SwitchedSysDyn:
         if cts_ss is None:
             warn('requires continuous state-space `cts_ss`')
         else:
-            if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
+            if not isinstance(
+                    cts_ss,
+                    (pc.Polytope, pc.Region)):
                 raise Exception(
                    '`cts_ss` must be '
                    'a `Polytope` or `Region`')
@@ -588,8 +590,8 @@ class SwitchedSysDyn:
             cls,
             list_subsys=[],
             domain=None):
-        pwa_sys = PwaSysDyn(list_subsys,domain)
-        return cls((1,1), {(0,0):pwa_sys}, domain)
+        pwa_sys = PwaSysDyn(list_subsys, domain)
+        return cls((1, 1), {(0, 0): pwa_sys}, domain)
 
     @classmethod
     def from_lti(cls, A=[], B=[], E=[], K=[],
@@ -655,7 +657,7 @@ def _check_time_consistency(
     @type system_list: `list` of `LtiSysDyn` or `PwaSysDyn`
     """
     # Check that time semantics for all subsystems match
-    for ind in range(len(system_list)-1):
+    for ind in range(len(system_list) - 1):
         if system_list[ind].timestep != system_list[ind+1].timestep:
             raise ValueError('Not all timesteps in child systems are the same.')
         if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
