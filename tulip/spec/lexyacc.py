@@ -102,8 +102,10 @@ class Lexer:
         # for setting the logger,
         # directly call the method `build`
         self.tokens = (
-            self.delimiters + self.operators +
-            self.misc + list(set(self.reserved.values())))
+            self.delimiters +
+            self.operators +
+            self.misc +
+            list(set(self.reserved.values())))
         self.build(debug=debug)
 
     def t_NAME(self, t):
