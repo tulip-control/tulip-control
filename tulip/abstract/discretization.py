@@ -708,7 +708,7 @@ def _discretize_bi(
             ax2.axis('scaled')
             file_extension = 'pdf'
         except:
-            logger.error('failed to import matplotlib')
+            logger.error('failed to import `matplotlib`')
             plt = None
     else:
         plt = None
