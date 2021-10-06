@@ -530,13 +530,13 @@ class SubSet(MathSet):
 
         Example
         =======
-        C{new_initial_state} should already be a state.
+        `new_initial_state` should already be a state.
         First use states.add to include it in set of states,
         then states.add_initial.
 
         See Also
         ========
-        L{MathSet.add}
+        `MathSet.add`
         """
         if new_element not in self._superset:
             raise Exception(
