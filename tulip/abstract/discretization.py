@@ -667,8 +667,8 @@ def _discretize_bi(
             elif len(poly) == 1:
                 orig_list.append(poly[0].copy())
             else:
-                raise Exception("discretize: "
-                    "problem in convexification")
+                raise Exception(
+                    'problem in convexification')
         orig = list(range(len(orig_list)))
     # Cheby radius of disturbance set
     # (defined within the loop for pwa systems)
