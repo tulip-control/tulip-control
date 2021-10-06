@@ -391,7 +391,7 @@ try:
             for i in range(queue.qsize()):
                 temp = queue.get()
                 temp1 = queue1.get()
-                if not temp[2] == []:
+                if temp[2]:
                     queue.put(temp)
                     queue1.put(temp1)
             write_case_no(enviroment, system, f, verbosem)
