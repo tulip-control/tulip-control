@@ -684,7 +684,9 @@ def _push_time_data(
             system.time_semantics != time_semantics and
             system.time_semantics is not None)
         if overwriting_time_semantics:
-            warn('Overwriting existing time semantics data.')
+            warn(
+                'Overwriting existing '
+                'time-semantics data.')
         overwriting_timestep_data = (
             system.timestep != timestep and
             system.timestep is not None)
