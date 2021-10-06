@@ -183,7 +183,10 @@ def to_tulip_transys(path):
     initial_state_list = [
         get_ts_state(s)
         for s in in_model.initial_states]
-    ts = MC() if in_model.model_type == stormpy.storage.ModelType.DTMC else MDP()
+    if in_model.model_type == stormpy.storage.ModelType.DTMC:
+        ts = MC()
+    else:
+        ts = MDP()
     ts.states.add_from(state_list)
     ts.states.initial.add_from(initial_state_list)
     # Neglect stormpy internal state labels
