@@ -153,7 +153,11 @@ class PrioritizedSpecification:
 
         @rtype: `list` of `FAWithPriority`
         """
-        return [phi for psi in self._Psi for phi in psi]
+        rules = list()
+        for psi in self._Psi:
+            for phi in psi:
+                rules.append(phi)
+        return rules
 
     def get_states(self):
         """Get the product of the states in all the finite automata."""
