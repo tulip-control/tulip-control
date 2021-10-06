@@ -303,27 +303,20 @@ class AbstractPwa:
         self.disc_params = disc_params
 
     def __str__(self):
-        s = str(self.ppp)
-        s += str(self.ts)
-
-        s += 30 * '-' + '\n'
-
-        s += 'Map PPP Regions ---> TS states:\n'
-        s += self._ppp2other_str(self.ppp2ts) + '\n'
-
-        s += 'Map PPP Regions ---> PWA PPP Regions:\n'
-        s += self._ppp2other_str(self._ppp2pwa) + '\n'
-
-        s += 'Map PPP Regions ---> PWA Subsystems:\n'
-        s += self._ppp2other_str(self._ppp2sys) + '\n'
-
-        s += 'Map PPP Regions ---> Original PPP Regions:\n'
-        s += self._ppp2other_str(self._ppp2orig) + '\n'
-
-        s += 'Discretization Options:\n\t'
-        s += pprint.pformat(self.disc_params) +'\n'
-
-        return s
+        return (
+            str(self.ppp) +
+            str(self.ts) +
+            30 * '-' + '\n'
+            'Map PPP Regions ---> TS states:\n' +
+            self._ppp2other_str(self.ppp2ts) + '\n'
+            'Map PPP Regions ---> PWA PPP Regions:\n' +
+            self._ppp2other_str(self._ppp2pwa) + '\n'
+            'Map PPP Regions ---> PWA Subsystems:\n' +
+            self._ppp2other_str(self._ppp2sys) + '\n'
+            'Map PPP Regions ---> Original PPP Regions:\n' +
+            self._ppp2other_str(self._ppp2orig) + '\n'
+            'Discretization Options:\n\t' +
+            pprint.pformat(self.disc_params) + '\n')
 
     def ts2ppp(self, state):
         region_index = self.ppp2ts.index(state)
