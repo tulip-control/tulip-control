@@ -458,10 +458,10 @@ class FiniteTransitionSystem(LabeledDiGraph):
         """Instantiate finite transition system.
 
         @param env_actions: environment (uncontrolled) actions,
-            defined as C{edge_label_types} in L{LabeledDiGraph.__init__}
+            defined as `edge_label_types` in `LabeledDiGraph.__init__`
 
         @param sys_actions: system (controlled) actions, defined as
-            C{edge_label_types} in L{LabeledDiGraph.__init__}
+            `edge_label_types` in `LabeledDiGraph.__init__`
         """
         self._owner = 'sys'
 
