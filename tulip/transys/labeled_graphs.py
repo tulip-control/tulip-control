@@ -106,7 +106,7 @@ def test_common_bug(value, desired_value):
         raise Exception(msg)
 
 
-class States(object):
+class States:
     """Methods to manage states and initial states."""
 
     def __init__(self, graph):
@@ -400,7 +400,7 @@ class States(object):
         return self.graph.out_degree(state) == 0
 
 
-class Transitions(object):
+class Transitions:
     """Methods for handling labeled transitions.
 
     Note that a directed edge is an ordered set of nodes.

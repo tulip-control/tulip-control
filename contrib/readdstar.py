@@ -84,7 +84,7 @@ except NameError:
     pass
 
 
-class AcceptancePair(object):
+class AcceptancePair:
     def __init__(self, L=None, U=None):
         if L is None:
             self.L = set()

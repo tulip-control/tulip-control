@@ -34,7 +34,7 @@ from itertools import product
 from tulip.transys.automata import FiniteStateAutomaton as FA
 
 
-class FAWithPriority(object):
+class FAWithPriority:
     """A class for defining a rule, represented by a nondeterministic finite automaton,
     with priority"""
 
@@ -60,7 +60,7 @@ class FAWithPriority(object):
         return self._level
 
 
-class PrioritizedSpecification(object):
+class PrioritizedSpecification:
     """A class for defining a prioritized safety specification"""
 
     def __init__(self):

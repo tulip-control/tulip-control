@@ -44,7 +44,7 @@ def setup_module():
     np.random.seed(0)  # Make pseudorandom number sequence repeatable
 
 
-class GridWorld_test(object):
+class GridWorld_test:
     def setup_method(self):
         self.prefix = "testworld"
         self.X = gw.GridWorld(REFERENCE_GWFILE, prefix=self.prefix)
@@ -227,7 +227,7 @@ class GridWorld_test(object):
 
 
 @pytest.mark.slow
-class RandomWorld_test(object):
+class RandomWorld_test:
     def setup_method(self):
         self.wall_densities = [.2, .4, .6]
         self.sizes = [(4,5), (4,5), (10,20)]

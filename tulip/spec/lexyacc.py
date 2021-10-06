@@ -53,7 +53,7 @@ PARSER_LOGGER = 'tulip.ltl_parser_log'
 # TODO: add past fragment of LTL
 
 
-class Lexer(object):
+class Lexer:
     """Token rules to build LTL lexer."""
 
     reserved = {
@@ -171,7 +171,7 @@ class Lexer(object):
             **kwargs)
 
 
-class Parser(object):
+class Parser:
     """Production rules to build LTL parser."""
 
     tabmodule = TABMODULE

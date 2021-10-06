@@ -322,7 +322,7 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
     return ba
 
 
-class RabinPairs(object):
+class RabinPairs:
     """Acceptance pairs for Rabin automaton.
 
     Each pair defines an acceptance condition.

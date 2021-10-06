@@ -49,7 +49,7 @@ except ImportError:
     import Queue as _queue
 
 
-class AutomatonState(object):
+class AutomatonState:
     """AutomatonState class for representing a state in a finite state
     automaton.  An AutomatonState object contains the following
     fields:

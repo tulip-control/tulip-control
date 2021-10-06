@@ -10,7 +10,7 @@ import pytest
 from tulip.spec.form import LTL, GRSpec, replace_dependent_vars
 
 
-class LTL_test(object):
+class LTL_test:
     def setup_method(self):
         self.f = LTL("[](p -> <>q)", input_variables={"p": "boolean"},
                      output_variables={"q": "boolean"})
@@ -62,7 +62,7 @@ def GR1specs_equal(s1, s2):
     return True
 
 
-class GRSpec_test(object):
+class GRSpec_test:
     def setup_method(self):
         self.f = GRSpec(env_vars={"x"}, sys_vars={"y"},
                         env_init=["x"], sys_safety=["y"],

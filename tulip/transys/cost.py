@@ -34,7 +34,7 @@
 from collections.abc import Iterable
 
 
-class ValidTransitionCost(object):
+class ValidTransitionCost:
     """A class for defining valid transition cost."""
 
     def __contains__(self, obj):
@@ -46,7 +46,7 @@ class ValidTransitionCost(object):
             return False
 
 
-class VectorCost(object):
+class VectorCost:
     """A class for defining a vector cost, with addition and comparision operations"""
 
     def __init__(self, value):

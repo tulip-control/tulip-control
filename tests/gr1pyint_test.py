@@ -13,7 +13,7 @@ from tulip.spec import GRSpec, translate
 from tulip.interfaces import gr1py
 
 
-class basic_test(object):
+class basic_test:
     def setup_method(self):
         self.f_un = GRSpec(
             env_vars="x",

@@ -55,7 +55,7 @@ from tulip.spec import translation as ts
 __all__ = ['LTL', 'GRSpec', 'replace_dependent_vars']
 
 
-class LTL(object):
+class LTL:
     """LTL formula (specification).
 
     Minimal class that describes an LTL formula in the canonical TuLiP

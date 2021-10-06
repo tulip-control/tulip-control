@@ -75,7 +75,7 @@ __all__ = [
 
 debug = False
 
-class AbstractSwitched(object):
+class AbstractSwitched:
     """Abstraction of `SwitchedSysDyn`.
 
     This class stores also mode-specific and
@@ -201,7 +201,7 @@ class AbstractSwitched(object):
         #        axs += [ax]
         return axs
 
-class AbstractPwa(object):
+class AbstractPwa:
     """Discrete abstraction of PWA dynamics, with attributes:
 
     - `ppp`: Partition into Regions.

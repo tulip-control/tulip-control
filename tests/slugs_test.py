@@ -42,7 +42,7 @@ def bitfields_to_ints_test():
         assert m == {'a': n}
 
 
-class basic_test(object):
+class basic_test:
     def setup_method(self):
         self.check_realizable = lambda x: slugs.synthesize(x) is not None
         self.synthesize = slugs.synthesize

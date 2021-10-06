@@ -144,7 +144,7 @@ class MarkovChain(KripkeStructure):
 
     probability_label = "probability"
 
-    class ValidProbability(object):
+    class ValidProbability:
         """A class for defining valid transition cost."""
 
         def __contains__(self, obj):

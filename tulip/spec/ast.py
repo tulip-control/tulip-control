@@ -80,7 +80,7 @@ def make_nodes(opmap=None):
     if opmap is None:
         opmap = OPMAP
 
-    class Node(object):
+    class Node:
         """Base class for AST nodes."""
         opmap = None
 
@@ -218,7 +218,7 @@ def make_nodes(opmap=None):
                 self.operands[1].flatten(*arg, **kw),
                 ')'])
 
-    class Nodes(object):
+    class Nodes:
         """AST nodes for a generic grammar."""
 
     nodes = Nodes()

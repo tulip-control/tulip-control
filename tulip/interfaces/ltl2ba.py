@@ -41,7 +41,7 @@ import ply.yacc
 TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
 
 
-class Lexer(object):
+class Lexer:
     """Token rules to build lexer for `ltl2ba` output."""
 
     reserved = {
@@ -109,7 +109,7 @@ class Lexer(object):
         return t
 
 
-class Parser(object):
+class Parser:
     """Production rules to build parser for ltl2ba output."""
 
     precedence = (

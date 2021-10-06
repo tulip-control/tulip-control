@@ -59,8 +59,8 @@ def _indent(s, n):
     w = n*' '
     return w + ('\n'+w).join(s)
 
-class LtiSysDyn(object):
 
+class LtiSysDyn:
     r"""Represents discrete-time continuous-state dynamics.
 
     Specifically, dynamics of the form:
@@ -239,8 +239,8 @@ class LtiSysDyn(object):
 
         return ax
 
-class PwaSysDyn(object):
 
+class PwaSysDyn:
     """Specifies a polytopic piecewise-affine system.
 
     Attributes:
@@ -364,7 +364,8 @@ class PwaSysDyn(object):
                            show_domain=show_domain, **kwargs)
         return ax
 
-class SwitchedSysDyn(object):
+
+class SwitchedSysDyn:
     """Represent hybrid systems switching between dynamic modes.
 
     Represents a system with switching modes
