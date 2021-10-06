@@ -54,7 +54,9 @@ _hl = 40 * '-'
 pure = {'present', 'absent'}
 
 
-def is_valuation(ports, valuations):
+def is_valuation(
+        ports,
+        valuations):
     for name, port_type in ports.items():
         curvaluation = valuations[name]
         # functional set membership description ?

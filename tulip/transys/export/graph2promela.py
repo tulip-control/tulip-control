@@ -63,7 +63,10 @@ def fts2promela(graph, procname=None):
     @param procname: Promela process name (after proctype)
     @type procname: str (default: system name)
     """
-    def state_ap2promela(state, graph, ap_alphabet):
+    def state_ap2promela(
+            state,
+            graph,
+            ap_alphabet):
         ap_label = get_label_of(state, graph)
         s = ''
         for prop in ap_alphabet:
@@ -79,7 +82,10 @@ def fts2promela(graph, procname=None):
         s += '\t\n'
         return s
 
-    def trans2promela(transitions, graph, ap_alphabet):
+    def trans2promela(
+            transitions,
+            graph,
+            ap_alphabet):
         s = '\t if\n'
         for (from_state, to_state, sublabels_dict) in transitions:
             s += '\t :: atomic{\n'

@@ -255,7 +255,9 @@ def _place_initial_states(trs_graph, pd_graph, tikz):
     pd_graph.subgraph(init_subg)
 
 
-def _add_incoming_edge(g, state):
+def _add_incoming_edge(
+        g,
+        state):
     phantom_node = 'phantominit' + str(state)
     g.add_node(phantom_node, label='""', shape='none', width='0')
     g.add_edge(phantom_node, state)

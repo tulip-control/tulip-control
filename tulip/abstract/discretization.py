@@ -443,7 +443,11 @@ class AbstractPwa:
             else:
                 logger.info('correct transition: ' + msg)
 
-def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
+def _plot_abstraction(
+        ab,
+        show_ts,
+        only_adjacent,
+        color_seed):
     if ab.ppp is None or ab.ts is None:
         warnings.warn('Either ppp or ts is None.')
         return
@@ -465,14 +469,21 @@ def _plot_abstraction(ab, show_ts, only_adjacent, color_seed):
     return ax
 
 def discretize(
-    part, ssys, N=10, min_cell_volume=0.1,
-    closed_loop=True, conservative=False,
-    max_num_poly=5, use_all_horizon=False,
-    trans_length=1, remove_trans=False,
-    abs_tol=1e-7,
-    plotit=False, save_img=False, cont_props=None,
-    plot_every=1, simu_type='bi'
-):
+        part, ssys,
+        N=10,
+        min_cell_volume=0.1,
+        closed_loop=True,
+        conservative=False,
+        max_num_poly=5,
+        use_all_horizon=False,
+        trans_length=1,
+        remove_trans=False,
+        abs_tol=1e-7,
+        plotit=False,
+        save_img=False,
+        cont_props=None,
+        plot_every=1,
+        simu_type='bi'):
     """Refine the partition via bisimulation or dual-simulation.
 
     Refines the partition via either:
@@ -564,14 +575,20 @@ def discretize(
     return AbstractPwa
 
 def _discretize_bi(
-    part, ssys, N=10, min_cell_volume=0.1,
-    closed_loop=True, conservative=False,
-    max_num_poly=5, use_all_horizon=False,
-    trans_length=1, remove_trans=False,
-    abs_tol=1e-7,
-    plotit=False, save_img=False, cont_props=None,
-    plot_every=1
-):
+        part, ssys,
+        N=10,
+        min_cell_volume=0.1,
+        closed_loop=True,
+        conservative=False,
+        max_num_poly=5,
+        use_all_horizon=False,
+        trans_length=1,
+        remove_trans=False,
+        abs_tol=1e-7,
+        plotit=False,
+        save_img=False,
+        cont_props=None,
+        plot_every=1):
     """Refine partition, based on reachability analysis.
 
     Refines the partition, and establishes transitions
@@ -1033,14 +1050,20 @@ def _discretize_bi(
     )
 
 def _discretize_dual(
-    part, ssys, N=10, min_cell_volume=0.1,
-    closed_loop=True, conservative=False,
-    max_num_poly=5, use_all_horizon=False,
-    trans_length=1, remove_trans=False,
-    abs_tol=1e-7,
-    plotit=False, save_img=False, cont_props=None,
-    plot_every=1
-):
+        part, ssys,
+        N=10,
+        min_cell_volume=0.1,
+        closed_loop=True,
+        conservative=False,
+        max_num_poly=5,
+        use_all_horizon=False,
+        trans_length=1,
+        remove_trans=False,
+        abs_tol=1e-7,
+        plotit=False,
+        save_img=False,
+        cont_props=None,
+        plot_every=1):
     """Refine partition, based on reachability analysis.
 
     Refines the partition, and establishes transitions
@@ -1468,7 +1491,9 @@ def sym_adj_change(IJ, adj_k, transitions, i):
     IJ[:, i] = vertical.astype(int)
 
 # DEFUNCT until further notice
-def discretize_overlap(closed_loop=False, conservative=False):
+def discretize_overlap(
+        closed_loop=False,
+        conservative=False):
     """default False.
 
     UNDER DEVELOPMENT; function signature may change without notice.
@@ -1549,7 +1574,9 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #                    original_regions=orig_list, orig=orig)
 #     return new_part
 
-def multiproc_discretize(q, mode, ppp, cont_dyn, disc_params):
+def multiproc_discretize(
+        q, mode, ppp,
+        cont_dyn, disc_params):
     global logger
     logger = mp.log_to_stderr()
 
@@ -1576,9 +1603,11 @@ def multiproc_get_transitions(
     print('Worker: ' + str(name) + 'finished.')
 
 def multiproc_discretize_switched(
-    ppp, hybrid_sys, disc_params=None,
-    plot=False, show_ts=False, only_adjacent=True
-):
+        ppp, hybrid_sys,
+        disc_params=None,
+        plot=False,
+        show_ts=False,
+        only_adjacent=True):
     """Parallel implementation of `discretize_switched`.
 
     Uses the multiprocessing package.
@@ -1643,9 +1672,11 @@ def multiproc_discretize_switched(
     return merged_abstr
 
 def discretize_switched(
-    ppp, hybrid_sys, disc_params=None,
-    plot=False, show_ts=False, only_adjacent=True
-):
+        ppp, hybrid_sys,
+        disc_params=None,
+        plot=False,
+        show_ts=False,
+        only_adjacent=True):
     """Abstract switched dynamics over given partition.
 
     @type ppp: `PropPreservingPartition`
@@ -1749,7 +1780,9 @@ def plot_annot(ax):
     ax.set_xlabel('$v_1$', fontsize=fontsize+6)
     ax.set_ylabel('$v_2$', fontsize=fontsize+6)
 
-def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
+def merge_abstractions(
+        merged_abstr, trans,
+        abstr, modes, mode_nums):
     """Construct merged transitions.
 
     @type merged_abstr: `AbstractSwitched`
@@ -1815,10 +1848,10 @@ def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     merged_abstr.ppp2ts = ppp2ts
 
 def get_transitions(
-    abstract_sys, mode, ssys, N=10,
-    closed_loop=True,
-    trans_length=1
-):
+        abstract_sys, mode, ssys,
+        N=10,
+        closed_loop=True,
+        trans_length=1):
     """Find which transitions are feasible in given mode.
 
     Used for the candidate transitions of the merged partition.
@@ -2002,10 +2035,9 @@ def merge_partitions(abstractions):
     return (abstraction, ap_labeling)
 
 def merge_partition_pair(
-    old_regions, ab2,
-    cur_mode, prev_modes,
-    old_parents, old_ap_labeling
-):
+        old_regions, ab2,
+        cur_mode, prev_modes,
+        old_parents, old_ap_labeling):
     """Merge an Abstraction with the current partition iterate.
 
     @param old_regions: A `list` of `Region` that is from either:

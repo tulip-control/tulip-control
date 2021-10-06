@@ -349,7 +349,11 @@ def to_prism_file(ts, path):
             f.write('label "{}" = {};\n'.format(label, state_str))
 
 
-def model_checking(tulip_transys, formula, prism_file_path, extract_policy=False):
+def model_checking(
+        tulip_transys,
+        formula,
+        prism_file_path,
+        extract_policy=False):
     """Model check tulip_transys against formula
 
     @type tulip_transys: either a MarkovChain or MarkovDecisionProcess object.
@@ -427,13 +431,12 @@ def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
 
 
 def _update_possible_actions_with_transitions(
-    possible_actions,
-    stormpy_model,
-    tulip_transys,
-    from_state_tulip,
-    stormpy_transitions,
-    prob_tol=1e-6,
-):
+        possible_actions,
+        stormpy_model,
+        tulip_transys,
+        from_state_tulip,
+        stormpy_transitions,
+        prob_tol=1e-6):
     """Return a subset of possible_actions from from_state_tulip
     such that the probability of transition to each state matches stormpy_transitions
     with the given prob_tol

@@ -666,8 +666,10 @@ def _check_time_data(semantics, timestep):
             raise TypeError(error_string)
 
 
-
-def _check_time_consistency(system_list, time_semantics, timestep):
+def _check_time_consistency(
+        system_list,
+        time_semantics,
+        timestep):
     """Checks that all the dynamical systems in system_list have the same time
     semantics and timestep. Raises ValueError if not the case.
 

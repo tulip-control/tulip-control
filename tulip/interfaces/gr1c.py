@@ -726,10 +726,14 @@ class GR1CSession:
         emove_vector = list(range(len(env_move)))
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
-        self.p.stdin.write("sysnexta "+" ".join(
-            [str(i) for i in state_vector]
-        )+" "+" ".join(
-            [str(i) for i in emove_vector])+"\n"
+        self.p.stdin.write(
+            "sysnexta " +
+            " ".join(
+                [str(i) for i in state_vector]) +
+            " " +
+            " ".join(
+                [str(i) for i in emove_vector]) +
+            "\n"
         )
         sys_moves = []
         line = self.p.stdout.readline()

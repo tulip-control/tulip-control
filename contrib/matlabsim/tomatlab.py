@@ -10,8 +10,14 @@ from tulip import hybrid
 
 
 def export(
-        filename, mealy_machine, system_dynamics=None, abstraction=None,
-        disc_params=None, R=None, r=None, Q=None, mid_weight=None):
+        filename, mealy_machine,
+        system_dynamics=None,
+        abstraction=None,
+        disc_params=None,
+        R=None,
+        r=None,
+        Q=None,
+        mid_weight=None):
     """Creates two matlab files.
 
     One is a script that generates a Simulink model

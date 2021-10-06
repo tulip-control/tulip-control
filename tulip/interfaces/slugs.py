@@ -148,7 +148,11 @@ def _bitfields_to_ints(bit_state, vrs):
     return int_state
 
 
-def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
+def _call_slugs(
+        filename,
+        synth=True,
+        symbolic=True,
+        slugs_compiler_path=None):
     """Call `slugs` and return results.
 
     `slugs_compiler_path` is the path to
