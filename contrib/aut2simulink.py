@@ -84,8 +84,12 @@ def question(string):
         the RETURN button.)
     """
     default='yes'
-    valid = {"yes":True,   "y":True,  "ye":True,
-             "no":False,     "n":False}
+    valid = dict(
+        yes=True,
+        y=True,
+        ye=True,
+        no=False,
+        n=False)
     prompt = ' [Y/n] '
     while True:
         print(string)
