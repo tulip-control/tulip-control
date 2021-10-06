@@ -431,13 +431,20 @@ def _update_possible_actions_with_transitions(
             stormpy_model.states[stormpy_transition.column],
             tulip_transys)
         probability = stormpy_transition.value()
-        for tulip_transition in tulip_transys.transitions.find(
-            from_state_tulip, [to_state_tulip]
-        ):
-            if abs(tulip_transition[2][MC.probability_label] - probability) > prob_tol:
-                try:
-                    idx = possible_actions.index(
-                        tulip_transition[2][MDP.action_label])
-                    possible_actions.pop(idx)
-                except ValueError:
-                    pass
+        transitions = tulip_transys.transitions.find(
+            from_state_tulip,
+            [to_state_tulip])
+        for tulip_transition in transitions:
+            prob = abs(
+                tulip_transition[2][
+                    MC.probability_label] -
+                probability)
+            pred = prob > prob_tol
+            if not pred:
+                continue
+            try:
+                idx = possible_actions.index(
+                    tulip_transition[2][MDP.action_label])
+                possible_actions.pop(idx)
+            except ValueError:
+                pass
