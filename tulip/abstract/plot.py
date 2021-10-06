@@ -36,12 +36,14 @@ from __future__ import division
 import logging
 logger = logging.getLogger(__name__)
 
-import numpy as np
-from scipy import sparse as sp
 import networkx as nx
-import polytope as pc
-from polytope.plot import plot_partition, plot_transition_arrow
+import numpy as np
+import scipy.sparse as sp
 
+import polytope as pc
+from polytope.plot import (
+    plot_partition,
+    plot_transition_arrow)
 from tulip.abstract import find_controller
 # inline imports:
 #
