@@ -1640,7 +1640,7 @@ def multiproc_discretize_switched(
 
     Uses the multiprocessing package.
     """
-    logger.info('parallel discretize_switched started')
+    logger.info('parallel `discretize_switched` started')
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
     q = mp.Queue()

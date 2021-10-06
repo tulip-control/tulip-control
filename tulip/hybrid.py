@@ -622,7 +622,7 @@ class SwitchedSysDyn:
     def modes(self):
         if self.dynamics is None:
             warn(
-                'No dynamics defined (None).')
+                'No dynamics defined (`None`).')
             return None
         return self.dynamics.keys()
 
