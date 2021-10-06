@@ -33,7 +33,6 @@
 """Classes representing hybrid dynamical systems."""
 from __future__ import absolute_import
 import logging
-logger = logging.getLogger(__name__)
 from warnings import warn
 import itertools
 from pprint import pformat
@@ -49,6 +48,7 @@ __all__ = [
     'LtiSysDyn',
     'PwaSysDyn',
     'SwitchedSysDyn']
+logger = logging.getLogger(__name__)
 
 
 def _indent(s, n):

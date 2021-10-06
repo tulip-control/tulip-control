@@ -31,7 +31,6 @@
 # SUCH DAMAGE.
 """Interface to `ltl2ba`."""
 import logging
-logger = logging.getLogger(__name__)
 import subprocess
 
 import networkx as nx
@@ -40,6 +39,7 @@ import ply.yacc
 
 
 TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
+logger = logging.getLogger(__name__)
 
 
 class Lexer:
