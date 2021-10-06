@@ -380,7 +380,8 @@ def load_aut_json(x):
     except TypeError:
         autjs = json.load(x)
     if autjs['version'] != 1:
-        raise ValueError('Only gr1c JSON format version 1 is supported.')
+        raise ValueError(
+            'Only `gr1c` JSON format version 1 is supported.')
     # convert to nx
     A = nx.DiGraph()
     symtab = autjs['ENV'] + autjs['SYS']
@@ -490,7 +491,8 @@ def synthesize(spec):
             universal_newlines=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
-            raise Exception('gr1c not found in path.')
+            raise Exception(
+                '`gr1c` not found in path.')
         else:
             raise
     s = translate(spec, 'gr1c')

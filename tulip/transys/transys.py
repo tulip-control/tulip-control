@@ -571,7 +571,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
     @owner.setter
     def owner(self, x):
         if x not in {'env', 'sys'}:
-            raise ValueError("The owner can be either 'sys' or 'env'.")
+            raise ValueError(
+                "The owner can be either `'sys'` or `'env'`.")
         self._owner = x
 
     def _save(self, path, fileformat):
@@ -653,8 +654,9 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
         if state_labeling is None:
             return
         if not isinstance(state_labeling, Iterable):
-            raise TypeError('State labeling function: L->2^AP must be '
-                            'defined using an Iterable.')
+            raise TypeError(
+                'The state-labeling function: `L -> 2^AP` must be '
+                'defined using an `Iterable`.')
         state_label_pairs = True
         # cannot be caught by try below
         if isinstance(state_labeling[0], str):
@@ -667,13 +669,17 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
             state_label_pairs = False
         if state_label_pairs:
             return state_labeling
-        logger.debug('State labeling L not tuples (state, ap_label),\n'
-                     'zipping with states S...\n')
+        logger.debug(
+            'State labeling `L` not tuples '
+            '`(state, ap_label)`,\n'
+            'zipping with states `S`...\n')
         state_labeling = zip(states, state_labeling)
         return state_labeling
     # args
     if not isinstance(S, Iterable):
-        raise TypeError('States S must be iterable, even for single state.')
+        raise TypeError(
+            'States `S` must be iterable, '
+            'even for single state.')
     # convention
     if not isinstance(S0, Iterable) or isinstance(S0, str):
         S0 = [S0]
