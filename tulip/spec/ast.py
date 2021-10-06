@@ -50,7 +50,6 @@ OPMAP = {
     '+': '+', '-': '-', '*': '*', '/': '/',
     '<<>>': '<<>>'  # arithmetic
 }
-
 # this mapping is based on SPIN documentation:
 #   http://spinroot.com/spin/Man/ltl.html
 FULL_OPERATOR_NAMES = {
@@ -79,7 +78,6 @@ def make_nodes(opmap=None):
     """
     if opmap is None:
         opmap = OPMAP
-
     class Node:
         """Base class for AST nodes."""
         opmap = None
@@ -92,7 +90,6 @@ def make_nodes(opmap=None):
 
         def flatten(self):
             pass
-
     Node.opmap = opmap
 
     # Do not confuse "term" with the abbreviation of "terminal".

@@ -83,10 +83,8 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         state2 = other.states._int2mutant(idx2)
         prod_state = (state1, state2)
         return prod_state
-
     def label_union(nx_label):
         (v1, v2) = nx_label
-
         if v1 is None or v2 is None:
             raise Exception(
                 'At least one factor has unlabeled state, '
@@ -101,22 +99,18 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
             raise TypeError(
                 'The state sublabel types should support ' +
                 'either | or + for labeled system products.')
-
     def state_label_union(attr_dict):
         prod_attr_dict = dict()
         for k, v in attr_dict.items():
             prod_attr_dict[k] = label_union(v)
         return prod_attr_dict
-
     # union of state labels from the networkx tuples
     for prod_state_id, attr_dict in prod_graph.nodes(data=True):
         prod_attr_dict = state_label_union(attr_dict)
         prod_state = prod_ids2states(prod_state_id, self, other)
-
         prod_sys.states.add(prod_state)
         prod_sys.states.add(prod_state, **prod_attr_dict)
     print(prod_sys.states)
-
     # prod of initial states
     inits1 = self.states.initial
     inits2 = other.states.initial
@@ -126,7 +120,6 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
         new_init = (init1, init2)
         prod_init.append(new_init)
     prod_sys.states.initial |= prod_init
-
     # # multiply mutable states (only the reachable added)
     # if self.states.mutants or other.states.mutants:
     #     for idx, prod_state_id in prod_graph.nodes():
@@ -139,10 +132,8 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     # action labeling is taken care by nx,
     # since transition taken at a time
     for from_state_id, to_state_id, edge_dict in prod_graph.edges(data=True):
-
         from_state = prod_ids2states(from_state_id, self, other)
         to_state = prod_ids2states(to_state_id, self, other)
-
         prod_sys.transitions.add(
             from_state, to_state, **edge_dict)
     return prod_sys

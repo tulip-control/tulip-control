@@ -33,7 +33,6 @@
 # there exists: https://github.com/mikedewar/d3py,
 # but it is not sufficiently developed yet,
 # so here the wheel is partially re-invented
-
 import os
 import inspect
 
@@ -47,11 +46,9 @@ def _format_label(label_def, label_dot_format):
         shown_name = label_dot_format[sublabel_name]
         kv_sep = label_dot_format['type?label']
         sep = label_dot_format['separator']
-
         s += '"' +shown_name +kv_sep +'" '
         s += '+d.' +str(sublabel_name) +'+"' +sep+'" +'
     s += '" ";'
-
     return s
 
 
@@ -83,11 +80,9 @@ def labeled_digraph2d3(
     """
     file_path = inspect.getfile(inspect.currentframe())
     dir_path = os.path.dirname(os.path.abspath(file_path) )
-
     d3_file_name = os.path.join(dir_path, 'd3.v3.min.js')
     d3_file = open(d3_file_name)
     d3_js = d3_file.read()
-
     s = """
     <!DOCTYPE html>
     <meta charset="utf-8">
@@ -112,11 +107,9 @@ def labeled_digraph2d3(
 
     <script>
     """
-
     # embed d3.js to create single .html,
     # instead of bunch of files
     s += d3_js
-
     s += """
     </script>
     <body>
@@ -149,7 +142,6 @@ def labeled_digraph2d3(
         .attr('class', 'end-arrow');
 
     var graph = """
-
     # embed to avoid browser local file-loading restrictions
     try:
         s += json_graph.dumps(graph)
@@ -158,9 +150,7 @@ def labeled_digraph2d3(
         import json
         data = json_graph.node_link_data(graph)
         s += json.dumps(data, default=lambda x: str(x) )
-
     s += ';'
-
     s += """
     function draw(graph){
       force
@@ -179,7 +169,6 @@ def labeled_digraph2d3(
       link.append("title")
           .text(function(d) {
           	return """
-
     # edge labels (shown when mouse on edge)
     if (
             hasattr(graph, '_transition_label_def') and
@@ -189,9 +178,7 @@ def labeled_digraph2d3(
         s += _format_label(transition_label_def, transition_label_format)
     else:
         s += '" ";'
-
     s += """});
-
       var node = svg.selectAll(".node")
           .data(graph.nodes)
        .enter().append("g")
@@ -211,7 +198,6 @@ def labeled_digraph2d3(
       node.append("title")
           .style("fill", "gray")
           .text(function(d) { return """
-
     # edge labels (shown when mouse on edge)
     if (
             hasattr(graph, '_state_label_def') and
@@ -221,7 +207,6 @@ def labeled_digraph2d3(
         s += _format_label(state_label_def, state_label_format)
     else:
         s += '" ";'
-
     s += """});
 
       force.on("tick", function() {
@@ -250,7 +235,6 @@ def labeled_digraph2d3(
     </script>
     </body>
     """
-
     html_file = open(html_file_name, 'w')
     html_file.write(s)
     return True

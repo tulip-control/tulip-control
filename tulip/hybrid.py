@@ -34,10 +34,8 @@
 Classes representing hybrid dynamical systems.
 """
 from __future__ import absolute_import
-
 import logging
 logger = logging.getLogger(__name__)
-
 from warnings import warn
 import itertools
 from pprint import pformat
@@ -186,7 +184,6 @@ class LtiSysDyn:
 
         self.A = A
         self.B = B
-
         if K is None:
             if len(A) != 0:
                 self.K = np.zeros([mA, 1])
@@ -201,15 +198,12 @@ class LtiSysDyn:
         else:
             self.E = E
             self.Wset = Wset
-
         self.Uset = Uset
         self.domain = domain
-
         # Check that timestep and semantics are valid.
         _check_time_data(time_semantics, timestep)
         self.time_semantics = time_semantics
         self.timestep = timestep
-
 
     def __str__(self):
         n = 3
@@ -239,15 +233,11 @@ class LtiSysDyn:
         n = self.A.shape[0]
         DA = self.A - np.eye(n)
         v = DA.dot(x) + self.K
-
         if ax is None:
             ax, fig = newax()
-
         if show_domain:
             self.domain.plot(ax, color)
-
         quiver(x, v, ax, **kwargs)
-
         return ax
 
 
@@ -304,7 +294,6 @@ class PwaSysDyn:
             consistent with `time_semantics` and
             `timestep`.
         """
-
         if domain is None:
             warn("Domain not given to PwaSysDyn()")
 
@@ -333,10 +322,8 @@ class PwaSysDyn:
                 if pc.is_fulldim(x[0].domain.intersect(x[1].domain) ):
                     raise Exception("PwaSysDyn: subdomains have to be mutually"+
                         " exclusive")
-
         self.list_subsys = list_subsys
         self.domain = domain
-
         # Input time semantics
         _check_time_data(time_semantics, timestep)
         if overwrite_time:
@@ -346,14 +333,11 @@ class PwaSysDyn:
         self.timestep = timestep
         self.time_semantics = time_semantics
 
-
     def __str__(self):
         s = 'Piecewise-Affine System Dynamics\n'
         s += 30 * '-' + 2*'\n'
-
         s += 3*' ' + 'Domain:\n\n'
         s += _indent(str(self.domain), n=6) + '\n'
-
         for i, sys in enumerate(self.list_subsys):
             s += 3*' ' + 'Subsystem: ' + str(i) +'\n'
             s += _indent(str(sys), n=6)
@@ -382,10 +366,8 @@ class PwaSysDyn:
         except:
             logger.error('failed to import graphics')
             return
-
         if ax is None:
             ax, fig = newax()
-
         for subsystem in self.list_subsys:
             subsystem.plot(ax, color=np.random.rand(3),
                            show_domain=show_domain, **kwargs)
@@ -483,14 +465,11 @@ class SwitchedSysDyn:
             if not isinstance(cts_ss, (pc.Polytope, pc.Region) ):
                 raise Exception('SwitchedSysDyn: ' +
                    '`cts_ss` must be a Polytope or Region')
-
         self.disc_domain_size = disc_domain_size
-
         # If label numbers agree with
         # `disc_domain_size`, then use them.
         # Otherwise, ignore the labels.
         n_env, n_sys = disc_domain_size
-
         self._env_labels = self._check_labels(n_env, env_labels)
         self._disc_sys_labels = self._check_labels(n_sys, disc_sys_labels)
         # Check that each dynamics key is a valid mode,
@@ -498,17 +477,13 @@ class SwitchedSysDyn:
         # environment and system labels.
         if dynamics is not None:
             modes = self.all_mode_combs
-
             undefined_modes = set(dynamics.keys()).difference(modes)
-
             if undefined_modes:
                 msg = 'SwitchedSysDyn: `dynamics` keys inconsistent'
                 msg += ' with discrete mode labels.\n'
                 msg += 'Undefined modes:\n' + str(undefined_modes)
                 raise ValueError(msg)
-
             missing_modes = set(modes).difference(dynamics.keys())
-
             if missing_modes:
                 msg = 'Missing the modes:\n' + str(missing_modes)
                 msg += '\n Make sure you did not forget any modes,\n'
@@ -520,10 +495,8 @@ class SwitchedSysDyn:
                 msg = 'For each mode dynamics must be PwaSysDyn.\n'
                 msg += 'Got instead: ' +str(type(sys))
                 raise Exception(msg)
-
         self.dynamics = dynamics
         self.cts_ss = cts_ss
-
         _check_time_data(time_semantics, timestep)
         if overwrite_time:
             _push_time_data(self.dynamics.values(), time_semantics, timestep)
@@ -566,7 +539,6 @@ class SwitchedSysDyn:
                 msg += 'Ignoring given environment labels.\n'
                 msg += 'Defaulting to integer labels.'
                 warn(msg)
-
                 return None
         except:
             warn('Environment labels of type: ' +
@@ -580,7 +552,6 @@ class SwitchedSysDyn:
         """
         modes = [(a,b) for a in self.env_labels
                            for b in self.disc_sys_labels]
-
         logger.debug('Available modes: ' + str(modes) )
         return modes
 
@@ -650,11 +621,9 @@ def _check_time_data(semantics, timestep):
 
     @rtype: None
     """
-
     if semantics not in ['sampled', 'discrete', None]:
         raise ValueError('Time semantics must be discrete or ' +
             'sampled (sampled from continuous time system).')
-
     if ((semantics == 'discrete') and (timestep is not None)):
         raise ValueError('Discrete semantics must not have a timestep')
 
@@ -679,20 +648,15 @@ def _check_time_consistency(
 
     # Check that time semantics for all subsystems match
     for ind in range(len(system_list)-1):
-
         if system_list[ind].timestep != system_list[ind+1].timestep:
             raise ValueError('Not all timesteps in child systems are the same.')
-
         if system_list[ind].time_semantics != system_list[ind+1].time_semantics:
             raise ValueError('Not all time semantics are the same.')
-
-
     # Check that time semantics for all subsystems
     # match specified system and timestep
     if system_list[0].timestep != timestep:
         raise ValueError('Timestep of subsystems do not match specified ' +
                          'timestep.')
-
     if system_list[0].time_semantics != time_semantics:
         raise ValueError('Time semantics of subsystems do not match ' +
                          'specified time semantics.')

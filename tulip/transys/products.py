@@ -109,9 +109,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         """Add the successors of (s, q) to the state space.
 
         @param s: TS state
-
         @param q: BA state
-
         @return: those successors that are new states
         """
         sq = (s, q)

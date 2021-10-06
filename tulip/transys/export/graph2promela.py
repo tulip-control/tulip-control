@@ -33,7 +33,6 @@
 Convert state graphs to promela
 """
 from __future__ import print_function
-
 from time import strftime
 
 def fts2promela(graph, procname=None):
@@ -72,7 +71,6 @@ def fts2promela(graph, procname=None):
         for prop in ap_alphabet:
             if prop is True:
                 continue
-
             if prop in ap_label:
                 s += '\t\t ' +str(prop) +' = 1;\n'
             else:
@@ -95,17 +93,14 @@ def fts2promela(graph, procname=None):
             s += '\t }\n'
         s += '\t fi;\n\n'
         return s
-
     def get_label_of(state, graph):
         state_label_pairs = graph.states.find([state] )
         (state_, ap_label) = state_label_pairs[0]
         print('state:\t' +str(state) )
         print('ap label:\t' +str(ap_label) )
         return ap_label['ap']
-
     if procname is None:
         procname = graph.name
-
     s = '/*\n * Promela file generated with TuLiP\n'
     s += ' * Date: '+str(strftime('%x %X %z') ) +'\n */\n\n'
     for ap in graph.atomic_propositions:
@@ -119,17 +114,14 @@ def fts2promela(graph, procname=None):
     for initial_state in graph.states.initial:
         s += '\t :: goto ' +str(initial_state) +'\n'
     s += '\t fi;\n'
-
     ap_alphabet = graph.atomic_propositions
     for state in graph.states():
         out_transitions = graph.transitions.find(
             {state}, as_dict=True
         )
-
         s += str(state).replace(' ', '_') +':'
         s += trans2promela(out_transitions, graph,
                            ap_alphabet)
-
     s += '}\n'
     return s
 

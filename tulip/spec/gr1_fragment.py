@@ -115,7 +115,6 @@ def check(formula):
 
     # plot parse tree
     sast.dump_dot(ast, 'ast.dot')
-
     # sync product of AST with DFA,
     # to check acceptance
     Q = [(ast, 'gf')]
@@ -365,10 +364,8 @@ def response_to_gr1(p, q, aux='aux'):
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
-
     s = p + ' -> <> ' + q
     v = tx.check_var_name_conflict(s, a0)
-
     sys_vars = v | {a0}
     # sys_init = {a}
     sys_safe = {
@@ -463,7 +460,6 @@ def _paren(x):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-
     s = '(a U b) && []a && <>a && <>a && []<>(<>z)'
     parsed_formula = check(s)
 

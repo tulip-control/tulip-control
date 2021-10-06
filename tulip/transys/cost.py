@@ -30,7 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Cost Module for state or transition cost/weight"""
-
 from collections.abc import Iterable
 
 

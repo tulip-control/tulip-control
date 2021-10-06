@@ -50,11 +50,9 @@ def dijkstra_single_source_multiple_targets(
     @return (cost, path) where path is a list representing the optimal path
         and cost is the sum of the edge costs on this path.
     """
-
     dist = {source: 0}
     visited = set()
     Q = [(0, source, [])]
-
     while Q:
         (cost, u, path) = heappop(Q)
         if u in visited:
@@ -64,7 +62,6 @@ def dijkstra_single_source_multiple_targets(
         path_to_u.append(u)
         if u in target_set:
             return (cost, path_to_u)
-
         for transition in graph.transitions.find(u):
             v = transition[1]
             if v in visited:
@@ -74,7 +71,6 @@ def dijkstra_single_source_multiple_targets(
             if not current_cost or new_cost < current_cost:
                 dist[v] = new_cost
                 heappush(Q, (new_cost, v, path_to_u))
-
     return (float("inf"), ())
 
 
@@ -93,7 +89,6 @@ def dijkstra_multiple_sources_multiple_targets(
     @return (cost, path) where path is a list representing the optimal path
         and cost is the sum of the edge costs on this path.
     """
-
     best_cost = float("inf")
     best_path = []
     for source in source_set:

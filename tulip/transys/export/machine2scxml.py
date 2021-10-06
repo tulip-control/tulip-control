@@ -60,12 +60,10 @@ def mealy2scxml(mealy):
     """
     def indent(n):
         return '\n' +n*'\t'
-
     def transitions_str(from_state, mealy):
         s = ''
         trans = mealy.transitions.find([from_state] )
         n = 2
-
         for (from_state_, to_state, sublabel_dict) in trans:
             s += indent(n) +'<transition '
             n = n +1
@@ -75,11 +73,9 @@ def mealy2scxml(mealy):
             n = n -1
             s += indent(n) +'</transition>'
         return s
-
     s = '<?xml version="1.0" encoding="UTF-8"?>\n'
     s += '<scxml xmlns="http://www.w3.org/2005/07/scxml" '
     s += ' version="1.0" '
-
     if len(mealy.states.initial) != 1:
         msg = 'Must have exactly 1 initial state.\n'
         msg += 'Got instead:\n\t' +str(mealy.states.initial() )

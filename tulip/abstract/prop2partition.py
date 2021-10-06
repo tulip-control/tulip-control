@@ -142,7 +142,6 @@ def prop2part(state_space, cont_props_dict):
     )
 
     mypartition.adj = pc.find_adjacent_regions(mypartition).copy()
-
     return mypartition
 
 def part2convex(ppp):
@@ -175,9 +174,7 @@ def part2convex(ppp):
             )
             cvxpart.regions.append(region_now)
             new2old += [i]
-
     cvxpart.adj = pc.find_adjacent_regions(cvxpart).copy()
-
     return (cvxpart, new2old)
 
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
@@ -217,7 +214,6 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
         raise Exception('pwa system is not defined everywhere ' +
                         'in state space')
-
     # for each subsystem's domain, cut it into pieces
     # each piece is the intersection with
     # a unique Region in ppp.regions
@@ -227,31 +223,23 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     for i, subsys in enumerate(pwa_sys.list_subsys):
         for j, region in enumerate(ppp.regions):
             isect = region.intersect(subsys.domain)
-
             if pc.is_fulldim(isect):
                 rc, xc = pc.cheby_ball(isect)
-
                 if rc < abs_tol:
                     msg = 'One of the regions in the refined PPP is '
                     msg += 'too small, this may cause numerical problems'
                     warnings.warn(msg)
-
                 # not Region yet, but Polytope ?
                 if len(isect) == 0:
                     isect = pc.Region([isect])
-
                 # label with AP
                 isect.props = region.props.copy()
-
                 # store new Region
                 new_list.append(isect)
-
                 # keep track of original Region in ppp.regions
                 parents.append(j)
-
                 # index of subsystem active within isect
                 subsys_list.append(i)
-
     # compute spatial adjacency matrix
     n = len(new_list)
     adj = sp.lil_matrix((n, n), dtype=np.int8)
@@ -259,13 +247,11 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         pi = parents[i]
         for j, rj in enumerate(new_list[0:i]):
             pj = parents[j]
-
             if (ppp.adj[pi, pj] == 1) or (pi == pj):
                 if pc.is_adjacent(ri, rj):
                     adj[i, j] = 1
                     adj[j, i] = 1
         adj[i, i] = 1
-
     new_ppp = PropPreservingPartition(
         domain = ppp.domain,
         regions = new_list,
@@ -309,7 +295,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         raise Exception(
             "add_grid: At least one of the grid size or number of "
             "grid points parameters must be given.")
-
     dim=len(ppp.domain.A[0])
     domain_bb = ppp.domain.bounding_box
     size_list=list()
@@ -351,10 +336,8 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         else:
             raise Exception("add_grid: "
                 "num_grid_pnts isn't given in a correct format.")
-
     j=0
     list_grid=dict()
-
     while j<dim:
         list_grid[j] = compute_interval(
             float(domain_bb[0][j]),
@@ -369,7 +352,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             else:
                 re_list=product_interval(re_list, list_grid[j])
         j+=1
-
     new_list = []
     parent = []
     for i in range(len(re_list)):
@@ -381,7 +363,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         for j in range(len(ppp.regions)):
             tmp = pc.box2poly(temp_list)
             isect = tmp.intersect(ppp.regions[j], abs_tol)
-
             #if pc.is_fulldim(isect):
             rc, xc = pc.cheby_ball(isect)
             if rc > abs_tol / 2:
@@ -394,7 +375,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 isect.props = ppp.regions[j].props.copy()
                 new_list.append(isect)
                 parent.append(j)
-
     adj = sp.lil_matrix((len(new_list), len(new_list)), dtype=np.int8)
     for i in range(len(new_list)):
         adj[i,i] = 1
@@ -404,7 +384,6 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
                 if pc.is_adjacent(new_list[i], new_list[j]):
                     adj[i,j] = 1
                     adj[j,i] = 1
-
     return PropPreservingPartition(
         domain = ppp.domain,
         regions = new_list,
@@ -472,7 +451,6 @@ class PropPreservingPartition(pc.MetricPartition):
         adj=None, prop_regions=None, check=True
     ):
         #super(PropPreservingPartition, self).__init__(adj)
-
         if prop_regions is None:
             self.prop_regions = None
         else:
@@ -485,11 +463,8 @@ class PropPreservingPartition(pc.MetricPartition):
                 msg = 'prop_regions must be dict.'
                 msg += 'Got instead: ' + str(type(prop_regions))
                 raise TypeError(msg)
-
             self.prop_regions = copy.deepcopy(prop_regions)
-
         n = len(regions)
-
         if hasattr(adj, 'shape'):
             (m, k) = adj.shape
             if m != k:
@@ -497,9 +472,7 @@ class PropPreservingPartition(pc.MetricPartition):
             if m != n:
                 msg = "adj size doesn't agree with number of regions"
                 raise ValueError(msg)
-
         self.regions = regions[:]
-
         if check:
             for region in regions:
                 if not region <= domain:
@@ -509,7 +482,6 @@ class PropPreservingPartition(pc.MetricPartition):
                     raise ValueError(msg)
 
             self.is_symbolic()
-
         self.domain = domain
         super(PropPreservingPartition, self).__init__(domain)
         self.adj = adj
@@ -530,7 +502,6 @@ class PropPreservingPartition(pc.MetricPartition):
             msg = 'No continuous propositions defined.'
             logging.warning(msg)
             return
-
         for region in self.regions:
             if not region.props <= set(self.prop_regions):
                 msg = 'Partitions: Region labeled with propositions:\n\t'
@@ -650,7 +621,6 @@ def ppp2ts(part):
     """
     # generate transition system and add transitions
     ofts = trs.FTS()
-
     adj = part.adj #sp.lil_matrix
     n = adj.shape[0]
     ofts_states = range(n)

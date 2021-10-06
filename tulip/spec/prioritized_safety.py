@@ -42,7 +42,6 @@ class FAWithPriority:
         assert isinstance(fa, FA)
         assert isinstance(priority, int)
         assert isinstance(level, int)
-
         self._fa = fa
         self._priority = priority
         self._level = level
@@ -88,7 +87,6 @@ class PrioritizedSpecification:
         ):
             self._iter_index = 0
             self._iter_level += 1
-
         if self._iter_level >= len(self._Psi) or self._iter_index >= len(
             self._Psi[self._iter_level]
         ):
@@ -123,13 +121,11 @@ class PrioritizedSpecification:
         assert isinstance(level, int)
         assert priority > 0
         assert level >= 0
-
         # Check the consistency of atomic propositions
         if len(self._Psi) == 0:
             self.atomic_propositions = fa.atomic_propositions
         else:
             assert self.atomic_propositions == fa.atomic_propositions
-
         # Add the rule
         rule = FAWithPriority(fa, priority, level)
 

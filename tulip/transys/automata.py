@@ -99,7 +99,6 @@ class FiniteStateAutomaton(LabeledDiGraph):
         """
         self.atomic_proposition_based = atomic_proposition_based
         self.symbolic = symbolic
-
         # edge labeling
         if symbolic:
             alphabet = None  # no checks
@@ -133,7 +132,6 @@ class FiniteStateAutomaton(LabeledDiGraph):
                                              'type?label': '',
                                              'separator': r'\\n'}
         self._transition_dot_mask = dict()
-
         self.dot_node_shape = {'normal': 'circle',
                                'accepting': 'doublecircle'}
         self.default_export_fname = 'fsa'
@@ -299,14 +297,11 @@ def tuple2ba(
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(initial_states, prepend_str)
     accepting_states = prepend_with(accepting_states, prepend_str)
-
     ba = BuchiAutomaton(atomic_proposition_based=atomic_proposition_based)
     ba.name = name
-
     ba.states.add_from(states)
     ba.states.initial |= initial_states
     ba.states.accepting |= accepting_states
-
     if atomic_proposition_based:
         ba.alphabet.math_set |= alphabet_or_ap
     else:

@@ -134,12 +134,10 @@ def _untaglist(x, cast_f=float,
         elem = ET.fromstring(x)
     else:
         elem = x
-
     if (namespace is None) or (len(namespace) == 0):
         ns_prefix = ''
     else:
         ns_prefix = '{' + namespace + '}'
-
     # Extract list
     if cast_f is None:
         cast_f = str
@@ -150,7 +148,6 @@ def _untaglist(x, cast_f=float,
         li = []
     else:
         li = [cast_f(k) for k in elem.text.split()]
-
     return (elem.tag, li)
 
 
@@ -184,12 +181,10 @@ def _untagdict(
         elem = ET.fromstring(x)
     else:
         elem = x
-
     if (namespace is None) or (len(namespace) == 0):
         ns_prefix = ""
     else:
         ns_prefix = "{"+namespace+"}"
-
     # Extract dictionary
     items_li = elem.findall(ns_prefix+"item")
     if cast_f_keys is None:
@@ -235,12 +230,10 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         elem = ET.fromstring(x)
     else:
         elem = x
-
     if (namespace is None) or (len(namespace) == 0):
         ns_prefix = ''
     else:
         ns_prefix = '{' + namespace + '}'
-
     if elem.tag != ns_prefix + 'tulipcon':
         raise TypeError('root tag should be tulipcon.')
     if ('version' not in elem.attrib.keys()):
@@ -248,16 +241,13 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     if int(elem.attrib['version']) != 1:
         raise ValueError("unsupported tulipcon XML version: "+
             str(elem.attrib["version"]))
-
     # Extract discrete variables and LTL specification
     (tag_name, env_vardict, env_vars) = _untagdict(elem.find(
         ns_prefix+"env_vars"), get_order=True)
     (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
         ns_prefix+"sys_vars"), get_order=True)
-
     env_vars = _parse_vars(env_vars, env_vardict)
     sys_vars = _parse_vars(sys_vars, sys_vardict)
-
     s_elem = elem.find(ns_prefix+"spec")
     spec = GRSpec(env_vars=env_vars, sys_vars=sys_vars)
     for spec_tag in ["env_init", "env_safety", "env_prog",
@@ -270,13 +260,11 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         li = [v.replace("&gt;", ">") for v in li]
         li = [v.replace("&amp;", "&") for v in li]
         setattr(spec, spec_tag, li)
-
     aut_elem = elem.find(ns_prefix+"aut")
     if aut_elem is None or (
         (aut_elem.text is None) and len(aut_elem.getchildren()) == 0):
         mach = None
         return (spec, mach)
-
     # Assume version 1 of tulipcon XML
     if aut_elem.attrib['type'] != 'basic':
         raise ValueError('Automaton class only recognizes type "basic".')
@@ -306,7 +294,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         (tag_name, this_state) = _untagdict(node.find(ns_prefix+"state"),
                                             cast_f_values=int,
                                             namespace=namespace)
-
         if tag_name != ns_prefix+"state":
             raise ValueError("failure of consistency check " +
                 "while processing aut XML string.")
@@ -314,9 +301,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             logger.warning("duplicate nodes found: "+str(this_id)+"; ignoring...")
             continue
         id_list.append(this_id)
-
         logger.info('loaded from gr1c result:\n\t' +str(this_state) )
-
         A.add_node(this_id, state=copy.copy(this_state),
                    mode=mode, rgrad=rgrad)
         for next_node in this_child_list:
@@ -401,7 +386,6 @@ def check_syntax(spec_str):
     except TypeError:  # Try to be compatible with Python 2.7
         f.write(bytes(spec_str))
     f.seek(0)
-
     p = subprocess.Popen([GR1C_BIN_PREFIX+"gr1c", "-s"],
                          stdin=f,
                          stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -481,7 +465,6 @@ def synthesize(spec):
             raise Exception('gr1c not found in path.')
         else:
             raise
-
     s = translate(spec, 'gr1c')
     logger.info('\n{hl}\n gr1c input:\n {s}\n{hl}'.format(s=s, hl=_hl))
 
@@ -494,9 +477,7 @@ def synthesize(spec):
             logger.debug('wrote input to file "{f}"'.format(f=fname))
     except:
         logger.error('failed to write auxiliary file: "{f}"'.format(f=fname))
-
     (stdoutdata, stderrdata) = p.communicate(s)
-
     msg = (
         ('{spaces} gr1c return code: {c}\n\n'
          '{spaces} gr1c stdout, stderr:\n {out}\n\n').format(

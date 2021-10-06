@@ -290,7 +290,6 @@ def solve_open_loop(
         for p2 in target_polys:
             cur_s0 = poly_to_poly(p1, p2, ssys, N, trans_set)
             s0 = s0.union(cur_s0, check_convex=True)
-
     return s0
 
 
@@ -311,25 +310,20 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     # Project polytope s0 onto lower dim
     n = np.shape(ssys.A)[1]
     dims = range(1, n+1)
-
     s0 = s0.project(dims)
-
     return pc.reduce(s0)
 
 
 def volumes_for_reachability(part, max_num_poly):
     if len(part) <= max_num_poly:
         return part
-
     vol_list = np.zeros(len(part) )
     for i in range(len(part) ):
         vol_list[i] = part[i].volume
-
     ind = np.argsort(-vol_list)
     temp = list()
     for i in ind[range(max_num_poly) ]:
         temp.append(part[i] )
-
     part = pc.Region(temp, [])
     return part
 
@@ -375,10 +369,8 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     """
     if not isinstance(list_P, Iterable):
         list_P = [list_P] +(N-1) *[Pk] +[PN]
-
     if disturbance_ind is None:
         disturbance_ind = range(1,N+1)
-
     A = ssys.A
     B = ssys.B
     E = ssys.E
@@ -392,36 +384,26 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     if not np.all(E==0):
         if not pc.is_fulldim(D):
             E = np.zeros(K.shape)
-
     list_len = np.array([P.A.shape[0] for P in list_P])
     sumlen = np.sum(list_len)
-
     LUn = np.shape(PU.A)[0]
-
     Lk = np.zeros([sumlen, n+N*m])
     LU = np.zeros([LUn*N, n+N*m])
-
     Mk = np.zeros([sumlen, 1])
     MU = np.tile(PU.b.reshape(PU.b.size, 1), (N, 1))
-
     Gk = np.zeros([sumlen, p*N])
     GU = np.zeros([LUn*N, p*N])
-
     K_hat = np.tile(K, (N, 1))
-
     B_diag = B
     E_diag = E
     for i in range(N-1):
         B_diag = _block_diag2(B_diag, B)
         E_diag = _block_diag2(E_diag, E)
-
     A_n = np.eye(n)
     A_k = np.zeros([n, n*N])
-
     sum_vert = 0
     for i in range(N+1):
         Li = list_P[i]
-
         if not isinstance(Li, pc.Polytope):
             logger.warning('createLM: Li of type: ' +str(type(Li) ) )
 
@@ -438,26 +420,20 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
                 range(Gk.shape[1])
             )
             Gk[idx] = Li.A.dot(A_k).dot(E_diag)
-
             if (PU.A.shape[1] == m+n) and (i < N):
                 A_k_E_diag = A_k.dot(E_diag)
                 d_mult = np.vstack([np.zeros([m, p*N]), A_k_E_diag])
-
                 idx = np.ix_(range(LUn*i, LUn*(i+1)), range(p*N))
                 GU[idx] = PU.A.dot(d_mult)
-
         ######### FOR L #########
         AB_line = np.hstack([A_n, A_k.dot(B_diag)])
-
         idx = np.ix_(
             range(sum_vert, sum_vert + Li.A.shape[0]),
             range(0,Lk.shape[1])
         )
         Lk[idx] = Li.A.dot(AB_line)
-
         if i >= N:
             continue
-
         if PU.A.shape[1] == m:
             idx = np.ix_(
                 range(i*LUn, (i+1)*LUn),
@@ -466,38 +442,29 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
             LU[idx] = PU.A
         elif PU.A.shape[1] == m+n:
             uk_line = np.zeros([m, n + m*N])
-
             idx = np.ix_(range(m), range(n+m*i, n+m*(i+1)))
             uk_line[idx] = np.eye(m)
-
             A_mult = np.vstack([uk_line, AB_line])
-
             b_mult = np.zeros([m+n, 1])
             b_mult[range(m, m+n), :] = A_k.dot(K_hat)
-
             idx = np.ix_(
                 range(i*LUn, (i+1)*LUn),
                 range(n+m*N)
             )
             LU[idx] = PU.A.dot(A_mult)
-
             MU[range(i*LUn, (i+1)*LUn), :] -= PU.A.dot(b_mult)
-
         ####### Iterate #########
         sum_vert += Li.A.shape[0]
         A_n = A.dot(A_n)
         A_k = A.dot(A_k)
-
         idx = np.ix_(range(n), range(i*n, (i+1)*n))
         A_k[idx] = np.eye(n)
-
     # Get disturbance sets
     if not np.all(Gk==0):
         G = np.vstack([Gk, GU])
         D_hat = get_max_extreme(G, D, N)
     else:
         D_hat = np.zeros([sumlen + LUn*N, 1])
-
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
     M = np.vstack([Mk, MU]) - D_hat
@@ -549,7 +516,6 @@ def get_max_extreme(G,D,N):
         ind = np.base_repr(i, base=nv, padding=N)
         for j in range(N):
             DN_extreme[range(j*dim,(j+1)*dim),i] = D_extreme[int(ind[-j-1]),:]
-
     d_hat = np.amax(np.dot(G,DN_extreme), axis=1)
     return d_hat.reshape(d_hat.size,1)
 

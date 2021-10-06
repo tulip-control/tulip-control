@@ -238,23 +238,18 @@ class Transducer(LabeledDiGraph):
         self.inputs = dict()
         self.outputs = dict()
         # self.set_actions = {}
-
         # state labeling
         self._state_label_def = dict()
         self._state_dot_label_format = {'type?label': ':',
                                         'separator': r'\\n'}
-
         # edge labeling
         self._transition_label_def = dict()
         self._transition_dot_label_format = {'type?label': ':',
                                              'separator': r'\\n'}
         self._transition_dot_mask = dict()
         self._state_dot_mask = dict()
-
         self.default_export_fname = 'fsm'
-
         LabeledDiGraph.__init__(self)
-
         self.dot_node_shape = dict(
             normal='ellipse')
         self.default_export_fname = 'fsm'
@@ -588,7 +583,6 @@ class MealyMachine(Transducer):
             (i, j, d)
             for i, j, d in self.edges([from_state], data=True)
             if project_dict(d, restricted_inputs) == inputs]
-
         if len(enabled_trans) == 0:
             some_possibilities = []
             for i, j, d in self.edges([from_state], data=True):
@@ -599,7 +593,6 @@ class MealyMachine(Transducer):
                 possible_inputs = project_dict(d, restricted_inputs)
                 if possible_inputs not in some_possibilities:
                     some_possibilities.append(possible_inputs)
-
         # must be deterministic
         try:
             ((_, next_state, attr_dict), ) = enabled_trans
@@ -987,13 +980,10 @@ def strip_ports(mealy, names):
     @type names: iterable container of `str`
     """
     new = MealyMachine()
-
     new.add_inputs(trim_dict(mealy.inputs, names))
     new.add_outputs(trim_dict(mealy.outputs, names))
-
     new.add_nodes_from(mealy)
     new.states.initial.add_from(mealy.states.initial)
-
     for u, v, d in mealy.edges(data=True):
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)

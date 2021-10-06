@@ -81,7 +81,6 @@ def get_action_map(stormpy_model, tulip_transys):
         and value is the corresponding action of `tulip_transys`
     """
     action_map = {}
-
     for from_state_stormpy in stormpy_model.states:
         from_state_tulip = to_tulip_state(from_state_stormpy, tulip_transys)
         for stormpy_action in from_state_stormpy.actions:
@@ -152,14 +151,12 @@ def to_tulip_state(stormpy_state, tulip_transys):
     If such a state does not exist or is not unique,
     `ValueError` will be raised.
     """
-
     possible_states = [
         s
         for s in tulip_transys.states
         if set(tulip_transys.states[s]["ap"])
         == set(to_tulip_labels(stormpy_state, tulip_transys))
     ]
-
     if len(possible_states) != 1:
         raise ValueError(
             "Cannot find a unique state corresponding to label {}".format(
@@ -194,11 +191,9 @@ def to_tulip_transys(path):
     # The list of states and initial states
     state_list = [get_ts_state(s) for s in in_model.states]
     initial_state_list = [get_ts_state(s) for s in in_model.initial_states]
-
     ts = MC() if in_model.model_type == stormpy.storage.ModelType.DTMC else MDP()
     ts.states.add_from(state_list)
     ts.states.initial.add_from(initial_state_list)
-
     # Neglect stormpy internal state labels
     neglect_labels = ['init', 'deadlock']
     # Populate the set of atomic propositinos and
@@ -231,7 +226,6 @@ def to_prism_file(ts, path):
     @param path: path of output `prism` file
     @type path: `str`
     """
-
     # Only deal with MDP and MC with a unique initial state
     assert type(ts) == MDP or type(ts) == MC
     assert len(ts.states) > 0
@@ -256,7 +250,6 @@ def to_prism_file(ts, path):
     # from state s to to_state under action a.
     def get_transition_dict(state_transitions):
         transition_dict = {}
-
         for transition in state_transitions:
             action = transition[2].get(MDP.action_label, None)
             if action is None:
@@ -268,7 +261,6 @@ def to_prism_file(ts, path):
             )
 
         return transition_dict
-
     # Return a properly formatted string for the given probability
     def get_prob_str(prob):
         return "{:.4f}".format(prob)
@@ -282,7 +274,6 @@ def to_prism_file(ts, path):
             state_str += "'"
         state_str += '=' + str(state_index)
         return state_str
-
     # Return the description of transitions in prism file
     def get_transition_str(transitions):
         str_list = [
@@ -293,7 +284,6 @@ def to_prism_file(ts, path):
             for transition in transitions
         ]
         return ' + '.join(str_list)
-
     # Return a dictionary whose key is an atomic proposition
     # and whose value is a list of state such that the atomic proposition]
     # is in its state labels.
@@ -304,7 +294,6 @@ def to_prism_file(ts, path):
                 state for state in ts.states if label in ts.states[state]["ap"]
             ]
         return label_dict
-
     # Use the above functions to describe the model in prism format.
     with open(path, 'w') as f:
         # Type of model
@@ -312,7 +301,6 @@ def to_prism_file(ts, path):
             f.write('mdp')
         elif type(ts) == MC:
             f.write('dtmc')
-
         # The set of states and initial state
         f.write('\n\nmodule sys_model\n')
         f.write(
@@ -323,7 +311,6 @@ def to_prism_file(ts, path):
             )
         )
         f.write('\n')
-
         # Transitions
         for idx, state in enumerate(state_list):
             transition_dict = get_transition_dict(ts.transitions.find(state))
@@ -338,9 +325,7 @@ def to_prism_file(ts, path):
                         get_transition_str(transitions),
                     )
                 )
-
         f.write('\nendmodule\n\n')
-
         # Labels
         for label, states in get_label_dict().items():
             state_str = '|'.join(
@@ -375,10 +360,8 @@ def model_checking(
           `policy[state]` is the action to be
           applied at `state`.
     """
-
     assert type(tulip_transys) == MDP or type(tulip_transys) == MC
     to_prism_file(tulip_transys, prism_file_path)
-
     prism_program = stormpy.parse_prism_program(prism_file_path)
     stormpy_model = stormpy.build_model(prism_program)
     properties = stormpy.parse_properties(formula, prism_program)
@@ -388,7 +371,6 @@ def model_checking(
     prob = _extract_probability(result, stormpy_model, tulip_transys)
     if not extract_policy:
         return prob
-
     policy = _extract_policy(result, stormpy_model, tulip_transys)
     return (prob, policy)
 
@@ -400,7 +382,6 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
     assert stormpy_policy is not None
     tulip_policy = FunctionOnLabeledState("state", MDP.action_label)
     action_map = get_action_map(stormpy_model, tulip_transys)
-
     for state in stormpy_model.states:
         tulip_state = to_tulip_state(state, tulip_transys)
         choice = stormpy_policy.get_choice(state)
@@ -422,11 +403,9 @@ def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
     from `stormpy_result`.
     """
     probability = FunctionOnLabeledState('state', 'probability')
-
     for state in stormpy_model.states:
         tulip_state = to_tulip_state(state, tulip_transys)
         probability.add(tulip_state, stormpy_result.at(state))
-
     return probability
 
 

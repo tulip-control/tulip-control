@@ -183,7 +183,6 @@ class AbstractSwitched:
                 edge_label = dict(
                     env_actions=env_mode,
                     sys_actions=sys_mode)
-
                 ax = _plot_abstraction(
                     self, show_ts=False, only_adjacent=False,
                     color_seed=color_seed
@@ -419,12 +418,9 @@ class AbstractPwa:
             params = {'N', 'close_loop', 'use_all_horizon'}
             disc_params = {k:v for k,v in self.disc_params.items()
                            if k in params}
-
             s0 = solve_feasible(from_region, to_region, sys,
                                 trans_set=trans_set, **disc_params)
-
             msg = str(i) + ' ---> ' + str(j)
-
             if not from_region <= s0:
                 logger.error('incorrect transition: ' + msg)
 
@@ -452,9 +448,7 @@ def _plot_abstraction(
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
     )
-
     #ax = self.ts.plot()
-
     return ax
 
 def discretize(
@@ -657,7 +651,6 @@ def _discretize_bi(
         # map new regions to pwa subsystems
         if ispwa:
             ppp2pwa = [ppp2pwa[i] for i in new2old]
-
         remove_trans = False # already allowed in nonconservative
         orig_list = list()
         for poly in part:
@@ -937,7 +930,6 @@ def _discretize_bi(
                 prop_regions=part.prop_regions
             )
             assert(tmp_part.is_partition() )
-
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
         progress += [progress_ratio]
@@ -1463,7 +1455,6 @@ def reachable_within(trans_length, adj_k, adj):
     """
     if trans_length <= 1:
         return adj_k
-
     k = 1
     while k < trans_length:
         adj_k = (np.dot(adj_k, adj)!=0).astype(int)
@@ -1573,7 +1564,6 @@ def multiproc_discretize(
     print('Abstracting mode: ' + str(mode) + ', on: ' + str(name))
 
     absys = discretize(ppp, cont_dyn, **disc_params)
-
     q.put((mode, absys))
     print('Worker: ' + str(name) + 'finished.')
 
@@ -1583,12 +1573,9 @@ def multiproc_get_transitions(
 ):
     global logger
     logger = mp.log_to_stderr()
-
     name = mp.current_process().name
     print('Merged transitions for mode: ' + str(mode) + ', on: ' + str(name))
-
     trans = get_transitions(absys, mode, ssys, **params)
-
     q.put((mode, trans))
     print('Worker: ' + str(name) + 'finished.')
 
@@ -1604,7 +1591,6 @@ def multiproc_discretize_switched(
     Uses the multiprocessing package.
     """
     logger.info('parallel discretize_switched started')
-
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
     q = mp.Queue()
@@ -1612,7 +1598,6 @@ def multiproc_discretize_switched(
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
         mode_args[mode] = (q, mode, ppp, cont_dyn, disc_params[mode])
-
     jobs = [mp.Process(target=multiproc_discretize, args=args)
             for args in mode_args.values()]
     for job in jobs:
@@ -1634,12 +1619,9 @@ def multiproc_discretize_switched(
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
         params = disc_params[mode]
-
         mode_args[mode] = (q, merged_abstr, mode, cont_dyn, params)
-
     jobs = [mp.Process(target=multiproc_get_transitions, args=args)
             for args in mode_args.values()]
-
     for job in jobs:
         job.start()
     trans = dict()
@@ -1680,20 +1662,15 @@ def discretize_switched(
     """
     if disc_params is None:
         disc_params = dict(N=1, trans_length=1)
-
     logger.info('discretizing hybrid system')
-
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
-
     # discretize each abstraction separately
     abstractions = dict()
     for mode in modes:
         logger.debug(30*'-'+'\n')
         logger.info('Abstracting mode: ' + str(mode))
-
         cont_dyn = hybrid_sys.dynamics[mode]
-
         absys = discretize(
             ppp, cont_dyn,
             **disc_params[mode]
@@ -1701,7 +1678,6 @@ def discretize_switched(
         logger.debug('Mode Abstraction:\n' + str(absys) +'\n')
 
         abstractions[mode] = absys
-
     # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
@@ -1711,9 +1687,7 @@ def discretize_switched(
     trans = dict()
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
-
         params = disc_params[mode]
-
         trans[mode] = get_transitions(
             merged_abstr, mode, cont_dyn,
             N=params['N'], trans_length=params['trans_length']
@@ -1775,7 +1749,6 @@ def merge_abstractions(
     logger.info('APs: ' + str(aps))
 
     sys_ts = trs.FTS()
-
     # create stats
     n = len(merged_abstr.ppp)
     states = range(n)
@@ -1786,11 +1759,9 @@ def merge_abstractions(
     for (i, state) in enumerate(ppp2ts):
         props =  merged_abstr.ppp[i].props
         sys_ts.states[state]['ap'] = props
-
     # create mode actions
     sys_actions = [str(s) for e,s in modes]
     env_actions = [str(e) for e,s in modes]
-
     # no env actions ?
     if mode_nums[0] == 0:
         actions_per_mode = {
@@ -1852,7 +1823,6 @@ def get_transitions(
     # Initialize output
     n = len(part)
     transitions = sp.lil_matrix((n, n), dtype=int)
-
     # Do the abstraction
     n_checked = 0
     n_found = 0
@@ -1923,17 +1893,14 @@ def merge_partitions(abstractions):
         for ab2 in abstractions.values():
             p1 = ab1.ppp
             p2 = ab2.ppp
-
             if p1.prop_regions != p2.prop_regions:
                 msg = 'merge: partitions have different sets '
                 msg += 'of continuous propositions'
                 raise Exception(msg)
-
             if (
                     not (p1.domain.A == p2.domain.A).all() or
                     not (p1.domain.b == p2.domain.b).all()):
                 raise Exception('merge: partitions have different domains')
-
             # check equality of original PPP partitions
             if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info('original partitions happen to be equal')
@@ -1948,7 +1915,6 @@ def merge_partitions(abstractions):
 
     # initialize iteration data
     prev_modes = [init_mode]
-
    	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
@@ -1978,7 +1944,6 @@ def merge_partitions(abstractions):
                 pi = parents[mode][i]
                 pj = parents[mode][j]
                 part = abstractions[mode].ppp
-
                 if (part.adj[pi, pj] == 1) or (pi == pj):
                     touching = True
                     break
@@ -1988,7 +1953,6 @@ def merge_partitions(abstractions):
                 adj[i,j] = 1
                 adj[j,i] = 1
         adj[i,i] = 1
-
     ppp = PropPreservingPartition(
         domain=ab0.ppp.domain,
         regions=new_list,
@@ -2092,7 +2056,5 @@ def merge_partition_pair(
                 msg = 'Inconsistent AP labels between intersecting regions\n'
                 msg += 'of partitions of switched system.'
                 raise Exception(msg)
-
             ap_labeling[idx] = ap_label_1
-
     return new_list, parents, ap_labeling

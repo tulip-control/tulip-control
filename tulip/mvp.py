@@ -31,7 +31,6 @@
 # SUCH DAMAGE.
 
 """Minimum violation planning module"""
-
 from itertools import product
 from tulip.transys import KripkeStructure as KS
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
@@ -62,7 +61,6 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     """
     from_spec_state = from_prod_state[1]
     to_spec_state = to_prod_state[1]
-
     cost = [0 for i in range(spec.get_num_levels())]
     for idx, rule in enumerate(spec):
         rule_transitions = rule.automaton().transitions.find(
@@ -101,7 +99,6 @@ def _add_transition(
         in ks
     @param fa: the finite automaton
     """
-
     for from_prod_state in from_prod_states:
         for to_prod_state in to_prod_states:
             to_ap = ks.states[to_prod_state[0]]["ap"]
@@ -128,23 +125,17 @@ def _construct_weighted_product_automaton(ks, spec):
         tulip.transys.automata.WeightedFiniteStateAutomaton
         and null_state is the null state
     """
-
     null_state = "null"
     while null_state in ks.states:
         null_state += "0"
-
     fa = WFA()
-
     fa.states.add_from(set(product(ks.states, spec.get_states())))
     fa.states.add_from(set(product([null_state], spec.get_states())))
-
     fa.states.initial.add_from(
         set(product([null_state], spec.get_initial_states())))
     fa.states.accepting.add_from(
         set(product(ks.states, spec.get_accepting_states())))
-
     fa.atomic_propositions.add_from(ks.atomic_propositions)
-
     for transition in ks.transitions.find():
         from_ks_state = transition[0]
         to_ks_state = transition[1]
@@ -157,7 +148,6 @@ def _construct_weighted_product_automaton(ks, spec):
             trans_ks_cost,
             fa,
         )
-
     _add_transition(
         fa.states.initial,
         product(ks.states.initial, spec.get_states()),
@@ -186,22 +176,17 @@ def solve(ks, goal_label, spec):
        * best_path is the optimal path to the goal
        * weighted_product_automaton is the weighted product automaton ks times spec
     """
-
     assert isinstance(ks, KS)
     assert isinstance(spec, PrioritizedSpecification)
     assert ks.atomic_propositions == spec.atomic_propositions
     (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
-
     goal_states = [
         state for state in ks.states if goal_label in ks.states[state]["ap"]]
     accepting_goal_states = SubSet(wpa.states.accepting)
     accepting_goal_states.add_from(
         set(product(goal_states, spec.get_states())))
-
     (cost, product_path) = dijkstra_multiple_sources_multiple_targets(
         wpa, wpa.states.initial, accepting_goal_states, cost_key="cost"
     )
-
     state_path = [state[0] for state in product_path if state[0] != null_state]
-
     return (cost, state_path, product_path, wpa)

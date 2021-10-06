@@ -244,7 +244,6 @@ def get_input(
     else:
         print("get_input: "
               "Warning, no transition matrix found, assuming feasible")
-
     if (not conservative) & (orig is None):
         print("List of original proposition preserving "
               "partitions not given, reverting to conservative mode")
@@ -367,7 +366,6 @@ def get_input_helper(
     """
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
-
     list_P = list()
     if closed_loop:
         temp_part = P3
