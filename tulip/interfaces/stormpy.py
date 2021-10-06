@@ -92,8 +92,7 @@ def get_action_map(stormpy_model, tulip_transys):
                 tulip_transys,
                 from_state_tulip,
                 stormpy_action.transitions,
-                prob_tol=1e-6,
-            )
+                prob_tol=1e-6)
     return action_map
 
 
@@ -177,9 +176,7 @@ def to_tulip_transys(path):
     in_model = build_stormpy_model(path)
     assert (
         in_model.model_type == stormpy.storage.ModelType.DTMC
-        or in_model.model_type == stormpy.storage.ModelType.MDP
-    )
-
+        or in_model.model_type == stormpy.storage.ModelType.MDP)
     # The list of states and initial states
     state_list = [get_ts_state(s) for s in in_model.states]
     initial_state_list = [
@@ -208,8 +205,7 @@ def to_tulip_transys(path):
                 ts.transitions.add(
                     get_ts_state(state),
                     get_ts_state(transition.column),
-                    transition_attr,
-                )
+                    transition_attr)
     return ts
 
 
@@ -251,9 +247,8 @@ def to_prism_file(ts, path):
             if action not in transition_dict:
                 transition_dict[action] = []
             transition_dict[action].append(
-                (transition[2].get(MC.probability_label), transition[1])
-            )
-
+                (transition[2].get(MC.probability_label),
+                 transition[1]))
         return transition_dict
     # Return a properly formatted string for the given probability
     def get_prob_str(prob):
@@ -367,8 +362,9 @@ def model_checking(
     stormpy_model = stormpy.build_model(prism_program)
     properties = stormpy.parse_properties(formula, prism_program)
     result = stormpy.model_checking(
-        stormpy_model, properties[0], extract_scheduler=extract_policy
-    )
+        stormpy_model,
+        properties[0],
+        extract_scheduler=extract_policy)
     prob = _extract_probability(result, stormpy_model, tulip_transys)
     if not extract_policy:
         return prob
@@ -393,8 +389,7 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
             to_tulip_action(
                 action, stormpy_model,
                 tulip_transys, action_map),
-            to_tulip_labels(state, tulip_transys),
-        )
+            to_tulip_labels(state, tulip_transys))
 
     return tulip_policy
 
@@ -429,8 +424,8 @@ def _update_possible_actions_with_transitions(
     """
     for stormpy_transition in stormpy_transitions:
         to_state_tulip = to_tulip_state(
-            stormpy_model.states[stormpy_transition.column], tulip_transys
-        )
+            stormpy_model.states[stormpy_transition.column],
+            tulip_transys)
         probability = stormpy_transition.value()
         for tulip_transition in tulip_transys.transitions.find(
             from_state_tulip, [to_state_tulip]

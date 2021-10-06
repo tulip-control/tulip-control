@@ -659,8 +659,7 @@ class GR1CSession:
             'getindex ' +
             ' '.join(
                 str(i) for i in state_vector) +
-            f' {goal_mode}\n'
-        )
+            f' {goal_mode}\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
@@ -817,8 +816,7 @@ class GR1CSession:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                universal_newlines=True
-            )
+                universal_newlines=True)
         else:
             self.p = None
         return True

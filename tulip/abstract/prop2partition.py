@@ -140,9 +140,7 @@ def prop2part(state_space, cont_props_dict):
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
         regions = regions,
-        prop_regions = copy.deepcopy(cont_props_dict)
-    )
-
+        prop_regions = copy.deepcopy(cont_props_dict))
     mypartition.adj = pc.find_adjacent_regions(mypartition).copy()
     return mypartition
 
@@ -161,8 +159,7 @@ def part2convex(ppp):
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
-        prop_regions=copy.deepcopy(ppp.prop_regions)
-    )
+        prop_regions=copy.deepcopy(ppp.prop_regions))
     new2old = []
     for i in range(len(ppp.regions)):
         simplified_reg = pc.union(
@@ -172,8 +169,7 @@ def part2convex(ppp):
         for j in range(len(simplified_reg)):
             region_now = pc.Region(
                 [simplified_reg[j]],
-                ppp.regions[i].props
-            )
+                ppp.regions[i].props)
             cvxpart.regions.append(region_now)
             new2old += [i]
     cvxpart.adj = pc.find_adjacent_regions(cvxpart).copy()
@@ -260,8 +256,7 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
         domain = ppp.domain,
         regions = new_list,
         adj = adj,
-        prop_regions = ppp.prop_regions
-    )
+        prop_regions = ppp.prop_regions)
     return (new_ppp, subsys_list, parents)
 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
@@ -356,8 +351,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
             float(domain_bb[0][j]),
             float(domain_bb[1][j]),
             size_list[j],
-            abs_tol
-        )
+            abs_tol)
         if j > 0:
             if j == 1:
                 re_list = list_grid[j - 1]
@@ -407,8 +401,7 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
         domain=ppp.domain,
         regions=new_list,
         adj=adj,
-        prop_regions=ppp.prop_regions
-    )
+        prop_regions=ppp.prop_regions)
 
 #### Helper functions ####
 def compute_interval(low_domain, high_domain, size, abs_tol=1e-7):

@@ -100,11 +100,9 @@ def fts_maximal_example():
     # add transition info (unlabeled)
     fts.transitions.add('pay', 'select') # notice: no labels
     fts.transitions.add_from(
-        [('select', x) for x in {'soda', 'beer'}]
-    )
+        [('select', x) for x in {'soda', 'beer'}])
     fts.transitions.add_from(
-        [('soda', x) for x in {'beer', 'pay'}]
-    )
+        [('soda', x) for x in {'beer', 'pay'}])
     fts.transitions.add('pay', 'soda')
     fts.transitions.remove('pay', 'soda')
 
@@ -207,11 +205,9 @@ def fts_maximal_example():
 
     fts.transitions.add('pay', 'select', sys_actions='insert_coin')
     fts.transitions.remove_from(
-        [('select', x) for x in {'soda', 'beer'}]
-    )
+        [('select', x) for x in {'soda', 'beer'}])
     fts.transitions.add_from(
-        [('select', x) for x in {'soda', 'beer'}]
-    )
+        [('select', x) for x in {'soda', 'beer'}])
     fts.transitions.remove('soda', 'pay')
     fts.transitions.add('soda', 'pay', sys_actions='get_soda')
 
@@ -320,8 +316,7 @@ def scipy_sparse_labeled_adj():
     ofts.transitions.add_adj(
         A, adj2states,
         sys_actions='move',
-        env_actions='rain'
-    )
+        env_actions='rain')
 
     ofts.plot()
 
@@ -342,8 +337,7 @@ def scipy_sparse_labeled_adj():
     ofts.transitions.add_adj(
         A, adj2states,
         sys_actions='move',
-        env_actions='rain'
-    )
+        env_actions='rain')
     ofts.plot()
 
     return ofts

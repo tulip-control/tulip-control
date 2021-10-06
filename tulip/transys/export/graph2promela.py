@@ -115,8 +115,7 @@ def fts2promela(graph, procname=None):
     for state in graph.states():
         out_transitions = graph.transitions.find(
             {state},
-            as_dict=True
-        )
+            as_dict=True)
         s += str(state).replace(' ', '_') + ':'
         s += trans2promela(
             out_transitions, graph,

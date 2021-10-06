@@ -140,8 +140,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
         ts.states[state]["ap"] = reduce(
             or_, [
                 models[i].states[state[i]]["ap"]
-                for i in range(len(models))]
-        )
+                for i in range(len(models))])
     #
     # Compute the initial state of ts: I = I_1 \times ... \times I_n
     for state in product(*prod_initials):
@@ -175,8 +174,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
             attr = _get_transition_attr(
                 transition, transition_attr_operations)
             ts.transitions.add(
-                from_state, to_state, attr,
-            )
+                from_state, to_state, attr)
     return ts
 
 

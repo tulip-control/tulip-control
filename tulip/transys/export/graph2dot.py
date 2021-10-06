@@ -320,8 +320,7 @@ def _form_node_label(state, state_data, label_def,
         # dot2tex math mode doesn't handle newlines properly
         node_dot_label = (
             rf'$\\begin{{matrix}} {node_dot_label}'
-            r'\\end{matrix}$'
-        )
+            r'\\end{matrix}$')
     return node_dot_label
 
 
@@ -353,8 +352,7 @@ def _transitions2dot_str(trans, to_dot_graph, tikz=False):
     ):
         edge_dot_label = _form_edge_label(
             edge_data, label_def,
-            label_format, label_mask, tikz
-        )
+            label_format, label_mask, tikz)
         edge_color = edge_data.get('color', 'black')
         to_dot_graph.add_edge(
             u, v,

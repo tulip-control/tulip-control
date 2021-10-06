@@ -67,8 +67,7 @@ class LabeledStateInputOutputPair:
         """Convert this object to a jsonable object, i.e., a dictionary"""
         labels = (
             transys.states[self.state]["ap"]
-            if transys is not None else self.labels
-        )
+            if transys is not None else self.labels)
         ret = dict(
             state=self.state,
             labels=labels)
@@ -206,8 +205,7 @@ class FunctionOnLabeledState:
                 for pair in self._state_input_output_list
                 if pair.is_at(state, input_dict)
             ),
-            None,
-        )
+            None)
 
     def add(self, input_tuple, output_tuple, labels=[]):
         """Add a map `input_tuple` -> `output_tuple` to this function.
@@ -230,8 +228,7 @@ class FunctionOnLabeledState:
                 state,
                 input_dict,
                 output_dict,
-                labels)
-        )
+                labels))
 
     def save(self, path, transys=None):
         """Export this to a JSON file.
@@ -244,5 +241,4 @@ class FunctionOnLabeledState:
                 [pair.to_json(transys)
                  for pair in self._state_input_output_list],
                 outfile,
-                indent=4,
-            )
+                indent=4)

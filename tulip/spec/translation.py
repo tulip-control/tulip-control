@@ -273,8 +273,7 @@ def _to_gr1c(d):
 
         _gr1c_str(d['sys_init'], 'SYSINIT', '') +
         _gr1c_str(d['sys_safety'], 'SYSTRANS', '[]') +
-        _gr1c_str(d['sys_prog'], 'SYSGOAL', '[]<>')
-    )
+        _gr1c_str(d['sys_prog'], 'SYSGOAL', '[]<>'))
     return output
 
 def _to_wring(d):
@@ -351,8 +350,7 @@ def _to_slugs(d):
 
         f(d['sys_safety'], 'SYS_TRANS') +
         f(d['sys_prog'], 'SYS_LIVENESS') +
-        f(d['sys_init'], 'SYS_INIT', sep='&')
-    )
+        f(d['sys_init'], 'SYS_INIT', sep='&'))
 
 
 def _slugs_str(r, name, sep='\n'):

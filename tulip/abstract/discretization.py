@@ -187,12 +187,10 @@ class AbstractSwitched:
                     self,
                     show_ts=False,
                     only_adjacent=False,
-                    color_seed=color_seed
-                )
+                    color_seed=color_seed)
                 plot_ts_on_partition(
                     self.ppp, self.ts, self.ppp2ts,
-                    edge_label, only_adjacent, ax
-                )
+                    edge_label, only_adjacent, ax)
                 axs.append(ax)
         # plot mode partitions
         for mode, ab in self.modes.items():
@@ -453,8 +451,7 @@ def _plot_abstraction(
         ppp2ts = None
     ax = ab.ppp.plot(
         ts, ppp2ts, only_adjacent=only_adjacent,
-        color_seed=color_seed
-    )
+        color_seed=color_seed)
     # ax = self.ts.plot()
     return ax
 
@@ -689,8 +686,7 @@ def _discretize_bi(
     num_regions = len(part)
     transitions = np.zeros(
         [num_regions, num_regions],
-        dtype = int
-    )
+        dtype = int)
     sol = deepcopy(part.regions)
     adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
@@ -746,8 +742,7 @@ def _discretize_bi(
         S0 = solve_feasible(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set,
-            max_num_poly
-        )
+            max_num_poly)
         logger.info(
             f'\n Working with partition cells: {i}, {j}')
         msg = (
@@ -953,8 +948,7 @@ def _discretize_bi(
                 domain=part.domain,
                 regions=sol,
                 adj=sp.lil_matrix(adj),
-                prop_regions=part.prop_regions
-            )
+                prop_regions=part.prop_regions)
             assert(tmp_part.is_partition())
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ) ) /n_cells**2
@@ -974,8 +968,7 @@ def _discretize_bi(
         tmp_part = PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
-            prop_regions=part.prop_regions
-        )
+            prop_regions=part.prop_regions)
         # plot pair under reachability check
         ax2.clear()
         si_tmp.plot(ax=ax2, color='green')
@@ -1011,8 +1004,7 @@ def _discretize_bi(
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
-        prop_regions=part.prop_regions
-    )
+        prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
         tmp_part = deepcopy(new_part)
@@ -1060,8 +1052,7 @@ def _discretize_bi(
         ppp2sys=subsys_list,
         orig_ppp=orig_ppp,
         ppp2orig=ppp2orig,
-        disc_params=param
-    )
+        disc_params=param)
 
 def _discretize_dual(
         part, ssys,
@@ -1193,8 +1184,7 @@ def _discretize_dual(
     num_regions = len(part)
     transitions = np.zeros(
         [num_regions, num_regions],
-        dtype = int
-    )
+        dtype = int)
     sol = deepcopy(part.regions)
     adj = part.adj.copy().toarray()
     # next 2 lines omitted in `discretize_overlap`
@@ -1251,8 +1241,7 @@ def _discretize_dual(
             trans_set = orig_list[orig[i]]
         S0 = solve_feasible(
             si, sj, ss, N, closed_loop,
-            use_all_horizon, trans_set, max_num_poly
-        )
+            use_all_horizon, trans_set, max_num_poly)
         logger.info(
             f'\n Working with partition cells: {i}, {j}')
         msg = (
@@ -1387,8 +1376,7 @@ def _discretize_dual(
             tmp_part = PropPreservingPartition(
                 domain=part.domain,
                 regions=sol, adj=sp.lil_matrix(adj),
-                prop_regions=part.prop_regions
-            )
+                prop_regions=part.prop_regions)
             assert(tmp_part.is_partition())
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
@@ -1410,8 +1398,7 @@ def _discretize_dual(
         tmp_part = PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
-            prop_regions=part.prop_regions
-        )
+            prop_regions=part.prop_regions)
         # plot pair under reachability check
         ax2.clear()
         si_tmp.plot(ax=ax2, color='green')
@@ -1447,8 +1434,7 @@ def _discretize_dual(
     new_part = PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
-        prop_regions=part.prop_regions
-    )
+        prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
         tmp_part = deepcopy(new_part)
@@ -1496,8 +1482,7 @@ def _discretize_dual(
         ppp2sys=subsys_list,
         orig_ppp=orig_ppp,
         ppp2orig=ppp2orig,
-        disc_params=param
-    )
+        disc_params=param)
 
 
 def reachable_within(trans_length, adj_k, adj):
@@ -1724,8 +1709,7 @@ def discretize_switched(
         cont_dyn = hybrid_sys.dynamics[mode]
         absys = discretize(
             ppp, cont_dyn,
-            **disc_params[mode]
-        )
+            **disc_params[mode])
         logger.debug(
             f'Mode Abstraction:\n{absys}\n')
         abstractions[mode] = absys
@@ -1740,9 +1724,8 @@ def discretize_switched(
         params = disc_params[mode]
         trans[mode] = get_transitions(
             merged_abstr, mode, cont_dyn,
-            N=params['N'], trans_length=params['trans_length']
-        )
-
+            N=params['N'],
+            trans_length=params['trans_length'])
     # merge the abstractions, creating a common TS
     merge_abstractions(
         merged_abstr, trans,
@@ -1834,9 +1817,7 @@ def merge_abstractions(
         sys_ts.transitions.add_adj(
             adj = adj,
             adj2states = states,
-            **env_sys_actions
-        )
-
+            **env_sys_actions)
     merged_abstr.ts = sys_ts
     merged_abstr.ppp2ts = ppp2ts
 
@@ -1887,9 +1868,7 @@ def get_transitions(
         trans_feasible = is_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
-            trans_set = trans_set
-        )
-
+            trans_set = trans_set)
         if trans_feasible:
             transitions[i, j] = 1
             msg = '\t Feasible transition.'
@@ -1968,8 +1947,7 @@ def merge_partitions(abstractions):
         ab2 = abstractions[cur_mode]
         r = merge_partition_pair(
             regions, ab2, cur_mode, prev_modes,
-            parents, ap_labeling
-        )
+            parents, ap_labeling)
         regions, parents, ap_labeling = r
         prev_modes.append(cur_mode)
     new_list = regions
@@ -2001,15 +1979,11 @@ def merge_partitions(abstractions):
         domain=ab0.ppp.domain,
         regions=new_list,
         prop_regions=ab0.ppp.prop_regions,
-        adj=adj
-    )
-
+        adj=adj)
     abstraction = AbstractSwitched(
         ppp=ppp,
         modes=abstractions,
-        ppp2modes=parents,
-    )
-
+        ppp2modes=parents)
     return (abstraction, ap_labeling)
 
 

@@ -73,8 +73,7 @@ def is_feasible(
     S0 = solve_feasible(
         from_region, to_region, sys, N,
         closed_loop, use_all_horizon,
-        trans_set
-    )
+        trans_set)
     return from_region <= S0
 
 def solve_feasible(
@@ -148,8 +147,7 @@ def solve_feasible(
         return solve_open_loop(
             P1, P2, ssys, N,
             trans_set=trans_set,
-            max_num_poly=max_num_poly
-        )
+            max_num_poly=max_num_poly)
 
 
 def _solve_closed_loop_fixed_horizon(
@@ -440,8 +438,7 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
                 range(
                     sum_vert,
                     sum_vert + Li.A.shape[0]),
-                range(Gk.shape[1])
-            )
+                range(Gk.shape[1]))
             Gk[idx] = Li.A.dot(A_k).dot(E_diag)
             if (PU.A.shape[1] == m + n) and (i < N):
                 A_k_E_diag = A_k.dot(E_diag)

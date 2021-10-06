@@ -227,8 +227,7 @@ class LTL:
                         domain = domain.split(',')
                         variables[i][name] = (
                             int(domain[0][1:]),
-                            int(domain[1][:domain[1].index(']')])
-                        )
+                            int(domain[1][:domain[1].index(']')]))
                     elif domain[0] == '{':  # Finite set domain
                         domain.strip()
                         assert domain[-1] == '}'
@@ -251,8 +250,7 @@ class LTL:
         return LTL(
             formula=formula,
             input_variables=variables[0],
-            output_variables=variables[1]
-        )
+            output_variables=variables[1])
 
     @staticmethod
     def load(f):
@@ -581,22 +579,19 @@ class GRSpec(LTL):
                 '    INITIAL\n\t  ' +
                 '\n\t& '.join([
                     f'({f})' for f in self.env_init
-                ]) + '\n'
-            )
+                ]) + '\n')
         if self.env_safety:
             output += (
                 '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
                     f'({f})' for f in self.env_safety
-                ]) + '\n'
-            )
+                ]) + '\n')
         if self.env_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
                     f'({f})' for f in self.env_prog
-                ]) + '\n'
-            )
+                ]) + '\n')
 
         output += 'GUARANTEE:\n'
         if self.sys_init:
@@ -604,22 +599,19 @@ class GRSpec(LTL):
                 '    INITIAL\n\t  ' +
                 '\n\t& '.join([
                     f'({f})' for f in self.sys_init
-                ]) + '\n'
-            )
+                ]) + '\n')
         if self.sys_safety:
             output += (
                 '    SAFETY\n\t  []' +
                 '\n\t& []'.join([
                     f'({f})' for f in self.sys_safety
-                ]) + '\n'
-            )
+                ]) + '\n')
         if self.sys_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
                 '\n\t& []<>'.join([
                     f'({f})' for f in self.sys_prog
-                ]) + '\n'
-            )
+                ]) + '\n')
         return output
 
     def check_syntax(self):

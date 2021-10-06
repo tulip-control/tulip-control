@@ -64,8 +64,7 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     cost = [0 for i in range(spec.get_num_levels())]
     for idx, rule in enumerate(spec):
         rule_transitions = rule.automaton().transitions.find(
-            from_spec_state[idx], to_spec_state[idx]
-        )
+            from_spec_state[idx], to_spec_state[idx])
         rule_transition_labels = [
             set(transition[2]["letter"]) for transition in rule_transitions
         ]
@@ -108,8 +107,7 @@ def _add_transition(
             fa.transitions.add(
                 from_prod_state,
                 to_prod_state,
-                {"cost": VectorCost(cost)}
-            )
+                {"cost": VectorCost(cost)})
 
 
 def _construct_weighted_product_automaton(ks, spec):
@@ -148,16 +146,14 @@ def _construct_weighted_product_automaton(ks, spec):
             ks,
             spec,
             trans_ks_cost,
-            fa,
-        )
+            fa)
     _add_transition(
         fa.states.initial,
         product(ks.states.initial, spec.get_states()),
         ks,
         spec,
         0,
-        fa,
-    )
+        fa)
     return (fa, null_state)
 
 
@@ -191,7 +187,6 @@ def solve(ks, goal_label, spec):
         wpa,
         wpa.states.initial,
         accepting_goal_states,
-        cost_key="cost"
-    )
+        cost_key="cost")
     state_path = [state[0] for state in product_path if state[0] != null_state]
     return (cost, state_path, product_path, wpa)

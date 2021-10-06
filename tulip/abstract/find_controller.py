@@ -302,8 +302,7 @@ def get_input(
                     u, cost = get_input_helper(
                         x0, ssys, P1, P3, N, R, r, Q, ord,
                         closed_loop=closed_loop,
-                        solver=solver
-                    )
+                        solver=solver)
                 except _InputHelperLPException as ex:
                     # The end state might consist of several polytopes.
                     # For some of them there might not be a control action that
@@ -340,8 +339,7 @@ def get_input(
         low_u, cost = get_input_helper(
             x0, ssys, P1, P3, N, R, r, Q, ord,
             closed_loop=closed_loop,
-            solver=solver
-        )
+            solver=solver)
     return low_u
 
 

@@ -323,9 +323,7 @@ def stability_to_gr1(p, aux='aux'):
     """
     logging.warning(
         'Conversion of stability (<>[]p) to GR(1)' +
-        'is sound, but NOT complete.'
-    )
-
+        'is sound, but NOT complete.')
     a = aux
     a0 = a
     p = _paren(p)

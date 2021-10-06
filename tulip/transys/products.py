@@ -81,8 +81,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             msg = (
                 'Transition System has no initial states !\n'
                 '=> Empty product system.\n'
-                'Did you forget to define initial states ?'
-            )
+                'Did you forget to define initial states ?')
             warnings.warn(msg)
 
         for s0 in s0s:
@@ -132,8 +131,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
 
             (new_sqs, new_accepting) = find_prod_succ(
                 sq, next_s, enabled_ba_trans,
-                self, ba, ts
-            )
+                self, ba, ts)
 
             next_sqs.update(new_sqs)
             self.states.accepting |= new_accepting
