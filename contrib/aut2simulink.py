@@ -73,6 +73,7 @@ class AutomatonState(object):
         self.state = copy.copy(state)
         self.transition = transition[:]
 
+
 def question(string):
     """This function asks a yes/no question and returns the answer.
 
@@ -95,6 +96,7 @@ def question(string):
             return valid[choice]
         else:
             print("Please respond with 'yes' or 'no'\n")
+
 
 def load_file(aut_file):
     """Construct an AutomatonState object from aut_file and place in a Queue.
@@ -149,7 +151,8 @@ def read_variables(smv_file):
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 
-def write_startline(enviroment,system,f):
+
+def write_startline(enviroment, system, f):
     """Write the first lines before the switch cases in the matlab file.
 
     Input:
@@ -178,7 +181,8 @@ def write_startline(enviroment,system,f):
         enviroment.put(temp)
     f.write(")\nglobal state;\ncoder.extrinsic('disp');\nswitch state\n")
 
-def write_case(enviroment,system,f,verbosem):
+
+def write_case(enviroment, system, f, verbosem):
     """Write the switch cases in the matlab file.
 
     Input:
@@ -188,34 +192,32 @@ def write_case(enviroment,system,f,verbosem):
     - fileobject f
     - verbosem
     """
-
-    #for each case
+    # for each case
     for i in range(queue.qsize()):
         f.write('\tcase '+str(i)+'\n')
-
-        #for each condition within each case
-        temp=queue.get()
-        ef=0
+        # for each condition within each case
+        temp = queue.get()
+        ef = 0
         for k in range(queue1.qsize()):
-            temp2=queue1.get()
+            temp2 = queue1.get()
             if str(k) in temp[2]:
                 if ef == 0:
                     f.write('\t\tif ')
-                    ef=1
+                    ef = 1
                 else:
                     f.write('\t\telseif ')
                 for l in range(enviroment.qsize()):
                     count=enviroment.qsize()
                     temp1=enviroment.get()
-                    if count == l+1:
+                    if count == l + 1:
                         f.write(temp1+' == '+temp2[1][temp1])
                     else:
                         f.write(temp1+' == '+temp2[1][temp1]+' && ')
                     enviroment.put(temp1)
                 f.write('\n')
-                if verbosem==1:
+                if verbosem == 1:
                     f.write('\t\t\tstate = '+str(temp2[0])+';\n')
-                elif verbosem==0:
+                elif verbosem == 0:
                     f.write('\t\t\tstate = '+str(temp2[0])+'\n')
                 else:
                     raise Exception
@@ -229,15 +231,13 @@ def write_case(enviroment,system,f,verbosem):
                         raise Exception
                     system.put(temp1)
             queue1.put(temp2)
-
-
-        #else statement for each case
+        # else statement for each case
         if not temp[2]:
             for l in range(system.qsize()):
-                temp1=system.get()
-                if verbosem==1:
+                temp1 = system.get()
+                if verbosem == 1:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+';\n')
-                elif verbosem==0:
+                elif verbosem == 0:
                     f.write('\t\t'+temp1+' = '+temp[1][temp1]+'\n')
                 else:
                     raise Exception
@@ -246,22 +246,21 @@ def write_case(enviroment,system,f,verbosem):
             f.write('\t\telse\n')
             f.write("\t\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
             for l in range(system.qsize()):
-                temp1=system.get()
-                if verbosem==1:
+                temp1 = system.get()
+                if verbosem == 1:
                     f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+';\n')
-                elif verbosem==0:
+                elif verbosem == 0:
                     f.write('\t\t\t'+temp1+' = '+temp[1][temp1]+'\n')
                 else:
                     raise Exception
                 system.put(temp1)
             f.write('\t\tend\n')
         queue.put(temp)
-
-    #the last case is an otherwise statement
+    # the last case is an otherwise statement
     f.write('\totherwise\n')
     f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
-        temp1=system.get()
+        temp1 = system.get()
         if verbosem==1:
             f.write('\t\t'+temp1+' = 0;\n')
         elif verbosem==0:
@@ -271,7 +270,8 @@ def write_case(enviroment,system,f,verbosem):
         system.put(temp1)
     f.write('end')
 
-def write_case_no(enviroment,system,f,verbosem):
+
+def write_case_no(enviroment, system, f, verbosem):
     """Write the switch cases in the matlab file and exclude no
     successors.
 
@@ -282,22 +282,19 @@ def write_case_no(enviroment,system,f,verbosem):
     - fileobject f
     - verbosem
     """
-
-    #for each case
-    li=list()
+    # for each case
+    li = list()
     for i in range(queue.qsize()):
-        q=queue.get()
+        q = queue.get()
         li.append(q[0])
         queue.put(q)
-
     for i in range(queue.qsize()):
-
-        #for each condition within each case
-        temp=queue.get()
+        # for each condition within each case
+        temp = queue.get()
         f.write('\tcase '+str(temp[0])+'\n')
-        ef=0
+        ef = 0
         for k in range(queue2.qsize()):
-            temp2=queue2.get()
+            temp2 = queue2.get()
             if str(k) in temp[2] and k in li:
                 if ef == 0:
                     f.write('\t\tif ')
@@ -305,9 +302,9 @@ def write_case_no(enviroment,system,f,verbosem):
                 else:
                     f.write('\t\telseif ')
                 for l in range(enviroment.qsize()):
-                    count=enviroment.qsize()
-                    temp1=enviroment.get()
-                    if count == l+1:
+                    count = enviroment.qsize()
+                    temp1 = enviroment.get()
+                    if count == l + 1:
                         f.write(temp1+' == '+temp2[1][temp1])
                     else:
                         f.write(temp1+' == '+temp2[1][temp1]+' && ')
@@ -329,8 +326,6 @@ def write_case_no(enviroment,system,f,verbosem):
                         raise Exception
                     system.put(temp1)
             queue2.put(temp2)
-
-
         #else statement for each case
         if not temp[2]:
             for l in range(system.qsize()):
@@ -356,50 +351,50 @@ def write_case_no(enviroment,system,f,verbosem):
                 system.put(temp1)
             f.write('\t\tend\n')
         queue.put(temp)
-
-    #the last case is an otherwise statement
+    # the last case is an otherwise statement
     f.write('\totherwise\n')
     f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
-        temp1=system.get()
-        if verbosem==1:
+        temp1 = system.get()
+        if verbosem == 1:
             f.write('\t\t'+temp1+' = 0;\n')
-        elif verbosem==0:
+        elif verbosem == 0:
             f.write('\t\t'+temp1+' = 0\n')
         else:
             raise Exception
         system.put(temp1)
     f.write('end')
 
-queue=_queue.Queue()
-queue1=_queue.Queue()
-queue2=_queue.Queue()
-enviroment=_queue.Queue()
-system=_queue.Queue()
+
+queue = _queue.Queue()
+queue1 = _queue.Queue()
+queue2 = _queue.Queue()
+enviroment = _queue.Queue()
+system = _queue.Queue()
 try:
     load_file(sys.argv[1]+'.aut')
     read_variables(sys.argv[1]+'.smv')
     q=question('Shall there be a semicolon printed after each variable assignment? [Y/n]')
     q2=question('Shall the script exclude no successors? [Y/n]')
     if q:
-        verbosem=1
+        verbosem = 1
     else:
-        verbosem=0
+        verbosem = 0
     if not os.path.isfile(sys.argv[2]+'.m'):
         f=open(sys.argv[2]+'.m','w')
-        write_startline(enviroment,system,f)
+        write_startline(enviroment, system, f)
         if q2:
             for i in range(queue.qsize()):
-                temp=queue.get()
-                temp1=queue1.get()
+                temp = queue.get()
+                temp1 = queue1.get()
                 if not temp[2] == []:
                     queue.put(temp)
                     queue1.put(temp1)
-            write_case_no(enviroment,system,f,verbosem)
+            write_case_no(enviroment, system, f, verbosem)
         else:
-            write_case(enviroment,system,f,verbosem)
+            write_case(enviroment, system, f, verbosem)
         f.close()
-        if queue.get()[0]==-1:
+        if queue.get()[0] == -1:
             raise IOError
         print('MATLAB script written to '+sys.argv[2]+'.m'+' with success\n')
     else:

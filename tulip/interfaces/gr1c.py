@@ -621,8 +621,9 @@ class GR1CSession(object):
             return False
 
     def getindex(self, state, goal_mode):
-        if goal_mode < 0 or goal_mode > self.numgoals()-1:
-            raise ValueError("Invalid goal mode requested: "+str(goal_mode))
+        if goal_mode < 0 or goal_mode > self.numgoals() - 1:
+            raise ValueError(
+                "Invalid goal mode requested: " + str(goal_mode))
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]

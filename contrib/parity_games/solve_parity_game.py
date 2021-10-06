@@ -41,12 +41,11 @@ def McNaughton(p):
 
         W_ = McNaughton(p_)
 
-        if not W_[1-sigma]:
-            W[sigma] = set(p) - W[1-sigma]
+        if not W_[1 - sigma]:
+            W[sigma] = set(p) - W[1 - sigma]
             return (W[0], W[1])
-
-        a = attractor(W_[1-sigma], p, 1-sigma)
-        W[1-sigma] = W[1-sigma].union(a)
+        a = attractor(W_[1 - sigma], p, 1 - sigma)
+        W[1 - sigma] = W[1 - sigma].union(a)
 
         p.states.remove_from(a)
 
