@@ -30,9 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-Functions for plotting Partitions.
-"""
+"""Functions for plotting Partitions."""
 from __future__ import division
 
 import logging

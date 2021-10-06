@@ -30,9 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-Classes representing hybrid dynamical systems.
-"""
+"""Classes representing hybrid dynamical systems."""
 from __future__ import absolute_import
 import logging
 logger = logging.getLogger(__name__)

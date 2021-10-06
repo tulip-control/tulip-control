@@ -30,8 +30,10 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-"""
-Algorithms related to controller synthesis for discretized dynamics.
+"""Controller synthesis for discretized dynamics.
+
+Algorithms related to controller synthesis for
+discretized dynamics.
 
 Primary functions:
 - `get_input`

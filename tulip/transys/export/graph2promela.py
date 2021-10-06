@@ -29,9 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Convert state graphs to promela
-"""
+"""Convert state graphs to Promela."""
 from __future__ import print_function
 from time import strftime
 

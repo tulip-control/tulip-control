@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Mathematical Sets and Power Sets"""
+"""Mathematical Sets and Power Sets."""
 from __future__ import print_function
 
 import logging
