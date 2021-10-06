@@ -69,10 +69,7 @@ def check_realizable(spec):
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        try:
-            fin.write(bytes(struct, 'utf-8'))
-        except TypeError:  # Try to be compatible with Python 2.7
-            fin.write(bytes(struct))
+        fin.write(bytes(struct, 'utf-8'))
     realizable, out = _call_slugs(fin.name, synth=False)
     return realizable
 
@@ -92,10 +89,7 @@ def synthesize(spec, symbolic=False):
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:
-        try:
-            fin.write(bytes(struct, 'utf-8'))
-        except TypeError:  # Try to be compatible with Python 2.7
-            fin.write(bytes(struct))
+        fin.write(bytes(struct, 'utf-8'))
     realizable, out = _call_slugs(
         fin.name,
         synth=True,
