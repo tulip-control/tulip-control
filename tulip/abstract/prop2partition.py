@@ -445,7 +445,6 @@ def product_interval(list1, list2):
             new_list.append(list1[m] + list2[n])
     return new_list
 
-################################
 
 class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:
