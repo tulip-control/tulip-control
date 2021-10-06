@@ -57,7 +57,7 @@ __all__ = [
 
 
 def plot_abstraction_scc(ab, ax=None):
-    """Plot Regions colored by strongly connected component.
+    """Plot Regions colored by strongly-connected component.
 
     Handy to develop new examples or debug existing ones.
     """
