@@ -315,9 +315,12 @@ class PwaSysDyn:
                 'a `Polytope` or `Region`')
         if len(list_subsys) > 0:
             uncovered_dom = domain.copy()
-            n = list_subsys[0].A.shape[1]  # State space dimension
-            m = list_subsys[0].B.shape[1]  # Input space dimension
-            p = list_subsys[0].E.shape[1]  # Disturbance space dimension
+            n = list_subsys[0].A.shape[1]
+                # State-space dimension
+            m = list_subsys[0].B.shape[1]
+                # Input-space dimension
+            p = list_subsys[0].E.shape[1]
+                # Disturbance-space dimension
             for subsys in list_subsys:
                 uncovered_dom = uncovered_dom.diff(
                     subsys.domain)
