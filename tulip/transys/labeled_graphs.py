@@ -110,9 +110,9 @@ class States(object):
     """Methods to manage states and initial states."""
 
     def __init__(self, graph):
-        """Initialize C{States}.
+        """Initialize `States`.
 
-        @type graph: L{LabeledDiGraph}
+        @type graph: `LabeledDiGraph`
         """
         self.graph = graph
         self.initial = []
@@ -123,7 +123,7 @@ class States(object):
     def __call__(self, *args, **kwargs):
         """Return list of states.
 
-        For more details see L{LabeledDiGraph.nodes}
+        For more details see `LabeledDiGraph.nodes`
         """
         return self.graph.nodes(*args, **kwargs)
 
@@ -148,7 +148,7 @@ class States(object):
 
     @property
     def initial(self):
-        """ Return L{SubSet} of initial states."""
+        """ Return `SubSet` of initial states."""
         return self._initial
 
     @initial.setter
@@ -169,23 +169,23 @@ class States(object):
         return states
 
     def add(self, new_state, attr_dict=None, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_node},
+        """Wraps `LabeledDiGraph.add_node`,
 
-        which wraps C{networkx.MultiDiGraph.add_node}.
+        which wraps `networkx.MultiDiGraph.add_node`.
         """
         self.graph.add_node(new_state, attr_dict, check, **attr)
 
     def add_from(self, new_states, check=True, **attr):
-        """Wraps L{LabeledDiGraph.add_nodes_from},
+        """Wraps `LabeledDiGraph.add_nodes_from`,
 
-        which wraps C{networkx.MultiDiGraph.add_nodes_from}.
+        which wraps `networkx.MultiDiGraph.add_nodes_from`.
         """
         self.graph.add_nodes_from(new_states, check, **attr)
 
     def remove(self, state):
-        """Remove C{state} from states (including initial).
+        """Remove `state` from states (including initial).
 
-        Wraps C{networkx.MultiDiGraph.remove_node}.
+        Wraps `networkx.MultiDiGraph.remove_node`.
         """
         if state in self.initial:
             self.initial.remove(state)
@@ -194,8 +194,8 @@ class States(object):
     def remove_from(self, states):
         """Remove a list of states.
 
-        Iterates C{States.remove} to imitate
-        C{networkx.MultiDiGraph.remove_nodes_from},
+        Iterates `States.remove` to imitate
+        `networkx.MultiDiGraph.remove_nodes_from`,
         handling also initial states.
         """
         for state in states:
@@ -211,9 +211,9 @@ class States(object):
 
         See Also
         ========
-          - L{pre}
-          - Def. 2.3, p.23 U{[BK08]
-            <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+        - `pre`
+        - Def. 2.3, p.23 U{[BK08]
+          <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
         @param states:
           - None, so initial states returned
@@ -235,9 +235,9 @@ class States(object):
 
         See Also
         ========
-          - L{post}
-          - Def. 2.3, p.23 U{[BK08]
-            <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+        - `post`
+        - Def. 2.3, p.23 U{[BK08]
+          <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
         @rtype: set
         """
@@ -271,7 +271,7 @@ class States(object):
 
         @param state: valid system state
 
-        @param color: with which to paint C{state}
+        @param color: with which to paint `state`
         @type color: str of valid dot color
         """
         self.graph.nodes[state]['style'] = 'filled'
@@ -284,34 +284,43 @@ class States(object):
         ========
         Assume that the system is:
 
-        >>> import transys as trs
-        >>> ts = trs.FTS()
-        >>> ts.atomic_propositions.add('p')
-        >>> ts.states.add('s0', ap={'p'})
+        ```python
+        import transys as trs
 
-          - To find the label of a single state C{'s0'}:
+        ts = trs.FTS()
+        ts.atomic_propositions.add('p')
+        ts.states.add('s0', ap={'p'})
+        ```
 
-              >>> a = ts.states.find(['s0'] )
-              >>> (s0_, label) = a[0]
-              >>> print(label)
-              {'ap': set(['p'])}
+        - To find the label of a single state `'s0'`:
 
-          - To find all states with a specific label C{{'p'}}:
+          ```python
+          >>> a = ts.states.find(['s0'])
+          >>> s0_, label = a[0]
+          >>> print(label)
+          {'ap': set(['p'])}
+          ```
 
-              >>> ts.states.add('s1', ap={'p'})
-              >>> b = ts.states.find(with_attr_dict={'ap':{'p'} } )
-              >>> states = [state for (state, label_) in b]
-              >>> print(set(states) )
-              {'s0', 's1'}
+        - To find all states with a specific label `{'p'}`:
 
-          - To find all states in subset C{M} labeled with C{{'p'}}:
+          ```python
+          >>> ts.states.add('s1', ap={'p'})
+          >>> b = ts.states.find(with_attr_dict={'ap':{'p'}})
+          >>> states = [state for state, label_ in b]
+          >>> print(set(states))
+          {'s0', 's1'}
+          ```
 
-              >>> ts.states.add('s2', ap={'p'})
-              >>> M = {'s0', 's2'}
-              >>> b = ts.states.find(M, {'ap': {'p'} } )
-              >>> states = [state for (state, label_) in b]
-              >>> print(set(states) )
-              {'s0', 's2'}
+        - To find all states in subset `M` labeled with `{'p'}`:
+
+          ```python
+          >>> ts.states.add('s2', ap={'p'})
+          >>> M = {'s0', 's2'}
+          >>> b = ts.states.find(M, {'ap': {'p'}})
+          >>> states = [state for state, label_ in b]
+          >>> print(set(states))
+          {'s0', 's2'}
+          ```
 
         @param states: subset of states over which to search
         @type states: 'any' (default)
@@ -323,13 +332,13 @@ class States(object):
             | leave empty, to allow any state label (default)
 
         @param with_attr: label key-value pairs which take
-            precedence over C{with_attr_dict}.
+            precedence over `with_attr_dict`.
 
         @rtype: list of labeled states
-        @return: [(C{state}, C{label}),...]
+        @return: `[(state, label),...]`
             where:
-                - C{state} \\in C{states}
-                - C{label}: dict
+            - `state` \\in `states`
+            - `label`: dict
         """
         if with_attr_dict is None:
             with_attr_dict = with_attr
@@ -399,9 +408,9 @@ class Transitions(object):
     """
 
     def __init__(self, graph, deterministic=False):
-        """Initialize C{Transitions}.
+        """Initialize `Transitions`.
 
-        @type graph: L{LabeledDiGraph}
+        @type graph: `LabeledDiGraph`
         """
         self.graph = graph
         self._deterministic = deterministic
@@ -409,7 +418,7 @@ class Transitions(object):
     def __call__(self, **kwargs):
         """Return list of transitions.
 
-        Wraps L{LabeledDiGraph.edges}.
+        Wraps `LabeledDiGraph.edges`.
         """
         return self.graph.edges(**kwargs)
 
@@ -439,27 +448,27 @@ class Transitions(object):
             raise Exception(msg)
 
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edge},
+        """Wrapper of `LabeledDiGraph.add_edge`,
 
-        which wraps C{networkx.MultiDiGraph.add_edge}.
+        which wraps `networkx.MultiDiGraph.add_edge`.
         """
         # self._breaks_determinism(from_state, labels)
         self.graph.add_edge(from_state, to_state,
                             attr_dict=attr_dict, check=check, **attr)
 
     def add_from(self, transitions, attr_dict=None, check=True, **attr):
-        """Wrapper of L{LabeledDiGraph.add_edges_from},
+        """Wrapper of `LabeledDiGraph.add_edges_from`,
 
-        which wraps C{networkx.MultiDiGraph.add_edges_from}.
+        which wraps `networkx.MultiDiGraph.add_edges_from`.
         """
         self.graph.add_edges_from(transitions, attr_dict=attr_dict,
                                   check=check, **attr)
 
     def add_comb(self, from_states, to_states, attr_dict=None,
                  check=True, **attr):
-        """Add an edge for each combination C{(u, v)},
+        """Add an edge for each combination `(u, v)`,
 
-        for C{u} in C{from_states} for C{v} in C{to_states}.
+        for `u` in `from_states` for `v` in `to_states`.
         """
         for u in from_states:
             for v in to_states:
@@ -472,10 +481,10 @@ class Transitions(object):
         If only the states are passed,
         then all transitions between them are removed.
 
-        If C{attr_dict}, C{attr} are also passed,
+        If `attr_dict`, `attr` are also passed,
         then only transitions annotated with those labels are removed.
 
-        Wraps L{LabeledDiGraph.remove_labeled_edge}.
+        Wraps `LabeledDiGraph.remove_labeled_edge`.
         """
         self.graph.remove_labeled_edge(from_state, to_state, attr_dict, **attr)
 
@@ -484,8 +493,8 @@ class Transitions(object):
 
         Each transition is either a:
 
-          - 2-tuple: (u, v), or a
-          - 3-tuple: (u, v, data)
+        - 2-tuple: `(u, v)`, or
+        - 3-tuple: `(u, v, data)`
         """
         self.graph.remove_labeled_edges_from(transitions)
 
@@ -496,29 +505,29 @@ class Transitions(object):
         """Add multiple labeled transitions from adjacency matrix.
 
         The label can be empty.
-        For more details see L{add}.
+        For more details see `add`.
 
         @param adj: new transitions represented by adjacency matrix.
         @type adj: scipy.sparse.lil (list of lists)
 
         @param adj2states: map from adjacency matrix indices to states.
             If value not a state, raise Exception.
-            Use L{States.add}, L{States.add_from} to add states first.
+            Use `States.add`, `States.add_from` to add states first.
 
             For example the 1st state in adj2states corresponds to
-            the first node in C{adj}.
+            the first node in `adj`.
 
             States must have been added using:
 
-               - sys.states.add, or
-               - sys.states.add_from
+            - `sys.states.add`, or
+            - `sys.states.add_from`
 
-            If C{adj2states} includes a state not in sys.states,
+            If `adj2states` includes a state not in sys.states,
             no transition is added and an exception raised.
         @type adj2states: either of:
-            - C{dict} from adjacency matrix indices to
+            - `dict` from adjacency matrix indices to
               existing, or
-            - C{list} of existing states
+            - `list` of existing states
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
@@ -544,22 +553,25 @@ class Transitions(object):
 
         Instead of having two separate methods to:
 
-          - find all labels of edges between given states (s1, s2)
+        - find all labels of edges between given states (s1, s2)
 
-          - find all transitions (s1, s2, L) with given label L,
-                possibly from some given state s1,
-                i.e., the edges leading to the successor states
-                Post(s1, a) = Post(s1) restricted by action a
+        - find all transitions (s1, s2, L) with given label L,
+          possibly from some given state s1,
+          i.e., the edges leading to the successor states
+          Post(s1, a) = Post(s1) restricted by action a
 
         this method provides both functionalities.
 
         Preimage under edge labeling function L of given label,
-        intersected with given subset of edges::
-            L^{-1}(desired_label) \\cap (from_states x to_states)
+        intersected with given subset of edges:
+
+        ```
+        L^{-1}(desired_label) \\cap (from_states x to_states)
+        ```
 
         See Also
         ========
-        L{add}, L{add_adj}
+        `add`, `add_adj`
 
         @param from_states: edges must start from this subset of states
         @type from_states:
@@ -577,21 +589,21 @@ class Transitions(object):
             - None (no constraint, default)
 
         @param with_attr: label type-value pairs,
-            take precedence over C{desired_label}.
+            take precedence over `desired_label`.
 
-        @return: set of transitions = labeled edges::
+        @return: set of transitions = labeled edges:
                 (from_state, to_state, label)
-        such that::
+        such that:
                 (from_state, to_state )
                 in from_states x to_states
 
-        @rtype: list of transitions::
-                = list of labeled edges
-                = [(from_state, to_state, label),...]
+        @rtype: list of transitions:
+            = list of labeled edges
+            = `[(from_state, to_state, label),...]`
         where:
-          - C{from_state} in C{from_states}
-          - C{to_state} in C{to_states}
-          - C{label}: dict
+          - `from_state` in `from_states`
+          - `to_state` in `to_states`
+          - `label`: dict
         """
         if with_attr_dict is None:
             with_attr_dict = with_attr
@@ -635,9 +647,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
     Before removing a value from a label type,
     first make sure no state (or edge) is labeled with it.
 
-    Multiple edges with the same C{attr_dict} are not possible.
-    So the difference from C{networkx.MultiDiGraph} is that
-    the C{dict} of edges between u,v is a bijection.
+    Multiple edges with the same `attr_dict` are not possible.
+    So the difference from `networkx.MultiDiGraph` is that
+    the `dict` of edges between u,v is a bijection.
 
     Between two nodes either:
 
@@ -651,103 +663,117 @@ class LabeledDiGraph(nx.MultiDiGraph):
     Label types by example
     ======================
 
-    Use a C{dict} for each label type you want to define,
+    Use a `dict` for each label type you want to define,
     like this:
 
-      >>> types = [
-              {'name': 'drink',
-               'values': {'tea', 'coffee'},
-               'setter': True,
-               'default': 'tea'}]
+    ```python
+    types = [
+        {'name': 'drink',
+         'values': {'tea', 'coffee'},
+         'setter': True,
+         'default': 'tea'}]
+    ```
 
-    This will create a label type named C{'drink'} that can
-    take the values C{'tea'} and C{'coffee'}.
+    This will create a label type named `'drink'` that can
+    take the values `'tea'` and `'coffee'`.
 
     Assuming this label type applies to nodes,
     you can now label a new node as:
 
-      >>> g = LabeledDiGraph(types)
-      >>> g.add_node(1, drink='coffee')
+    ```python
+    g = LabeledDiGraph(types)
+    g.add_node(1, drink='coffee')
+    ```
 
     If you omit the label when adding a new node,
     it gets the default value:
 
-      >>> g.add_node(2)
-      >>> g.nodes[2]
-      {'drink': 'tea'}
+    ```python
+    >>> g.add_node(2)
+    >>> g.nodes[2]
+    {'drink': 'tea'}
+    ```
 
-    The main difference with vanilla C{networkx} is
+    The main difference with vanilla `networkx` is
     that the dict above includes type checking:
 
-      >>> type(g.nodes[2])
-      tulip.transys.mathset.TypedDict
+    ```python
+    >>> type(g.nodes[2])
+    tulip.transys.mathset.TypedDict
+    ```
 
-    The C{'setter'} key with value C{True}
-    creates also a field C{g.drink}.
+    The `'setter'` key with value `True`
+    creates also a field `g.drink`.
     Be careful to avoid name conflicts with existing
-    networkx C{MultiDiGraph} attributes.
+    networkx `MultiDiGraph` attributes.
 
     This allows us to add more values after creating
     the graph:
 
-      >>> g.drink
-      {'coffee', 'tea'}
-      >>> g.drink.add('water')
-      {'coffee', 'tea', 'water'}
+    ```python
+    >>> g.drink
+    {'coffee', 'tea'}
+    >>> g.drink.add('water')
+    {'coffee', 'tea', 'water'}
+    ```
 
     Finally, the graph will prevent us from
     accidentally using an untyped label name,
-    by raising an C{AttributeError}:
+    by raising an `AttributeError`:
 
-      >>> g.add_node(3, day='Jan')
-      AttributeError: ...
+    ```python
+    >>> g.add_node(3, day='Jan')
+    AttributeError: ...
+    ```
 
     To add untyped labels, do so explicitly:
 
-      >>> g.add_node(3, day='Jan', check=False)
-      >>> g.nodes[3]
-      {'day': 'Jan', 'drink': 'tea'}
+    ```python
+    >>> g.add_node(3, day='Jan', check=False)
+    >>> g.nodes[3]
+    {'day': 'Jan', 'drink': 'tea'}
+    ```
 
 
     Details on label types
     ======================
 
-    Each label type is defined by a C{dict} that
-    must have the keys C{'name'} and C{'values'}:
+    Each label type is defined by a `dict` that
+    must have the keys `'name'` and `'values'`:
 
-      - C{'name'}: with C{str} value
+      - `'name'`: with `str` value
 
-      - C{'values' : B} implements C{__contains__}
+      - `'values' : B` implements `__contains__`
         used to check label validity.
 
-        If you want the codomain C{B} to be
+        If you want the codomain `B` to be
         extensible even after initialization,
-        it must implement method C{add}.
+        it must implement method `add`.
 
     and optionally the keys:
 
-      - C{'setter': C} with 3 possibilities:
+      - `'setter': C` with 3 possibilities:
 
         - if absent,
-          then no C{setter} attribute is created
+          then no `setter` attribute is created
 
-        - otherwise an attribute C{self.A}
+        - otherwise an attribute `self.A`
           is created, pointing at:
 
-            - the given co-domain C{B}
-              if C{C is True}
+            - the given co-domain `B`
+              if `C is True`
 
-            - C{C}, otherwise.
+            - `C`, otherwise.
 
-      - C{'default': d} is a value in C{B}
+      - `'default': d` is a value in `B`
         to be returned for node and edge labels
         not yet explicitly specified by the user.
 
     @param node_label_types: applies to nodes, as described above.
-    @type node_label_types: C{list} of C{dict}
+    @type node_label_types: `list` of `dict`
 
     @param edge_label_types: applies to edges, as described above.
-    @type node_label_types: C{list} of C{dict}
+    @type node_label_types: `list` of `dict`
 
     @param deterministic: if True, then edge-label-deterministic
 
@@ -775,8 +801,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
     Credits
     =======
 
-    Some code in overridden methods of C{networkx.MultiDiGraph}
-    is adapted from C{networkx}, which is distributed under a BSD license.
+    Some code in overridden methods of `networkx.MultiDiGraph`
+    is adapted from `networkx`, which is distributed under a BSD license.
     """
 
     def __init__(
@@ -811,7 +837,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_label_types(self, label_types, is_edge):
         """Add label_types to node or edge depending on is_edge param
 
-        @param label_types: see L{__init__}.
+        @param label_types: see `__init__`.
         @param is_edge: whether to add label_types to node (False) or edge (True)
         """
         labeling, defaults = self._init_labeling(label_types)
@@ -830,7 +856,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         'state' will be renamed to 'node' in the future
         'transition' will be renamed to 'edge' in the future
 
-        @param label_types: see L{__init__}.
+        @param label_types: see `__init__`.
         """
         labeling = dict()
         defaults = dict()
@@ -905,16 +931,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
         return attr_dict
 
     def add_node(self, n, attr_dict=None, check=True, **attr):
-        """Use a L{TypedDict} as attribute dict.
+        """Use a `TypedDict` as attribute dict.
 
-        Overrides C{networkx.MultiDiGraph.add_node},
+        Overrides `networkx.MultiDiGraph.add_node`,
         see that for details.
 
         Log warning if node already exists.
         All other functionality remains the same.
 
         @param check: if True and untyped keys are passed,
-            then raise C{AttributeError}.
+            then raise `AttributeError`.
         """
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         # define typed dict
@@ -931,8 +957,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def add_nodes_from(self, nodes, check=True, **attr):
         """Create or label multiple nodes.
 
-        Overrides C{networkx.MultiDiGraph.add_nodes_from},
-        for details see that and L{LabeledDiGraph.add_node}.
+        Overrides `networkx.MultiDiGraph.add_nodes_from`,
+        for details see that and `LabeledDiGraph.add_node`.
         """
         for n in nodes:
             try:
@@ -946,18 +972,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self.add_node(node, attr_dict=attr_dict, check=check)
 
     def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
-        """Use a L{TypedDict} as attribute dict.
+        """Use a `TypedDict` as attribute dict.
 
-        Overrides C{networkx.MultiDiGraph.add_edge},
+        Overrides `networkx.MultiDiGraph.add_edge`,
         see that for details.
 
-          - Raise ValueError if C{u} or C{v} are not already nodes.
+          - Raise ValueError if `u` or `v` are not already nodes.
           - Raise Exception if edge (u, v, {}) exists.
           - Log warning if edge (u, v, attr_dict) exists.
-          - Raise ValueError if C{attr_dict} contains
+          - Raise ValueError if `attr_dict` contains
             typed key with invalid value.
-          - Raise AttributeError if C{attr_dict} contains untyped keys,
-            unless C{check=False}.
+          - Raise AttributeError if `attr_dict` contains untyped keys,
+            unless `check=False`.
 
         Each label defines a different labeled edge.
         So to "change" the label, either:
@@ -965,12 +991,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - remove the edge with this label, then add a new one, or
             - find the edge key, then use subscript notation:
 
-                C{G[i][j][key]['attr_name'] = attr_value}
+                `G[i][j][key]['attr_name'] = attr_value`
 
         Notes
         =====
 
-        @param check: raise C{AttributeError} if C{attr_dict}
+        @param check: raise `AttributeError` if `attr_dict`
             has untyped attribute keys, otherwise warn
         """
         # legacy
@@ -1032,7 +1058,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                        check=True, **attr):
         """Add multiple labeled edges.
 
-        Overrides C{networkx.MultiDiGraph.add_edges_from},
+        Overrides `networkx.MultiDiGraph.add_edges_from`,
         see that for details.
 
         Only difference is that only 2 and 3-tuple edges allowed.
@@ -1043,7 +1069,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - 2-tuples: (u, v), or
             - 3-tuples: (u, v, label)
 
-          See also L{remove_labeled_edges_from}.
+          See also `remove_labeled_edges_from`.
         """
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         # process ebunch
@@ -1072,7 +1098,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         @param attr_dict: attributes with which to identify the edge.
         @type attr_dict: dict
 
-        @param attr: keyword arguments with which to update C{attr_dict}.
+        @param attr: keyword arguments with which to update `attr_dict`.
         """
         if u not in self:
             return
@@ -1090,19 +1116,25 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Example
         =======
-        >>> g = LabeledDiGraph()
-        >>> g.add_edge(1, 2, day='Mon')
-        >>> g.add_edge(1, 2, day='Tue')
-        >>> edges = [(1, 2, {'day':'Mon'}),
-                     (1, 2, {'day':'Tue'})]
-        >>> g.remove_edges_from(edges)
 
-        @param labeled_ebunch: iterable container of edge tuples
-            Each edge tuple can be:
+        ```python
+        g = LabeledDiGraph()
+        g.add_edge(1, 2, day='Mon')
+        g.add_edge(1, 2, day='Tue')
+        edges = [
+            (1, 2, {'day':'Mon'}),
+            (1, 2, {'day':'Tue'})]
+        g.remove_edges_from(edges)
+        ```
 
-              - 2-tuple: (u, v) All edges between u and v are removed.
-              - 3-tuple: (u, v, attr_dict) all edges between u and v
-                  annotated with that C{attr_dict} are removed.
+        @param labeled_ebunch: iterable container of edge `tuple`s
+            Each edge `tuple` can be:
+
+            - 2-`tuple`: `(u, v)` All edges between
+              `u` and `v` are removed.
+            - 3-`tuple`: `(u, v, attr_dict)` all edges
+              between `u` and `v` annotated with
+              that `attr_dict` are removed.
         """
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         for e in labeled_ebunch:
@@ -1158,47 +1190,49 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Recommended file formats:
 
-            - tikz (via dot2tex)
-            - pdf
-            - svg
-            - dot
-            - png
+        - tikz (via dot2tex)
+        - pdf
+        - svg
+        - dot
+        - png
 
         Experimental:
 
-            - html (uses d3.js)
-            - 'scxml'
+        - html (uses d3.js)
+        - 'scxml'
 
         Requires
         ========
-          - graphviz dot: http://www.graphviz.org/
+          - graphviz `dot`: <http://www.graphviz.org>
           - Python package `graphviz`:
             <https://pypi.org/project/graphviz>
 
         and for tikz:
 
-          - dot2tex: https://pypi.python.org/pypi/dot2tex
-          - dot2texi: http://www.ctan.org/pkg/dot2texi
-            (to automate inclusion)
+        - `dot2tex`: <https://pypi.python.org/pypi/dot2tex>
+        - `dot2texi`: <http://www.ctan.org/pkg/dot2texi>
+          (to automate inclusion)
 
         See Also
         ========
-        L{plot}
+        `plot`
 
         @param filename: file path to save image to
-            Default is C{self.name}, unless C{name} is empty,
+            Default is `self.name`, unless `name` is empty,
             then use 'out.pdf'.
 
             If extension is missing '.pdf' is used.
         @type filename: str
 
-        @param fileformat: replace the extension of C{filename}
-            with this. For example::
+        @param fileformat: replace the extension of `filename`
+            with this. For example:
 
-                filename = 'fig.pdf'
-                fileformat = 'svg'
+            ```python
+            filename = 'fig.pdf'
+            fileformat = 'svg'
+            ```
 
-            result in saving 'fig.svg'
+            result in saving `'fig.svg'`.
 
         @param rankdir: direction for dot layout
         @type rankdir: str = 'TB' | 'LR'
@@ -1257,7 +1291,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         See Also
         ========
-        L{save}
+        `save`
 
         Depends
         =======
@@ -1294,20 +1328,23 @@ def prepend_with(states, prepend_str):
 
     Example
     =======
-    >>> states = [0, 1]
-    >>> prepend_str = 's'
-    >>> states = prepend_with(states, prepend_str)
-    >>> assert(states == ['s0', 's1'] )
+
+    ```python
+    states = [0, 1]
+    prepend_str = 's'
+    states = prepend_with(states, prepend_str)
+    assert states == ['s0', 's1']
+    ```
 
     See Also
     ========
-    L{tuple2ba}, L{tuple2fts}
+    `tuple2ba`, `tuple2fts`
 
-    @param states: items prepended with string C{prepend_str}
+    @param states: items prepended with string `prepend_str`
     @type states: iterable
 
-    @param prepend_str: text prepended to C{states}.  If None, then
-        C{states} is returned without modification
+    @param prepend_str: text prepended to `states`.  If None, then
+        `states` is returned without modification
     @type prepend_str: str or None
     """
     if not isinstance(states, Iterable):

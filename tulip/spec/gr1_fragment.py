@@ -64,7 +64,12 @@ __all__ = [
 
 
 def check(formula):
-    """Parse formula string and create abstract syntax tree (AST).
+    """Return syntax tree for `formula`.
+
+    Parse `formula` and create abstract
+    syntax tree (AST).
+
+    @type formula: `str`
     """
     from tulip import transys as trs
 
@@ -175,13 +180,16 @@ def str_to_grspec(f):
 
     Formula `f` must be in the form:
 
-      A -> G
+    ```
+    A => G
+    ```
 
-    where each of A, G is a conjunction of terms: `B`, `[]C`, `[]<>B`.
-    For more details on `B, C`, see [split_gr1].
+    where each of A, G is a conjunction of
+    terms: `B`, `[]C`, `[]<>B`.
+    For more details on `B, C`, see `split_gr1`.
 
     @type f: `str`
-    @rtype: [GRSpec]
+    @rtype: `GRSpec`
     """
     t = parser.parse(f)
     assert t.operator == '->'
@@ -303,26 +311,26 @@ def has_operator(u, g, operators):
 
 
 def stability_to_gr1(p, aux='aux'):
-    """Convert C{<>[] p} to GR(1).
+    """Convert `<>[] p` to GR(1).
 
     Warning: This conversion is sound, but not complete.
     See p.2, U{[E10]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#e10>}
 
-    GR(1) form::
+    GR(1) form:
 
-        !(aux) &&
-        [](aux -> X aux) &&
-        []<>(aux) &&
+    ```
+    !(aux) &&
+    [](aux -> X aux) &&
+    []<>(aux) &&
 
-        [](aux -> p)
+    [](aux -> p)
+    ```
 
-    @type p: str
-
+    @type p: `str`
     @param aux: name to use for auxiliary variable
-    @type aux: str
-
-    @rtype: L{GRSpec}
+    @type aux: `str`
+    @rtype: `GRSpec`
     """
     logging.warning(
         'Conversion of stability (<>[]p) to GR(1)' +
@@ -348,23 +356,22 @@ def stability_to_gr1(p, aux='aux'):
 
 
 def response_to_gr1(p, q, aux='aux'):
-    """Convert C{[](p -> <> q)} to GR(1).
+    """Convert `[](p -> <> q)` to GR(1).
 
-    GR(1) form::
+    GR(1) form:
 
-        []<>(aux) &&
+    ```
+    []<>(aux) &&
 
-        []( (p && !q) -> X ! aux) &&
-        []( (! aux && !q) -> X ! aux)
+    []( (p && !q) -> X ! aux) &&
+    []( (! aux && !q) -> X ! aux)
+    ```
 
-    @type p: str
-
-    @type q: str
-
+    @type p: `str`
+    @type q: `str`
     @param aux: name to use for auxiliary variable
-    @type aux: str
-
-    @rtype: L{GRSpec}
+    @type aux: `str`
+    @rtype: `GRSpec`
     """
     a = aux
     a0 = a
@@ -389,22 +396,22 @@ def response_to_gr1(p, q, aux='aux'):
 
 
 def eventually_to_gr1(p, aux='aux'):
-    """Convert C{<> p} to GR(1).
+    """Convert `<> p` to GR(1).
 
-    GR(1) form::
+    GR(1) form:
 
-        !(aux) &&
-        [](aux -> X aux) &&
-        []<>(aux) &&
+    ```
+    !(aux) &&
+    [](aux -> X aux) &&
+    []<>(aux) &&
 
-        []( (!p && !aux) -> X!(aux) )
+    []( (!p && !aux) -> X!(aux))
+    ```
 
-    @type p: str
-
+    @type p: `str`
     @param aux: name to use for auxiliary variable
-    @type aux: str
-
-    @rtype: L{GRSpec}
+    @type aux: `str`
+    @rtype: `GRSpec`
     """
     a = aux
     a0 = a
@@ -427,24 +434,24 @@ def eventually_to_gr1(p, aux='aux'):
 
 
 def until_to_gr1(p, q, aux='aux'):
-    """Convert C{p U q} to GR(1).
+    """Convert `p U q` to GR(1).
 
-    GR(1) form::
+    GR(1) form:
 
-        (!q -> !aux) &&
-        [](q -> aux)
-        [](aux -> X aux) &&
-        []<>(aux) &&
+    ```
+    (!q -> !aux) &&
+    [](q -> aux)
+    [](aux -> X aux) &&
+    []<>(aux) &&
 
-        []( (!aux && X(!q) ) -> X!(aux) ) &&
-        [](!aux -> p)
+    []( (!aux && X(!q) ) -> X!(aux)) &&
+    [](!aux -> p)
+    ```
 
-    @type p: str
-
+    @type p: `str`
     @param aux: name to use for auxiliary variable
-    @type aux: str
-
-    @rtype: L{GRSpec}
+    @type aux: `str`
+    @rtype: `GRSpec`
     """
     a = aux
     a0 = a

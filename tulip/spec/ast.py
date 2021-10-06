@@ -33,7 +33,7 @@
 """Abstract syntax tree classes for LTL.
 
 Syntax taken originally roughly from:
-http://spot.lip6.fr/wiki/LtlSyntax
+<http://spot.lip6.fr/wiki/LtlSyntax>
 """
 import logging
 logger = logging.getLogger(__name__)
@@ -75,7 +75,7 @@ def make_nodes(opmap=None):
 
     The tree is defined recursively,
     not with a graph data structure.
-    L{Tree} is a graph data structure for that purpose.
+    `Tree` is a graph data structure for that purpose.
     """
     if opmap is None:
         opmap = OPMAP
@@ -103,11 +103,11 @@ def make_nodes(opmap=None):
 
         Include:
 
-          - 0-ary function constants (numbers, strings)
-          - 0-ary function variables (integer or string variable)
-          - 0-ary connectives (Boolean constants)
-          - 0-ary predicate constants
-          - 0-ary predicate variables
+        - 0-ary function constants (numbers, strings)
+        - 0-ary function variables (integer or string variable)
+        - 0-ary connectives (Boolean constants)
+        - 0-ary predicate constants
+        - 0-ary predicate variables
         """
 
         def __init__(self, value):

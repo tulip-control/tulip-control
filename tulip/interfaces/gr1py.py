@@ -29,10 +29,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Interface to C{gr1py}.
+"""Interface to `gr1py`.
 
-U{https://pypi.python.org/pypi/gr1py}
-U{https://github.com/slivingston/gr1py}
+<https://pypi.python.org/pypi/gr1py>
+<https://github.com/slivingston/gr1py>
 """
 from __future__ import absolute_import
 import logging
@@ -53,9 +53,11 @@ _hl = 60 * '-'
 def check_realizable(spec):
     """Decide realizability of specification.
 
-    Consult the documentation of L{synthesize} about parameters.
+    Consult the documentation of `synthesize` about parameters.
 
-    @return: True if realizable, False if not, or an error occurs.
+    @return: `True` if realizable,
+        `False` if not, or
+        an error occurs.
     """
     init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
@@ -65,7 +67,7 @@ def check_realizable(spec):
 def synthesize(spec):
     """Synthesize strategy realizing the given specification.
 
-    cf. L{tulip.interfaces.gr1c.synthesize}
+    cf. `tulip.interfaces.gr1c.synthesize`
     """
     init_option = select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)

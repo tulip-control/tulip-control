@@ -32,7 +32,7 @@
 """Interface to the slugs implementation of GR(1) synthesis.
 
 Relevant links:
-  - U{slugs<https://github.com/LTLMoP/slugs>}
+- [slugs](https://github.com/LTLMoP/slugs)
 """
 from __future__ import absolute_import
 import errno
@@ -56,9 +56,10 @@ logger = logging.getLogger(__name__)
 def check_realizable(spec):
     """Decide realizability of specification.
 
-    Consult the documentation of L{synthesize} about parameters.
+    Consult the documentation of `synthesize` about parameters.
 
-    @return: True if realizable, False if not, or an error occurs.
+    @return: `True` if realizable,
+        `False` if not, or an error occurs.
     """
     if isinstance(spec, GRSpec):
         assert not spec.moore
@@ -77,11 +78,12 @@ def check_realizable(spec):
 
 
 def synthesize(spec, symbolic=False):
-    """Return strategy satisfying the specification C{spec}.
+    """Return strategy satisfying the specification `spec`.
 
-    @type spec: L{GRSpec} or C{str} in structured slugs syntax.
-    @return: If realizable return synthesized strategy, otherwise C{None}.
-    @rtype: C{networkx.DiGraph}
+    @type spec: `GRSpec` or `str` in structured slugs syntax.
+    @return: If realizable return synthesized strategy,
+        otherwise `None`.
+    @rtype: `networkx.DiGraph`
     """
     if isinstance(spec, GRSpec):
         assert not spec.moore
@@ -128,8 +130,8 @@ def synthesize(spec, symbolic=False):
 def _bitfields_to_ints(bit_state, vrs):
     """Convert bitfield representation to integers.
 
-    @type line: C{str}
-    @type vrs: C{dict}
+    @type line: `str`
+    @type vrs: `dict`
     """
     int_state = dict()
     for var, dom in vrs.items():
@@ -150,11 +152,16 @@ def _bitfields_to_ints(bit_state, vrs):
 def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
     """Call `slugs` and return results.
 
-    slugs_compiler_path is the path to the slugsin converter format.
-    If None (default), then use the path as in the module-level
-    identifier SLUGS_COMPILER_PATH.  If this path begins with '/',
-    then it is considered to be absolute.  Otherwise, it is relative
-    to the path of the `slugs` executable.
+    `slugs_compiler_path` is the path to
+    the SlugsIn converter format.
+    If `None` (default), then use the path
+    as in the module-level identifier
+    `SLUGS_COMPILER_PATH`.
+
+    If this path begins with `/`,
+    then it is considered to be absolute.
+    Otherwise, it is relative to the path
+    of the `slugs` executable.
     """
     if slugs_compiler_path is None:
         slugs_compiler_path = SLUGS_COMPILER_PATH

@@ -106,10 +106,10 @@ def synchronous_parallel(models, transition_attr_operations={}):
     @return: the synchronous parallel composition of
         all the objects in models
     @rtype: one of the following types:
-        * L{transys.KripkeStructure}
-        * L{transys.WeightedKripkeStructure}
-        * L{transys.MarkovChain}
-        * L{transys.MarkovDecisionProcess}
+        * `transys.KripkeStructure`
+        * `transys.WeightedKripkeStructure`
+        * `transys.MarkovChain`
+        * `transys.MarkovDecisionProcess`
     """
     # Let models = [K_1, ..., K_n].
     # Let

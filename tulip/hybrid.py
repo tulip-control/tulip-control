@@ -60,43 +60,60 @@ def _indent(s, n):
     return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
-    r"""Represent discrete-time continuous-state dynamics::
 
-        s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
+    r"""Represents discrete-time continuous-state dynamics.
 
-    subject to the constraints::
+    Specifically, dynamics of the form:
 
-        u[t] \in Uset
-        d[t] \in Wset
-        s[t] \in domain
+    ```
+    s[t + 1] = A * s[t] + B * u[t] + E * d[t] + K
+    ```
+
+    subject to the constraints:
+
+    ```
+    u[t] \in Uset
+    d[t] \in Wset
+    s[t] \in domain
+    ```
 
     where:
-        - u[t] the control input
-        - d[t] the disturbance input
-        - s[t] the system state
+    - `u[t]` the control input
+    - `d[t]` the disturbance input
+    - `s[t]` the system state
 
-    A LtiSysDyn object contains the fields:
+    Attributes:
 
-        - A, B, E, K, (matrices)
-        - Uset, Wset, (each a C{polytope.Polytope})
-        - domain (C{polytope.Polytope} or C{polytope.Region})
-        - time_semantics: 'discrete' (if system is originally a discrete-time
-          system) or 'sampled' (if system is sampled from a continuous-time
-          system)
-        - timestep: A positive real number containing the timestep (for sampled
-          system)
+    - `A`, `B`, `E`, `K`, (matrices)
+    - `Uset`, `Wset`, (each a `polytope.Polytope`)
+    - `domain` (`polytope.Polytope` or `polytope.Region`)
+    - `time_semantics`:
+      - `'discrete'`: if the system is
+        originally a discrete-time system, or
+      - `'sampled'`: if the system is sampled from
+        a continuous-time system)
+    - timestep: A positive real number containing the
+      timestep (for sampled system)
 
     as defined above.
 
+
     Note
     ====
-    For state-dependent bounds on the input,::
-        [u[t]; s[t]] \in Uset
+    For state-dependent bounds on the input,
+
+    ```
+    [u[t]; s[t]] \in Uset
+    ```
+
     can be used.
 
-    See Also
+
+    Relevant
     ========
-    L{PwaSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
+    `PwaSysDyn`,
+    `SwitchedSysDyn`,
+    `polytope.Polytope`
     """
     def __init__(self, A=None, B=None, E=None, K=None,
                  Uset=None,Wset=None, domain=None, time_semantics=None,
@@ -223,39 +240,53 @@ class LtiSysDyn(object):
         return ax
 
 class PwaSysDyn(object):
-    """PwaSysDyn class for specifying a polytopic piecewise affine system.
-    A PwaSysDyn object contains the fields:
 
-      - C{list_subsys}: list of L{LtiSysDyn}
+    """Specifies a polytopic piecewise-affine system.
 
-      - C{domain}: domain over which piecewise affine system is defined,
-          type: polytope.Polytope or polytope.Region
+    Attributes:
 
-      - C{time_semantics}: 'discrete' (if system is originally a discrete-time
-       system) or 'sampled' (if system is sampled from a continuous-time
-       system)
+    - `list_subsys`: list of `LtiSysDyn`
 
-      - C{timestep}: A positive real number containing the timestep (for sampled
-        systems)
+    - `domain`: domain over which piecewise-affine
+      system is defined. Type:
+      - `polytope.Polytope` or
+      - `polytope.Region`
 
-    For the system to be well-defined the domains of its subsystems should be
-    mutually exclusive (modulo intersections with empty interior) and cover the
-    domain.
+    - `time_semantics`: either
+      - `'discrete'` (if system is originally
+        a discrete-time system) or
+      - `'sampled'` (if system is sampled from
+        a continuous-time system)
 
-    See Also
+    - `timestep`: A positive real number that contains
+      the timestep (for sampled systems)
+
+    For the system to be well-defined the domains of
+    its subsystems should be mutually exclusive
+    (modulo intersections with empty interior) and
+    cover the domain.
+
+    Relevant
     ========
-    L{LtiSysDyn}, L{SwitchedSysDyn}, C{polytope.Polytope}
+    `LtiSysDyn`,
+    `SwitchedSysDyn`,
+    `polytope.Polytope`
     """
     def __init__(self, list_subsys=[], domain=None, time_semantics=None,
                  timestep=None, overwrite_time=True):
-        """
-        @type overwrite_time: bool
-        @param overwrite_time: If true, then overwrites any time data in the
-                               objects in C{list_subsys} with the data in
-                               C{time_semantics} and C{timestep} variables.
-                               Otherwise checks that the time data of the
-                               objects in C{list_subsys} are consistent with
-                               C{time_semantics} and C{timestep}.
+        """Constructor.
+
+        @type overwrite_time: `bool`
+        @param overwrite_time:
+            If `True`, then overwrite any time data
+            in the objects in `list_subsys` with
+            the data in `time_semantics` and
+            `timestep` variables.
+
+            Otherwise, check that the time data
+            of the objects in `list_subsys` are
+            consistent with `time_semantics` and
+            `timestep`.
         """
 
         if domain is None:
@@ -336,67 +367,81 @@ class PwaSysDyn(object):
 class SwitchedSysDyn(object):
     """Represent hybrid systems switching between dynamic modes.
 
-    A C{SwitchedSysDyn} represents a system with switching modes
+    Represents a system with switching modes
     that depend on both discrete:
 
-        - n_env environment variables (uncontrolled)
-        - n_sys system variables (controlled)
+    - `n_env` environment variables (uncontrolled)
+    - `n_sys` system variables (controlled)
 
-    A C{SwitchedSysDyn} object contains the fields:
+    Attributes:
 
-     - C{disc_domain_size}: 2-tuple of numbers of modes
-       type: (n_env, n_sys)
+    - `disc_domain_size`: 2-`tuple` of numbers of modes
+      - type: `(n_env, n_sys)`
 
-     - C{env_labels}: (optional) labels for discrete environment variables
-       type: list of len(n_env)
-       default: range(n_env)
+    - `env_labels`: (optional) labels for
+      discrete environment variables.
+      - type: `list` of `len(n_env)`
+      - default: `range(n_env)`
 
-     - C{disc_sys_labels}: (optional) labels for discrete system variables
-       type: list of len(n_sys)
-       default: range(n_sys)
+    - `disc_sys_labels`: (optional) labels for
+      discrete system variables
+      - type: `list` of `len(n_sys)`
+      - default: `range(n_sys)`
 
-     - C{dynamics}: mapping mode 2-tuples to active dynamics::
+    - `dynamics`: mapping mode 2-`tuple`s to
+      active dynamics:
 
-         (env_label, sys_label) -> PwaSysDyn
+      ```
+      (env_label, sys_label) -> PwaSysDyn
+      ```
 
-       type: dict
-       default: If no env_label or sys_label passed,
-       then default to int indices (i,j) L{PwaSysDyn}.
+      - type: `dict`
+      - default: If no `env_label` or `sys_label passed`,
+        then default to `int` indices `(i, j)` `PwaSysDyn`.
 
-     - C{cts_ss}: continuous state space over which hybrid system is defined.
-       type: C{polytope.Region}
+    - `cts_ss`: continuous state-space over which
+      the hybrid system is defined.
+      - type: `polytope.Region`
 
-     - C{time_semantics}: 'discrete' (if system is originally a discrete-time
-       system) or 'sampled' (if system is sampled from a continuous-time
-       system)
+    - `time_semantics`: either
+      - `'discrete'` (if the system is originally
+        a discrete-time system) or
+      - `'sampled'` (if the system is sampled from
+        a continuous-time system)
 
-     - C{timestep}: A positive real number containing the timestep (for sampled
-       systems)
+    - `timestep`: A positive real number that
+      contains the timestep (for sampled systems)
 
 
     Note
     ====
-    We assume that system and environment switching modes are
-    independent of one another.  (Use LTL statement to make it not so.)
+    We assume that system and environment switching
+    modes are independent of one another.
+    (Use LTL statement to make it not so.)
 
-    See Also
+
+    Relevant
     ========
-    L{LtiSysDyn}, L{PwaSysDyn}, C{polytope.Region}
+    `LtiSysDyn`,
+    `PwaSysDyn`,
+    `polytope.Region`
     """
     def __init__(self, disc_domain_size=(1,1),
                  dynamics=None, cts_ss=None,
                  env_labels=None, disc_sys_labels=None, time_semantics=None,
                  timestep=None, overwrite_time=True):
-        """
-        @type overwrite_time: bool
-        @param overwrite_time: If true, then overwrites any time data in the
-                               objects in C{list_subsys} with the data in
-                               C{time_semantics} and C{timestep} variables.
-                               Otherwise checks that the time data of the
-                               objects in C{list_subsys} are consistent with
-                               C{time_semantics} and C{timestep}.
-        """
+        """Constructor.
 
+        @type overwrite_time: `bool`
+        @param overwrite_time:
+            If `True`, then overwrite any time data in
+            the objects in `list_subsys` with the data in
+            `time_semantics` and `timestep` variables.
+
+            Otherwise, check that the time data of the
+            objects in `list_subsys` are consistent with
+            `time_semantics` and `timestep`.
+        """
         # check that the continuous domain is specified
         if cts_ss is None:
             warn('continuous state space not given to SwitchedSysDyn')

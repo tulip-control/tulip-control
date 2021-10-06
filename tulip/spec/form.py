@@ -32,7 +32,7 @@
 """Formulae constituting specifications
 
 what this module adds to the pure syntactic manipulations of
-L{transformation} is a variable table, with game semantics in particular.
+`transformation` is a variable table, with game semantics in particular.
 
 Also, those modules are for manipulating expressions.
 This module knows about program structure,
@@ -56,21 +56,21 @@ __all__ = ['LTL', 'GRSpec', 'replace_dependent_vars']
 
 
 class LTL(object):
-    """LTL formula (specification)
+    """LTL formula (specification).
 
     Minimal class that describes an LTL formula in the canonical TuLiP
     syntax.  It contains three attributes:
 
-      - C{formula}: a C{str} of the formula.  Syntax is only enforced
-        if the user requests it, e.g., using the L{check_form} method.
+      - `formula`: a `str` of the formula.  Syntax is only enforced
+        if the user requests it, e.g., using the `check_form` method.
 
-      - C{input_variables}: a C{dict} of variables (names given as
+      - `input_variables`: a `dict` of variables (names given as
         strings) and their domains; each key is a variable name and
         its value (in the dictionary) is its domain.  See notes below.
         Semantically, these variables are considered to be inputs
         (i.e., uncontrolled, externally determined).
 
-      - C{output_variables}: similar to C{input_variables}, but
+      - `output_variables`: similar to `input_variables`, but
         considered to be outputs, i.e., controlled, the strategy for
         setting of which we seek in formal synthesis.
 
@@ -78,13 +78,13 @@ class LTL(object):
     indicated below in parenthesis.  Recognized domains, along with
     examples, are:
 
-      - boolean (C{str}); this domain is specified by C{"boolean"};
-      - finite_set (C{set}); e.g., C{{1, 3, 5}};
-      - range (C{tuple} of length 2); e.g., C{(0, 15)}.
+      - boolean (`str`); this domain is specified by `"boolean"`;
+      - finite_set (`set`); e.g., `{1, 3, 5}`;
+      - range (`tuple` of length 2); e.g., `(0, 15)`.
 
-    As with the C{formula} attribute, type-checking is only performed
+    As with the `formula` attribute, type-checking is only performed
     if requested by the user.  E.g., any iterable can act as a
-    finite_set.  However, a range domain must be a C{tuple} of length
+    finite_set.  However, a range domain must be a `tuple` of length
     2; otherwise it is ambiguous with finite_set.
     """
 
@@ -252,7 +252,7 @@ class LTL(object):
 
     @staticmethod
     def load(f):
-        """Wrap L{loads} for reading from files.
+        """Wrap `loads` for reading from files.
 
         @param f: file or str.  In the latter case, attempt to open a
             file named "f" read-only.
@@ -265,81 +265,126 @@ class LTL(object):
 class GRSpec(LTL):
     r"""GR(1) specification.
 
-    The basic form is::
+    The basic form is:
 
-      (env_init & []env_safety & []<>env_prog_1 & []<>env_prog_2 & ...)
-        -> (sys_init & []sys_safety & []<>sys_prog_1 & []<>sys_prog_2 & ...)
+    ```
+    (env_init & []env_safety & []<>env_prog_1 & []<>env_prog_2 & ...)
+    -> (sys_init & []sys_safety & []<>sys_prog_1 & []<>sys_prog_2 & ...)
+    ```
 
-    A GRSpec object contains the following attributes:
+    Attributes:
 
-      - C{moore}: select whether a strategy can see primed
-        environment variables.
+    - `moore`: select whether a strategy can see primed
+      environment variables.
 
-      - C{plus_one}: select causal implication between
-        assumptions and guarantees.
+    - `plus_one`: select causal implication between
+      assumptions and guarantees.
 
-      - C{qinit}: select quantification of initial values for variables:
+    - `qinit`: select quantification of initial values
+      for variables:
 
-        C{win} below describes the set of winning states.
-        C{internal_init} is the initial condition for the
-        internal strategy variables.
-        C{Op == expr} means operator C{Op} is defined as the expression C{expr}.
+      `win` below describes the set of winning states.
+      `internal_init` is the initial condition for the
+      internal strategy variables.
+      `Op == expr` means operator `Op` is defined as
+      the expression `expr`.
 
-          - C{'\A \A'}: C{forall env_vars:  forall sys_vars:  env_init -> win}.
-            C{sys_init} must be empty or contain true.
-            The strategy enumeration iterates through all assignments that
-            satisfy C{env_init & internal_init}.
+      - `'\A \A'`:
+        `forall env_vars:  forall sys_vars:  env_init -> win`.
+        `sys_init` must be empty or contain true.
+        The strategy enumeration iterates through
+        all assignments that satisfy
+        `env_init & internal_init`.
 
-          - C{'\A \E'}: C{forall env_vars:  exist sys_vars:  form}, where:
-              - C{form == sys_init & (env_init -> win)}  (C{plus_one is True})
-              - C{form == env_init -> (sys_init & win)}  (C{plus_one is False})
-            The strategy enumeration iterates through all assignments that
-            satisfy C{\E sys_vars:  env_init}, and
-            picks assignments that satisfy C{form & internal_init}.
+      - `'\A \E'`:
+        `forall env_vars:  exist sys_vars:  form`,
+        where:
+        - `form == sys_init & (env_init -> win)`
+          (`plus_one is True`)
+        - `form == env_init -> (sys_init & win)`
+          (`plus_one is False`)
+        The strategy enumeration iterates
+        through all assignments that
+        satisfy `\E sys_vars:  env_init`, and
+        picks assignments that satisfy
+        `form & internal_init`.
 
-          - C{'\E \A'}: C{exist sys_vars:  forall env_vars:  form}, where:
-              - C{form == sys_init & (env_init -> win)}  (C{plus_one is True})
-              - C{form == env_init -> (sys_init & win)}  (C{plus_one is False})
-            The strategy enumeration picks an assignment that satisfies
-            C{internal_init & \A env_vars:  form} and iterates through
-            all assignments that satisfy C{env_init}.
+      - `'\E \A'`:
 
-          - C{'\E \E'}: C{exist env_vars:  exist sys_vars:  sys_init & win}.
-            C{env_init} must be empty or contain true.
-            The strategy enumeration picks an assignment that satisfies
-            C{sys_init & win & internal_init}.
+        ```
+        exist sys_vars:  forall env_vars:  form
+        ```
 
-      - C{env_vars}: alias for C{input_variables} of L{LTL},
-        concerning variables that are determined by the environment.
+        where:
+        - `form == sys_init & (env_init -> win)`
+          (`plus_one is True`)
+        - `form == env_init -> (sys_init & win)`
+          (`plus_one is False`)
 
-      - C{env_init}: a list of string that specifies the assumption
-        about the initial state of the environment.
+        The strategy enumeration picks
+        an assignment that satisfies:
 
-      - C{env_safety}: a list of string that specifies the assumption
-        about the evolution of the environment state.
+        ```
+        internal_init & \A env_vars:  form
+        ```
 
-      - C{env_prog}: a list of string that specifies the justice
-        assumption on the environment.
+        and iterates through all assignments
+        that satisfy `env_init`.
 
-      - C{sys_vars}: alias for C{output_variables} of L{LTL},
-        concerning variables that are controlled by the system.
+      - `'\E \E'`:
 
-      - C{sys_init}: a list of string that specifies the requirement
-        on the initial state of the system.
+        ```
+        exist env_vars:  exist sys_vars:  sys_init & win
+        ```
 
-      - C{sys_safety}: a list of string that specifies the safety
-        requirement.
+        `env_init` must be empty or contain true.
+        The strategy enumeration picks
+        an assignment that satisfies:
 
-      - C{sys_prog}: a list of string that specifies the progress
-        requirement.
+        ```
+        sys_init & win & internal_init
+        ```
 
-    An empty list for any formula (e.g., if env_init = []) is marked
-    as "True" in the specification. This corresponds to the constant
-    Boolean function, which usually means that subformula has no
+    - `env_vars`: alias for `input_variables` of `LTL`,
+      concerning variables that are determined
+      by the environment.
+
+    - `env_init`: `list` of `str` that
+      specifies the assumption about the
+      initial state of the environment.
+
+    - `env_safety`: `list` of `str` that
+      specifies the assumption about the
+      evolution of the environment state.
+
+    - `env_prog`: `list` of `str` that
+      specifies the justice assumption
+      on the environment.
+
+    - `sys_vars`: alias for `output_variables` of `LTL`,
+      concerning variables that are controlled
+      by the system.
+
+    - `sys_init`: `list` of `str` that
+      specifies the requirement
+      on the initial state of the system.
+
+    - `sys_safety`: `list` of `str` that
+      specifies the safety requirement.
+
+    - `sys_prog`: `list` of `str` that
+      specifies the progress requirement.
+
+    An empty list for any formula
+    (e.g., if `env_init = []`)
+    is marked as `True` in the specification.
+
+    This corresponds to the constant Boolean function,
+    which usually means that subformula has no
     effect (is non-restrictive) on the spec.
 
-    Consult L{GRSpec.__init__} concerning arguments at the time of
-    instantiation.
+    Consult `GRSpec.__init__` concerning
+    arguments at the time of instantiation.
     """
 
     def __init__(self, env_vars=None, sys_vars=None,
@@ -505,7 +550,7 @@ class GRSpec(LTL):
 
     @staticmethod
     def load(f):
-        """Wrap L{loads} for reading from files.
+        """Wrap `loads` for reading from files.
 
         UNDER DEVELOPMENT; function signature may change without
         notice.  Calling will result in NotImplementedError.
@@ -693,13 +738,13 @@ class GRSpec(LTL):
           - syntactic using this function
 
           - no substitution by user code, instead flatten to python and
-            use C{eval} together with a C{dict} defining
-            the values of variables, as done in L{eval_init}.
+            use `eval` together with a `dict` defining
+            the values of variables, as done in `eval_init`.
 
         For converting non-integer finite types to
-        integer types, use L{replace_finite_by_int}.
+        integer types, use `replace_finite_by_int`.
 
-        @return: C{dict} of ASTs after the substitutions,
+        @return: `dict` of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
         logger.info('substitute values for variables...')
@@ -714,25 +759,27 @@ class GRSpec(LTL):
     def compile_init(self, no_str):
         """Compile python expression for initial conditions.
 
-        The returned bytecode can be used with C{eval}
-        and a C{dict} assigning values to variables.
+        The returned bytecode can be used with `eval`
+        and a `dict` assigning values to variables.
         Its value is the implication
 
-            C{env_init => sys_init}
+        ```tla
+        env_init => sys_init
+        ```
 
         Use the corresponding python data types
-        for the C{dict} values:
+        for the `dict` values:
 
-              - C{bool} for Boolean variables
-              - C{int} for integers
-              - C{str} for arbitrary finite types
+              - `bool` for Boolean variables
+              - `int` for integers
+              - `str` for arbitrary finite types
 
         @param no_str: if True, then compile the formula
             where all string variables have been replaced by integers.
             Otherwise compile the original formula containing strings.
 
-        @return: python expression compiled for C{eval}
-        @rtype: C{code}
+        @return: python expression compiled for `eval`
+        @rtype: `code`
         """
         self.str_to_int()
         init = {'env': self.env_init, 'sys': self.sys_init}
@@ -788,7 +835,7 @@ class GRSpec(LTL):
     def ast(self, x):
         """Return AST corresponding to formula x.
 
-        If AST for formula C{x} has already been computed earlier,
+        If AST for formula `x` has already been computed earlier,
         then return cached result.
         """
         if logger.getEffectiveLevel() <= logging.DEBUG:
@@ -807,7 +854,7 @@ class GRSpec(LTL):
         """Parse each clause and store it.
 
         The AST resulting from each clause is stored
-        in the C{dict} attribute C{ast}.
+        in the `dict` attribute `ast`.
         """
         logger.info('parsing ASTs to cache them...')
         vardoms = dict(self.env_vars)

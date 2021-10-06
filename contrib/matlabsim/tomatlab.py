@@ -12,16 +12,26 @@ from tulip import hybrid
 def export(
         filename, mealy_machine, system_dynamics=None, abstraction=None,
         disc_params=None, R=None, r=None, Q=None, mid_weight=None):
-    """Creates two matlab files. One is a script that generates a Simulink model
-    that contains a Stateflow Chart of the Mealy Machine, a block that contains
-    a get_input function, a block that maps continuous state to discrete state,
-    and a block that times simulation of get_input.
+    """Creates two matlab files.
 
-    @param filename: string ending in '.mat'
-    @param system: L{LtiSysDyn}, L{PwaSysDyn}, or L{HybridSysDyn} to be saved in
-        the .mat file.
-    @param filename: String containing name of the .mat file to be created.
-    @rtype: None
+    One is a script that generates a Simulink model
+    that contains a Stateflow Chart of
+    the Mealy Machine, a block that contains
+    a `get_input` function, a block that maps
+    continuous state to discrete state,
+    and a block that times simulation of `get_input`.
+
+    @param filename: string ending in `'.mat'`
+    @type filename: `str`
+    @param system: object to be saved in the `.mat` file.
+    @type system:
+        `LtiSysDyn` or
+        `PwaSysDyn` or
+        `HybridSysDyn`
+    @param filename: string containing name of
+        the `.mat` file to be created
+    @type filename: `str`
+    @rtype: `None`
     """
     # Check whether we're discrete or continuous
     if (
@@ -110,7 +120,7 @@ def export(
 
 
 def lti_export(ltisys):
-    """Saves a LtiSysDyn as a Matlab struct."""
+    """Saves a `LtiSysDyn` as a Matlab struct."""
     output = dict(
         A=ltisys.A,
         B=ltisys.B,
@@ -149,8 +159,10 @@ def switched_export(switchedsys):
 def poly_export(poly):
     """Saves parts of a polytope as a dictionary for export to MATLAB.
 
-    @param poly: L{Polytope} that will be exported.
-    @return output: dictionary containing fields of poly
+    @param poly: polytope that will be exported
+    @type poly: `Polytope`
+    @return: dictionary containing fields of `poly`
+    @rtype: `dict`
     """
     if poly is None:
         return dict()
@@ -160,17 +172,21 @@ def poly_export(poly):
 def reg_export(reg):
     """Saves a region as a dictionary for export to MATLAB.
 
-    @type reg: L{Region}
-    @return output: a dictionary containing a list of polytopes.
+    @type reg: `Region`
+    @return: dictionary containing a list of polytopes.
+    @rtype: `dict`
     """
     return dict(list_poly=[poly_export(p) for p in reg.list_poly])
 
 
 def export_locations(abstraction):
-    """Exports an abstraction to a .mat file
+    """Exports an abstraction to a `.mat` file
 
-    @type abstraction: L{AbstractPwa} or L{AbstractSwitched}
-    @rtype output: dictionary"""
+    @type abstraction:
+        `AbstractPwa` or
+        `AbstractSwitched`
+    @rtype output: `dict`
+    """
     location_list = list()
     for i, region in enumerate(abstraction.ppp.regions):
         d = dict(
@@ -183,7 +199,7 @@ def export_locations(abstraction):
 def export_mealy_io(variables, values):
     """Return declarations of variable types.
 
-    @rtype: list of dict
+    @rtype: `list` of `dict`
     """
     vrs = list()
     for i, var in enumerate(variables):
@@ -195,14 +211,18 @@ def export_mealy_io(variables, values):
 
 
 def export_mealy(mealy_machine, is_continuous):
-    """Exports a Mealy Machine to data that can be put into a .mat file. Turns
-    the Mealy Machine states into a list of dictionaries. Turns the Mealy
-    Machine transitions into a list of transition matrices.
+    """Exports a Mealy Machine to data that can be put into a .mat file.
 
-    Some of the exported information is a bit redundant, but makes writing the
+    Turns the Mealy Machine states into
+    a list of dictionaries.
+    Turns the Mealy Machine transitions
+    into a list of transition matrices.
+
+    Some of the exported information is
+    a bit redundant, but makes writing the
     MATLAB code easier.
 
-    @rtype: dict
+    @rtype: `dict`
     """
     SINIT = 'Sinit'
     # map from Mealy nodes to value of variable "loc"

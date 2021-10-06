@@ -34,13 +34,14 @@
 Check Linear Discrete-Time-Invariant System reachability between polytopes
 
 Primary functions:
-    - L{solve_feasible}
-    - L{createLM}
-    - L{get_max_extreme}
+- `solve_feasible`
+- `createLM`
+- `get_max_extreme`
 
-See Also
+
+Relevant
 ========
-L{find_controller}
+`find_controller`
 """
 from __future__ import print_function
 
@@ -65,9 +66,9 @@ def is_feasible(
     use_all_horizon=False,
     trans_set=None
 ):
-    """Return True if to_region is reachable from_region.
+    """Return `True` if `to_region` is reachable `from_region`.
 
-    For details see solve_feasible.
+    For details read function `solve_feasible`.
     """
     S0 = solve_feasible(
         from_region, to_region, sys, N,
@@ -80,23 +81,24 @@ def solve_feasible(
     P1, P2, ssys, N=1, closed_loop=True,
     use_all_horizon=False, trans_set=None, max_num_poly=5
 ):
-    r"""Compute S0 \subseteq trans_set from which P2 is N-reachable.
 
-    N-reachable = reachable in horizon C{N}.
-    The system dynamics are C{ssys}.
+    r"""Compute `S0 \subseteq trans_set` from which `P2` is `N`-reachable.
+
+    `N`-reachable means reachable in horizon `N`.
+    The system dynamics are `ssys`.
     The closed-loop algorithm solves for one step at a time,
     which keeps the dimension of the polytopes down.
 
     Time semantics:
 
-    - C{use_all_horizon = False}: fixed sampling period of
+    - `use_all_horizon = False`: fixed sampling period of
       discrete-valued environment variables.
-      Reachability in exactly C{N} steps.
+      Reachability in exactly `N` steps.
 
-    - C{use_all_horizon = True}: sampling period that varies and
+    - `use_all_horizon = True`: sampling period that varies and
       is chosen by the system, depending on how many steps are
-      taken during each trajectory from C{P1} to C{P2}.
-      Reachability in C{1..N} steps, with an under-approximation
+      taken during each trajectory from `P1` to `P2`.
+      Reachability in `1..N` steps, with an under-approximation
       of the attractor set.
 
       If the system dynamics do not allow staying at the same state,
@@ -104,29 +106,30 @@ def solve_feasible(
       in the computation. Consider decreasing the sampling period
       used for discretizing the associated continuous-time dynamical system.
 
-    @type P1: C{Polytope} or C{Region}
-    @type P2: C{Polytope} or C{Region}
-    @type ssys: L{LtiSysDyn}
+    @type P1: `Polytope` or `Region`
+    @type P2: `Polytope` or `Region`
+    @type ssys: `LtiSysDyn`
     @param N: horizon length
-    @param closed_loop: If C{True}, then take 1 step at a time.
+    @param closed_loop: If `True`, then take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
     @type closed_loop: bool
 
     @param use_all_horizon: Used for closed loop algorithm.
 
-        - If C{True}, then check for reachability in C{< N} steps,
+        - If `True`, then check for
+          reachability in `< N` steps,
 
-        - otherwise, in exactly C{N} steps.
+        - otherwise, in exactly `N` steps.
 
-    @type use_all_horizon: bool
+    @type use_all_horizon: `bool`
 
     @param trans_set: If specified,
         then force transitions to be in this set.
-        Otherwise, P1 is used.
+        Otherwise, `P1` is used.
 
-    @return: states from which P2 is reachable
-    @rtype: C{Polytope} or C{Region}
+    @return: states from which `P2` is reachable
+    @rtype: `Polytope` or `Region`
     """
     if closed_loop:
         if use_all_horizon:
@@ -149,24 +152,24 @@ def solve_feasible(
 
 def _solve_closed_loop_fixed_horizon(
         P1, P2, ssys, N, trans_set=None):
-    """Under-approximate states in P1 that can reach P2 in N > 0 steps.
+    """Underapproximate states in `P1` that can reach `P2`.
+
+    Underapproximate states in polytope `P1` that
+    can reach polytope `P2` in `N` steps,
+    with `N > 0`.
 
     If intermediate polytopes are convex,
-    then the result is exact and not an under-approximation.
+    then the result is exact and not an underapproximation.
 
-    @type P1: C{Polytope} or C{Region}
-    @type P2: C{Polytope} or C{Region}
-
+    @type P1: `Polytope` or `Region`
+    @type P2: `Polytope` or `Region`
     @param ssys: system dynamics
-
     @param N: horizon length
-    @type N: int > 0
-
+    @type N: positive `int`
     @param trans_set: If provided,
         then intermediate steps are allowed
-        to be in trans_set.
-
-        Otherwise, P1 is used.
+        to be in `trans_set`.
+        Otherwise, `P1` is used.
     """
     assert N > 0, N
     p1 = P1.copy()  # initial set
@@ -189,10 +192,13 @@ def _solve_closed_loop_fixed_horizon(
 
 def _solve_closed_loop_bounded_horizon(
         P1, P2, ssys, N, trans_set=None):
-    """Under-approximate states in P1 that can reach P2 in <= N steps.
+    """Underapproximate `P1` subset that can reach `P2`.
 
-    See docstring of function `_solve_closed_loop_fixed_horizon`
-    for details.
+    Underapproximates the states in polytope `P1`
+    that can reach polytope `P2` in at most `N` steps.
+
+    For details, read the docstring of
+    the function `_solve_closed_loop_fixed_horizon`.
     """
     _print_horizon_warning()
     p1 = P1.copy()  # initial set
@@ -223,10 +229,13 @@ def _solve_closed_loop_bounded_horizon(
 
 def _underapproximate_attractor(
         P1, P2, ssys, N, trans_set=None):
-    """Under-approximate N-step attractor of polytope P2, with N > 0.
+    """Underapproximate `N`-step attractor of `P2`.
 
-    See docstring of function `_solve_closed_loop_fixed_horizon`
-    for details.
+    Underapproximates the `N`-step attractor
+    of polytope `P2`, with `N > 0`.
+
+    For details, read the docstring of the function
+    `_solve_closed_loop_fixed_horizon`.
     """
     assert N > 0, N
     _print_horizon_warning()
@@ -289,7 +298,10 @@ def solve_open_loop(
     return s0
 
 def poly_to_poly(p1, p2, ssys, N, trans_set=None):
-    """Compute s0 for open-loop polytope to polytope N-reachability.
+    """Compute `s0` for open-loop `N`-reachability.
+
+    Computes `s0` for open-loop polytope-to-polytope
+    `N`-reachability.
     """
     p1 = p1.copy()
     p2 = p2.copy()
@@ -327,40 +339,44 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    r"""Compute the components of the polytope::
 
-        L [x(0)' u(0)' ... u(N-1)']' <= M
+    r"""Compute the components of the polytope:
+
+    ```
+    L [x(0)' u(0)' ... u(N-1)']' <= M
+    ```
 
     which stacks the following constraints:
 
-      - x(t+1) = A x(t) + B u(t) + E d(t)
-      - [u(k); x(k)] \in ssys.Uset for all k
+    - `x(t + 1) = A * x(t) + B * u(t) + E * d(t)`
+    - `\A k:  [u(k); x(k)] \in ssys.Uset`
 
-    If list_P is a C{Polytope}:
+    If `list_P` is a `Polytope`:
 
-      - x(0) \in list_P if list_P
-      - x(k) \in Pk for k= 1,2, .. N-1
-      - x(N) \in PN
+    - `x(0) \in list_P if list_P`
+    - `x(k) \in Pk` for `k \in 1..(N - 1)`
+    - `x(N) \in PN`
 
-    If list_P is a list of polytopes:
+    If `list_P` is a `list` of polytopes:
 
-      - x(k) \in list_P[k] for k= 0, 1 ... N
+    - `x(k) \in list_P[k]` for `k \in 0..N`
 
-    The returned polytope describes the intersection of the polytopes
+    The returned polytope describes the
+    intersection of the polytopes
     for all possible
 
     @param ssys: system dynamics
-    @type ssys: L{LtiSysDyn}
-
+    @type ssys: `LtiSysDyn`
     @param N: horizon length
-
-    @type list_P: list of Polytopes or C{Polytope}
-    @type Pk: C{Polytope}
-    @type PN: C{Polytope}
-
-    @param disturbance_ind: list indicating which k's
-        that disturbance should be taken into account.
-        Default is [1,2, ... N]
+    @type list_P: `list` of `Polytope`,
+        or `Polytope`
+    @type Pk: `Polytope`
+    @type PN: `Polytope`
+    @param disturbance_ind: `list`
+        that indicates which `k`'s
+        that disturbance should be
+        taken into account.
+        Default is `1..N`
     """
     if not isinstance(list_P, Iterable):
         list_P = [list_P] +(N-1) *[Pk] +[PN]
@@ -501,22 +517,30 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     return L,M
 
 def get_max_extreme(G,D,N):
-    """Calculate the array d_hat such that::
+    """Calculate the array `d_hat` such that:
 
-        d_hat = max(G*DN_extreme),
+    ```
+    d_hat = max(G*DN_extreme)
+    ```
 
-    where DN_extreme are the vertices of the set D^N.
+    where `DN_extreme` are the vertices
+    of the set `D^N`.
 
-    This is used to describe the polytope::
+    This is used to describe the polytope:
 
-        L*x <= M - G*d_hat.
+    ```
+    L * x <= M - G * d_hat
+    ```
 
-    Calculating d_hat is equivalen to taking the intersection
-    of the polytopes::
+    Calculating `d_hat` is equivalent to
+    taking the intersection of the polytopes:
 
-        L*x <= M - G*d_i
+    ```
+    L * x <= M - G * d_i
+    ```
 
-    for every possible d_i in the set of extreme points to D^N.
+    for every possible `d_i` in the set of
+    extreme points to `D^N`.
 
     @param G: The matrix to maximize with respect to
     @param D: Polytope describing the disturbance set
@@ -538,14 +562,17 @@ def get_max_extreme(G,D,N):
 
     d_hat = np.amax(np.dot(G,DN_extreme), axis=1)
     return d_hat.reshape(d_hat.size,1)
+def _block_diag2(A, B):
+    """Similar to `block_diag()` in `scipy.linalg`.
 
-def _block_diag2(A,B):
-    """Like block_diag() in scipy.linalg, but restricted to 2 inputs.
+    This function is similar to the function
+    `scipy.linalg.block_diag`, but is restricted to 2 inputs.
 
     Old versions of the linear algebra package in SciPy (i.e.,
-    scipy.linalg) do not have a block_diag() function.  Providing
-    _block_diag2() here until most folks are using sufficiently
-    up-to-date SciPy installations improves portability.
+    `scipy.linalg`) do not have a `block_diag()` function.
+    Providing `_block_diag2()` here until most folks are
+    using sufficiently up-to-date SciPy installations
+    improves portability.
     """
     if len(A.shape) == 1:  # Cast 1d array into matrix
         A = np.array([A])

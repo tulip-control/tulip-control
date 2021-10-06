@@ -30,16 +30,19 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """
-Interface to gr1c
+Interface to `gr1c`.
 
-  - U{http://scottman.net/2012/gr1c}
-  - release documentation at U{https://tulip-control.github.io/gr1c/}
+- <http://scottman.net/2012/gr1c>
+- release documentation at
+  <https://tulip-control.github.io/gr1c/>
 
-In general, functions defined here will raise CalledProcessError (from
-the subprocess module) or OSError if an exception occurs while
-interacting with the gr1c executable.
+In general, functions defined here
+will raise `CalledProcessError` (from
+the `subprocess` module) or `OSError`
+if an exception occurs while
+interacting with the `gr1c` executable.
 
-Use the logging module to throttle verbosity.
+Use the `logging` module to throttle verbosity.
 """
 from __future__ import print_function
 
@@ -64,7 +67,7 @@ logger = logging.getLogger(__name__)
 
 
 def check_gr1c():
-    """Return `True` if `gr1c >= require_version` found in PATH."""
+    """Return `True` if `gr1c >= require_version` found in `PATH`."""
     try:
         v = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
     except OSError:
@@ -89,12 +92,12 @@ def _assert_gr1c():
 
 
 def get_version():
-    """Get version of gr1c as detected by TuLiP.
+    """Get version of `gr1c` as detected by TuLiP.
 
-    Failure to find the gr1c program or errors in parsing the received
+    Failure to find the `gr1c` program or errors in parsing the received
     version string will cause an exception.
 
-    @return: (major, minor, micro), a tuple of int
+    @return: `(major, minor, micro)`, a `tuple` of `int`
     """
     try:
         v_str = subprocess.check_output(["gr1c", "-V"], universal_newlines=True)
@@ -114,14 +117,14 @@ def _untaglist(x, cast_f=float,
                namespace=DEFAULT_NAMESPACE):
     """Extract list from given tulipcon XML tag (string).
 
-    Use function cast_f for type-casting extracting element strings.
-    The default is float, but another common case is cast_f=int (for
-    "integer").  If cast_f is set to None, then items are left as
+    Use function `cast_f` for type-casting extracting element strings.
+    The default is `float`, but another common case is `cast_f=int` (for
+    "integer").  If `cast_f` is set to `None`, then items are left as
     extracted, i.e. as strings.
 
     The argument x can also have the type of the return value of
-    xml.etree.ElementTree.fromstring(). This is mainly for internal
-    use, e.g. by the function untagpolytope and some load/dumpXML
+    `xml.etree.ElementTree.fromstring()`. This is mainly for internal
+    use, e.g. by the function `untagpolytope` and some load/dumpXML
     methods elsewhere.
 
     Return result as 2-tuple, containing name of the tag (as a string)
@@ -154,21 +157,21 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
                namespace=DEFAULT_NAMESPACE, get_order=False):
     """Extract dictionary from given tulipcon XML tag (string).
 
-    Use functions cast_f_keys and cast_f_values for type-casting
-    extracting key and value strings, respectively, or None.  The
-    default is None, which means the extracted keys (resp., values)
+    Use functions `cast_f_keys` and `cast_f_values` for type-casting
+    extracting key and value strings, respectively, or `None`.  The
+    default is `None`, which means the extracted keys (resp., values)
     are left untouched (as strings), but another common case is
-    cast_f_values=int (for "integer") or cast_f_values=float (for
-    "floating-point numbers"), while leaving cast_f_keys=None to
-    indicate dictionary keys are strings.
+    `cast_f_values=int` (for "integer") or `cast_f_values=float`
+    (for "floating-point numbers"), while leaving `cast_f_keys=None`
+    to indicate dictionary keys are strings.
 
-    The argument x can also have the type of the return value of
-    xml.etree.ElementTree.fromstring(). This is mainly for internal
-    use, e.g. by the function untagpolytope and some load/dumpXML
+    The argument `x` can also have the type of the return value of
+    `xml.etree.ElementTree.fromstring()`. This is mainly for internal
+    use, e.g. by the function `untagpolytope` and some load/dumpXML
     methods elsewhere.
 
-    Return result as 2-tuple, containing name of the tag (as a string)
-    and the dictionary obtained from it.  If get_order is True, then
+    Return result as 2-`tuple`, containing name of the tag (as a string)
+    and the dictionary obtained from it.  If get_order is `True`, then
     return a triple, where the first two elements are as usual and the
     third is the list of keys in the order they were found.
     """
@@ -202,22 +205,25 @@ def _untagdict(x, cast_f_keys=None, cast_f_values=None,
         return (elem.tag, di)
 
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
-    """Return strategy constructed from output of gr1c.
+    """Return strategy constructed from output of `gr1c`.
 
     @param x: a string or an instance of
-        xml.etree.ElementTree.fromstring()
+        `xml.etree.ElementTree.fromstring()`
 
-    @type spec0: L{GRSpec}
+    @type spec0: `GRSpec`
     @param spec0: GR(1) specification with which to interpret the
-        output of gr1c while constructing a MealyMachine, or None if
-        the output from gr1c should be used as is.  Note that spec0
-        may differ from the specification in the given tulipcon XML
-        string x.  If you are unsure what to do, try setting spec0 to
-        whatever L{gr1cint.synthesize} was invoked with.
+        output of `gr1c` while constructing a `MealyMachine`, or
+        `None` if the output from `gr1c` should be used as is.
+        Note that `spec0` may differ from the specification in
+        the given tulipcon XML string `x`.
+        If you are unsure what to do, try setting `spec0` to
+        whatever `gr1cint.synthesize` was invoked with.
 
-    @return: if a strategy is given in the XML string, return it as
-        C{networkx.DiGraph}. Else, return (L{GRSpec}, C{None}), where
-        the first element is the specification as read from the XML string.
+    @return: if a strategy is given in the XML string,
+        return it as `networkx.DiGraph`.
+        Else, return `(GRSpec, None)`,
+        where the first element is the specification
+        as read from the XML string.
     """
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -342,12 +348,11 @@ def _parse_vars(variables, vardict):
     return variables
 
 def load_aut_json(x):
-    """Return strategy constructed from output of gr1c
+    """Return strategy constructed from output of `gr1c`
 
     @param x: string or file-like object
-
-    @return: strategy as C{networkx.DiGraph}, like the return value of
-        L{load_aut_xml}
+    @return: strategy as `networkx.DiGraph`,
+        like the return value of `load_aut_xml`
     """
     try:
         autjs = json.loads(x)
@@ -376,9 +381,9 @@ def load_aut_json(x):
     return A
 
 def check_syntax(spec_str):
-    """Check whether given string has correct gr1c specification syntax.
+    """Check whether given string has correct `gr1c` specification syntax.
 
-    Return True if syntax check passed, False on error.
+    Return `True` if syntax check passed, `False` on error.
     """
     _assert_gr1c()
     f = tempfile.TemporaryFile()
@@ -406,9 +411,10 @@ def check_syntax(spec_str):
 def check_realizable(spec):
     """Decide realizability of specification.
 
-    Consult the documentation of L{synthesize} about parameters.
+    Consult the documentation of `synthesize` about parameters.
 
-    @return: True if realizable, False if not, or an error occurs.
+    @return: `True` if realizable, `False` if not,
+        or an error occurs.
     """
     logger.info('checking realizability...')
     _assert_gr1c()
@@ -438,15 +444,15 @@ def check_realizable(spec):
 def synthesize(spec):
     """Synthesize strategy realizing the given specification.
 
-    @type spec: L{GRSpec}
+    @type spec: `GRSpec`
     @param spec: specification.
 
-    Consult the U{documentation of gr1c
-    <https://tulip-control.github.io/gr1c/md_spc_format.html#initconditions>}
+    Consult the [documentation of `gr1c`](
+        https://tulip-control.github.io/gr1c/md_spc_format.html#initconditions)
     for a detailed description.
 
-    @return: strategy as C{networkx.DiGraph},
-        or None if unrealizable or error occurs.
+    @return: strategy as `networkx.DiGraph`,
+        or `None` if unrealizable or error occurs.
     """
     _assert_gr1c()
     init_option = select_options(spec)
@@ -531,18 +537,16 @@ def select_options(spec):
 
 
 def load_mealy(filename, fformat='tulipxml'):
-    """Load C{gr1c} strategy from file.
+    """Load `gr1c` strategy from file.
 
     @param filename: file name
-    @type filename: C{str}
-
-    @param fformat: file format; can be one of "tulipxml" (default),
-        "json". Not case sensitive.
-
-    @type fformat: C{str}
-
+    @type filename: `str`
+    @param fformat: file format; can be one of
+        `"tulipxml"` (default),
+        `"json"`. Not case sensitive.
+    @type fformat: `str`
     @return: loaded strategy as an annotated graph.
-    @rtype: C{networkx.Digraph}
+    @rtype: `networkx.Digraph`
     """
     s = open(filename, 'r').read()
     if fformat.lower() == 'tulipxml':
@@ -560,24 +564,24 @@ def load_mealy(filename, fformat='tulipxml'):
     return strategy
 
 class GR1CSession(object):
-    """Manage interactive session with gr1c.
+    """Manage interactive session with `gr1c`.
 
     Given lists of environment and system variable names determine the
-    order of values in state vectors for communication with the gr1c
+    order of values in state vectors for communication with the `gr1c`
     process.  Eventually there may be code to infer this directly from
     the spec file.
 
-    **gr1c is assumed not to use GNU Readline.**
+    **`gr1c` is assumed not to use GNU Readline.**
 
     Please compile it that way if you are using this class.
     (Otherwise, GNU Readline will echo commands and make interaction
-    with gr1c more difficult.)
+    with `gr1c` more difficult.)
 
     The argument `prompt` is the string printed by gr1c to indicate it
     is ready for the next command.  The default value is a good guess.
 
-    Unless otherwise indicated, command methods return True on
-    success, False if error.
+    Unless otherwise indicated, command methods return `True` on
+    success, `False` if error.
     """
     def __init__(self, spec_filename, sys_vars, env_vars=[], prompt=">>> "):
         self.spec_filename = spec_filename
@@ -596,11 +600,11 @@ class GR1CSession(object):
             self.p = None
 
     def iswinning(self, state):
-        """Return True if given state is in winning set, False otherwise.
+        """Return `True` if given state is in winning set, `False` otherwise.
 
-        state should be a dictionary with keys of variable names
+        `state` should be a dictionary with keys of variable names
         (strings) and values of the value taken by that variable in
-        this state, e.g., as in nodes of the Automaton class.
+        this state, e.g., as in nodes of the `Automaton` class.
         """
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
@@ -636,9 +640,9 @@ class GR1CSession(object):
         return int(line[:-1])
 
     def env_next(self, state):
-        """Return list of possible next environment moves, given current state.
+        """Return `list` of possible next environment moves, given current state.
 
-        Format of given state is same as for iswinning method.
+        Format of given `state` is same as for `iswinning` method.
         """
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
@@ -663,9 +667,9 @@ class GR1CSession(object):
         return env_moves
 
     def sys_nextfeas(self, state, env_move, goal_mode):
-        """Return list of next system moves consistent with some strategy.
+        """Return `list` of next system moves consistent with some strategy.
 
-        Format of given state and env_move is same as for iswinning
+        Format of given `state` and `env_move` is same as for `iswinning`
         method.
         """
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
@@ -698,9 +702,9 @@ class GR1CSession(object):
         return sys_moves
 
     def sys_nexta(self, state, env_move):
-        """Return list of possible next system moves, whether or not winning.
+        """Return `list` of possible next system moves, whether or not winning.
 
-        Format of given state and env_move is same as for iswinning
+        Format of given `state` and `env_move` is same as for `iswinning`
         method.
         """
         state_vector = list(range(len(state)))
@@ -781,8 +785,7 @@ class GR1CSession(object):
         return True
 
     def close(self):
-        """End session, and kill gr1c child process.
-        """
+        """End session, and terminate `gr1c` subprocess."""
         self.p.stdin.write("quit\n")
         returncode = self.p.wait()
         self.p = None

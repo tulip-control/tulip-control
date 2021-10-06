@@ -205,8 +205,8 @@ def _format_color(color, prog='tikz'):
     """Encode color in syntax for given program.
 
     @type color:
-      - C{str} for single color or
-      - C{dict} for weighted color mix
+      - `str` for single color or
+      - `dict` for weighted color mix
 
     @type prog: 'tikz' or 'dot'
     """
@@ -419,7 +419,7 @@ def _graph2dot(
         rankdir='TB'):
     """Convert (possibly labeled) state graph to dot str.
 
-    @type graph: L{LabeledDiGraph}
+    @type graph: `LabeledDiGraph`
 
     @rtype: str
     """
@@ -438,13 +438,13 @@ def _graph2dot(
 
 
 def graph2dot_str(graph, wrap=10, tikz=False):
-    """Convert graph to dot string.
+    """Convert graph to DOT string.
 
     @type graph: L{LabeledDiGraph}
 
+    @type graph: `LabeledDiGraph`
     @param wrap: textwrap width
-
-    @rtype: str
+    @rtype: `str`
     """
     dot_graph = _graph2dot(graph, wrap=wrap, tikz=tikz)
     return dot_graph.source
@@ -456,10 +456,9 @@ def save_dot(
         tikz=False):
     """Save state graph to dot file.
 
-    @type graph: L{LabeledDiGraph}
-
-    @return: True upon success
-    @rtype: bool
+    @type graph: `LabeledDiGraph`
+    @return: `True` upon success
+    @rtype: `bool`
     """
     dot_graph = _graph2dot(
         graph,
@@ -492,18 +491,19 @@ def plot_dot(
     No files written or deleted from the disk.
 
     Note that all networkx graph classes are inherited
-    from networkx.Graph
+    from `networkx.Graph`.
+
 
     See Also
     ========
-    dot documentation
+    `dot` documentation
 
     @param graph: to plot
-    @type graph: networkx.Graph
+    @type graph: `networkx.Graph`
 
-    @param prog: GraphViz programto use
-    @type prog: 'dot' | 'neato' | 'circo' | 'twopi'
-        | 'fdp' | 'sfdp' | etc
+    @param prog: GraphViz program to use
+    @type prog: `'dot'` | `'neato'` | `'circo'` | `'twopi'`
+        | `'fdp'` | `'sfdp'` | etc
 
     @param rankdir: direction to layout nodes
     @type rankdir: 'LR' | 'TB'

@@ -148,7 +148,7 @@ def write_startline(enviroment,system,f):
 
     - enviroment queue
     - system queue
-    - fileobject f
+    - fileobject `f`
     """
     f.write('function [')
     for i in range(system.qsize()):

@@ -62,7 +62,7 @@ class Tree(nx.MultiDiGraph):
     so it is preferred to working directly with the
     recursive AST classes.
 
-    The attribute C{self.root} is the tree's root L{Node}.
+    The attribute `self.root` is the tree's root `Node`.
     """
 
     def __init__(self):
@@ -80,9 +80,9 @@ class Tree(nx.MultiDiGraph):
 
     @property
     def variables(self):
-        """Return the set of variables in C{tree}.
+        """Return the set of variables in `tree`.
 
-        @rtype: C{set} of L{Var}
+        @rtype: `set` of `Var`
         """
         return {u for u in self if u.type == 'var'}
 
@@ -120,12 +120,12 @@ class Tree(nx.MultiDiGraph):
         return w
 
     def add_subtree(self, leaf, tree):
-        """Add the C{tree} at node C{nd}.
+        """Add the `tree` at node `nd`.
 
-        @type leaf: L{FOL.Node}
+        @type leaf: `FOL.Node`
 
         @param tree: to be added, w/o copying AST nodes.
-        @type tree: L{Tree}
+        @type tree: `Tree`
         """
         assert not self.succ.get(leaf)
         for u, v, k in tree.edges(keys=True):
@@ -143,7 +143,7 @@ class Tree(nx.MultiDiGraph):
     def _to_dot(self, detailed=False):
         """Create GraphViz dot string from given AST.
 
-        @type ast: L{ASTNode}
+        @type ast: `ASTNode`
         @rtype: str
         """
         g = ast_to_labeled_graph(self, detailed)
@@ -162,11 +162,11 @@ class Tree(nx.MultiDiGraph):
 
 
 def ast_to_labeled_graph(tree, detailed):
-    """Convert AST to C{NetworkX.DiGraph} for graphics.
+    """Convert AST to `NetworkX.DiGraph` for graphics.
 
     @param ast: Abstract syntax tree
 
-    @rtype: C{networkx.DiGraph}
+    @rtype: `networkx.DiGraph`
     """
     g = nx.DiGraph()
     for u in tree:
@@ -189,22 +189,22 @@ def ast_to_labeled_graph(tree, detailed):
 
 
 def check_for_undefined_identifiers(tree, domains):
-    """Check that types in C{tree} are incompatible with C{domains}.
+    """Check that types in `tree` are incompatible with `domains`.
 
-    Raise a C{ValueError} if C{tree} either:
+    Raise a `ValueError` if `tree` either:
 
-      - contains a variable missing from C{domains}
+      - contains a variable missing from `domains`
       - binary operator between variable and
         invalid value for that variable.
 
-    @type tree: L{Tree}
+    @type tree: `Tree`
 
     @param domains: variable definitions:
 
-        C{{'varname': domain}}
+        `{'varname': domain}`
 
-        See L{GRSpec} for more details of available domain types.
-    @type domains: C{dict}
+        See `GRSpec` for more details of available domain types.
+    @type domains: `dict`
     """
     for u in tree:
         if u.type == 'var' and u.value not in domains:
@@ -257,10 +257,10 @@ def sub_values(tree, var_values):
 
     @param tree: AST
 
-    @type var_values: C{dict}
+    @type var_values: `dict`
 
-    @return: AST with L{Var} nodes replaces by
-        L{Num}, L{Const}, or L{Bool}
+    @return: AST with `Var` nodes replaces by
+        `Num`, `Const`, or `Bool`
     """
     old2new = dict()
     for u in tree.nodes():
@@ -286,7 +286,7 @@ def sub_constants(tree, var_str2int):
     to integer domains prior to calling gr1c.
 
     @param const2int: {'varname':['const_val0', ...], ...}
-    @type const2int: C{dict} of C{list}
+    @type const2int: `dict` of `list`
     """
     # logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
@@ -307,14 +307,14 @@ def sub_constants(tree, var_str2int):
 def sub_bool_with_subtree(tree, bool2subtree):
     """Replace selected Boolean variables with given AST.
 
-    @type tree: L{LTL_AST}
+    @type tree: `LTL_AST`
 
     @param bool2form: map from each Boolean variable to some
         equivalent formula. A subset of Boolean varibles may be used.
 
-        Note that the types of variables in C{tree}
-        are defined by C{bool2form}.
-    @type bool2form: C{dict} from C{str} to L{Tree}
+        Note that the types of variables in `tree`
+        are defined by `bool2form`.
+    @type bool2form: `dict` from `str` to `Tree`
     """
     for u in list(tree.nodes()):
         if u.type == 'var' and u.value in bool2subtree:
@@ -324,22 +324,22 @@ def sub_bool_with_subtree(tree, bool2subtree):
 
 
 def pair_node_to_var(tree, c):
-    """Find variable under L{Binary} operator above given node.
+    """Find variable under `Binary` operator above given node.
 
-    First move up from C{nd}, stop at first L{Binary} node.
-    Then move down, until first C{Var}.
-    This assumes that only L{Unary} operators appear between a
-    L{Binary} and its variable and constant operands.
+    First move up from `nd`, stop at first `Binary` node.
+    Then move down, until first `Var`.
+    This assumes that only `Unary` operators appear between a
+    `Binary` and its variable and constant operands.
 
     May be extended in the future, depending on what the
     tools support and is thus needed here.
 
-    @type tree: L{LTL_AST}
+    @type tree: `LTL_AST`
 
-    @type L{nd}: L{Const} or L{Num}
+    @type `nd`: `Const` or `Num`
 
     @return: variable, constant
-    @rtype: C{(L{Var}, L{Const})}
+    @rtype: `(Var, Const)`
     """
     # find parent Binary operator
     while True:
@@ -364,7 +364,7 @@ def infer_constants(formula, variables):
     """Enclose all non-variable names in quotes.
 
     @param formula: well-formed LTL formula
-    @type formula: C{str} or L{LTL_AST}
+    @type formula: `str` or `LTL_AST`
 
     @param variables: domains of variables, or only their names.
         If the domains are given, then they are checked
@@ -375,12 +375,12 @@ def infer_constants(formula, variables):
         If the names are given only, then a warning is raised,
         because ambiguities cannot be checked in that case,
         since they depend on what domains will be used.
-    @type variables: C{dict} as accepted by L{GRSpec} or
-        container of C{str}
+    @type variables: `dict` as accepted by `GRSpec` or
+        container of `str`
 
-    @return: C{formula} with all string literals not in C{variables}
+    @return: `formula` with all string literals not in `variables`
         enclosed in double quotes
-    @rtype: C{str}
+    @rtype: `str`
     """
     if isinstance(variables, dict):
         for var in variables:
@@ -416,7 +416,7 @@ def _check_var_conflicts(s, variables):
     @param s: set
 
     @param variables: definitions of variable types
-    @type variables: C{dict}
+    @type variables: `dict`
     """
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
@@ -466,9 +466,9 @@ def collect_primed_vars(t):
 
 # defunct until further notice
 def _flatten(tree, u, to_lang, **kw):
-    """Recursively flatten C{tree}.
+    """Recursively flatten `tree`.
 
-    @rtype: C{str}
+    @rtype: `str`
     """
     s = tree.succ[u]
     if not s:

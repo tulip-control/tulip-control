@@ -34,15 +34,16 @@
 Algorithms related to controller synthesis for discretized dynamics.
 
 Primary functions:
-    - L{get_input}
+- `get_input`
 
 Helper functions:
-    - L{get_input_helper}
-    - L{is_seq_inside}
+- `get_input_helper`
+- `is_seq_inside`
 
-See Also
+
+Relevant
 ========
-L{discretize}
+`discretize`
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -91,86 +92,107 @@ def get_input(
     Computes a continuous control input sequence
     which takes the plant:
 
-        - from state C{start}
-        - to state C{end}
+    - from state `start`
+    - to state `end`
 
-    These are states of the partition C{abstraction}.
-    The computed control input is such that::
+    These are states of the partition `abstraction`.
+    The computed control input is such that:
 
-        f(x, u) = |Rx|_{ord} + |Qu|_{ord} + r'x +
-                  mid_weight * |xc - x(N)|_{ord}
+    ```
+    f(x, u) ==
+        |Rx|_{ord}
+        + |Qu|_{ord}
+        + r'x
+        + mid_weight * |xc - x(N)|_{ord}
+    ```
 
     be minimal.
 
-    C{xc} is the chebyshev center of the final cell.
-    If no cost parameters are given, then the defaults are:
+    `xc` is the chebyshev center of the final cell.
+    If no cost parameters are given,
+    then the defaults are:
 
-        - Q = I
-        - mid_weight = 3
+    - `Q = I`
+    - `mid_weight = 3`
+
 
     Notes
     =====
-    1. The same horizon length as in reachability analysis
-        should be used in order to guarantee feasibility.
+    1. The same horizon length as in
+       reachability analysis
+       should be used, in order to
+       guarantee feasibility.
 
-    2. If the closed loop algorithm has been used
-        to compute reachability the input needs to be
-        recalculated for each time step
-        (with decreasing horizon length).
+    2. If the closed-loop algorithm has
+       been used to compute reachability,
+       then the input needs to be
+       recalculated for each time step
+       (with decreasing horizon length).
 
-        In this case only u(0) should be used as
-        a control signal and u(1) ... u(N-1) discarded.
+       In this case only `u(0)` should be
+       used as a control signal, and
+       `u(1)` ... `u(N - 1)` discarded.
 
     3. The "conservative" calculation makes sure that
-        the plant remains inside the convex hull of the
-        starting region during execution, i.e.::
+       the plant remains inside the convex hull of the
+       starting region during execution, i.e.:
 
-            x(1), x(2) ...  x(N-1) are
-            \in conv_hull(starting region).
+       ```tla
+       \A i \in 1..(N - 1):
+           x[i] \in conv_hull(starting region)
+       ```
 
-        If the original proposition preserving partition
-        is not convex, then safety cannot be guaranteed.
+       If the original proposition-preserving partition
+       is not convex, then safety cannot be guaranteed.
 
     @param x0: initial continuous state
-    @type x0: numpy 1darray
-
+    @type x0: `numpy` 1darray
     @param ssys: system dynamics
-    @type ssys: L{LtiSysDyn}
-
+    @type ssys: `LtiSysDyn`
     @param abstraction: abstract system dynamics
-    @type abstraction: L{AbstractPwa}
+    @type abstraction: `AbstractPwa`
+    @param start: index of the initial state in `abstraction.ts`
+    @type start: `int` >= 0
+    @param end: index of the end state in `abstraction.ts`
+    @type end: `int` >= 0
+    @param R: state cost matrix for:
 
-    @param start: index of the initial state in C{abstraction.ts}
-    @type start: int >= 0
-
-    @param end: index of the end state in C{abstraction.ts}
-    @type end: int >= 0
-
-    @param R: state cost matrix for::
-            x = [x(1)' x(2)' .. x(N)']'
-        If empty, zero matrix is used.
-    @type R: size (N*xdim x N*xdim)
-
-    @param r: cost vector for state trajectory:
+        ```
         x = [x(1)' x(2)' .. x(N)']'
-    @type r: size (N*xdim x 1)
+        ```
 
-    @param Q: input cost matrix for control input::
-            u = [u(0)' u(1)' .. u(N-1)']'
-        If empty, identity matrix is used.
-    @type Q: size (N*udim x N*udim)
+        If empty, then the zero matrix is used.
+    @type R: `size(N * xdim x N * xdim)`
+    @param r: cost vector for state trajectory:
 
+        ```
+        x = [x(1)' x(2)' .. x(N)']'
+        ```
+
+    @type r: `size(N * xdim x 1)`
+    @param Q: input cost matrix for control input:
+
+        ```
+        u = [u(0)' u(1)' .. u(N-1)']'
+        ```
+
+        If empty, then the identity matrix is used.
+    @type Q: `size(N * udim x N * udim)`
     @param mid_weight: cost weight for |x(N)-xc|_{ord}
+    @param ord: norm used for cost function:
 
-    @param ord: norm used for cost function::
-        f(x, u) = |Rx|_{ord} + |Qu|_{ord} + r'x +
-              mid_weight *|xc - x(N)|_{ord}
-    @type ord: ord \in {1, 2, np.inf}
-
-    @return: array A where row k contains the
-        control input: u(k)
-        for k = 0, 1 ... N-1
-    @rtype: (N x m) numpy 2darray
+        ```
+        f(x, u) ==
+            |Rx|_{ord}
+            + |Qu|_{ord}
+            + r'x
+            + mid_weight * |xc - x(N)|_{ord}
+        ```
+    @type ord: `ord \in {1, 2, np.inf}`
+    @return: array `A`, where row `k` contains the
+        control input: `u(k)`,
+        for `k \in 0..(N - 1)`
+    @rtype: `N x m` `numpy` 2darray
     """
     part = abstraction.ppp
     regions = part.regions
@@ -334,16 +356,23 @@ def get_input_helper(
     x0, ssys, P1, P3, N, R, r, Q, ord=1,
     closed_loop=True, solver=None
 ):
-    r"""Calculate the sequence u_seq such that:
+    r"""Compute sequence of control inputs.
 
-      - x(t+1) = A x(t) + B u(t) + K
-      - x(k) \in P1 for k = 0,...N
-      - x(N) \in P3
-      - [u(k); x(k)] \in PU
+    Computes the sequence `u_seq` such that:
+
+      - `x[t + 1] = A * x(t) + B * u(t) + K`
+      - `\A k \in 0..N:  x[k] \in P1`
+      - `x[N] \in P3`
+      - `[u(k); x(k)] \in PU`
 
     and minimize:
-        |Rx|_{ord} + |Qu|_{ord} + r'x +
-        mid_weight * |xc - x(N)|_{ord}
+
+    ```
+    |Rx|_{ord}
+    + |Qu|_{ord}
+    + r'x
+    + mid_weight * |xc - x(N)|_{ord}
+    ```
     """
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
@@ -492,21 +521,25 @@ class _InputHelperQPException(Exception):
 
 
 def is_seq_inside(x0, u_seq, ssys, P0, P1):
-    r"""Checks if the plant remains inside P0 for time t = 1, ... N-1
-    and  that the plant reaches P1 for time t = N.
+    r"""Check transition from `P0` to `P1`.
+
+    Checks if the plant remains inside
+    polytope `P0` for time `t \in 1..(N - 1)`,
+    and that the plant reaches polytope `P1`
+    for time `t = N`.
     Used to test a computed input sequence.
     No disturbance is taken into account.
 
     @param x0: initial point for execution
-    @param u_seq: (N x m) array where row k is input for t = k
-
+    @param u_seq: `N \X m` array where row `k`
+        is input for `t = k`
     @param ssys: dynamics
-    @type ssys: L{LtiSysDyn}
-
-    @param P0: C{Polytope} where we want x(k) to remain for k = 1, ... N-1
-
-    @return: C{True} if x(k) \in P0 for k = 1, .. N-1 and x(N) \in P1.
-        C{False} otherwise
+    @type ssys: `LtiSysDyn`
+    @param P0: `Polytope` where we want
+        `x(k)` to remain for `k \in 1..(N - 1)`
+    @return: `True` if `x(k) \in P0` for
+        `k \in 1..(N - 1)` and `x(N) \in P1`.
+        `False` otherwise.
     """
     N = u_seq.shape[0]
     x = x0.reshape(x0.size, 1)
@@ -536,28 +569,32 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
 
 
 def find_discrete_state(x0, part):
-    """Return index identifying the discrete state
-    to which the continuous state x0 belongs to.
+    """Return index of discrete state that contains `x0`.
+
+    Returns the index that identifies the
+    discrete state in the partition `part`
+    to which the continuous state `x0` belongs to.
+
 
     Notes
     =====
     1. If there are overlapping partitions
-        (i.e., x0 belongs to more than one discrete state),
-        then return the first discrete state ID
+       (i.e., `x0` belongs to more than one discrete state),
+       then return the first discrete state ID
 
     @param x0: initial continuous state
-    @type x0: numpy 1darray
+    @type x0: `numpy` 1darray
 
-    @param part: state space partition
-    @type part: L{PropPreservingPartition}
+    @param part: state-space partition
+    @type part: `PropPreservingPartition`
 
-    @return: if C{x0} belongs to some
-        discrete state in C{part},
+    @return: if `x0` belongs to some
+        discrete state in `part`,
         then return the index of that state
 
-        Otherwise return None, i.e., in case
-        C{x0} does not belong to any discrete state.
-    @rtype: int
+        Otherwise return `None`, i.e., in case
+        `x0` does not belong to any discrete state.
+    @rtype: `int`
     """
     for (i, region) in enumerate(part):
         if x0 in region:

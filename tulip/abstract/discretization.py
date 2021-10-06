@@ -35,7 +35,7 @@ Algorithms related to discretization of continuous dynamics.
 
 See Also
 ========
-L{find_controller}
+`find_controller`
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -76,34 +76,39 @@ __all__ = [
 debug = False
 
 class AbstractSwitched(object):
-    """Abstraction of SwitchedSysDyn, with mode-specific and common info.
+    """Abstraction of `SwitchedSysDyn`.
+
+    This class stores also mode-specific and
+    common information.
 
     Attributes:
 
-      - ppp: merged partition, if any
-          Preserves both propositions and dynamics
+    - `ppp`: merged partition, if any
+      Preserves both propositions and dynamics
 
-      - ts: common TS, if any
+    - `ts`: common `TS`, if any
 
-      - ppp2ts: map from C{ppp.regions} to C{ts.states}
+    - `ppp2ts`: map from `ppp.regions` to `ts.states`
 
-      - modes: dict of {mode: AbstractPwa}
+    - `modes`: `dict` of `{mode: AbstractPwa}`
 
-      - ppp2modes: map from C{ppp.regions} to C{modes[mode].ppp.regions}
-        of the form:
+    - `ppp2modes`: map from `ppp.regions` to
+      `modes[mode].ppp.regions` of the form:
 
-        {mode: list}
+      ```
+      mode: list
+      ```
 
-        where C{list} has same indices as C{ppp.regions} and
-        elements in each C{list} are indices of regions in
-        each C{modes[mode].ppp.regions}.
+      where `list` has same indices as `ppp.regions` and
+      elements in each `list` are indices of regions in
+      each `modes[mode].ppp.regions`.
 
-        type: dict
+      - type: `dict`
 
     Each partition corresponds to some mode.
     (for switched systems)
 
-    In each mode a L{PwaSysDyn} is active.
+    In each mode, a `PwaSysDyn` is active.
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
@@ -130,34 +135,29 @@ class AbstractSwitched(object):
         return s
 
     def ppp2pwa(self, mode, i):
-        """Return original C{Region} containing C{Region} C{i} in C{mode}.
+        """Return original `Region` containing `Region` `i` in `mode`.
 
-        @param mode: key of C{modes}
+        @param mode: key of `modes`
+        @param i: Region index in common partition `ppp.regions`
+        @return: tuple `(j, region)` of:
+            - index `j` of `Region` and
+            - `Region` object
 
-        @param i: Region index in common partition C{ppp.regions}.
-
-        @return: tuple C{(j, region)} of:
-
-                - index C{j} of C{Region} and
-                - C{Region} object
-
-            in C{modes[mode].ppp.regions}
+            in `modes[mode].ppp.regions`
         """
         region_idx = self.ppp2modes[mode][i]
         ab = self.modes[mode]
         return ab.ppp2pwa(region_idx)
 
     def ppp2sys(self, mode, i):
-        """Return index of active PWA subsystem in C{mode},
+        """Return index of active PWA subsystem in `mode`,
 
-        @param mode: key of C{modes}
+        @param mode: key of `modes`
+        @param i: Region index in common partition `ppp.regions`.
 
-        @param i: Region index in common partition C{ppp.regions}.
-
-        @return: tuple C{(j, subsystem)} of:
-
-                - index C{j} of PWA C{subsystem}
-                - L{LtiSysDyn} object C{subsystem}
+        @return: tuple `(j, subsystem)` of:
+            - index `j` of PWA `subsystem`
+            - `LtiSysDyn` object `subsystem`
         """
         region_idx = self.ppp2modes[mode][i]
         ab = self.modes[mode]
@@ -166,7 +166,7 @@ class AbstractSwitched(object):
     def plot(self, show_ts=False, only_adjacent=False):
         """Plot mode partitions and merged partition, if one exists.
 
-        For details see L{AbstractPwa.plot}.
+        For details read `AbstractPwa.plot`.
         """
         axs = []
         color_seed = 0
@@ -203,64 +203,65 @@ class AbstractSwitched(object):
 class AbstractPwa(object):
     """Discrete abstraction of PWA dynamics, with attributes:
 
-      - ppp: Partition into Regions.
-          Each Region corresponds to
-          a discrete state of the abstraction
+    - `ppp`: Partition into Regions.
+      Each Region corresponds to
+      a discrete state of the abstraction
 
-          type: L{PropPreservingPartition}
+      - type: `PropPreservingPartition`
 
-      - ts: Finite transition system abstracting the continuous system.
-          Each state corresponds to a Region in C{ppp.regions}.
-          It can be fed into discrete synthesis algorithms.
+    - `ts`: Finite transition system abstracting
+      the continuous system.
+      Each state corresponds to a Region in `ppp.regions`.
+      It can be fed into discrete synthesis algorithms.
 
-          type: L{FTS}
+      - type: `FTS`
 
-      - ppp2ts: bijection between C{ppp.regions} and C{ts.states}.
-          Has common indices with C{ppp.regions}.
-          Elements are states in C{ts.states}.
-          (usually each state is a str)
+    - `ppp2ts`: bijection between `ppp.regions` and `ts.states`.
+      Has common indices with `ppp.regions`.
+      Elements are states in `ts.states`.
+      (usually each state is a `str`)
 
-          type: list of states
+      - type: `list` of states
 
-      - pwa: system dynamics
+    - `pwa`: system dynamics
 
-          type: L{PwaSysDyn}
+      - type: `PwaSysDyn`
 
-      - pwa_ppp: partition preserving both:
+    - `pwa_ppp`: partition preserving both:
 
-            - propositions and
-            - domains of PWA subsystems
+      - propositions and
+      - domains of PWA subsystems
 
-          Used for non-conservative planning.
-          If just L{LtiSysDyn}, then the only difference
-          of C{pwa_ppp} from C{orig_ppp} is convexification.
+      Used for non-conservative planning.
+      If just `LtiSysDyn`, then the only difference
+      of `pwa_ppp` from `orig_ppp` is convexification.
 
-          type: L{PropPreservingPartition}
+      - type: `PropPreservingPartition`
 
-      - orig_ppp: partition preserving only propositions
-          i.e., agnostic of dynamics
+    - `orig_ppp`: partition preserving only propositions
+      i.e., agnostic of dynamics
 
-          type: L{PropPreservingPartition}
+      - type: `PropPreservingPartition`
 
-      - disc_params: parameters used in discretization that
-          should be passed to the controller refinement
-          to ensure consistency
+    - `disc_params`: parameters used in discretization that
+      should be passed to the controller refinement
+      to ensure consistency
 
-          type: dict
+      - type: dict
 
     If any of the above is not given,
-    then it is initialized to None.
+    then it is initialized to `None`.
 
     Notes
     =====
-      1. There could be some redundancy in ppp and ofts,
-         in that they are both decorated with propositions.
-         This might be useful to keep each of
-         them as functional units on their own
-         (possible to change later).
+    1. There could be some redundancy in `ppp` and `ofts`,
+       in that they are both decorated with propositions.
+       This might be useful to keep each of
+       them as functional units on their own
+       (possible to change later).
 
-      2. The 'Pwa' in L{AbstractPwa} includes L{LtiSysDyn}
-         as a special case.
+    2. The 'Pwa' in `AbstractPwa` includes `LtiSysDyn`
+       as a special case.
     """
     def __init__(
         self, ppp=None, ts=None, ppp2ts=None,
@@ -328,14 +329,14 @@ class AbstractPwa(object):
 
     def ppp2pwa(self, region_index):
         """Return dynamics and predicate-preserving region
+
         and its index for PWA subsystem active in given region.
 
-        The returned region is the C{trans_set} used for
+        The returned region is the `trans_set` used for
         non-conservative planning.
 
-        @param region_index: index in C{ppp.regions}.
-
-        @rtype: C{(i, pwa.pwa_ppp[i])}
+        @param region_index: index in `ppp.regions`.
+        @rtype: `(i, pwa.pwa_ppp[i])`
         """
         j = self._ppp2pwa[region_index]
         pwa_region = self.pwa_ppp[j]
@@ -344,12 +345,11 @@ class AbstractPwa(object):
     def ppp2sys(self, region_index):
         """Return index and PWA subsystem active in indexed region.
 
-        Semantics: j-th sub-system is active in i-th Region,
-        where C{j = ppp2pwa[i]}
+        Semantics: `j`-th sub-system is active in `i`-th Region,
+        where `j = ppp2pwa[i]`
 
-        @param region_index: index in C{ppp.regions}.
-
-        @rtype: C{(i, pwa.list_subsys[i])}
+        @param region_index: index in `ppp.regions`.
+        @rtype: `(i, pwa.list_subsys[i])`
         """
         # LtiSysDyn ?
         if self._ppp2sys is None:
@@ -362,12 +362,11 @@ class AbstractPwa(object):
     def ppp2orig(self, region_index):
         """Return index and region of original partition.
 
-        The original partition is w/o any dynamics,
+        The original partition is without any dynamics,
         not even the PWA domains, only the polytopic predicates.
 
-        @param region_index: index in C{ppp.regions}.
-
-        @rtype: C{(i, orig_ppp.regions[i])}
+        @param region_index: index in `ppp.regions`.
+        @rtype: `(i, orig_ppp.regions[i])`
         """
         j = self._ppp2orig[region_index]
         orig_region = self.orig_ppp[j]
@@ -398,13 +397,12 @@ class AbstractPwa(object):
         """Plot partition and optionally feasible transitions.
 
         @param show_ts: plot feasible transitions on partition
-        @type show_ts: bool
-
+        @type show_ts: `bool`
         @param only_adjacent: plot feasible transitions only
             between adjacent regions. This reduces clutter,
-            but if horizon > 1 and not all horizon used,
+            but if `horizon > 1` and not all horizon used,
             then some transitions could be hidden.
-        @param only_adjacent: bool
+        @param only_adjacent: `bool`
         """
         ax = _plot_abstraction(self, show_ts, only_adjacent,
                                color_seed)
@@ -467,60 +465,71 @@ def discretize(
     plotit=False, save_img=False, cont_props=None,
     plot_every=1, simu_type='bi'
 ):
-    """Refine the partition via bisimulation
-    or dual-simulation algorithms, and establish transitions
+    """Refine the partition via bisimulation or dual-simulation.
+
+    Refines the partition via either:
+    - bisimulation, or
+    - dual-simulation
+
+    algorithms, and establish transitions
     based on reachability analysis.
+
 
     Reference
     =========
     U{[NOTM12]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#notm12>}
 
-    See Also
+
+    Relevant
     ========
-    L{prop2partition.pwa_partition}, L{prop2partition.part2convex}
+    `prop2partition.pwa_partition`,
+    `prop2partition.part2convex`
 
-    @param part: L{PropPreservingPartition} object
-    @param ssys: L{LtiSysDyn} or L{PwaSysDyn} object
+
+    @param part: `PropPreservingPartition` object
+    @param ssys: `LtiSysDyn` or `PwaSysDyn` object
     @param N: horizon length
-    @param min_cell_volume: the minimum volume of cells in the resulting
-        partition.
-    @param closed_loop: boolean indicating whether the `closed loop`
-        algorithm should be used. default True.
-    @param conservative: if true, force sequence in reachability analysis
-        to stay inside starting cell. If false, safety
-        is ensured by keeping the sequence inside a convexified
-        version of the original proposition preserving cell.
-    @param max_num_poly: maximum number of polytopes in a region to use in
+    @param min_cell_volume: the minimum volume of
+        cells in the resulting partition.
+    @param closed_loop: boolean indicating whether
+        the `closed loop` algorithm should be used.
+        (default is `True`)
+    @param conservative:
+        - `True`: force sequence in reachability analysis
+          to stay inside starting cell
+        - `False`: safety is ensured by keeping the
+          sequence inside a convexified version of
+          the original proposition-preserving cell.
+    @param max_num_poly: maximum number of
+        polytopes in a region to use in
         reachability analysis.
-    @param use_all_horizon: in closed loop algorithm: if we should look
-        for reachability also in less than N steps.
-    @param trans_length: the number of polytopes allowed to cross in a
-        transition.  a value of 1 checks transitions
-        only between neighbors, a value of 2 checks
+    @param use_all_horizon: in closed-loop algorithm:
+        if we should look for reachability also
+        in less than `N` steps.
+    @param trans_length: the number of polytopes
+        allowed to cross in a transition.
+        A value of `1` checks transitions
+        only between neighbors, a value of `2` checks
         neighbors of neighbors and so on.
-    @param remove_trans: if True, remove found transitions between
-        non-neighbors.
+    @param remove_trans: if `True`, then remove
+        the found transitions between non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
-
     @param plotit: plot partitioning as it evolves
-    @type plotit: boolean,
-        default = False
-
-    @param save_img: save snapshots of partitioning to PDF files,
-        requires plotit=True
+    @type plotit: `bool`,
+        with `False` as default
+    @param save_img: save snapshots of partitioning
+        to PDF files,
+        requires `plotit=True`
     @type save_img: boolean,
-        default = False
-
+        with `False` as default
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of C{Polytope}
-
-    @param simu_type: if 'bi', use bisimulation partition; if 'dual',
-        use dual-simulation partition
-    @type simu_type: string,
-        default = 'bi'
-
-    @rtype: L{AbstractPwa}
+    @type cont_props: `list` of `Polytope`
+    @param simu_type:
+        - `'bi'` (default): use bisimulation partition
+        - `'dual'`: use dual-simulation partition
+    @type simu_type: `str`
+    @rtype: `AbstractPwa`
     """
     if simu_type == 'bi':
         AbstractPwa = _discretize_bi(
@@ -555,8 +564,11 @@ def _discretize_bi(
     plotit=False, save_img=False, cont_props=None,
     plot_every=1
 ):
-    """Refine the partition and establish transitions
+    """Refine partition, based on reachability analysis.
+
+    Refines the partition, and establishes transitions
     based on reachability analysis. Use bi-simulation algorithm.
+
 
     Reference
     =========
@@ -566,46 +578,49 @@ def _discretize_bi(
        "A Bisimulation-like Algorithm for Abstracting Control Systems."
        54th Annual Allerton Conference on CCC 2016
 
-    See Also
+
+    Relevant
     ========
-    L{prop2partition.pwa_partition}, L{prop2partition.part2convex}
+    `prop2partition.pwa_partition`,
+    `prop2partition.part2convex`
 
-    @param part: L{PropPreservingPartition} object
-    @param ssys: L{LtiSysDyn} or L{PwaSysDyn} object
+
+    @param part: `PropPreservingPartition` object
+    @param ssys: `LtiSysDyn` or `PwaSysDyn` object
     @param N: horizon length
-    @param min_cell_volume: the minimum volume of cells in the resulting
-        partition.
-    @param closed_loop: boolean indicating whether the `closed loop`
-        algorithm should be used. default True.
-    @param conservative: if true, force sequence in reachability analysis
-        to stay inside starting cell. If false, safety
-        is ensured by keeping the sequence inside a convexified
-        version of the original proposition preserving cell.
-    @param max_num_poly: maximum number of polytopes in a region to use in
-        reachability analysis.
-    @param use_all_horizon: in closed loop algorithm: if we should look
-        for reachability also in less than N steps.
-    @param trans_length: the number of polytopes allowed to cross in a
-        transition.  a value of 1 checks transitions
-        only between neighbors, a value of 2 checks
+    @param min_cell_volume: the minimum volume of
+        cells in the resulting partition.
+    @param closed_loop: boolean indicating whether
+        the `closed loop` algorithm should be used.
+        (default is `True`)
+    @param conservative:
+        - `True`: force sequence in reachability
+          analysis to stay inside the starting cell
+        - `False` (default): safety is ensured by keeping
+          the sequence inside a convexified version of
+          the original proposition-preserving cell.
+    @param max_num_poly: maximum number of polytopes
+        in a region to use in reachability analysis.
+    @param use_all_horizon: in closed-loop algorithm:
+        if we should look for reachability also
+        in less than `N` steps.
+    @param trans_length: the number of polytopes allowed
+        to cross in a transition.
+        A value of `1` checks transitions
+        only between neighbors, a value of `2` checks
         neighbors of neighbors and so on.
-    @param remove_trans: if True, remove found transitions between
-        non-neighbors.
+    @param remove_trans: if `True`, then remove
+        the found transitions between non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
-
     @param plotit: plot partitioning as it evolves
-    @type plotit: boolean,
-        default = False
-
-    @param save_img: save snapshots of partitioning to PDF files,
-        requires plotit=True
-    @type save_img: boolean,
-        default = False
-
+    @type plotit: `bool` (default is `False`)
+    @param save_img: save snapshots of partitioning
+        to PDF files,
+        `requires plotit=True`
+    @type save_img: `bool` (default is `False`)
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of C{Polytope}
-
-    @rtype: L{AbstractPwa}
+    @type cont_props: `list` of `Polytope`
+    @rtype: `AbstractPwa`
     """
     start_time = os.times()[0]
     orig_ppp = part
@@ -1011,8 +1026,12 @@ def _discretize_dual(
     plotit=False, save_img=False, cont_props=None,
     plot_every=1
 ):
-    """Refine the partition and establish transitions
-    based on reachability analysis. Use dual-simulation algorithm.
+    """Refine partition, based on reachability analysis.
+
+    Refines the partition, and establishes transitions
+    based on reachability analysis.
+    Uses dual-simulation algorithm.
+
 
     Reference
     =========
@@ -1022,51 +1041,55 @@ def _discretize_dual(
        "A Bisimulation-like Algorithm for Abstracting Control Systems."
        54th Annual Allerton Conference on CCC 2016
 
-    See Also
+
+    Relevant
     ========
-    L{prop2partition.pwa_partition}, L{prop2partition.part2convex}
+    `prop2partition.pwa_partition`,
+    `prop2partition.part2convex`
 
-    @param part: L{PropPreservingPartition} object
-    @param ssys: L{LtiSysDyn} or L{PwaSysDyn} object
+
+    @param part: `PropPreservingPartition` object
+    @param ssys: `LtiSysDyn`
+        or `PwaSysDyn` object
     @param N: horizon length
-    @param min_cell_volume: the minimum volume of cells in the resulting
-        partition.
-    @param closed_loop: boolean indicating whether the `closed loop`
-        algorithm should be used. default True.
-    @param conservative: if true, force sequence in reachability analysis
-        to stay inside starting cell. If false, safety
-        is ensured by keeping the sequence inside a convexified
-        version of the original proposition preserving cell.
-    @param max_num_poly: maximum number of polytopes in a region to use in
-        reachability analysis.
-    @param use_all_horizon: in closed loop algorithm: if we should look
-        for reachability also in less than N steps.
-    @param trans_length: the number of polytopes allowed to cross in a
-        transition.  a value of 1 checks transitions
-        only between neighbors, a value of 2 checks
-        neighbors of neighbors and so on.
-    @param remove_trans: if True, remove found transitions between
-        non-neighbors.
+    @param min_cell_volume: the minimum volume of
+        ells in the resulting partition.
+    @param closed_loop: `bool` indicating whether
+        the `closed loop` algorithm should be used.
+        (default is `True`)
+    @param conservative:
+        - `True`: force sequence in reachability analysis
+          to stay inside starting cell.
+        - `False`: safety is ensured by keeping the
+          sequence inside a convexified version of
+          the original proposition-preserving cell.
+    @param max_num_poly: maximum number of polytopes
+        in a region to use in reachability analysis.
+    @param use_all_horizon: in closed-loop algorithm:
+        if we should look for reachability also in
+        less than `N` steps.
+    @param trans_length: the number of polytopes
+        allowed to cross in a transition.
+        - `1`: check transitions only between neighbors,
+        - `2`: check neighbors of neighbors and so on.
+    @param remove_trans: if `True`, then remove
+        found transitions between non-neighbors.
     @param abs_tol: maximum volume for an "empty" polytope
-
     @param plotit: plot partitioning as it evolves
-    @type plotit: boolean,
-        default = False
-
-    @param save_img: save snapshots of partitioning to PDF files,
-        requires plotit=True
-    @type save_img: boolean,
-        default = False
-
+    @type plotit: `bool` (default is `False`)
+    @param save_img: save snapshots of partitioning
+        to PDF files,
+        requires `plotit=True`
+    @type save_img: `bool` (default is `False`)
     @param cont_props: continuous propositions to plot
-    @type cont_props: list of C{Polytope}
-
-    @param simu_type: flag used to choose abstraction algorithm
-        (bisimulation or dual-simulation).
-    @type simu_type: string, 'bi' or 'dual'
-        default = 'bi'
-
-    @rtype: L{AbstractPwa}
+    @type cont_props: `list` of `Polytope`
+    @param simu_type: flag used to choose
+        abstraction algorithm
+        (bisimulation or dual-simulation):
+        - `'bi'` (default), or
+        - `'dual'`
+    @type simu_type: `str`
+    @rtype: `AbstractPwa`
     """
     start_time = os.times()[0]
     orig_ppp = part
@@ -1536,7 +1559,7 @@ def multiproc_discretize_switched(
     ppp, hybrid_sys, disc_params=None,
     plot=False, show_ts=False, only_adjacent=True
 ):
-    """Parallel implementation of discretize_switched.
+    """Parallel implementation of `discretize_switched`.
 
     Uses the multiprocessing package.
     """
@@ -1605,23 +1628,20 @@ def discretize_switched(
 ):
     """Abstract switched dynamics over given partition.
 
-    @type ppp: L{PropPreservingPartition}
-
+    @type ppp: `PropPreservingPartition`
     @param hybrid_sys: dynamics of switching modes
-    @type hybrid_sys: L{SwitchedSysDyn}
-
-    @param disc_params: discretization parameters passed to L{discretize} for
-		each mode. See L{discretize} for details.
-    @type disc_params: dict (keyed by mode) of dicts.
-
+    @type hybrid_sys: `SwitchedSysDyn`
+    @param disc_params: discretization parameters
+        passed to `discretize` for each mode.
+        See `discretize` for details.
+    @type disc_params: `dict` (keyed by mode) of `dict`s.
     @param plot: save partition images
-    @type plot: bool
-
-    @param show_ts, only_adjacent: options for L{AbstractPwa.plot}.
-
+    @type plot: `bool`
+    @param show_ts, only_adjacent: options for
+        `AbstractPwa.plot`.
     @return: abstracted dynamics,
-        some attributes are dict keyed by mode
-    @rtype: L{AbstractSwitched}
+        some attributes are `dict` keyed by mode
+    @rtype: `AbstractSwitched`
     """
     if disc_params is None:
         disc_params = {'N':1, 'trans_length':1}
@@ -1712,8 +1732,8 @@ def plot_annot(ax):
 def merge_abstractions(merged_abstr, trans, abstr, modes, mode_nums):
     """Construct merged transitions.
 
-    @type merged_abstr: L{AbstractSwitched}
-    @type abstr: dict of L{AbstractPwa}
+    @type merged_abstr: `AbstractSwitched`
+    @type abstr: dict of `AbstractPwa`
     """
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
@@ -1783,9 +1803,11 @@ def get_transitions(
 
     Used for the candidate transitions of the merged partition.
 
-    @rtype: scipy.sparse.lil_matrix
+    @rtype: `scipy.sparse.lil_matrix`
     """
-    logger.info('checking which transitions remain feasible after merging')
+    logger.info(
+        'checking which transitions remain '
+        'feasible after merging')
     part = abstract_sys.ppp
 
     # Initialize matrix for pairs to check
@@ -1847,8 +1869,9 @@ def multiproc_merge_partitions(abstractions):
 
     Assuming sufficient number of processors.
 
-    UNDER DEVELOPMENT; function signature may change without notice.
-    Calling will result in NotImplementedError.
+    UNDER DEVELOPMENT; function signature may
+    change without notice.
+    Calling will result in `NotImplementedError`.
     """
     raise NotImplementedError
 
@@ -1856,11 +1879,11 @@ def merge_partitions(abstractions):
     """Merge multiple abstractions.
 
     @param abstractions: keyed by mode
-    @type abstractions: dict of L{AbstractPwa}
+    @type abstractions: dict of `AbstractPwa`
 
     @return: (merged_abstraction, ap_labeling)
         where:
-            - merged_abstraction: L{AbstractSwitched}
+            - merged_abstraction: `AbstractSwitched`
             - ap_labeling: dict
     """
     if len(abstractions) == 0:
@@ -1965,13 +1988,13 @@ def merge_partition_pair(
 ):
     """Merge an Abstraction with the current partition iterate.
 
-    @param old_regions: A list of C{Region} that is from either:
-        1. The ppp of the first (initial) L{AbstractPwa} to be merged.
+    @param old_regions: A `list` of `Region` that is from either:
+        1. The ppp of the first (initial) `AbstractPwa` to be merged.
         2. A list of already-merged regions
-    @type old_regions: list of C{Region}
+    @type old_regions: list of `Region`
 
     @param ab2: Abstracted piecewise affine dynamics to be merged into the
-    @type ab2: L{AbstractPwa}
+    @type ab2: `AbstractPwa`
 
     @param cur_mode: mode to be merged
     @type cur_mode: tuple
@@ -1982,7 +2005,7 @@ def merge_partition_pair(
     @param old_parents: dict of modes that have already been merged to dict of
         indices of new regions to indices of regions
     @type old_parents: dict of modes to list of region indices in list
-        C{old_regions} or dict of region indices to regions in original ppp for
+        `old_regions` or dict of region indices to regions in original ppp for
         that mode
 
     @param old_ap_labeling: dict of states of already-merged modes to sets of
@@ -1990,11 +2013,11 @@ def merge_partition_pair(
     @type old_ap_labeling: dict of tuples to sets
 
     @return: the following:
-        - C{new_list}, list of new regions
-        - C{parents}, same as input param C{old_parents}, except that it
+        - `new_list`, list of new regions
+        - `parents`, same as input param `old_parents`, except that it
           includes the mode that was just merged and for list of regions in
-          return value C{new_list}
-        - C{ap_labeling}, same as input param C{old_ap_labeling}, except that it
+          return value `new_list`
+        - `ap_labeling`, same as input param `old_ap_labeling`, except that it
           includes the mode that was just merged.
     """
     logger.info('merging partitions')

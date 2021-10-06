@@ -33,7 +33,7 @@
 Interface to Lily that solves LTL games.
 
 Relevant links:
-  - U{Lily<http://www.ist.tugraz.at/staff/jobstmann/lily/>}
+  - [Lily](http://www.ist.tugraz.at/staff/jobstmann/lily/)
 """
 import collections as _cl
 import itertools as _itr
@@ -58,27 +58,27 @@ DOTFILE = 'ltl2vl-synthesis.dot'
 
 
 def synthesize(formula, env_vars=None, sys_vars=None):
-    """Return Moore transducer if C{formula} is realizable.
+    """Return Moore transducer if `formula` is realizable.
 
-    Variable C{dict}s have variable names as keys and their type as
+    Variable `dict`s have variable names as keys and their type as
     value. The types should be 'boolean'. These parameters are only
-    used if formula is of type C{str}. Else, the variable dictionaries
-    associated with the L{LTL} or L{GRSpec} object are used.
+    used if formula is of type `str`. Else, the variable dictionaries
+    associated with the `LTL` or `GRSpec` object are used.
 
     @param formula: linear temporal logic formula
-    @type formula: C{str}, L{LTL}, or L{GRSpec}
+    @type formula: `str`, `LTL`, or `GRSpec`
 
     @param env_vars: uncontrolled variables (inputs); used only if
-        C{formula} is of type C{str}
-    @type env_vars: C{dict} or None
+        `formula` is of type `str`
+    @type env_vars: `dict` or None
 
     @param sys_vars: controlled variables (outputs); used only if
-        C{formula} is of type C{str}
-    @type sys_vars: C{dict} or None
+        `formula` is of type `str`
+    @type sys_vars: `dict` or None
 
     @return: symbolic Moore transducer
         (guards are conjunctions, not sets)
-    @rtype: L{MooreMachine}
+    @rtype: `MooreMachine`
     """
     if isinstance(formula, GRSpec):
         env_vars = formula.env_vars
@@ -147,7 +147,7 @@ def _lily_strategy2moore(
         Moore strategy game graph,
         described in output from Lily
 
-    @rtype: L{MooreMachine}
+    @rtype: `MooreMachine`
     """
     lines = text.splitlines()
     def is_node_or_edge(line):
@@ -240,11 +240,10 @@ def _lily_strategy2moore(
 
 
 def _parse_label(s):
-    """Return C{dict} from variable conjunction.
+    """Return `dict` from variable conjunction.
 
-    @type s: C{str}
-
-    @rtype: C{dict}
+    @type s: `str`
+    @rtype: `dict`
     """
     l = re.findall(r'(\w+)=(0|1)', s)
     return {k: bool(int(v)) for k, v in l}

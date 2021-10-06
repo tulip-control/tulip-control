@@ -35,24 +35,28 @@ Convert Finite State Machines to State Chart XML (SCXML)
 def mealy2scxml(mealy):
     """Convert Mealy machine to SCXML.
 
-    Using examples/transys/machine_examples:
+    Using `examples/transys/machine_examples`:
 
-    >>> from machine_examples import garage_counter
-    >>> from tulip.transys.export import machine2scxml
-    >>> m = garage_counter()
-    >>> s = machine2scxml.mealy2scxml(m)
-    >>> f = open('mealy.scxml', 'w')
-    >>> f.write(s)
-    >>> f.close()
+    ```python
+    from machine_examples import garage_counter
+    from tulip.transys.export import machine2scxml
+
+
+    m = garage_counter()
+    s = machine2scxml.mealy2scxml(m)
+    f = open('mealy.scxml', 'w')
+    f.write(s)
+    f.close()
+    ```
 
     See Also
     ========
-    transys.machines.mealy
+    `transys.machines.mealy`
 
     @param mealy: machine to export as SCXML
-    @type mealy: MealyMachine
+    @type mealy: `MealyMachine`
 
-    @rtype: SCXML str
+    @rtype: SCXML `str`
     """
     def indent(n):
         return '\n' +n*'\t'

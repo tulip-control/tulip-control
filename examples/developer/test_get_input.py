@@ -4,8 +4,10 @@ To be run after `continuous.py`, in same session.
 For example, within an `ipython` interactive session in
 this directory:
 
+```
 run ../continuous.py
 run -i test_get_input.py
+```
 """
 from __future__ import print_function
 

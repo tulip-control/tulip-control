@@ -244,7 +244,7 @@ def _jtlv_str(m, comment, prefix='[]<>'):
 def _to_gr1c(d):
     """Dump to gr1c specification string.
 
-    Cf. L{interfaces.gr1c}.
+    Cf. `interfaces.gr1c`.
     """
     def _to_gr1c_print_vars(vardict):
         output = ''
@@ -318,10 +318,10 @@ def _to_wring(d):
 
 
 def convert_domain(dom):
-    """Return equivalent integer domain if C{dom} contais strings.
+    """Return equivalent integer domain if `dom` contais strings.
 
-    @type dom: C{list} of C{str}
-    @rtype: C{'boolean'} or C{(min_int, max_int)}
+    @type dom: `list` of `str`
+    @rtype: `'boolean'` or `(min_int, max_int)`
     """
     # not a string variable ?
     if not isinstance(dom, list):
@@ -384,17 +384,17 @@ to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs,
 def translate(spec, lang):
     """Return str or tuple in tool format.
 
-    Consult the respective documentation in L{tulip.interfaces}
+    Consult the respective documentation in `tulip.interfaces`
     concerning formats and links to further reading.
 
-    @type spec: L{GRSpec}
+    @type spec: `GRSpec`
     @type lang: 'gr1c', 'slugs', 'jtlv', or 'wring'
 
     @return: spec formatted for input to tool; the type of the return
     value depends on the tool:
 
-        - C{str} if gr1c or slugs
-        - (assumption, guarantee), where each element of the tuple is C{str}
+        - `str` if gr1c or slugs
+        - (assumption, guarantee), where each element of the tuple is `str`
     """
     if not isinstance(spec, tulip.spec.form.GRSpec):
         raise TypeError('translate requires first argument (spec) to be of type GRSpec')
@@ -411,14 +411,14 @@ def translate(spec, lang):
 
 
 def translate_ast(tree, lang):
-    """Return AST of formula C{tree}.
+    """Return AST of formula `tree`.
 
-    @type tree: L{Nodes.Node}
+    @type tree: `Nodes.Node`
     @type lang: 'gr1c' or 'slugs' or 'jtlv' or
       'promela' or 'smv' or 'python' or 'wring'
 
-    @return: tree using AST nodes of C{lang}
-    @rtype: L{FOL.Node}
+    @return: tree using AST nodes of `lang`
+    @rtype: `FOL.Node`
     """
     if lang == 'python':
         return _ast_to_python(tree, lang2nodes[lang])

@@ -30,8 +30,10 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""PLY-based parser for TuLiP LTL syntax,
-using AST classes from spec.ast
+"""PLY-based parser for TuLiP LTL syntax.
+
+This parser uses syntax-tree classes from
+the module `tulip.spec.ast`.
 """
 from __future__ import absolute_import
 from __future__ import print_function
@@ -225,10 +227,22 @@ class Parser(object):
             debuglog=debuglog)
 
     def parse(self, formula, debuglog=None):
-        """Parse formula string and create abstract syntax tree (AST).
+        """Return syntax tree for `formula`.
 
-        @param logger: defaults to logger C{"ltl_parser_log"}.
-        @type logger: C{logging.Logger}
+        @param formula: logic formula
+        @type formula: `str`
+        @param debuglog: logger passed as
+            keyword parameter `debuglog` to
+            the method
+            `ply.yacc.LRParser.parse`.
+            The default value is the logger
+            with name `PARSER_LOGGER`.
+        @type logger: `logging.Logger`
+        @return: abstract syntax tree that
+            results from parsing `formula`
+        @rtype: `tulip.spec.ast.nodes.Node`,
+            unless parameter `ast` was
+            passed to `self.__init__`
         """
         if debuglog is None:
             debuglog = logging.getLogger(PARSER_LOGGER)

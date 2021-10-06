@@ -88,24 +88,32 @@ class FunctionOnLabeledState(object):
 
     This class represents a function
 
-        f : S \times I_1 \times \ldots \times I_n
-            \to O_1 \times \ldots \times O_m
+    ```
+    f: S \times I_1 \times \ldots \times I_n
+       \to O_1 \times \ldots \times O_m
+    ```
 
-    where
-        I_1, \ldots, I_n are the sets of inputs and
-        O_1, \ldots, O_m are the sets of outputs.
+    where:
+
+    - `I_1`, \ldots, `I_n` are the sets of inputs and
+    - `O_1`, \ldots, `O_m` are the sets of outputs.
 
     Examples
     ========
-    >>> f = FunctionOnLabeledState("state", "action")
 
-    Then f is a memoryless policy,
-    i.e., f[s] = a where s is a state and a is an action.
+    ```python
+    f = FunctionOnLabeledState("state", "action")
+    ```
 
-    >>> f = FunctionOnLabeledState(["state", "mode"], "action")
+    Then `f` is a memoryless policy,
+    i.e., `f[s] = a` where `s` is a state and `a` is an action.
 
-    Then f is a finite memory policy, i.e., f[(s,q)] = a
-    where s is a state, q is a mode and a is an action.
+    ```python
+    f = FunctionOnLabeledState(["state", "mode"], "action")
+    ```
+
+    Then `f` is a finite memory policy, i.e., `f[(s,q)] = a`
+    where `s` is a state, `q` is a mode and `a` is an action.
 
     Note that "state" has to be part of the input.
     It has a special meaning here since it will be used to compute labels.

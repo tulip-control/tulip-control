@@ -94,62 +94,71 @@ class Transducer(LabeledDiGraph):
 
     Inputs
     ======
-    P = {p1, p2,...} is the set of input ports.
-    An input port p takes values in a set Vp.
-    Set Vp is called the "type" of input port p.
-    A "valuation" is an assignment of values to the input ports in P.
+    `P = {p1, p2,...}` is the set of input ports.
+    An input port p takes values in a set `Vp`.
+    The set `Vp` is called the "type" of input port `p`.
+    A "valuation" is an assignment of values to the input ports in `P`.
 
-    We call "inputs" the set of pairs::
+    We call "inputs" the set of pairs:
 
-      {(p_i, Vp_i),...}
+    ```
+    {(p_i, Vp_i), ...}
+    ```
 
-    of input ports p_i and their corresponding types Vp_i.
+    of input ports p_i and their corresponding types `Vp_i`.
 
     A guard is a predicate (bool-valued) used as sub-label for a transition.
     A guard is defined by a set and evaluated using set membership.
-    So given an input port value p=x, then if::
+    So given an input port value `p=x`, then if:
 
-      x \in guard_set
+    ```
+    x \in guard_set
+    ```
 
-    then the guard is True, otherwise it is False.
+    then the guard is `True`, otherwise it is `False`.
 
-    The "inputs" are defined by an OrderedDict::
+    The "inputs" are defined by an `OrderedDict`:
 
-      {'p1':explicit, 'p2':check, 'p3':None, ...}
+    ```python
+    {'p1': explicit, 'p2': check, 'p3': None, ...}
+    ```
 
     where:
-      - C{explicit}:
-        is an iterable representation of Vp,
-        possible only for discrete Vp.
-        If 'p1' is explicitly typed, then guards are evaluated directly::
+    - `explicit`:
+      is an iterable representation of Vp,
+      possible only for discrete Vp.
+      If 'p1' is explicitly typed,
+      then guards are evaluated directly:
 
-          input_port_value == guard_value ?
+      ```
+      input_port_value == guard_value ?
+      ```
 
-      - C{check}:
-        is a class with methods:
+    - `check`:
+      is a class with methods:
 
-          - C{__contains__(x) }:
-            check if guard value given to input port 'p1' is
-            in the set of possible values Vp.
+      - `__contains__(x)`:
+        check if guard value given to input port `'p1'` is
+        in the set of possible values Vp.
 
-          - C{__call__(guard_set, input_port_value) }:
-            check if C{input_port_value} \in C{guard_set}
-            This allows symbolic type definitions.
+      - `__call__(guard_set, input_port_value)`:
+        check if `input_port_value \in guard_set`
+        This allows symbolic type definitions.
 
-            For example, C{input_port_value} might be assigned
-            int values, but the C{guard_set} be defined by
-            a symbolic expression as the str: 'x<=5'.
+        For example, `input_port_value` might be assigned
+        `int` values, but the `guard_set` be defined by
+        a symbolic expression as the string: `'x<=5'`.
 
-            Then the user is responsible for providing
-            the appropriate method to the Mealy Machine,
-            using the custom C{check} class described here.
+        Then the user is responsible for providing
+        the appropriate method to the Mealy Machine,
+        using the custom `check` class described here.
 
-            Note that we could provide a rudimentary library
-            for the basic types of checks, e.g., for
-            the above simple symbolic case, where using
-            function eval() is sufficient.
+        Note that we could provide a rudimentary library
+        for the basic types of checks, e.g., for
+        the above simple symbolic case, where using
+        function `eval()` is sufficient.
 
-      - C{None}:
+      - `None`:
         signifies that no type is currently defined for
         this input port, so input type checking and guard
         evaluation are disabled.
@@ -162,7 +171,7 @@ class Transducer(LabeledDiGraph):
         by code, so the benefits of typedefs will be
         considerable compared to the required coding effort.
 
-    Guards annotate transitions::
+    Guards annotate transitions:
 
       Guards: States x States ---> Input_Predicates
 
@@ -170,36 +179,40 @@ class Transducer(LabeledDiGraph):
     =======
     Similarly defined to inputs, but:
 
-      - for Mealy Machines they annotate transitions
-      - for Moore Machines they annotate states
+    - for Mealy Machines they annotate transitions
+    - for Moore Machines they annotate states
 
     State Variables
     ===============
     Similarly defined to inputs, they annotate states,
-    for both Mealy and Moore machines::
+    for both Mealy and Moore machines:
 
-      States ---> State_Variables
+    States ---> State_Variables
 
     Update Function
     ===============
     The transition relation:
 
-      - for Mealy Machines::
+    - for Mealy Machines:
 
-        States x Input_Valuations ---> Output_Valuations x States
+      ```
+      States x Input_Valuations ---> Output_Valuations x States
+      ```
 
-        Note that in the range Output_Valuations are ordered before States
-        to emphasize that an output_valuation is produced
-        during the transition, NOT at the next state.
+      Note that in the range Output_Valuations are ordered before States
+      to emphasize that an output_valuation is produced
+      during the transition, NOT at the next state.
 
-        The data structure representation of the update function is
-        by storage of the Guards function and definition of Guard
-        evaluation for each input port via the OrderedDict discussed above.
+      The data structure representation of the update function is
+      by storage of the Guards function and definition of Guard
+      evaluation for each input port via the OrderedDict discussed above.
 
-      - for Moore Machines::
+    - for Moore Machines:
 
-        States x Input_Valuations ---> States
-        States ---> Output_valuations
+      ```
+      States x Input_Valuations ---> States
+      States ---> Output_valuations
+      ```
 
     Note
     ====
@@ -246,19 +259,19 @@ class Transducer(LabeledDiGraph):
     def add_inputs(self, new_inputs, masks=None):
         """Create new inputs.
 
-        @param new_inputs: C{dict} of pairs {port_name : port_type}
+        @param new_inputs: `dict` of pairs {port_name : port_type}
             where:
-                - port_name: str
-                - port_type: Iterable | check class
+            - port_name: str
+            - port_type: Iterable | check class
         @type new_inputs: dict
 
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
-                - True, if the sublabel should be shown
-                - False, otherwise (to hide it)
-        @type masks: C{dict} of functions C{{port_name : mask_function}}
-            each C{mask_function} returns bool
+            - True, if the sublabel should be shown
+            - False, otherwise (to hide it)
+        @type masks: `dict` of functions `{port_name : mask_function}`
+            each `mask_function` returns bool
         """
         for port_name, port_type in new_inputs.items():
             # append
@@ -286,17 +299,22 @@ class Transducer(LabeledDiGraph):
 class MooreMachine(Transducer):
     """Moore machine.
 
-    A Moore machine implements the discrete dynamics::
-        x[k+1] = f(x[k], u[k] )
-        y[k] = g(x[k] )
+    A Moore machine implements the discrete dynamics:
+
+    ```
+    x[k + 1] = f(x[k], u[k])
+    y[k] = g(x[k])
+    ```
+
     where:
-      - k: discrete time = sequence index
-      - x: state = valuation of state variables
-      - X: set of states = S
-      - u: inputs = valuation of input ports
-      - y: output actions = valuation of output ports
-      - f: X-> 2^X, transition function
-      - g: X-> Out, output function
+    - `k`: discrete time = sequence index
+    - `x`: state = valuation of state variables
+    - `X`: set of states = `S`
+    - `u`: inputs = valuation of input ports
+    - `y`: output actions = valuation of output ports
+    - `f`: `X-> 2^X`, transition function
+    - `g`: `X-> Out`, output function
+
     Observe that the output depends only on the state.
 
     Note
@@ -368,50 +386,64 @@ class MealyMachine(Transducer):
 
     Examples
     ========
+
     Traffic Light: Fig. 3.14, p.72 U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
-    >>> m = MealyMachine()
-    >>> pure_signal = {'present', 'absent'}
-    >>> m.add_inputs([('tick', pure_signal) ])
-    >>> m.add_outputs([('go', pure_signal), ('stop', pure_signal) ])
-    >>> m.states.add_from(['red', 'green', 'yellow'])
-    >>> m.states.initial.add('red')
+    ```python
+    m = MealyMachine()
+    pure_signal = {'present', 'absent'}
+    m.add_inputs([('tick', pure_signal) ])
+    m.add_outputs([('go', pure_signal), ('stop', pure_signal) ])
+    m.states.add_from(['red', 'green', 'yellow'])
+    m.states.initial.add('red')
+    ```
 
     For brevity:
 
-    >>> p = 'present'
-    >>> a = 'absent'
+    ```python
+    p = 'present'
+    a = 'absent'
+    ```
 
     The transitions can equivalently be defined with dict().
-    So instead of the previous C{m.transitions.add}, we can use:
+    So instead of the previous `m.transitions.add`, we can use:
 
-    >>> label = {'tick':p, 'go':p, 'stop':a}
-    >>> m.transitions.add('red', 'green', **label)
-    >>> label = {'tick':p, 'go':a, 'stop':p}
-    >>> m.transitions.add('green', 'yellow', **label)
-    >>> label = {'tick':p, 'go':a, 'stop':p}
-    >>> m.transitions.add('yellow', 'red', **label)
+    ```python
+    label = {'tick':p, 'go':p, 'stop':a}
+    m.transitions.add('red', 'green', **label)
+    label = {'tick':p, 'go':a, 'stop':p}
+    m.transitions.add('green', 'yellow', **label)
+    label = {'tick':p, 'go':a, 'stop':p}
+    m.transitions.add('yellow', 'red', **label)
+    ```
 
     This avoids any ordering issues, i.e., changing the
     order of the sublabels does not matter:
 
-    >>> label = {'go':p, 'tick':p, 'stop':a}
-    >>> m.transitions.add('red', 'green', **label)
+    ```python
+    label = {'go':p, 'tick':p, 'stop':a}
+    m.transitions.add('red', 'green', **label)
+    ```
 
     Theory
     ======
-    A Mealy machine implements the discrete dynamics::
-        x[k+1] = f(x[k], u[k] )
-        y[k] = g(x[k], u[k] )
+    A Mealy machine implements the discrete dynamics:
+
+    ```
+    x[k + 1] = f(x[k], u[k])
+    y[k] = g(x[k], u[k])
+    ```
+
     where:
-      - k: discrete time = sequence index
-      - x: state = valuation of state variables
-      - X: set of states = S
-      - u: inputs = valuation of input ports
-      - y: output actions = valuation of output ports
-      - f: X-> 2^X, transition function
-      - g: X-> Out, output function
+    - `k`: discrete time = sequence index
+    - `x`: state = valuation of state variables
+    - `X`: set of states = S
+    - `u`: inputs = valuation of input ports
+    - `y`: output actions = valuation of output ports
+    - `f`: `X -> 2^X`, transition function
+    - `g`: `X -> Out`, output function
+
     Observe that the output is defined when a reaction occurs to an input.
 
     Note
@@ -476,15 +508,15 @@ class MealyMachine(Transducer):
 
         @param new_outputs: dict of pairs {port_name : port_type}
           where:
-            - port_name: str
-            - port_type: Iterable | check class
+          - port_name: str
+          - port_type: Iterable | check class
         @type new_outputs: dict
 
         @param masks: custom mask functions, for each sublabel
             based on its current value
             each such function returns:
-              - True, if the sublabel should be shown
-              - False, otherwise (to hide it)
+            - True, if the sublabel should be shown
+            - False, otherwise (to hide it)
         @type masks: dict of functions
             keys are port_names (see arg: new_outputs)
             each function returns bool
@@ -511,14 +543,14 @@ class MealyMachine(Transducer):
         (for each state and input at most a single transition enabled,
         this notion does not coincide with output-determinism)
 
-        Not exactly a wrapper of L{Transitions.find},
+        Not exactly a wrapper of `Transitions.find`,
         because it matches only that part of an edge label
         that corresponds to the inputs.
 
         @param from_state: transition starts from this state.
-        @type from_state: element of C{self.states}
+        @type from_state: element of `self.states`
 
-        @param inputs: C{dict} assigning a valid value to each input port.
+        @param inputs: `dict` assigning a valid value to each input port.
         @type inputs: {'port_name':port_value, ...}
 
         @param lazy: Lazy evaluation of inputs? If lazy=True, then
@@ -528,7 +560,7 @@ class MealyMachine(Transducer):
 
         @return: output values and next state.
         @rtype: (next_state, outputs)
-          where C{outputs}: C{{'port_name':port_value, ...}}
+          where `outputs`: `{'port_name':port_value, ...}`
         """
         if lazy:
             restricted_inputs = set(self.inputs).intersection(inputs.keys())
@@ -575,17 +607,16 @@ class MealyMachine(Transducer):
         return (next_state, outputs)
 
     def reactionpart(self, from_state, inputs):
-        """Wraps reaction() with lazy=True
-        """
+        """Wraps `reaction()` with `lazy=True`."""
         return self.reaction(from_state, inputs, lazy=True)
 
     def run(self, from_state=None, input_sequences=None):
         """Guided or interactive run.
 
-        @param input_sequences: if C{None}, then call L{interactive_run},
-            otherwise call L{guided_run}.
+        @param input_sequences: if `None`, then call `interactive_run`,
+            otherwise call `guided_run`.
 
-        @return: output of L{guided_run}, otherwise C{None}.
+        @return: output of `guided_run`, otherwise `None`.
         """
         if input_sequences is None:
             interactive_run(self, from_state=from_state)
@@ -600,19 +631,19 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     @param from_state: start simulation
 
     @param mealy: input-deterministic Mealy machine
-    @type mealy: L{MealyMachine}
+    @type mealy: `MealyMachine`
 
     @param from_state: start simulation at this state.
-        If C{None}, then use the unique initial state C{Sinit}.
+        If `None`, then use the unique initial state `Sinit`.
 
     @param input_sequences: one sequence of values for each input port
-    @type input_sequences: C{dict} of C{lists}
+    @type input_sequences: `dict` of `lists`
 
     @return: sequence of states and sequence of output valuations
     @rtype: (states, output_sequences)
       where:
-        - C{states} is a C{list} of states excluding C{from_state}
-        - C{output_sequences} is a C{dict} of C{lists}
+        - `states` is a `list` of states excluding `from_state`
+        - `output_sequences` is a `dict` of `lists`
     """
     seqs = input_sequences  # abbrv
     missing_ports = set(mealy.inputs).difference(seqs)
@@ -654,12 +685,12 @@ def random_run(mealy, from_state=None, N=10):
     Randomly generated inputs may violate liveness assumption on environment.
 
     @param mealy: input-deterministic Mealy machine
-    @type mealy: C{MealyMachine}
+    @type mealy: `MealyMachine`
 
     @param N: number of reactions (inputs)
     @type N: int
 
-    @return: same as L{guided_run}
+    @return: same as `guided_run`
     """
     if from_state is None:
         state = next(iter(mealy.states.initial))
@@ -695,7 +726,7 @@ def interactive_run(mealy, from_state=None):
     """Run input-deterministic Mealy machine using user input.
 
     @param mealy: input-deterministic Mealy machine
-    @type mealy: L{MealyMachine}
+    @type mealy: `MealyMachine`
     """
     if from_state is None:
         state = next(iter(mealy.states.initial))
@@ -770,9 +801,9 @@ def moore2mealy(moore):
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
-    @type moore: L{MooreMachine}
+    @type moore: `MooreMachine`
 
-    @rtype: L{MealyMachine}
+    @rtype: `MealyMachine`
     """
     if not isinstance(moore, MooreMachine):
         raise TypeError('moore must be a MooreMachine')
@@ -823,9 +854,8 @@ def mealy2moore(mealy):
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
-    @type mealy: L{MealyMachine}
-
-    @rtype: L{MooreMachine}
+    @type mealy: `MealyMachine`
+    @rtype: `MooreMachine`
     """
     # TODO: check for when Mealy is exactly convertible to Moore
     if not isinstance(mealy, MealyMachine):
@@ -926,17 +956,18 @@ trim_dict = lambda x, y: {k: x[k] for k in x if k not in y}
 
 
 def strip_ports(mealy, names):
-    """Remove ports in C{names}.
+    """Remove ports in `names`.
 
     For example, to remove the atomic propositions
-    labeling the transition system C{ts} used
+    labeling the transition system `ts` used
     (so they are dependent variables), call it as:
 
-      >>> strip_ports(mealy, ts.atomic_propositions)
+    ```python
+    strip_ports(mealy, ts.atomic_propositions)
+    ```
 
-    @type mealy: L{MealyMachine}
-
-    @type names: iterable container of C{str}
+    @type mealy: `MealyMachine`
+    @type names: iterable container of `str`
     """
     new = MealyMachine()
 

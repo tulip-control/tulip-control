@@ -32,10 +32,12 @@
 """
 Convenience functions for plotting
 
-WARNING: The public functions dimension, newax, dom2vec, quiver will
-eventually be removed.  Their use in new applications is discouraged.
+WARNING: The public functions:
+    `dimension`, `newax`, `dom2vec`, `quiver`
+will eventually be removed.
+Their use in new applications is discouraged.
 
-They come from https://github.com/johnyf/pyvectorized
+They come from <https://github.com/johnyf/pyvectorized>.
 """
 from __future__ import division
 from __future__ import print_function
@@ -78,30 +80,27 @@ def newax(subplots=(1, 1), fig=None,
 
     @param fig: attach axes to this figure
     @type fig: figure object,
-        should be consistent with C{dim}
-
+        should be consistent with `dim`
     @param subplots: number or layout of subplots
-    @type subplots: int or
-        2-tuple of subplot layout
-
+    @type subplots:
+        `int` or
+        2-`tuple` of subplot layout
     @param mode: return the axes shaped as a
         vector or as a matrix.
         This is a convenience for later iterations
         over the axes.
     @type mode: 'matrix' | ['list']
-
     @param dim: plot dimension:
-
-            - if dim == 2, then use matplotlib
-            - if dim == 3, then use mayavi
-
-        So the figure type depends on dim.
-
-    @return: C{(ax, fig)} where:
-        - C{ax}: axes created
-        - C{fig}: parent of ax
-    @rtype: list or list of lists,
-        depending on C{mode} above
+        - if `dim == 2`, then use `matplotlib`
+        - if `dim == 3`, then use `mayavi`
+        So the figure type depends on `dim`.
+    @return: `(ax, fig)` where:
+        - `ax`: axes created
+        - `fig`: parent of `ax`
+    @rtype:
+        `list` or
+        `list` of `list`s,
+        depending on `mode` above
     """
     plt = _import_pyplot()
     # layout or number of axes ?
@@ -160,20 +159,25 @@ def dom2vec(domain, resolution):
 
     Example
     =======
-    >>> domain = [0, 1, 0,2]
-    >>> resolution = [4, 5]
-    >>> q = domain2vec(domain, resolution)
+
+    ```python
+    domain = [0, 1, 0,2]
+    resolution = [4, 5]
+    q = domain2vec(domain, resolution)
+    ```
 
     @param domain: extremal values of parallelepiped
-    @type domain: [xmin, xmax, ymin, ymax, ...]
-
-    @param resolution: # points /dimension
-    @type resolution: [nx, ny, ...]
-
-    @return: q = matrix of column vectors (meshgrid point coordinates)
+    @type domain: `[xmin, xmax, ymin, ymax, ...]`
+    @param resolution: # points / dimension
+    @type resolution: `[nx, ny, ...]`
+    @return: q = matrix of column vectors
+        (meshgrid point coordinates)
     @rtype: [#dim x #points]
 
-    See also vec2meshgrid, domain2meshgrid, meshgrid2vec.
+    See also:
+        `vec2meshgrid`,
+        `domain2meshgrid`,
+        `meshgrid2vec`
     """
     domain = _grouper(2, domain)
     lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
@@ -189,33 +193,31 @@ def quiver(x, v, ax=None, **kwargs):
     Plot v columns at points in columns of x
     in axes ax with plot formatting options in kwargs.
 
-    >>> import numpy as np
-    >>> import matplotlib as mpl
-    >>> from pyvectorized import quiver, dom2vec
-    >>> x = dom2vec([0, 10, 0, 11], [20, 20])
-    >>> v = np.vstack(np.sin(x[1, :] ), np.cos(x[2, :] ) )
-    >>> quiver(mpl.gca(), x, v)
+    ```python
+    import numpy as np
+    import matplotlib as mpl
+    from pyvectorized import quiver, dom2vec
+
+    x = dom2vec([0, 10, 0, 11], [20, 20])
+    v = np.vstack(np.sin(x[1, :] ), np.cos(x[2, :]))
+    quiver(mpl.gca(), x, v)
+    ```
 
     see also
-        matplotlib.quiver, mayavi.quiver3
+        `matplotlib.quiver`,
+        `mayavi.quiver3`
 
     @param x: points where vectors are based
         each column is a coordinate tuple
-    @type x: 2d lil | numpy.ndarray
-
+    @type x: 2d lil | `numpy.ndarray`
     @param v: vectors which to base at points x
-    @type v: 2d lil | numpy.ndarray
-
-    @param ax: axes handle, e.g., ax = gca())
-
+    @type v: 2d lil | `numpy.ndarray`
+    @param ax: axes handle, e.g., `ax = gca()`
     @param x: matrix of points where vectors are plotted
     @type x: [#dim x #points]
-
     @param v: matrix of column vectors to plot at points x
     @type v: [#dim x #points]
-
     @param kwargs: plot formatting
-
     @return: handle to plotted object(s)
     """
     plt = _import_pyplot()
@@ -254,8 +256,7 @@ def quiver(x, v, ax=None, **kwargs):
     return h
 
 def _grouper(n, iterable, fillvalue=None):
-    """grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
-    """
+    """`grouper(3, 'ABCDEFG', 'x')` --> ABC DEF Gxx."""
     args = [iter(iterable)] * n
     return izip_longest(fillvalue=fillvalue, *args)
 

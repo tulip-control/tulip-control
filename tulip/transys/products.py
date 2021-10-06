@@ -49,7 +49,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
 
     Note that performs on-the-fly BA * TS.
     The given TS can be explicit or on-the-fly,
-    depending on what you pass to C{__init__}.
+    depending on what you pass to `__init__`.
 
     The state space serves as the set of "visited" states.
 
@@ -174,15 +174,15 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
 
     See Also
     ========
-    L{ba_ts_sync_prod}, L{sync_prod}
+    `ba_ts_sync_prod`, `sync_prod`
 
-    @return: C{(product_ts, persistent_states)}, where:
-        - C{product_ts} is the synchronous product TS * BA
-        - C{persistent_states} are those in TS * BA which
+    @return: `(product_ts, persistent_states)`, where:
+        - `product_ts` is the synchronous product TS * BA
+        - `persistent_states` are those in TS * BA which
             project on accepting states of BA.
     @rtype:
-        - C{product_TS} is a L{transys.FiniteTransitionSystem}
-        - C{persistent_states} is the set of states which project
+        - `product_TS` is a `transys.FiniteTransitionSystem`
+        - `persistent_states` is the set of states which project
             on accepting states of the Buchi Automaton BA.
     """
     # if not hasattr(transition_system, FiniteTransitionSystem):
@@ -373,9 +373,9 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
 
     See Also
     ========
-    L{ts_ba_sync_prod}, L{sync_prod}
+    `ts_ba_sync_prod`, `sync_prod`
 
-    @return: C{prod_ba}, the product L{BuchiAutomaton}.
+    @return: `prod_ba`, the product `BuchiAutomaton`.
     """
     logger.debug('\n' + _hl + '\n'
                  'Product: BA * TS' +

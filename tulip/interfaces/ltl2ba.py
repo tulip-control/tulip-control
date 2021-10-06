@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Interface to ltl2ba"""
+"""Interface to `ltl2ba`."""
 import logging
 logger = logging.getLogger(__name__)
 import subprocess
@@ -42,7 +42,7 @@ TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
 
 
 class Lexer(object):
-    """Token rules to build lexer for ltl2ba output."""
+    """Token rules to build lexer for `ltl2ba` output."""
 
     reserved = {
         'goto': 'GOTO',
@@ -50,7 +50,6 @@ class Lexer(object):
         'fi': 'FI',
         'never': 'NEVER',
         'skip': 'SKIP'}
-
     tokens = (
         'TRUE', 'FALSE',
         'NUMBER',

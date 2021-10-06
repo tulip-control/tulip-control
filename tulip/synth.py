@@ -135,28 +135,28 @@ def exactly_one(iterable):
 
 
 def _conj_action(actions_dict, action_type, nxt=False, ids=None):
-    """Return conjunct if C{action_type} in C{actions_dict}.
+    """Return conjunct if `action_type` in `actions_dict`.
 
-    @param actions_dict: C{dict} with pairs C{action_type_name : action_value}
+    @param actions_dict: `dict` with pairs `action_type_name : action_value`
     @type actions_dict: dict
 
-    @param action_type: key to look for in C{actions_dict}
+    @param action_type: key to look for in `actions_dict`
     @type action_type: hashable (here typically a str)
 
     @param nxt: prepend or not with the next operator
     @type nxt: bool
 
-    @param ids: map C{action_value} -> value used in solver input,
+    @param ids: map `action_value` -> value used in solver input,
         for example, for gr1c
     @type ids: dict
 
     @return:
-        - conjunct (includes C{&&} operator) if:
+        - conjunct (includes `&&` operator) if:
 
-            - C{action_type} in C{actions_dict}, and
-            - C{action_value} is not the empty string (modeling "no constrain")
+            - `action_type` in `actions_dict`, and
+            - `action_value` is not the empty string (modeling "no constrain")
 
-          includes next operator (C{X}) if C{nxt = True}.
+          includes next operator (`X`) if `nxt = True`.
         - empty string otherwise
     @rtype: str
     """
@@ -177,7 +177,7 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     """Conjunction of multiple action types.
 
     Includes solver expression substitution.
-    See also L{_conj_action}.
+    See also `_conj_action`.
     """
     logger.debug('conjunction of actions: ' + str(actions_dict))
     logger.debug('mapping to solver equivalents: ' + str(solver_expr))
@@ -231,34 +231,34 @@ def iter2var(states, variables, statevar, bool_states, must):
 
     If FTS values are strings (e.g., 'park', 'wait'),
     then the additional action is 'none'.
-    They are treated by C{spec} as an arbitrary finite domain.
+    They are treated by `spec` as an arbitrary finite domain.
 
-    An option C{min_one} is internally available,
+    An option `min_one` is internally available,
     in order to allow only N values of the variable.
     This requires that the variable takes at least one value each time.
 
     Combined with a mutex constraint, it yields an n-ary xor constraint.
 
     @param states: values of domain.
-    @type states: iterable container of C{int}
-        or iterable container of C{str}
+    @type states: iterable container of `int`
+        or iterable container of `str`
 
     @param variables: to be augmented with integer or string variable
         or Boolean variables.
 
     @param statevar: name to use for integer or string valued variable.
-    @type statevar: C{str}
+    @type statevar: `str`
 
     @param bool_states: if True, then use bool variables.
         Otherwise use integer or string valued variable.
 
-    @return: C{tuple} of:
+    @return: `tuple` of:
       - mapping from values to GR(1) actions.
         If Booleans are used, then GR(1) are the same.
         Otherwise, they map to e.g. 'act = "wait"' or 'act = 3'
 
-      - constraints to be added to C{trans} and/or C{init} in GR(1)
-    @rtype: C{dict}, C{list}
+      - constraints to be added to `trans` and/or `init` in GR(1)
+    @rtype: `dict`, `list`
     """
     if not states:
         logger.debug('empty container, so empty dict for solver expr')
@@ -384,10 +384,10 @@ def sys_to_spec(
 ):
     """Convert transition system to GR(1) fragment of LTL.
 
-    The attribute C{FTS.owner} defines who controls the system,
-    as described next. It can take values C{'env'} or C{'sys'}.
+    The attribute `FTS.owner` defines who controls the system,
+    as described next. It can take values `'env'` or `'sys'`.
 
-    The following are represented by variables controlled by C{ofts.owner}:
+    The following are represented by variables controlled by `ofts.owner`:
 
       - the current state
       - the atomic propositions annotating states
@@ -399,12 +399,12 @@ def sys_to_spec(
 
     Multiple types of environment and system actions can be defined.
     Make sure that, depending on the player,
-    C{'env'} or C{'sys'} are part of the action type names,
-    so that L{synth.synthesize} can recognize them.
+    `'env'` or `'sys'` are part of the action type names,
+    so that `synth.synthesize` can recognize them.
 
     Caution
     =======
-    There are aspects of L{FTS} that
+    There are aspects of `FTS` that
     need to be separately specified in a logic formula.
 
     An example are the initial conditions constraining the values
@@ -412,43 +412,43 @@ def sys_to_spec(
 
     See also
     ========
-    L{sys_trans_from_ts}, L{env_open_fts2spec},
-    L{create_actions}, L{create_states}
+    `sys_trans_from_ts}, `env_open_fts2spec`,
+    `create_actions`, `create_states`
 
-    @param ofts: L{FTS}
+    @param ofts: `FTS`
 
     @param ignore_initial: Do not include initial state info from TS.
         Enable this to mask absence of FTS initial states.
         Useful when initial states are specified in another way,
         e.g., directly augmenting the spec part.
-    @type ignore_initial: C{bool}
+    @type ignore_initial: `bool`
 
     @param state_var: name to be used for the integer or string
         variable that equals the current transition system state.
-    @type state_var: C{str}
+    @type state_var: `str`
 
     @param bool_states: deprecated as inefficient
 
-        if C{True}, then use one Boolean variable
+        if `True`, then use one Boolean variable
         to represent each state (one-hot encoding).
         Otherwise use a single integer variable,
         different values of which correspond to states of
-        C{ofts} (binary encoding).
+        `ofts` (binary encoding).
 
     @type bool_states: bool
 
-    @param bool_actions: Similar to C{bool_states}.
+    @param bool_actions: Similar to `bool_states`.
         For each type of system actions,
         and each type of environment actions:
 
-          - if C{True}, then for each possible value of that action type,
+          - if `True`, then for each possible value of that action type,
             use a different Boolean variable to represent it.
 
           - Otherwise use a single integer variable,
             that ranges over the possible action values.
 
-    @return: logic formula in GR(1) form representing C{ofts}.
-    @rtype: L{GRSpec}
+    @return: logic formula in GR(1) form representing `ofts`.
+    @rtype: `GRSpec`
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
         raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
@@ -528,11 +528,11 @@ def env_to_spec(
 
     Multiple types of environment and system actions can be defined.
 
-    For more details see L{sys_to_spec}.
+    For more details see `sys_to_spec`.
 
     See also
     ========
-    L{sys_open_fts2spec}
+    `sys_open_fts2spec`
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
         raise TypeError('ofts must be FTS, got instead: ' + str(type(ofts)))
@@ -639,10 +639,10 @@ def _sys_trans_from_ts(
     so that users can play around with their own bare graphs,
     when they don't need the label typing overhead.
 
-    @param trans: L{Transitions} as from the transitions
-        attribute of L{FTS}.
+    @param trans: `Transitions` as from the transitions
+        attribute of `FTS`.
 
-    @param action_ids: same as C{sys-action_ids}
+    @param action_ids: same as `sys-action_ids`
         Caution: to be removed in a future release
 
     @param sys_action_ids: dict of dicts
@@ -655,19 +655,19 @@ def _sys_trans_from_ts(
 
           - as Boolean variables, so each possible action value
             becomes a different Boolean variable with the same
-            name, thus C{sys_action_ids[action_type]} will be
-            the identity map on C{action_values} for that C{action_type}.
+            name, thus `sys_action_ids[action_type]` will be
+            the identity map on `action_values` for that `action_type`.
 
           - as integer variables, so each possible action value
             becomes a different expression in the solver (e.g. gr1c)
-            input format. Then C{sys_action_ids[action_type]} maps
-            C{action_value} -> solver expression of the form:
+            input format. Then `sys_action_ids[action_type]` maps
+            `action_value` -> solver expression of the form:
 
-            C{action_type = i}
+            `action_type = i`
 
-            where C{i} corresponds to that particular  C{action_type}.
+            where `i` corresponds to that particular  `action_type`.
 
-    @param env_action_ids: same as C{sys-action_ids}
+    @param env_action_ids: same as `sys-action_ids`
     """
     logger.debug('modeling sys transitions in logic')
     sys_trans = list()
@@ -745,7 +745,7 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
     Might become optional in the future,
     depending on the desired way of defining env behavior.
 
-    @param env_action_ids: dict of dicts, see L{sys_trans_from_ts}.
+    @param env_action_ids: dict of dicts, see `sys_trans_from_ts`.
     """
     env_trans = list()
     # this probably useless for multiple action types
@@ -889,7 +889,7 @@ def _sprint_aps(label, aps):
 
 
 def build_dependent_var_table(fts, statevar):
-    """Return a C{dict} of substitution rules for dependent variables.
+    """Return a `dict` of substitution rules for dependent variables.
 
     The dependent variables in a transition system are the
     atomic propositions that are used to label states.
@@ -900,23 +900,25 @@ def build_dependent_var_table(fts, statevar):
 
     The returned substitutions can be used
 
-    @type fts: L{FTS}
+    @type fts: `FTS`
 
     @param statevar: name of variable used for the current state
         For example if it is 'loc', then the states
-        C{'s0', 's1'} are mapped to::
+        `'s0', 's1'` are mapped to:
 
-          {'s0': '(loc = "s0")',
-           's1': '(loc = "s1")'}
+        ```python
+        {'s0': '(loc = "s0")',
+         's1': '(loc = "s1")'}
+        ```
 
-    @type state_ids: C{dict}
+    @type state_ids: `dict`
 
-    @rtype: C{{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}}
+    @rtype: `{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}`
         where:
 
-          - C{'p'} is a proposition in C{fts.atomic_propositions}
-          - the states "s1", "s2" are labeled with C{'p'}
-          - C{loc} is the string variable used for the state of C{fts}.
+          - `'p'` is a proposition in `fts.atomic_propositions`
+          - the states "s1", "s2" are labeled with `'p'`
+          - `loc` is the string variable used for the state of `fts`.
     """
     state_ids, __ = iter2var(fts.states, variables=dict(), statevar=statevar,
                              bool_states=False, must='xor')
@@ -928,10 +930,10 @@ def build_dependent_var_table(fts, statevar):
 def map_ap_to_states(fts):
     """For each proposition find the states labeled with it.
 
-    @type fts: L{FTS}
+    @type fts: `FTS`
 
-    @rtype: C{{'p': s, ...}} where C{'p'} a proposition and
-        C{s} a set of states in C{fts}.
+    @rtype: `{'p': s, ...}` where `'p'` a proposition and
+        `s` a set of states in `fts`.
     """
     table = {p: set() for p in fts.atomic_propositions}
     for u in fts:
@@ -958,39 +960,43 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     represented in logic with a single variable,
     that ranges over a finite set of integers or strings, respectively.
 
-    The keys of C{ts} are used to name each state variable.
-    So the logic formula for C{ts['name']} will be C{'name'}.
+    The keys of `ts` are used to name each state variable.
+    So the logic formula for `ts['name']` will be `'name'`.
 
     Who controls this state variable is determined from
-    the attribute C{FTS.owner} that can take the values:
+    the attribute `FTS.owner` that can take the values:
 
-      - C{'env'}
-      - C{'sys'}
+      - `'env'`
+      - `'sys'`
 
     For example:
 
-      >>> ts.states.add_from(range(4))
-      >>> ts['door'].owner = 'env'
+    ```python
+    ts.states.add_from(range(4))
+    ts['door'].owner = 'env'
+    ```
 
     will result in a logic formula with
-    an integer variable C{'door'}
+    an integer variable `'door'`
     controlled by the environment and
-    taking values over C{{0, 1, 2, 3}}.
+    taking values over `{0, 1, 2, 3}`.
 
     The example:
 
-      >>> ts.states.add_from(['a', 'b', 'c'])
-      >>> ts['door'].owner = 'sys'
+    ```python
+    ts.states.add_from(['a', 'b', 'c'])
+    ts['door'].owner = 'sys'
+    ```
 
-    will instead result in a string variable C{'door'}
+    will instead result in a string variable `'door'`
     controlled by the system and taking
-    values over C{{'a', 'b', 'c'}}.
+    values over `{'a', 'b', 'c'}`.
 
-    @type specs: L{GRSpec}
+    @type specs: `GRSpec`
 
-    @type ts: C{dict} of L{FiniteTransitionSystem}
+    @type ts: `dict` of `FiniteTransitionSystem`
 
-    @type ignore_init: C{set} of keys from C{ts}
+    @type ignore_init: `set` of keys from `ts`
 
     @param solver: See function `synthesize` for
         available options.
@@ -1022,25 +1028,25 @@ def synthesize(
         solver='omega'):
     """Function to call the appropriate synthesis tool on the specification.
 
-    There are three attributes of C{specs} that define what
+    There are three attributes of `specs` that define what
     kind of controller you are looking for:
 
-    1. C{moore}: What information the controller knows when deciding the next
+    1. `moore`: What information the controller knows when deciding the next
        values of controlled variables:
         - Moore: can read current state,
           but not next environment variable values, or
         - Mealy: can read current state and next environment variable values.
 
-    2. C{qinit}: Quantification of initial variable values:
+    2. `qinit`: Quantification of initial variable values:
         Whether all states that satisfy a predicate should be winning,
         or the initial values of some (or all) the variables is
         subject to the synthesizer's choice.
 
-    3. C{plus_one}: The form of assume-guarantee specification,
+    3. `plus_one`: The form of assume-guarantee specification,
         i.e., how the system guarantees relate to assumptions about the
         environment.
 
-    For more details about these attributes, see L{GRSpec}.
+    For more details about these attributes, see `GRSpec`.
 
     The states of the transition system can be either:
 
@@ -1048,7 +1054,7 @@ def synthesize(
       - all strings
 
     For more details of how the transition system is represented in
-    logic look at L{synthesize_many}.
+    logic look at `synthesize_many`.
 
     Beware!
     =======
@@ -1057,7 +1063,7 @@ def synthesize(
     arguments supported and types of objects returned may change
     without notice.
 
-    @type specs: L{spec.GRSpec}
+    @type specs: `spec.GRSpec`
 
     @param env: A transition system describing the environment:
 
@@ -1068,7 +1074,7 @@ def synthesize(
 
         This constrains the transitions available to
         the environment, given the outputs from the system.
-    @type env: L{FTS}
+    @type env: `FTS`
 
     @param sys: A transition system describing the system:
 
@@ -1077,7 +1083,7 @@ def synthesize(
             - output: sys_actions
             - initial states constrain the system
 
-    @type sys: L{FTS}
+    @type sys: `FTS`
 
     @param ignore_env_init: Ignore any initial state information
         contained in env.
@@ -1095,22 +1101,22 @@ def synthesize(
 
         For GR(1) synthesis:
 
-          - C{"gr1c"}: use gr1c via L{interfaces.gr1c}.
+          - `"gr1c"`: use gr1c via `interfaces.gr1c`.
             written in C using CUDD, symbolic
 
-          - C{"gr1py"}: use gr1py via L{interfaces.gr1py}.
+          - `"gr1py"`: use gr1py via `interfaces.gr1py`.
             Python, enumerative
 
-          - C{"omega"}: use omega via L{interfaces.omega}.
-            Python using C{dd} or Cython using CUDD, symbolic
+          - `"omega"`: use omega via `interfaces.omega`.
+            Python using `dd` or Cython using CUDD, symbolic
 
-          - C{"slugs"}: use slugs via L{interfaces.slugs}.
+          - `"slugs"`: use slugs via `interfaces.slugs`.
             C++ using CUDD, symbolic
 
     @return: If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return None.
-    @rtype: L{MealyMachine} or None
+    @rtype: `MealyMachine` or None
     """
     specs = _spec_plus_sys(
         specs, env, sys,
@@ -1122,9 +1128,9 @@ def synthesize(
 def _synthesize(specs, solver, rm_deadends):
     """Return `MealyMachine` or `None` that implements `specs`.
 
-    @type specs: L{spec.GRSpec}
-    @type rm_deadends: C{bool}
-    @rtype: L{MealyMachine} or C{None}
+    @type specs: `spec.GRSpec`
+    @type rm_deadends: `bool`
+    @rtype: `MealyMachine` or `None`
     """
     if solver == 'gr1c':
         strategy = gr1c.synthesize(specs)
@@ -1148,11 +1154,11 @@ def _synthesize(specs, solver, rm_deadends):
 
 
 def _trim_strategy(strategy, specs, rm_deadends):
-    """Return C{MealyMachine} without deadends, or C{None}.
+    """Return `MealyMachine` without deadends, or `None`.
 
-    If C{strategy is None}, then return C{None}.
+    If `strategy is None`, then return `None`.
 
-    @param rm_deadends: if C{True}, then remove deadends
+    @param rm_deadends: if `True`, then remove deadends
         from the Mealy machine
     """
     # While the return values of the solver interfaces vary, we expect
@@ -1178,7 +1184,7 @@ def is_realizable(
         solver='omega'):
     """Check realizability.
 
-    For details see L{synthesize}.
+    For details see `synthesize`.
     """
     specs = _spec_plus_sys(
         specs, env, sys,
@@ -1264,15 +1270,15 @@ def strategy2mealy(A, spec):
     """Convert strategy to Mealy transducer.
 
     Note that the strategy is a deterministic game graph,
-    but the input C{A} is given as the contraction of
+    but the input `A` is given as the contraction of
     this game graph.
 
     @param A: strategy
-    @type A: C{networkx.DiGraph}
+    @type A: `networkx.DiGraph`
 
-    @type spec: L{GRSpec}
+    @type spec: `GRSpec`
 
-    @rtype: L{MealyMachine}
+    @rtype: `MealyMachine`
     """
     assert len(A) > 0
     logger.info('converting strategy (compact) to Mealy machine')
@@ -1389,16 +1395,16 @@ def _int2str(label, str_vars):
     """Replace integers with string values for string variables.
 
     @param label: mapping from variable names, to integer (as strings)
-    @type label: C{dict}
+    @type label: `dict`
 
     @param str_vars: mapping that defines those variables that
         should be converted from integer to string variables.
         Each variable is mapped to a list of strings that
         comprise its range. This list defines how integer values
         correspond to string literals for that variable.
-    @type str_vars: C{dict}
+    @type str_vars: `dict`
 
-    @rtype: C{dict}
+    @rtype: `dict`
     """
     label = dict(label)
     label.update({k: str_vars[k][int(v)]
@@ -1416,7 +1422,7 @@ def mask_outputs(machine):
 
 
 def determinize_machine_init(mach, init_out_values=None):
-    """Return a determinized copy of C{mach} with given initial outputs.
+    """Return a determinized copy of `mach` with given initial outputs.
 
     The transducers produced by synthesis can have multiple
     initial output valuations as possible reactions to a
@@ -1425,7 +1431,7 @@ def determinize_machine_init(mach, init_out_values=None):
     Possible reasons for this are:
 
       1. the system does not have full control over its initial state.
-        For example the option "ALL_INIT" of C{gr1c}.
+        For example the option "ALL_INIT" of `gr1c`.
 
       2. the strategy returned by the solver has multiple
         vertices that satisfy the initial conditions.
@@ -1451,13 +1457,13 @@ def determinize_machine_init(mach, init_out_values=None):
 
     Case 2
     ======
-    The function L{strategy2mealy} returns a transducer that
+    The function `strategy2mealy` returns a transducer that
     for each initial input valuation,
     for each initial output valuation,
     reacts with a unique transition.
 
     But this can yield multile reactions to a single input,
-    even for solver options like "ALL_ENV_EXIST_SYS_INIT" for C{gr1c}.
+    even for solver options like "ALL_ENV_EXIST_SYS_INIT" for `gr1c`.
     The reason is that there can be multiple strategy vertices
     that satisfy the initial conditions, but the solver
     included them not because they are needed as initial reactions,
@@ -1476,24 +1482,24 @@ def determinize_machine_init(mach, init_out_values=None):
     there is only a single reaction (output valuation) available.
 
     The non-determinism is resolved for the initial reaction
-    by ensuring the outputs given in C{init_out_values}
+    by ensuring the outputs given in `init_out_values`
     take those values.
     The remaining outputs are determinized arbitrarily.
 
     See also
     ========
-    L{synthesize}, L{strategy2mealy}
+    `synthesize`, `strategy2mealy`
 
     @param mach: possibly non-deterministic transducer,
-        as produced, for example, by L{synthesize}.
-    @type mach: L{MealyMachine}
+        as produced, for example, by `synthesize`.
+    @type mach: `MealyMachine`
 
     @param init_out_values: mapping from output ports that
         the system cannot control initially,
         to the initial values they take in this instance of the game.
-    @type init_out_values: C{dict}
+    @type init_out_values: `dict`
 
-    @rtype: L{MealyMachine}
+    @rtype: `MealyMachine`
     """
     mach = copy.deepcopy(mach)
     if init_out_values is None:

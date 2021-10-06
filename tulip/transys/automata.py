@@ -59,24 +59,25 @@ class FiniteStateAutomaton(LabeledDiGraph):
     """Set of sequences described with a graph and a condition.
 
     It has:
-        - states
-        - states.initial
-        - states.accepting (types have names, and classes)
-        - alphabet = set of symbols that label edges.
+    - `states`
+    - `states.initial`
+    - `states.accepting` (types have names, and classes)
+    - `alphabet` = set of symbols that label edges.
 
 
     Note
     ====
     If all paths in the graph belong to the set you
-    want to describe, then just use L{FiniteTransitionSystem}.
+    want to describe, then just use `FiniteTransitionSystem`.
 
     To describe an input-output function (which is a set too),
-    it is more convenient to use L{FiniteStateMachine}.
+    it is more convenient to use `FiniteStateMachine`.
 
 
-    See Also
+    Relevant
     ========
-    L{BA}, L{RabinAutomaton}.
+    `BA`,
+    `RabinAutomaton`
     """
 
     def __init__(
@@ -87,11 +88,14 @@ class FiniteStateAutomaton(LabeledDiGraph):
     ):
         """Initialize FiniteStateAutomaton.
 
-        Additional keyword arguments are passed to L{LabeledDiGraph.__init__}.
+        Additional keyword arguments are
+        passed to `LabeledDiGraph.__init__`.
 
-        @param atomic_proposition_based: If False, then the alphabet
-            is represented by a set.  If True, then the alphabet is
-            represented by a powerset 2^AP.
+        @param atomic_proposition_based:
+            if `False`, then the alphabet
+            is represented by a set.
+            If `True`, then the alphabet is
+            represented by a powerset `2^AP`.
         """
         self.atomic_proposition_based = atomic_proposition_based
         self.symbolic = symbolic
@@ -196,7 +200,9 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
     By default non-deterministic (NFA).
     To enforce determinism (DFA):
 
-    >>> a = FiniteWordAutomaton(deterministic=True)
+    ```python
+    a = FiniteWordAutomaton(deterministic=True)
+    ```
     """
     def __init__(self, deterministic=False,
                  atomic_proposition_based=True):
@@ -233,7 +239,7 @@ class BuchiAutomaton(OmegaAutomaton):
 
 
 class BA(BuchiAutomaton):
-    """Alias to L{BuchiAutomaton}."""
+    """Alias to `BuchiAutomaton`."""
 
     def __init__(self, **args):
         super(BA, self).__init__(**args)
@@ -243,25 +249,30 @@ def tuple2ba(S, S0, Sa, Sigma_or_AP, trans, name='ba', prepend_str=None,
              atomic_proposition_based=True):
     """Create a Buchi Automaton from a tuple of fields.
 
-    defines Buchi Automaton by a tuple (S, S0, Sa, \\Sigma, trans)
-    (maybe replacing \\Sigma by AP since it is an AP-based BA ?)
+    defines Buchi Automaton by
+    a tuple `(S, S0, Sa, \\Sigma, trans)`
+    (maybe replacing `\\Sigma` by AP,
+    since it is an AP-based BA ?)
 
-    See Also
+    Relevant
     ========
-    L{tuple2fts}
+    `tuple2fts`
 
     @param S: set of states
-    @param S0: set of initial states, must be \\subset S
+    @param S0: set of initial states, must be `\\subset S`
     @param Sa: set of accepting states
     @param Sigma_or_AP: Sigma = alphabet
-    @param trans: transition relation, represented by list of triples::
-            [(from_state, to_state, guard), ...]
-    where guard \\in \\Sigma.
+    @param trans: transition relation,
+        represented by list of triples:
+
+        ```python
+        [(from_state, to_state, guard), ...]
+        ```
+    where `guard \in \Sigma`.
 
     @param name: used for file export
-    @type name: str
-
-    @rtype: L{BuchiAutomaton}
+    @type name: `str`
+    @rtype: `BuchiAutomaton`
     """
     # args
     if not isinstance(S, Iterable):
@@ -312,43 +323,52 @@ class RabinPairs(object):
     """Acceptance pairs for Rabin automaton.
 
     Each pair defines an acceptance condition.
-    A pair (L, U) comprises of:
-        - a set L of "good" states
-        - a set U of "bad" states
-    L,U must each be a subset of States.
+    A pair `(L, U)` comprises of:
+    - a set `L` of "good" states
+    - a set `U` of "bad" states
 
-    A run: (q0, q1, ...) is accepted if for at least one Rabin Pair,
+    `L, U` must each be a subset of `States`.
+
+    A run: `(q0, q1, ...)` is accepted if,
+    for at least one Rabin Pair,
     it in intersects L an inf number of times, but U only finitely.
 
-    Internally a list of 2-tuples of SubSet objects is maintained::
-        [(L1, U1), (L2, U2), ...]
-    where: Li, Ui, are SubSet objects, with superset
-    the Rabin automaton's States.
+    Internally a list of 2-`tuple`s of
+    `SubSet` objects is maintained:
+
+    ```
+    [(L1, U1), (L2, U2), ...]
+    ```
+
+    where: `Li`, `Ui`, are `SubSet` objects,
+    with superset the Rabin automaton's `States`.
 
     Caution
     =======
-    Here and in ltl2dstar documentation L denotes a "good" set.
+    Here and in ltl2dstar documentation `L` denotes a "good" set.
     U{[BK08] <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
-    denote the a "bad" set with L.  To avoid ambiguity, attributes:
-    .good, .bad were used here.
+    denote the a "bad" set with `L`.
+    To avoid ambiguity, attributes:
+    `.good`, `.bad` were used here.
 
     Example
     =======
-    >>> dra = RabinAutomaton()
-    >>> dra.states.add_from([1, 2, 3] )
-    >>> dra.states.accepting.add([1], [2] )
-    >>> dra.states.accepting
 
-    >>> dra.states.accepting.good(1)
-
-    >>> dra.states.accepting.bad(1)
+    ```python
+    dra = RabinAutomaton()
+    dra.states.add_from([1, 2, 3])
+    dra.states.accepting.add([1], [2])
+    dra.states.accepting
+    dra.states.accepting.good(1)
+    dra.states.accepting.bad(1)
+    ```
 
     See Also
     ========
-      - L{RabinAutomaton}
-      - Def. 10.53, p.801, U{[BK08]
-        <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
-      - U{ltl2dstar<http://ltl2dstar.de/>} documentation
+    - `RabinAutomaton`
+    - Def. 10.53, p.801, U{[BK08]
+      <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+    - [`ltl2dstar`](http://ltl2dstar.de/>) documentation
     """
 
     def __init__(self, automaton_states):
@@ -370,20 +390,20 @@ class RabinPairs(object):
         return iter(self._pairs)
 
     def __call__(self):
-        """Get list of 2-tuples (L, U) of good-bad sets of states."""
+        """Get list of 2-`tuple`s `(L, U)` of good-bad sets of states."""
         return list(self._pairs)
 
     def add(self, good_states, bad_states):
-        """Add new acceptance pair (L, U).
+        """Add new acceptance pair `(L, U)`.
 
         See Also
         ========
-        remove, add_states, good, bad
+        `remove`, `add_states`, `good`, `bad`
 
-        @param good_states: set L of good states for this pair
+        @param good_states: set `L` of good states for this pair
         @type good_states: container of valid states
 
-        @param bad_states: set U of bad states for this pair
+        @param bad_states: set `U` of bad states for this pair
         @type bad_states: container of valid states
         """
         good_set = SubSet(self._states)
@@ -393,26 +413,26 @@ class RabinPairs(object):
         self._pairs.append((good_set, bad_set))
 
     def remove(self, good_states, bad_states):
-        """Delete pair (L, U) of good-bad sets of states.
+        """Delete pair `(L, U)` of good-bad sets of states.
 
         Note
         ====
         Removing a pair which is not last changes
         the indices of all other pairs, because internally
-        a list is used.
+        a `list` is used.
 
-        The sets L,U themselves (good-bad) are required
+        The sets `L`, `U` themselves (good-bad) are required
         for the deletion, instead of an index, to prevent
         acceidental deletion of an unintended pair.
 
-        Get the intended pair using __getitem__ first
-        (or in any other way) and them call remove.
+        Get the intended pair using `__getitem__` first
+        (or in any other way) and then call remove.
         If the pair is corrent, then the removal will
         be successful.
 
         See Also
         ========
-        add
+        `add`
 
         @param good_states: set of good states of this pair
         @type good_states: iterable container
@@ -432,23 +452,23 @@ class RabinPairs(object):
                             'Create a new one by callign .add.')
 
     def good(self, index):
-        """Return set L of "good" states for this pair.
+        """Return set `L` of "good" states for this pair.
 
         @param index: number of Rabin acceptance pair
-        @type index: int <= current total number of pairs
+        @type index: `int` <= current total number of pairs
         """
         return self._pairs[index][0]
 
     def bad(self, index):
-        """Return set U of "bad" states for this pair.
+        """Return set `U` of "bad" states for this pair.
 
         @param index: number of Rabin acceptance pair
-        @type index: int <= current total number of pairs
+        @type index: `int` <= current total number of pairs
         """
         return self._pairs[index][1]
 
     def has_superset(self, superset):
-        """Return true if the given argument is the superset."""
+        """Return `True` if the given argument is the superset."""
         return superset is self._states
 
 
@@ -457,7 +477,7 @@ class RabinAutomaton(OmegaAutomaton):
 
     See Also
     ========
-    L{DRA}, L{BuchiAutomaton}
+    `DRA`, `BuchiAutomaton`
     """
 
     def __init__(self, deterministic=False,
@@ -474,7 +494,7 @@ class DRA(RabinAutomaton):
 
     See Also
     ========
-    L{RabinAutomaton}
+    `RabinAutomaton`
     """
 
     def __init__(self, atomic_proposition_based=True):
@@ -487,22 +507,24 @@ class DRA(RabinAutomaton):
 class ParityGame(GameGraph):
     """GameGraph equipped with coloring.
 
-    Define as C{k} the highest color that
+    Define as `k` the highest color that
     occurs infinitely many times.
 
-    If C{k} is even, then Player 0 wins.
-    Otherwise Player 1 wins (C{k} is odd).
-    So the winner is Player (k mod 2).
+    If `k` is even, then Player 0 wins.
+    Otherwise Player 1 wins (`k` is odd).
+    So the winner is Player (`k` modulo 2).
 
-    To define the number of colors C{c}:
+    To define the number of colors `c`:
 
-    >>> p = ParityGame(c=4)
+    ```python
+    p = ParityGame(c=4)
+    ```
 
-    Note that the colors are: 0, 1, ..., c-1
+    Note that the colors are:  `0, 1, ..., c-1`
 
     See also
     ========
-    L{transys.GameGraph}
+    `transys.GameGraph`
     """
 
     def __init__(self, c=2):

@@ -3,9 +3,10 @@ McNaughton's algorithm for solving parity games
 
 Reference
 =========
+
 Robert McNaughton (1993). Infinite games played on finite graphs.
 Annals of Pure and Applied Logic 65(2): 149--184.
-doi:10.1016/0168-0072(93)90036-D
+<doi:10.1016/0168-0072(93)90036-D>
 """
 from __future__ import print_function
 
@@ -15,7 +16,7 @@ from tulip import transys as trs
 def McNaughton(p):
     """Solve parity game.
 
-    @type p: L{ParityGame}
+    @type p: `ParityGame`
     """
     p = copy.deepcopy(p)
 
@@ -55,7 +56,7 @@ def attractor(W, pg, player):
     @param w: winning region
     @type w: set
 
-    @type pg: L{ParityGame}
+    @type pg: `ParityGame`
 
     @param player: for whom to calculate attractor
     """
@@ -73,9 +74,9 @@ def ctrl_next(W, pg, player):
 
     These are the nodes that in one step:
 
-      - can reach W because player controls them
-      - will reach W because opponent controls them,
-        but has no other choice than next(W)
+    - can reach `W` because player controls them
+    - will reach `W` because opponent controls them,
+      but has no other choice than `next(W)`
     """
     cnext = set()
     for node in W:

@@ -314,7 +314,7 @@ class GridWorld(object):
         @param font_pt: size (in points) for rendering text in the
                  figure.  If 0, then use symbols instead (see legend above).
         @param troll_list: ...same as the argument with the same name
-                 given to L{add_trolls}.
+                 given to `add_trolls`.
 
         @param axes: Instance of matplotlib.axes._subplots.AxesSubplot
                  on which to draw, or None, in which case a new figure
@@ -561,7 +561,7 @@ class GridWorld(object):
     def load(self, gw_file):
         """Read description from given file.
 
-        Merely a convenience wrapper for the L{loads} method.
+        Merely a convenience wrapper for the `loads` method.
         """
         with open(gw_file, "r") as f:
             self.loads(f.read())
@@ -609,7 +609,7 @@ class GridWorld(object):
                  where any positions outside the actual gridworld are
                  assumed to be occupied.
 
-        @rtype: L{GridWorld}
+        @rtype: `GridWorld`
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
@@ -665,7 +665,7 @@ class GridWorld(object):
                  bottom-left corner of the gridworld should be placed
                  in the continuous space; default places it at the origin.
 
-        @rtype: L{PropPreservingPartition<prop2part.PropPreservingPartition>}
+        @rtype: `PropPreservingPartition<prop2part.PropPreservingPartition>`
         """
         try:
             from polytope import Polytope
@@ -727,11 +727,11 @@ class GridWorld(object):
         prefix_R_C, where prefix is given (attribute of this GridWorld
         object), R is the row, and C is the column of the cell
         (0-indexed).  If nonbool is True (default), cells are
-        identified with subformulae of the form::
+        identified with subformulae of the form:
 
           ((prefix_r = R) & (prefix_c = C))
 
-        L{GridWorld.__getitem__} and L{extract_coord} provide
+        `GridWorld.__getitem__` and `extract_coord` provide
         reference implementations.
 
         @param offset: index offset to apply when generating the
@@ -745,7 +745,7 @@ class GridWorld(object):
 
         @param nonbool: If True, then use variables with integer domains.
 
-        @rtype: L{GRSpec}
+        @rtype: `GRSpec`
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
@@ -875,7 +875,7 @@ class GridWorld(object):
         @param xf: integer scaling factor for columns
         @param yf: integer scaling factor for rows
 
-        @rtype: L{GridWorld}
+        @rtype: `GridWorld`
         """
         shape_scaled = (self.W.shape[0] * yf, self.W.shape[1] * xf)
         scaleW = np.zeros(shape_scaled, dtype=np.int32)
@@ -906,7 +906,7 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
 
     While an instance of GridWorld is returned, other views of the
     result are possible; e.g., to obtain a description string, use
-    L{GridWorld.dumps}.
+    `GridWorld.dumps`.
 
     @param size: a pair, indicating number of rows and columns.
     @param wall_density: the ratio of walls to total number of cells.
@@ -931,7 +931,7 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
              world is found before timeout seconds.  If timeout is
              None (default), then do not impose time constraints.
 
-    @rtype: L{GridWorld}, or None if timeout occurs.
+    @rtype: `GridWorld`, or None if timeout occurs.
 
     """
     if ensure_feasible and timeout is not None:
@@ -1029,7 +1029,7 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     @param prefix: string to be used as prefix for naming gridworld
                    cell variables.
 
-    @rtype: L{GridWorld}
+    @rtype: `GridWorld`
     """
     (w, h) = size
     if w < 3 or h < 3:
@@ -1062,7 +1062,7 @@ def unoccupied(size, prefix="Y"):
     @param size: a pair, indicating number of rows and columns.
     @param prefix: String to be used as prefix for naming gridworld
                    cell variables.
-    @rtype: L{GridWorld}
+    @rtype: `GridWorld`
     """
     if len(size) < 2:
         raise TypeError("invalid gridworld size.")
@@ -1079,7 +1079,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
     controlled "Y gridworld" position and each troll, but not
     between trolls.
 
-    @type Y: L{GridWorld}
+    @type Y: `GridWorld`
     @param Y: The controlled gridworld, describing in particular
              static obstacles that must be respected by the trolls.
 
@@ -1093,7 +1093,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
     @param nonbool: If True, then use variables with integer domains.
     @param get_moves_lists: Consult returned value description below.
 
-    @rtype: (L{GRSpec}, list)
+    @rtype: (`GRSpec`, list)
 
     @return: If get_moves_lists is True, then returns (spec, moves_N)
              where spec is the specification incorporating all of the

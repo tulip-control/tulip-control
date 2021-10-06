@@ -64,23 +64,27 @@ __all__ = [
 _hl = 40 * '-'
 
 def prop2part(state_space, cont_props_dict):
-    """Main function that takes a domain (state_space) and a list of
-    propositions (cont_props), and returns a proposition preserving
-    partition of the state space.
+    """
 
-    See Also
+    Takes a domain `state_space` and a `list` of
+    propositions `cont_props`, and returns
+    a proposition-preserving partition of
+    the state-space.
+
+
+    Relevant
     ========
-    L{PropPreservingPartition},
-    C{polytope.Polytope}
+    `PropPreservingPartition`,
+    `polytope.Polytope`
+
 
     @param state_space: problem domain
-    @type state_space: C{polytope.Polytope}
-
+    @type state_space: `polytope.Polytope`
     @param cont_props_dict: propositions
-    @type cont_props_dict: dict of C{polytope.Polytope}
-
-    @return: state space quotient partition induced by propositions
-    @rtype: L{PropPreservingPartition}
+    @type cont_props_dict: `dict` of `polytope.Polytope`
+    @return: state-space quotient partition induced
+        by propositions
+    @rtype: `PropPreservingPartition`
     """
     first_poly = [] #Initial Region's polytopes
     first_poly.append(state_space)
@@ -155,15 +159,17 @@ def prop2part(state_space, cont_props_dict):
     return mypartition
 
 def part2convex(ppp):
-    """This function takes a proposition preserving partition and generates
-    another proposition preserving partition such that each part in the new
-    partition is a convex polytope
+    """Refine partition so that cells be convex.
 
-    @type ppp: L{PropPreservingPartition}
+    Takes a proposition-preserving partition, and
+    generates another proposition-preserving partition,
+    such that each cell in the new partition is
+    a convex polytope.
 
+    @type ppp: `PropPreservingPartition`
     @return: refinement into convex polytopes and
         map from new to old Regions
-    @rtype: (L{PropPreservingPartition}, list)
+    @rtype: (`PropPreservingPartition`, list)
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
@@ -190,12 +196,13 @@ def part2convex(ppp):
 def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     """This function takes:
 
-      - a piecewise affine system C{pwa_sys} and
-      - a proposition-preserving partition C{ppp}
-          whose domain is a subset of the domain of C{pwa_sys}
+    - a piecewise affine system `pwa_sys` and
+    - a proposition-preserving partition `ppp`
+      whose domain is a subset of the domain of `pwa_sys`
 
     and returns a *refined* proposition preserving partition
-    where in each region a unique subsystem of pwa_sys is active.
+    where in each region a unique subsystem of `pwa_sys` is active.
+
 
     Reference
     =========
@@ -206,20 +213,19 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     `Temporal Logic Control of Switched Affine Systems with an
     Application in Fuel Balancing`, ACC 2012.
 
-    See Also
+
+    Relevant
     ========
-    L{discretize}
+    `discretize`
 
-    @type pwa_sys: L{hybrid.PwaSysDyn}
-    @type ppp: L{PropPreservingPartition}
 
+    @type pwa_sys: `hybrid.PwaSysDyn`
+    @type ppp: `PropPreservingPartition`
     @return: new partition and associated maps:
-
-        - new partition C{new_ppp}
-        - map of C{new_ppp.regions} to C{pwa_sys.list_subsys}
-        - map of C{new_ppp.regions} to C{ppp.regions}
-
-    @rtype: C{(L{PropPreservingPartition}, list, list)}
+        - new partition `new_ppp`
+        - map of `new_ppp.regions` to `pwa_sys.list_subsys`
+        - map of `new_ppp.regions` to `ppp.regions`
+    @rtype: `(PropPreservingPartition, list, list)`
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain) ):
         raise Exception('pwa system is not defined everywhere ' +
@@ -282,25 +288,31 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     return (new_ppp, subsys_list, parents)
 
 def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
-    """ This function takes a proposition preserving partition ppp and the size
-    of the grid or the number of grids, and returns a refined proposition
-    preserving partition with grids.
+    """Refine proposition-preserving partition using grids.
+
+    This function takes a proposition-preserving
+    partition `ppp`, and the size of the grid, or
+    the number of grids, and returns a refined
+    proposition-preserving partition with grids.
 
     Input:
 
-      - `ppp`: a L{PropPreservingPartition} object
-      - `grid_size`: the size of the grid,
-          type: float or list of float
-      - `num_grid_pnts`: the number of grids for each dimension,
-          type: integer or list of integer
+    - `ppp`: a `PropPreservingPartition` object
+    - `grid_size`: the size of the grid,
+      - type: `float`,
+        or `list of `float`
+    - `num_grid_pnts`: the number of grids
+      for each dimension,
+      - type: `int` or `list` of `int`
 
     Output:
 
-      - A L{PropPreservingPartition} object with grids
+      - A `PropPreservingPartition` object with grids
 
-    Note: There could be numerical instabilities when the continuous
-    propositions in ppp do not align well with the grid resulting in very small
-    regions. Performace significantly degrades without glpk.
+    Note: There could be numerical instabilities when
+    the continuous propositions in `ppp` do not align well with
+    the grid, resulting in very small regions.
+    Performace significantly degrades without `glpk`.
     """
     if (grid_size!=None)&(num_grid_pnts!=None):
         raise Exception(
@@ -442,25 +454,31 @@ def product_interval(list1, list2):
 class PropPreservingPartition(pc.MetricPartition):
     """Partition class with following fields:
 
-      - domain: the domain we want to partition
-          type: C{Polytope}
+    Attributes:
 
-      - regions: Regions of proposition-preserving partition
-          type: list of C{Region}
+    - `domain`: the domain we want to partition
+      - type: `Polytope`
 
-      - adj: a sparse matrix showing which regions are adjacent
-          order of C{Region}s same as in list C{regions}
+    - `regions`: `Region`s of
+      proposition-preserving partition
+      - type: `list` of `Region`
 
-          type: scipy lil sparse
+    - `adj`: sparse matrix showing which
+      regions are adjacent.
+      The order of `Region`s is the
+      same as in the `list` `regions`.
 
-      - prop_regions: map from atomic proposition symbols
-          to continuous subsets
+      - type: `scipy` `lil` `sparse`
 
-          type: dict of C{Polytope} or C{Region}
+    - `prop_regions`: map from atomic
+      proposition symbols to continuous subsets
 
-    See Also
+      - type: `dict` of `Polytope` or `Region`
+
+
+    Relevant
     ========
-    L{prop2part}
+    `prop2part`
     """
     def __init__(self,
         domain=None, regions=[],
@@ -536,14 +554,14 @@ class PropPreservingPartition(pc.MetricPartition):
                 raise ValueError(msg)
 
     def preserves_predicates(self):
-        """Return True if each Region <= Predicates for the
-        predicates in C{prop_regions.values},
-        where C{prop_regions} is a bijection to
+        """Return `True` if each `Region` <= Predicates for the
+        predicates in `prop_regions.values`,
+        where `prop_regions` is a bijection to
         "continuous" propositions of the specification's alphabet.
 
         Note
         ====
-        1. C{prop_regions} in practice need not be injective.
+        1. `prop_regions` in practice need not be injective.
             It doesnt hurt - though creates unnecessary redundancy.
 
         2. The specification alphabet is fixed an user-defined.
@@ -553,106 +571,95 @@ class PropPreservingPartition(pc.MetricPartition):
             its own bijection to TS.
         """
         all_props = set(self.prop_regions)
-
         for region in self.regions:
             # Propositions True in Region
             for prop in region.props:
                 preimage = self.prop_regions[prop]
-
                 if not region <= preimage:
                     return False
-
             # Propositions False in Region
             for prop in all_props.difference(region.props):
                 preimage = self.prop_regions[prop]
-
                 if region.intersect(preimage).volume > pc.polytope.ABS_TOL:
                     return False
         return True
 
     def __str__(self):
         """Get informal string representation."""
-        s = '\n' + _hl + '\n'
-        s += 'Proposition Preserving Partition:\n'
-        s += _hl + 2*'\n'
-
-        s += 'Domain: ' + str(self.domain) + '\n'
-
+        s = (
+            f'\n{_hl}\n'
+            'Proposition Preserving Partition:\n' +
+            _hl + 2 * '\n' +
+            f'Domain: {self.domain}\n')
         for j, region in enumerate(self.regions):
             s += 'Region: ' + str(j) +'\n'
-
             if self.prop_regions is not None:
                 s += '\t Propositions: '
-
                 active_props = ' '.join(region.props)
-
                 if active_props:
                     s += active_props + '\n'
                 else:
                     s += '{}\n'
-
             s += str(region)
-
         if hasattr(self.adj, 'toarray'):
             s += 'Adjacency matrix:\n'
-            s += str(self.adj.toarray()) + '\n'
+            s += f'{self.adj.toarray()}\n'
         return s
 
     def plot(
-        self, trans=None, ppp2trans=None, only_adjacent=False,
-        ax=None, plot_numbers=True, color_seed=None
-    ):
-        """For details see C{polytope.plot.plot_partition}.
-        """
+            self,
+            trans=None,
+            ppp2trans=None,
+            only_adjacent=False,
+            ax=None,
+            plot_numbers=True,
+            color_seed=None):
+        """For details see `polytope.plot.plot_partition`."""
         return plot_partition(
             self, trans, ppp2trans, only_adjacent,
-            ax, plot_numbers, color_seed
-        )
+            ax, plot_numbers, color_seed)
 
     def plot_props(self, ax=None, text_color='yellow'):
-        """Plot labeled regions of continuous propositions.
-        """
+        """Plot labeled regions of continuous propositions."""
         try:
             from tulip.graphics import newax
         except:
             logger.error('failed to import graphics')
             return
-
         if ax is None:
             ax, fig = newax()
-
         l, u = self.domain.bounding_box
         ax.set_xlim(l[0,0], u[0,0])
         ax.set_ylim(l[1,0], u[1,0])
-
-        for (prop, poly) in self.prop_regions.items():
+        for prop, poly in self.prop_regions.items():
             isect_poly = poly.intersect(self.domain)
-
             isect_poly.plot(ax, color='none', hatch='/')
             isect_poly.text(prop, ax, color=text_color)
         return ax
 
+
 class PPP(PropPreservingPartition):
-    """Alias to L{PropPreservingPartition}.
+    """Alias to `PropPreservingPartition`.
 
     See that for details.
     """
     def __init__(self, **args):
         PropPreservingPartition.__init__(self, **args)
 
+
 def ppp2ts(part):
     """Derive transition system from proposition preserving partition.
 
     @param part: labeled polytopic partition from
         which to derive the transition system
-    @type part: L{PropPreservingPartition}
+    @type part: `PropPreservingPartition`
 
-    @return: C{(ts, state_map)}
+    @return: `(ts, state_map)`
         finite transition system labeled with propositions
         from the given partition, and map of
         polytope indices to transition system states.
 
-    @rtype: (L{transys.FTS}, C{dict})
+    @rtype: `(transys.FTS, dict)`
     """
     # generate transition system and add transitions
     ofts = trs.FTS()
@@ -661,16 +668,12 @@ def ppp2ts(part):
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
-
     ofts.states.add_from(ofts_states)
-
     ofts.transitions.add_adj(adj, ofts_states)
-
     # decorate TS with state labels
     atomic_propositions = set(part.prop_regions)
     ofts.atomic_propositions.add_from(atomic_propositions)
     for state, region in zip(ofts_states, part.regions):
         state_prop = region.props.copy()
         ofts.states.add(state, ap=state_prop)
-
     return (ofts, ofts_states)

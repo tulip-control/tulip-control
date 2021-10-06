@@ -52,16 +52,16 @@ logger = logging.getLogger(__name__)
 def compare_lists(list1, list2):
     """Compare list contents, ignoring ordering.
 
-    Hashability of elements not assumed, incurring O(N**2)
+    Hashability of elements not assumed, incurring `O(N**2)`
 
-    See Also
+    Relevant
     ========
-    L{MathSet}
+    `MathSet`
 
-    @type list1: list
-    @type list2: list
+    @type list1: `list`
+    @type list2: `list`
 
-    @return: True if a bijection exists between the lists.
+    @return: `True` if a bijection exists between the lists.
         Note that this takes into account multiplicity of elements.
     @rtype: bool
     """
@@ -89,29 +89,41 @@ class MathSet(object):
 
     Examples
     ========
-    >>> s = MathSet(['a', 1, [1,2], {'a', 'b'} ] )
+
+    ```python
+    s = MathSet(['a', 1, [1,2], {'a', 'b'} ] )
+    ```
 
     Then print(s) shows how the elements were separately stored
     in a set and list, to optimize contains operations:
 
+    ```python
     >>> print(s)
     MathSet(['a', 1, [1, 2], set(['a', 'b'])])
+    ```
 
     Set operations similar to the builtin type are supported:
 
-    >>> p = MathSet()
-    >>> p.add(1)
-    >>> p |= [1, 2]
-    >>> p |= {3, 4}
-    >>> p |= [[1, 2], '5', {'a':1} ]
-    >>> p.add_from([5, 6, '7', {8, 9} ] )
-    >>> p.remove(1)
-    >>> p
-    MathSet([2, 3, 4, 5, 6, '5', '7', [1, 2], {'a': 1}, set([8, 9])])
+    ```python
+    p = MathSet()
+    p.add(1)
+    p |= [1, 2]
+    p |= {3, 4}
+    p |= [[1, 2], '5', {'a': 1}]
+    p.add_from([5, 6, '7', {8, 9}])
+    p.remove(1)
+    print(p)
+    ```
 
-    See Also
+    The output is:
+
+    ```
+    MathSet([2, 3, 4, 5, 6, '5', '7', [1, 2], {'a': 1}, set([8, 9])])
+    ```
+
+    Relevant
     ========
-    L{SubSet}, L{PowerSet}, set
+    `SubSet`, `PowerSet`, set
     """
 
     def __init__(self, iterable=[]):
@@ -119,7 +131,10 @@ class MathSet(object):
 
         Example
         =======
-        >>> s = MathSet([1, 2, 'a', {3, 4} ] )
+
+        ```python
+        s = MathSet([1, 2, 'a', {3, 4}])
+        ```
 
         @param iterable: iterable from which to initialize the set S
             which underlies the PowerSet 2^S
@@ -140,7 +155,7 @@ class MathSet(object):
 
         See Also
         ========
-        L{__ior__}
+        `__ior__`
 
         @param other: any other mathematical set.
         @type other: iterable, elements not restricted to hashable
@@ -153,30 +168,34 @@ class MathSet(object):
         return s
 
     def __mul__(self, other):
-        """Return the Cartesian product with another C{MathSet}.
+        """Return the Cartesian product with another `MathSet`.
 
         Example
         =======
-        >>> a = MathSet([1, 2] )
-        >>> b = MathSet([3, 4] )
-        >>> c = a *b
-        >>> print(type(c) )
 
-        >>> print(c)
-
+        ```python
+        a = MathSet([1, 2])
+        b = MathSet([3, 4])
+        c = a * b
+        print(type(c))
+        print(c)
+        ```
 
         If we prefer a CartesianProduct returned instead:
-        >>> c = a.cartesian(b)
+
+        ```
+        c = a.cartesian(b)
+        ```
 
         See Also
         ========
-        L{cartesian}
+        `cartesian`
 
         @param other: set with which to take Cartesian product
         @type other: MathSet
 
-        @return: Cartesian product of C{self} with C{other}.
-        @rtype: C{MathSet} (explicit construction)
+        @return: Cartesian product of `self` with `other`.
+        @rtype: `MathSet` (explicit construction)
         """
         cartesian = [(x, y) for x in self for y in other]
         return MathSet(cartesian)
@@ -186,14 +205,17 @@ class MathSet(object):
 
         Example
         =======
-        >>> s = MathSet([1, 2] )
-        >>> s |= [3, 4] # much cleaner & familiar
+
+        ```python
+        >>> s = MathSet([1, 2])
+        >>> s |= [3, 4]  # much cleaner and familiar
         >>> print(s)
         set([1, 2, 3, 4]) U []
+        ```
 
         See Also
         ========
-        L{__or__}
+        `__or__`
 
         @param iterable: any mathematical set.
         @type iterable: iterable, elements not restricted to hashable
@@ -260,13 +282,16 @@ class MathSet(object):
 
         Example
         =======
+
+        ```python
         >>> s = MathSet()
         >>> s.add(1)
         set([1]) U []
+        ```
 
         See Also
         ========
-        L{add_from}, L{__ior__}, L{remove}
+        `add_from`, `__ior__`, `remove`
 
         @param item: the new set element
         @type item: anything, if hashable it is stored in a Python set,
@@ -290,20 +315,26 @@ class MathSet(object):
 
         Example
         =======
-        >>> s = MathSet()
-        >>> s.add_from([1, 2, {3} ] )
+
+        ```python
+        s = MathSet()
+        s.add_from([1, 2, {3}])
+        ```
 
         is equivalent to:
 
-        >>> s = MathSet()
-        >>> s |= [1, 2, {3} ]
+        ```python
+        s = MathSet()
+        s |= [1, 2, {3}]
+        ```
 
         See Also
         ========
-        L{add}, L{__ior__}, L{remove}
+        `add`, `__ior__`, `remove`
 
         @param iterable: new MathSet elements
-        @type iterable: iterable containing (possibly not hashable) elements
+        @type iterable: iterable containing
+            (possibly not hashable) elements
         """
         if not isinstance(iterable, Iterable):
             raise TypeError(
@@ -332,14 +363,17 @@ class MathSet(object):
 
         Example
         =======
+
+        ```python
         >>> p = MathSet([1, 2] )
         >>> p.remove(1)
         >>> p
         set([2]) U []
+        ```
 
         See Also
         ========
-        L{add}, L{add_from}, L{__or__}
+        `add`, `add_from`, `__or__`
 
         @param item: An item already in the set.
             For adding items, see add.
@@ -379,11 +413,11 @@ class MathSet(object):
     def intersection(self, iterable):
         """Return intersection with iterable.
 
-        @param iterable: find common elements with C{self}
-        @type iterable: C{Iterable}
+        @param iterable: find common elements with `self`
+        @type iterable: `Iterable`
 
-        @return: intersection of C{self} with C{iterable}
-        @rtype: C{MathSet}
+        @return: intersection of `self` with `iterable`
+        @rtype: `MathSet`
         """
         s = MathSet()
         for item in iterable:
@@ -396,18 +430,19 @@ class MathSet(object):
 
         Checks the existence of common elements with iterable.
 
-        >>> s = MathSet()
-        >>> s.add(1)
-        >>> r = [1,2]
-        >>> s.intersects(r)
-        True
+        ```python
+        s = MathSet()
+        s.add(1)
+        r = [1,2]
+        assert s.intersects(r)
+        ```
 
         @param iterable: with which to check intersection
-        @type iterable: C{Iterable}
+        @type iterable: `Iterable`
 
-        @return: C{True} if C{self} has common element with C{iterable}.
-            Otherwise C{False}.
-        @rtype: C{bool}
+        @return: `True` if `self` has common element with `iterable`.
+            Otherwise `False`.
+        @rtype: `bool`
         """
         for item in iterable:
             if item in self:
@@ -423,23 +458,26 @@ class SubSet(MathSet):
 
     Example
     =======
+
+    ```python
     >>> superset = [1, 2]
     >>> s = SubSet(superset)
     >>> s |= [1, 2]
     >>> print(s)
     SubSet([[1, 2]])
     >>> s.add(3)
-    raises exception because 3 \\notin [1,2]
+    # raises exception because 3 \\notin [1,2]
+    ```
 
     See Also
     ========
-    L{MathSet}, L{PowerSet}
+    `MathSet`, `PowerSet`
     """
 
     def __init__(self, superset, iterable=None):
         """Define the superset of this set.
 
-        @param superset: This SubSet checked vs C{superset}
+        @param superset: This SubSet checked vs `superset`
         @type superset: Iterable
 
         @param iterable: elements to add to subset
@@ -492,15 +530,15 @@ class SubSet(MathSet):
 
         Note
         ====
-        It would be sufficient to extend only .add provided
-        MathSet.add_from called .add iteratively.
-        However MathSet.add_from filters states, which is
-        arguably more efficient. So both .add and .add_from
+        It would be sufficient to extend only `.add` provided
+        `MathSet.add_from` called `.add` iteratively.
+        However `MathSet.add_from` filters states, which is
+        arguably more efficient. So both `.add` and `.add_from`
         need to be extended here.
 
         See Also
         ========
-        L{add}, L{__ior__}
+        `add`, `__ior__`
         """
         if not is_subset(new_elements, self._superset):
             raise Exception('All new_elements:\n\t' + str(new_elements) +
@@ -555,12 +593,12 @@ def unique(iterable):
     however this defeats the purpose of creating this function
     to achieve brevity elsewhere in the code.
 
-    @return: iterable with duplicates removed, as C{set} if possible.
+    @return: iterable with duplicates removed, as `set` if possible.
     @rtype:
-        - If all items in C{iterable} are hashable,
-            then returns C{set}.
+        - If all items in `iterable` are hashable,
+            then returns `set`.
         - If iterable contains unhashable item,
-            then returns C{list} of unique elements.
+            then returns `list` of unique elements.
     """
     # hashable items ?
     try:
@@ -647,40 +685,51 @@ class PowerSet(object):
     =======
     Specify the mathematical set S underlying the PowerSet.
 
-    >>> S = [[1, 2], '3', {'a':1}, 1]
-    >>> p = PowerSet(S)
+    ```python
+    S = [[1, 2], '3', {'a': 1}, 1]
+    p = PowerSet(S)
 
-    >>> q = PowerSet()
-    >>> q.math_set = S
+    q = PowerSet()
+    q.math_set = S
+    ```
 
-    Add new element to underlying set S.
+    Add new element to underlying set `S`.
 
-    >>> p.math_set.add({3: 'a'} )
+    ```python
+    p.math_set.add({3: 'a'})
+    ```
 
-    Add multiple new elements to underlying set S.
+    Add multiple new elements to underlying set `S`.
 
-    >>> p.math_set.add_from({3, 'a'} )
-    >>> p.math_set |= [1,2]
+    ```python
+    p.math_set.add_from({3, 'a'})
+    p.math_set |= [1, 2]
+    ```
 
-    Remove existing element from set S.
+    Remove existing element from set `S`.
 
-    >>> p.remove(1)
+    ```python
+    p.remove(1)
+    ```
 
     See Also
     ========
-    L{MathSet}, L{SubSet}, L{is_subset}
+    `MathSet`, `SubSet`, `is_subset`
 
-    @param iterable: mathematical set S of elements, on which this 2^S defined.
+    @param iterable: mathematical set `S` of elements,
+        on which this `2^S` defined.
     @type iterable: iterable container
     """
 
     def __init__(self, iterable=None):
-        """Create new PowerSet over elements contained in S = C{iterable}.
+        """Create new `PowerSet` over elements contained in `iterable`.
 
-        This powerset is 2^S.
+        This powerset is `2^iterable`.
 
-        @param iterable: contains elements of set S underlying the PowerSet.
-        @type iterable: iterable of elements which can be hashable or not.
+        @param iterable: contains elements of set `iterable`
+        underlying the `PowerSet`.
+        @type iterable: iterable of elements which
+            can be hashable or not.
         """
         if iterable is None:
             iterable = []
@@ -741,13 +790,17 @@ class TypedDict(dict):
     Example
     =======
 
-    >>> d = TypedDict()
-    >>> allowed_values = {'name': {'Maria', 'John'},
-                          'age': range(122)}
-    >>> default_values = {'name': 'Maria',
-                          'age': 30}
-    >>> d.set_types(allowed_types)
-    >>> d.update(default_values)
+    ```python
+    d = TypedDict()
+    allowed_values = {
+        'name': {'Maria', 'John'},
+        'age': range(122)}
+    default_values = {
+        'name': 'Maria',
+        'age': 30}
+    d.set_types(allowed_types)
+    d.update(default_values)
+    ```
     """
     # credits for debugging this go here:
     #   http://stackoverflow.com/questions/2060972/
@@ -800,14 +853,16 @@ class TypedDict(dict):
     def set_types(self, allowed_values):
         """Restrict values the key can be paired with.
 
-        @param allowed_values: dict of the form::
+        @param allowed_values: dict of the form:
 
-                {key : values}
+            ```python
+            {key: values}
+            ```
 
-            C{values} must implement C{__contains__}
+            `values` must implement `__contains__`
             to enable checking validity of values.
 
-            If C{values} is C{None},
+            If `values` is `None`,
             then any value is allowed.
         """
         self.allowed_values = allowed_values

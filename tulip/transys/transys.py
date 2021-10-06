@@ -165,7 +165,10 @@ class MarkovChain(KripkeStructure):
 
 
 class MarkovDecisionProcess(MarkovChain):
-    """Markov chain with an additional label called `action` on the transitions
+    """Markov chain with "action" label.
+
+    A Markov chain with an additional label
+    on the transitions, called `"action"`.
     """
 
     action_label = "action"
@@ -189,22 +192,26 @@ class FiniteTransitionSystem(LabeledDiGraph):
     To define who "moves the token" between vertices in
     the graph, set the attribute:
 
-    >>> g = FiniteTransitionSystem()
-    >>> g.owner = 'sys'
+    ```python
+    g = FiniteTransitionSystem()
+    g.owner = 'sys'
+    ```
 
     This means that when there are more than one transition
     enabled, then the system picks the next state.
 
     The other option is:
 
-    >>> g.owner = 'env'
+    ```python
+    g.owner = 'env'
+    ```
 
     so the environment picks the next state.
 
     State labeling
     ==============
     The state labels are sets of atomic propositions,
-    similar to a L{KripkeStructure}.
+    similar to a `KripkeStructure`.
 
     In principle some of the propositions that label states
     could be controlled by either of the players,
@@ -215,8 +222,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
 
     It is a matter of future experimentation whether
     this capability will be introduced, by partitioning
-    the props into C{env_props} and C{sys_props}
-    (similar to C{env_vars}, C{sys_vars} in L{GRSpec}).
+    the props into `env_props` and `sys_props`
+    (similar to `env_vars`, `sys_vars` in `GRSpec`).
 
     Edge labeling
     =============
@@ -267,18 +274,18 @@ class FiniteTransitionSystem(LabeledDiGraph):
     Mutual exclusion of actions
     ===========================
     Constraints on actions can be defined
-    similarly to L{FTS} actions by setting the fields:
+    similarly to `FTS` actions by setting the fields:
 
-        - C{ofts.env_actions_must}
-        - C{ofts.sys_actions_must}
+    - `ofts.env_actions_must`
+    - `ofts.sys_actions_must`
 
     The default constraint is 'xor'.
 
     sys.sys_actions_must: select constraint on actions. Options:
 
-        - C{'mutex'}: at most 1 action True each time
-        - C{'xor'}: exactly 1 action True each time
-        - C{'none'}: no constraint on action values
+    - `'mutex'`: at most 1 action True each time
+    - `'xor'`: exactly 1 action True each time
+    - `'none'`: no constraint on action values
 
     The xor constraint can prevent the environment from
     blocking the system by setting all its actions to False.
@@ -290,52 +297,66 @@ class FiniteTransitionSystem(LabeledDiGraph):
     Each copy is annotated using a different action,
     the actions must belong to the same action set.
     That action set is defined as a set instance.
-    This description is a (closed) L{FTS}.
+    This description is a (closed) `FTS`.
 
     The system and environment actions are associated with an edge
     of a reactive system. To store these, mutliple labels are used
-    and their sets are encapsulated within the same C{FTS}.
+    and their sets are encapsulated within the same `FTS`.
 
     Example
     =======
-    In the following C{None} represents the empty set, subset of AP.
+    In the following `None` represents the empty set, subset of AP.
     First create an empty transition system and add some states to it:
 
-    >>> from tulip import transys as trs
-    >>> ts = trs.FiniteTransitionSystem()
-    >>> ts.states.add('s0')
-    >>> ts.states.add_from(['s1', 's3', 'end', 5] )
+    ```python
+    from tulip import transys as trs
+    ts = trs.FiniteTransitionSystem()
+    ts.states.add('s0')
+    ts.states.add_from(['s1', 's3', 'end', 5])
+    ```
 
     Set an initial state, which must already be in states:
 
-    >>> ts.states.initial.add('s0')
+    ```python
+    ts.states.initial.add('s0')
+    ```
 
     There can be more than one possible initial states:
 
-    >>> ts.states.initial.add_from(['s0', 's3'] )
+    ```python
+    ts.states.initial.add_from(['s0', 's3'])
+    ```
 
     To label the states, we need at least one atomic proposition,
-    here C{'p'}:
+    here `'p'`:
 
-    >>> ts.atomic_propositions |= ['p', None]
-    >>> ts.states.add('s0', ap={'p'})
-    >>> ts.states.add_from([('s1', {'ap':{'p'} }),
-                            ('s3', {'ap':{} } )])
+    ```python
+    ts.atomic_propositions |= ['p', None]
+    ts.states.add('s0', ap={'p'})
+    ts.states.add_from([('s1', {'ap': {'p'}}),
+                        ('s3', {'ap': {}})])
+    ```
 
     If a state has already been added, its label of atomic
     propositions can be defined directly:
 
-    >>> ts.states['s0']['ap'] = {'p'}
+    ```python
+    ts.states['s0']['ap'] = {'p'}
+    ```
 
     Having added states, we can also add some labeled transitions:
 
-    >>> ts.actions |= ['think', 'write']
-    >>> ts.transitions.add('s0', 's1', actions='think')
-    >>> ts.transitions.add('s1', 5, actions='write')
+    ```python
+    ts.actions |= ['think', 'write']
+    ts.transitions.add('s0', 's1', actions='think')
+    ts.transitions.add('s1', 5, actions='write')
+    ```
 
     Note that an unlabeled transition:
 
-    >>> ts.transitions.add('s0', 's3')
+    ```python
+    ts.transitions.add('s0', 's3')
+    ```
 
     is considered as different from a labeled one and to avoid
     unintended duplication, after adding an unlabeled transition,
@@ -347,17 +368,19 @@ class FiniteTransitionSystem(LabeledDiGraph):
     and edge labels, in addition to the above ones.
     For example:
 
-    >>> ts.states.add('s0')
-    >>> ts.nodes['s0']['my_cost'] = 5
+    ```python
+    ts.states.add('s0')
+    ts.nodes['s0']['my_cost'] = 5
+    ```
 
     The difference is that atomic proposition and action labels
     are checked to make sure they are elements of the system's
     AP and Action sets.
 
-    It is not advisable to use C{MultiDiGraph.add_node} and
-    C{MultiDiGraph.add_edge} directly,
+    It is not advisable to use `MultiDiGraph.add_node` and
+    `MultiDiGraph.add_edge` directly,
     because that can result in an inconsistent system,
-    since it skips all checks performed by L{transys}.
+    since it skips all checks performed by `transys`.
 
     Note
     ====
@@ -369,33 +392,43 @@ class FiniteTransitionSystem(LabeledDiGraph):
     =========
     For closed systems this corresponds to Def. 2.1, p.20 U{[BK08]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}:
-        - states (instance of L{States}) = S
-        - states.initial = S_0 \subseteq S
-        - atomic_propositions = AP
-        - actions = Act
-        - transitions (instance of L{Transitions})::
-              the transition relation ->
-                = edge set + edge labeling function
-                (labels \in actions)
-        Unlabeled edges are defined using:
-            - sys.transitions.add
-            - sys.transitions.add_from
-            - sys.transitions.add_adj
-        and accessed using:
-            - sys.transitions.find
-        - the state labeling function::
-                L: S-> 2^AP
-        can be defined using:
-            - sys.states.add
-            - sys.states.add_from
-        and accessed using methods:
-            - sys.states(data=True)
-            - sys.states.find
+    - `states` (instance of `States`) = S
+    - `states.initial` = S_0 \subseteq S
+    - `atomic_propositions` = AP
+    - `actions` = Act
+    - `transitions` (instance of `Transitions`):
 
-    See Also
+      The transition relation comprises of
+      an edge set and an edge-labeling function
+      (with labels \in actions).
+
+      Unlabeled edges are defined using:
+      - `sys.transitions.add`
+      - `sys.transitions.add_from`
+      - `sys.transitions.add_adj`
+
+      and accessed using:
+      - `sys.transitions.find`
+    - the state-labeling function:
+
+      ```
+      L: S -> 2**AP
+      ```
+
+      can be defined using:
+      - `sys.states.add`
+      - `sys.states.add_from`
+
+      and accessed using methods:
+      - `sys.states(data=True)`
+      - `sys.states.find`
+
+    Relevant
     ========
-    L{KripkeStructure}, L{tuple2fts},
-    L{line_labeled_with}, L{cycle_labeled_with}
+    `KripkeStructure`,
+    `tuple2fts`,
+    `line_labeled_with`,
+    `cycle_labeled_with`
     """
 
     def __init__(self, env_actions=None, sys_actions=None):
@@ -518,7 +551,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
 
         See Also
         ========
-        L{save}, L{plot}
+        `save`, `plot`
         """
         if fileformat not in {'promela', 'Promela', 'pml'}:
             return False
@@ -535,7 +568,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
 
 
 class FTS(FiniteTransitionSystem):
-    """Alias to L{FiniteTransitionSystem}."""
+    """Alias to `FiniteTransitionSystem`."""
 
 
 def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
@@ -558,7 +591,7 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 
     See Also
     ========
-    L{tuple2ba}
+    `tuple2ba`
 
     @param S: set of states
     @type S: iterable of hashables
@@ -673,28 +706,37 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 def line_labeled_with(L, m=0):
     """Return linear FTS with given labeling.
 
-    The resulting system will be a terminating sequence::
-        s0-> s1-> ... -> sN
-    where: N = C{len(L) -1}.
+    The resulting system will be a terminating sequence:
+
+    ```
+    s0 -> s1 -> ... -> sN
+    ```
+
+    where: N = `len(L) - 1`.
 
     See Also
     ========
-    L{cycle_labeled_with}
+    `cycle_labeled_with`
 
     @param L: state labeling
-    @type L: iterable of state labels, e.g.,::
-            [{'p', '!p', 'q',...]
+    @type L: iterable of state labels, e.g.,:
+
+    ```
+    [{'p', '!p', 'q',...]
+    ```
+
     Single strings are identified with singleton Atomic Propositions,
     so [..., 'p',...] and [...,{'p'},...] are equivalent.
 
     @param m: starting index
     @type m: int
 
-    @return: L{FTS} with:
-        - states ['s0', ..., 'sN'], where N = len(L) -1
-        - state labels defined by L, so s0 is labeled with L[0], etc.
+    @return: `FTS` with:
+        - states `['s0', ..., 'sN']`, where `N = len(L) - 1`
+        - state labels defined by `L`,
+          so `s0` is labeled with `L[0]`, etc.
         - transitions forming a sequence:
-            - s_{i} ---> s_{i+1}, for: 0 <= i < N
+          - s_{i} ---> s_{i+1}, for: 0 <= i < N
     """
     n = len(L)
     S = range(m, m + n)
@@ -716,25 +758,35 @@ def line_labeled_with(L, m=0):
 def cycle_labeled_with(L):
     """Return cycle FTS with given labeling.
 
-    The resulting system will be a cycle::
-        s0-> s1-> ... -> sN -> s0
-    where: N = C{len(L) -1}.
+    The resulting system will be a cycle:
+
+    ```
+    s0 -> s1 -> ... -> sN -> s0
+    ```
+
+    where: `N = len(L) - 1`.
 
     See Also
     ========
-    L{line_labeled_with}
+    `line_labeled_with`
 
     @param L: state labeling
-    @type L: iterable of state labels, e.g., [{'p', 'q'}, ...]
-        Single strings are identified with singleton Atomic Propositions,
-        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+    @type L: iterable of state labels, e.g.,
+        `[{'p', 'q'}, ...]`
+        Single strings are identified with
+        singleton Atomic Propositions,
+        so `[..., 'p',...]` and `[...,{'p'},...]`
+        are equivalent.
 
-    @return: L{FTS} with:
-        - states ['s0', ..., 'sN'], where N = len(L) -1
-        - state labels defined by L, so s0 is labeled with L[0], etc.
+    @return: `FTS` with:
+        - states `['s0', ..., 'sN']`,
+          where `N = len(L) - 1`
+        - state labels defined by `L`,
+          so `s0` is labeled with `L[0]`, etc.
         - transitions forming a cycle:
-            - s_{i} ---> s_{i+1}, for: 0 <= i < N
-            - s_N ---> s_0
+          - `s_{i} ---> s_{i+1}`,
+            for: `0 <= i < N`
+          - `s_N ---> s_0`
     """
     ts = line_labeled_with(L)
     last_state = 's' + str(len(L) - 1)
@@ -748,11 +800,13 @@ def add_initial_states(ts, ap_labels):
 
     For example if isinstance(ofts, FTS):
 
-      >>> from tulip.transys.transys import add_initial_states
-      >>> initial_labels = [{'home'}]
-      >>> add_initial_states(ofts, initial_labels)
+    ```python
+    from tulip.transys.transys import add_initial_states
+    initial_labels = [{'home'}]
+    add_initial_states(ofts, initial_labels)
+    ```
 
-    @type ts: L{FiniteTransitionSystem}
+    @type ts: `FiniteTransitionSystem`
 
     @param ap_labels: labels, each comprised of atomic propositions
     @type ap_labels: iterable of sets of elements from
@@ -766,7 +820,7 @@ def add_initial_states(ts, ap_labels):
 def _dumps_states(g):
     """Dump string of transition system states.
 
-    @type g: L{FTS}
+    @type g: `FTS`
     """
     nodes = g
     a = []
@@ -785,14 +839,16 @@ class GameGraph(LabeledDiGraph):
 
     When adding states, you have to say
     which player controls the outgoing transitions.
-    Use C{networkx} state labels for that:
+    Use `networkx` state labels for that:
 
-      >>> g = GameGraph()
-      >>> g.states.add('s0', player=0)
+    ```python
+    g = GameGraph()
+    g.states.add('s0', player=0)
+    ```
 
     See also
     ========
-    L{automata.ParityGame}
+    `automata.ParityGame`
 
     Reference
     =========
@@ -810,23 +866,23 @@ class GameGraph(LabeledDiGraph):
                                         edge_label_types)
 
     def player_states(self, n):
-        """Return states controlled by player C{n}.
+        """Return states controlled by player `n`.
 
-        'controlled' means that player C{n}
+        "controlled" means that player `n`
         gets to decide the successor state.
 
         @param n: player index (id number)
         @type n: 0 or 1
 
         @return: set of states
-        @rtype: C{set}
+        @rtype: `set`
         """
         return {x for x in self if self.nodes[x]['player'] == n}
 
     def edge_controlled_by(self, e):
-        """Return the index of the player controlling edge C{e}.
+        """Return the index of the player controlling edge `e`.
 
-        @type e: 2-tuple of nodes C{(n1, n2)}
+        @type e: 2-tuple of nodes `(n1, n2)`
 
         @rtype: integer 0 or 1
         """
@@ -867,14 +923,14 @@ class LabeledGameGraph(GameGraph):
 
 
 def _pre(graph, list_n):
-    """Find union of predecessors of nodes in graph defined by C{MultiDiGraph}.
+    """Find union of predecessors of nodes in graph defined by `MultiDiGraph`.
 
     @param graph: a graph structure corresponding to a FTS.
-    @type graph: C{networkx.MultiDiGraph}
+    @type graph: `networkx.MultiDiGraph`
     @param list_n: list of nodes whose predecessors need to be returned
-    @type list_n: list of nodes in C{graph}
-    @return: set of predecessors of C{list_n}
-    @rtype: C{set}
+    @type list_n: list of nodes in `graph`
+    @return: set of predecessors of `list_n`
+    @rtype: `set`
     """
     pre_set = set()
     for n in list_n:
@@ -883,20 +939,20 @@ def _pre(graph, list_n):
 
 
 def _output_fts(ts, transitions, sol):
-    """Convert the Part from C{nx.MultiDiGraph} to FTS.
+    """Convert the Part from `nx.MultiDiGraph` to FTS.
 
     The returned FTS does not contain any edge attribute in the original FTS.
     All the transitions are assumed to be controllable.
 
     @param ts: the input finite transition system
-    @type ts: L{FTS}
+    @type ts: `FTS`
     @param Part: the final partition
-    @type Part: C{networkx.MultiDiGraph}
+    @type Part: `networkx.MultiDiGraph`
 
     @return: the bi/dual simulation abstraction, and the
         partition of states in input ts
-    @rtype: L{FTS}, and C{dict} with keys C{ts2simu} and C{simu2ts}.
-        C{ts2simu} maps nodes from input FTS to output FTS and C{simu2ts}
+    @rtype: `FTS`, and `dict` with keys `ts2simu` and `simu2ts`.
+        `ts2simu` maps nodes from input FTS to output FTS and `simu2ts`
         maps the nodes of two FTS in the other direction.
     """
     env_actions = [
@@ -941,11 +997,11 @@ def simu_abstract(ts, simu_type):
 
     @param ts: input finite transition system, the one you want to get
                     its bi/dual-simulation abstraction.
-    @type ts: L{FTS}
+    @type ts: `FTS`
     @param simu_type: string 'bi'/'dual', flag used to switch b.w.
                       bisimulation algorithm and dual-simulation algorithm.
     @return: the bi/dual simulation, and the corresponding partition.
-    @rtype: L{FTS}, C{dict}
+    @rtype: `FTS`, `dict`
 
 
     References

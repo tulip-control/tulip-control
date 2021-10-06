@@ -29,9 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Export html containing d3.js animating SVG
-"""
+"""Export html containing `d3.js` animating SVG."""
 # there exists: https://github.com/mikedewar/d3py,
 # but it is not sufficiently developed yet,
 # so here the wheel is partially re-invented
@@ -61,20 +59,24 @@ def labeled_digraph2d3(graph, html_file_name='index.html'):
 
     Example
     =======
-    From C{examples/transys/machine_examples.py} call:
+    From `examples/transys/machine_examples.py` call:
 
-    >>> m = garage_counter_with_state_vars()
+    ```python
+    m = garage_counter_with_state_vars()
+    ```
 
-    Then export to html:
+    Then export to HTML:
 
-    >>> m.save('index.html', 'html')
+    ```python
+    m.save('index.html', 'html')
+    ```
 
     See Also
     ========
-    FSM, BA, Mealy
+    `FSM`, `BA`, `Mealy`
 
     @param graph: labeled graph to export
-    @type graph: L{LabeledDiGraph}
+    @type graph: `LabeledDiGraph`
     """
     file_path = inspect.getfile(inspect.currentframe())
     dir_path = os.path.dirname(os.path.abspath(file_path) )

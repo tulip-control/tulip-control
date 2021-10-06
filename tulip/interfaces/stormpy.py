@@ -30,9 +30,9 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-"""Interface to C{stormpy}
+"""Interface to `stormpy`.
 
-U{https://moves-rwth.github.io/stormpy/}
+<https://moves-rwth.github.io/stormpy/>
 """
 
 import copy
@@ -43,9 +43,9 @@ from tulip.transys.mathfunc import FunctionOnLabeledState
 
 
 def build_stormpy_model(path):
-    """Return the stormpy model created from the prism file
+    """Return the `stormpy` model created from the `prism` file.
 
-    @type path: a string indicating the path to the prism file
+    @type path: a string indicating the path to the `prism` file
     """
 
     prism_program = stormpy.parse_prism_program(path)
@@ -53,8 +53,7 @@ def build_stormpy_model(path):
 
 
 def print_stormpy_model(model):
-    """Print the stormpy model"""
-
+    """Print the `stormpy` model"""
     print(
         "Model type {}, number of states {}, number of transitins {}".format(
             model.model_type, model.nr_states, model.nr_transitions
@@ -75,10 +74,11 @@ def print_stormpy_model(model):
 
 
 def get_action_map(stormpy_model, tulip_transys):
-    """Get a map of action of stormpy_model and that of tulip_transys
+    """Get a map of action of `stormpy_model` and that of `tulip_transys`.
 
-    @return a dictionary whose key is the string representation of an action of stormpy_model
-        and value is the corresponding action of tulip_transys
+    @return a dictionary whose key is
+        the string representation of an action of `stormpy_model`
+        and value is the corresponding action of `tulip_transys`
     """
     action_map = {}
 
@@ -101,13 +101,16 @@ def get_action_map(stormpy_model, tulip_transys):
 
 
 def to_tulip_action(stormpy_action, stormpy_model, tulip_transys, action_map=None):
-    """Get an action of tulip_transys that corresponds to stormpy_action on stormpy_model
+    """Return action of `tulip_transys` on model.
 
-    The computation is based on the transition probability, i.e., it returns an action
-    such that from each pair of source and target state, the transition probability
-    matches that of stormpy_action.
+    Get an action of `tulip_transys` that
+    corresponds to `stormpy_action` on `stormpy_model`.
+
+    The computation is based on the transition probability,
+    i.e., it returns an action such that, from each pair of
+    source and target state, the transition probability
+    matches that of `stormpy_action`.
     """
-
     if action_map is None:
         action_map = get_action_map(stormpy_model, tulip_transys)
 
@@ -123,24 +126,27 @@ def to_tulip_action(stormpy_action, stormpy_model, tulip_transys, action_map=Non
 
 
 def to_tulip_labels(stormpy_state, tulip_transys):
-    """Get the set of atomic propositions at stormpy_state for tulip_transys.
+    """Get set of atomic propositions at `stormpy_state` for `tulip_transys`.
 
-    This typically involves getting rid of stormpy internal labels such as
-    "init", "deadlock", etc
+    This typically involves getting rid of `stormpy` internal labels such as
+    `"init"`, `"deadlock"`, etc.
 
-    @return a MathSet object corresponding to the set of atomicic propositions
-        of stormpy_state in tulip_transys
+    @return a `MathSet` object corresponding to
+        the set of atomicic propositions
+        of `stormpy_state` in `tulip_transys`
     """
     return tulip_transys.atomic_propositions.intersection(stormpy_state.labels)
 
 
 def to_tulip_state(stormpy_state, tulip_transys):
-    """Get a unique state of tulip_transys that corresponds to stormpy_state
+    """Get unique state of `tulip_transys` that corresponds to `stormpy_state`.
 
-    The computation is based on the state labels, i.e., it returns the unique state
-    in tulip_transys with the same labels as stormpy_state.
+    The computation is based on the state labels,
+    i.e., it returns the unique state
+    in `tulip_transys` with the same labels as `stormpy_state`.
 
-    If such a state does not exist or is not unique, ValueError will be raised.
+    If such a state does not exist or is not unique,
+    `ValueError` will be raised.
     """
 
     possible_states = [
@@ -160,11 +166,14 @@ def to_tulip_state(stormpy_state, tulip_transys):
 
 
 def to_tulip_transys(path):
-    """Return either a MarkovChain or MarkovDecisionProcess object created from the prism file
+    """Return Markov chain or decisiom process from `prism` file.
 
-    @type path: a string indicating the path to the prism file
+    Return either a `MarkovChain` or
+    `MarkovDecisionProcess` object,
+    created from the `prism` file.
+
+    @type path: a string indicating the path to the `prism` file
     """
-
     # Convert a state of prism file (typically represented by an integer) to
     # state on the tulip transition system.
     def get_ts_state(in_model_state):
@@ -213,8 +222,9 @@ def to_tulip_transys(path):
 def to_prism_file(ts, path):
     """Write a prism file corresponding to ts
 
-    @type ts: either a MarkovChain or MarkovDecisionProcess
-    @type path: a string indicating the path of the output prism file
+    @type ts: `MarkovChain` or `MarkovDecisionProcess`
+    @param path: path of output `prism` file
+    @type path: `str`
     """
 
     # Only deal with MDP and MC with a unique initial state
@@ -338,12 +348,17 @@ def model_checking(tulip_transys, formula, prism_file_path, extract_policy=False
     @type extract_policy: boolean that indicates whether to extract policy
 
     @return result
-        * If extract_policy = False, then for each state in model.states,
-          result[state] is the probability of satisfying the formula starting at state.
-        * If extract_policy = True, then result = (prob,policy) where for each
-          state in model.states, prob[state] is the probability of satisfying the
-          formula starting at state and policy[state] is the action to be applied at
-          state.
+        - If `extract_policy == False`,
+          then for each `state` in `model.states`,
+          `result[state]` is the probability of
+          satisfying the formula starting at `state`.
+        - If `extract_policy == True`, then
+          `result = (prob, policy)`, where for each
+          `state` in `model.states`, `prob[state]` is
+          the probability of satisfying the
+          formula starting at `state`, and
+          `policy[state]` is the action to be
+          applied at `state`.
     """
 
     assert type(tulip_transys) == MDP or type(tulip_transys) == MC
@@ -364,8 +379,7 @@ def model_checking(tulip_transys, formula, prism_file_path, extract_policy=False
 
 
 def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
-    """Extract policy from stormpy_result"""
-
+    """Extract policy from `stormpy_result`."""
     assert stormpy_result.has_scheduler
     stormpy_policy = stormpy_result.scheduler
     assert stormpy_policy is not None
@@ -386,8 +400,12 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
 
 
 def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
-    """Extract probability of satisfying a specification at each state from stormpy_result"""
+    """Extract probability of satisfying specification at each state.
 
+    Extracts the probability of satisfying
+    a specification at each state
+    from `stormpy_result`.
+    """
     probability = FunctionOnLabeledState("state", "probability")
 
     for state in stormpy_model.states:
