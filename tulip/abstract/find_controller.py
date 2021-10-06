@@ -478,8 +478,8 @@ def get_input_helper(
         sol = solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
             raise _InputHelperQPException(
-                "getInputHelper: "
-                "QP solver finished with status " +
+                'getInputHelper: '
+                'QP solver finished with status ' +
                 str(sol['status']))
         u = np.array(sol['x']).flatten()
         cost = sol['primal objective']
@@ -503,8 +503,8 @@ def get_input_helper(
     sol = pc.polytope.lpsolve(c_LP.flatten(), G_LP, h_LP, solver=solver)
     if sol['status'] != 0:
         raise _InputHelperLPException(
-            "getInputHelper: "
-            "LP solver finished with error code " +
+            'getInputHelper: '
+            'LP solver finished with error code ' +
             str(sol['status']))
     var = np.array(sol['x']).flatten()
     u = var[-N * m:]

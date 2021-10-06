@@ -75,7 +75,7 @@ class PrioritizedSpecification(object):
             level += 1
         if level < len(self._Psi) and key < len(self._Psi[level]):
             return self._Psi[level][key]
-        raise IndexError("index out of range")
+        raise IndexError('index out of range')
 
     def __iter__(self):
         self._iter_level = 0

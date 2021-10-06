@@ -83,10 +83,10 @@ def question(string):
         default is "yes". (The default occurs if the user only presses
         the RETURN button.)
     """
-    default="yes"
+    default='yes'
     valid = {"yes":True,   "y":True,  "ye":True,
              "no":False,     "n":False}
-    prompt = " [Y/n] "
+    prompt = ' [Y/n] '
     while True:
         print(string)
         choice = raw_input().lower()

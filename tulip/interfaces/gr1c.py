@@ -60,8 +60,8 @@ from tulip.spec import GRSpec, translate
 
 
 GR1C_MIN_VERSION = '0.9.0'
-GR1C_BIN_PREFIX = ""
-DEFAULT_NAMESPACE = "http://tulip-control.sourceforge.net/ns/1"
+GR1C_BIN_PREFIX = ''
+DEFAULT_NAMESPACE = 'http://tulip-control.sourceforge.net/ns/1'
 _hl = 60 * '-'
 logger = logging.getLogger(__name__)
 
@@ -136,9 +136,9 @@ def _untaglist(x, cast_f=float,
         elem = x
 
     if (namespace is None) or (len(namespace) == 0):
-        ns_prefix = ""
+        ns_prefix = ''
     else:
-        ns_prefix = "{"+namespace+"}"
+        ns_prefix = '{' + namespace + '}'
 
     # Extract list
     if cast_f is None:
@@ -231,15 +231,15 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         elem = x
 
     if (namespace is None) or (len(namespace) == 0):
-        ns_prefix = ""
+        ns_prefix = ''
     else:
-        ns_prefix = "{"+namespace+"}"
+        ns_prefix = '{' + namespace + '}'
 
-    if elem.tag != ns_prefix+"tulipcon":
-        raise TypeError("root tag should be tulipcon.")
-    if ("version" not in elem.attrib.keys()):
-        raise ValueError("unversioned tulipcon XML string.")
-    if int(elem.attrib["version"]) != 1:
+    if elem.tag != ns_prefix + 'tulipcon':
+        raise TypeError('root tag should be tulipcon.')
+    if ('version' not in elem.attrib.keys()):
+        raise ValueError('unversioned tulipcon XML string.')
+    if int(elem.attrib['version']) != 1:
         raise ValueError("unsupported tulipcon XML version: "+
             str(elem.attrib["version"]))
 
@@ -272,7 +272,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         return (spec, mach)
 
     # Assume version 1 of tulipcon XML
-    if aut_elem.attrib["type"] != "basic":
+    if aut_elem.attrib['type'] != 'basic':
         raise ValueError('Automaton class only recognizes type "basic".')
     node_list = aut_elem.findall(ns_prefix+"node")
     id_list = []  # For more convenient searching, and to catch redundancy
@@ -335,8 +335,8 @@ def _parse_vars(variables, vardict):
                     'invalid domain for variable "{v}":  {dom}'
                     ).format(v=v, dom=dom))
             domains.append((int(dom_parts[0]), int(dom_parts[1])))
-        elif dom == "boolean":
-            domains.append("boolean")
+        elif dom == 'boolean':
+            domains.append('boolean')
         else:
             raise ValueError((
                 'unrecognized type of domain for variable "{v}":  {dom}'
@@ -612,10 +612,9 @@ class GR1CSession(object):
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
-            "winning " +
-            " ".join([str(i) for i in state_vector])+"\n"
-        )
-        if "True\n" in self.p.stdout.readline():
+            'winning ' +
+            ' '.join(str(i) for i in state_vector) + '\n')
+        if 'True\n' in self.p.stdout.readline():
             return True
         else:
             return False
@@ -629,9 +628,9 @@ class GR1CSession(object):
             state_vector[ind] = state[self.env_vars[ind]]
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
-        self.p.stdin.write("getindex "+" ".join(
-            [str(i) for i in state_vector]) +" " +
-            str(goal_mode) +"\n"
+        self.p.stdin.write('getindex ' + ' '.join(
+            [str(i) for i in state_vector]) + ' ' +
+            str(goal_mode) + '\n'
         )
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
@@ -651,11 +650,12 @@ class GR1CSession(object):
         for ind in range(len(self.sys_vars)):
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
-            "envnext " +" ".join([str(i) for i in state_vector]) +"\n"
-        )
+            'envnext ' +
+            ' '.join(str(i) for i in state_vector) +
+            '\n')
         env_moves = []
         line = self.p.stdout.readline()
-        while "---\n" not in line:
+        while '---\n' not in line:
             if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
                 if loc >= 0:
@@ -690,7 +690,7 @@ class GR1CSession(object):
         )+" "+str(goal_mode)+"\n")
         sys_moves = []
         line = self.p.stdout.readline()
-        while "---\n" not in line:
+        while '---\n' not in line:
             if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
                 if loc >= 0:
@@ -723,7 +723,7 @@ class GR1CSession(object):
         )
         sys_moves = []
         line = self.p.stdout.readline()
-        while "---\n" not in line:
+        while '---\n' not in line:
             if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
                 if loc >= 0:
@@ -740,7 +740,7 @@ class GR1CSession(object):
 
         Indices are indicated in parens.
         """
-        self.p.stdin.write("var\n")
+        self.p.stdin.write('var\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
@@ -749,7 +749,7 @@ class GR1CSession(object):
         return line[:-1]
 
     def numgoals(self):
-        self.p.stdin.write("numgoals\n")
+        self.p.stdin.write('numgoals\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
                 loc = line.find(self.prompt)
@@ -763,7 +763,7 @@ class GR1CSession(object):
         If no filename given, then use previous one.
         """
         if self.p is not None:
-            self.p.stdin.write("quit\n")
+            self.p.stdin.write('quit\n')
             returncode = self.p.wait()
             self.p = None
             if returncode != 0:
@@ -787,7 +787,7 @@ class GR1CSession(object):
 
     def close(self):
         """End session, and terminate `gr1c` subprocess."""
-        self.p.stdin.write("quit\n")
+        self.p.stdin.write('quit\n')
         returncode = self.p.wait()
         self.p = None
         if returncode != 0:

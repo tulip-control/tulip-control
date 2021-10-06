@@ -195,7 +195,7 @@ def to_tulip_transys(path):
     ts.states.initial.add_from(initial_state_list)
 
     # Neglect stormpy internal state labels
-    neglect_labels = ["init", "deadlock"]
+    neglect_labels = ['init', 'deadlock']
 
     # Populate the set of atomic propositinos and compute the labels and transitions at each state
     for state in in_model.states:
@@ -203,7 +203,7 @@ def to_tulip_transys(path):
         for label in neglect_labels:
             state_ap.discard(label)
         ts.atomic_propositions.add_from(state_ap)
-        ts.states[get_ts_state(state)]["ap"] = state_ap
+        ts.states[get_ts_state(state)]['ap'] = state_ap
         for action in state.actions:
             if in_model.model_type == stormpy.storage.ModelType.MDP:
                 ts.actions.add(str(action))
@@ -237,7 +237,7 @@ def to_prism_file(ts, path):
     # of the tulip model.
     # This is to deal with restriction on naming of prism model.
     # For example, it doesn't allow action that is just an integer.
-    state_var = "s"
+    state_var = 's'
     state_list = list(ts.states)
     action_list = list(ts.actions) if type(ts) == MDP else []
 
@@ -269,19 +269,19 @@ def to_prism_file(ts, path):
         state_str = state_var
         if is_prime:
             state_str += "'"
-        state_str += "=" + str(state_index)
+        state_str += '=' + str(state_index)
         return state_str
 
     # Return the description of transitions in prism file
     def get_transition_str(transitions):
         str_list = [
             get_prob_str(transition[0])
-            + " : ("
+            + ' : ('
             + get_state_str(state_list.index(transition[1]), True)
-            + ")"
+            + ')'
             for transition in transitions
         ]
-        return " + ".join(str_list)
+        return ' + '.join(str_list)
 
     # Return a dictionary whose key is an atomic proposition
     # and whose value is a list of state such that the atomic proposition]
@@ -295,15 +295,15 @@ def to_prism_file(ts, path):
         return label_dict
 
     # Use the above functions to describe the model in prism format.
-    with open(path, "w") as f:
+    with open(path, 'w') as f:
         # Type of model
         if type(ts) == MDP:
-            f.write("mdp")
+            f.write('mdp')
         elif type(ts) == MC:
-            f.write("dtmc")
+            f.write('dtmc')
 
         # The set of states and initial state
-        f.write("\n\nmodule sys_model\n")
+        f.write('\n\nmodule sys_model\n')
         f.write(
             "    {} : [0..{}] init {};\n".format(
                 state_var,
@@ -311,13 +311,13 @@ def to_prism_file(ts, path):
                 state_list.index(list(ts.states.initial)[0]),
             )
         )
-        f.write("\n")
+        f.write('\n')
 
         # Transitions
         for idx, state in enumerate(state_list):
             transition_dict = get_transition_dict(ts.transitions.find(state))
             for action, transitions in transition_dict.items():
-                action_str = ""
+                action_str = ''
                 if type(ts) == MDP:
                     action_str = "act" + str(action_list.index(action))
                 f.write(
@@ -328,12 +328,12 @@ def to_prism_file(ts, path):
                     )
                 )
 
-        f.write("\nendmodule\n\n")
+        f.write('\nendmodule\n\n')
 
         # Labels
         for label, states in get_label_dict().items():
-            state_str = "|".join(
-                ["(" + get_state_str(state_list.index(s), False) + ")" for s in states]
+            state_str = '|'.join(
+                ['(' + get_state_str(state_list.index(s), False) + ')' for s in states]
             )
             f.write('label "{}" = {};\n'.format(label, state_str))
 
@@ -406,7 +406,7 @@ def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
     a specification at each state
     from `stormpy_result`.
     """
-    probability = FunctionOnLabeledState("state", "probability")
+    probability = FunctionOnLabeledState('state', 'probability')
 
     for state in stormpy_model.states:
         tulip_state = to_tulip_state(state, tulip_transys)
