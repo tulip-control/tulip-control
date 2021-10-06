@@ -36,13 +36,12 @@ recompute) Tulip data structures.
 """
 
 import numpy
-import scipy.sparse
-import xml.etree.ElementTree as ET
-
 import polytope
+import scipy.sparse
 from tulip import transys
 from tulip import hybrid
 from tulip import abstract
+import xml.etree.ElementTree as ET
 
 
 # Global names used in tags
