@@ -409,11 +409,14 @@ def add_grid(
     for i in range(len(new_list)):
         adj[i, i] = 1
         for j in range(i + 1, len(new_list)):
-            if (ppp.adj[parent[i], parent[j]] == 1 or
-                    parent[i] == parent[j]):
-                if pc.is_adjacent(new_list[i], new_list[j]):
-                    adj[i, j] = 1
-                    adj[j, i] = 1
+            todo = (
+                (ppp.adj[parent[i], parent[j]] == 1 or
+                 parent[i] == parent[j]) and
+                pc.is_adjacent(new_list[i], new_list[j]))
+            if not todo:
+                continue
+            adj[i, j] = 1
+            adj[j, i] = 1
     return PropPreservingPartition(
         domain=ppp.domain,
         regions=new_list,
