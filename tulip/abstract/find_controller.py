@@ -285,7 +285,7 @@ def get_input(
         else:
             print(P1)
             raise Exception(
-                '`conservative = False` arg requires '
+                '`conservative = False` argument requires '
                 'that original regions be convex')
     if len(P_end) > 0:
         low_cost = np.inf
