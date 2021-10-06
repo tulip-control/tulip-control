@@ -690,13 +690,16 @@ def _check_time_data(semantics, timestep):
     @type timestep: `int` or `float`
     """
     if semantics not in ['sampled', 'discrete', None]:
-        raise ValueError('Time semantics must be discrete or ' +
+        raise ValueError(
+            'Time semantics must be discrete or '
             'sampled (sampled from continuous time system).')
     if ((semantics == 'discrete') and (timestep is not None)):
         raise ValueError(
             'Discrete semantics must not have a timestep')
     if timestep is not None:
-        error_string = 'Timestep must be a positive real number or unspecified.'
+        error_string = (
+            'Timestep must be a positive real number, '
+            'or unspecified.')
         if timestep <= 0:
             raise ValueError(error_string)
         if not isinstance(timestep, (int, float)):
@@ -733,8 +736,10 @@ def _check_time_consistency(
     # Check that time semantics for all subsystems
     # match specified system and timestep
     if system_list[0].timestep != timestep:
-        raise ValueError('Timestep of subsystems do not match specified ' +
-                         'timestep.')
+        raise ValueError(
+            'Timestep of subsystems do not match '
+            'specified timestep.')
     if system_list[0].time_semantics != time_semantics:
-        raise ValueError('Time semantics of subsystems do not match ' +
-                         'specified time semantics.')
+        raise ValueError(
+            'Time semantics of subsystems do not match '
+            'specified time semantics.')

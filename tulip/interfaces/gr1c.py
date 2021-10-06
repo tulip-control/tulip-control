@@ -250,7 +250,8 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         raise ValueError(
             'unversioned tulipcon XML string.')
     if int(elem.attrib['version']) != 1:
-        raise ValueError("unsupported tulipcon XML version: "+
+        raise ValueError(
+            'unsupported tulipcon XML version: '
             f'{elem.attrib["version"]}')
     # Extract discrete variables and LTL specification
     (tag_name, env_vardict, env_vars) = _untagdict(elem.find(
@@ -312,15 +313,16 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             # This really should never happen and may not even be
             # worth checking.
             raise ValueError(
-                "failure of consistency check " +
-                "while processing aut XML string.")
+                'failure of consistency check '
+                'while processing aut XML string.')
         tag_name, this_state = _untagdict(
             node.find(f'{ns_prefix}state'),
             cast_f_values=int,
             namespace=namespace)
         if tag_name != f'{ns_prefix}state':
-            raise ValueError("failure of consistency check " +
-                "while processing aut XML string.")
+            raise ValueError(
+                'failure of consistency check '
+                'while processing aut XML string.')
         if this_id in id_list:
             logger.warning(
                 f'duplicate nodes found: {this_id}; '

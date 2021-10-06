@@ -51,9 +51,12 @@ def export(
             (disc_params is not None)):
         is_continuous = True
     else:
-        raise StandardError('Cannot tell whether system is continuous or ' +
-            'discrete. Please specify dynamics and abstraciton and ' +
-            'discretization parameters or none at all.')
+        raise StandardError(
+            'Cannot tell whether system '
+            'is continuous or discrete. '
+            'Please specify dynamics and '
+            'abstraciton and discretization '
+            'parameters or none at all.')
     output = dict()
     output['is_continuous'] = is_continuous
     # Only export dynamics and abstraction and
@@ -127,8 +130,9 @@ def export(
             sim_params['closed_loop'] = True
         if 'conservative' in disc_params:
             if disc_params['conservative'] is True:
-                raise ValueError('MATLAB interface does not suport ' +
-                                 'conservative simulation')
+                raise ValueError(
+                    'MATLAB interface does not suport '
+                    'conservative simulation')
         output['simulation_parameters'] = sim_params
         # Abstraction
         output['abstraction'] = export_locations(abstraction)
