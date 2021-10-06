@@ -88,29 +88,21 @@ def prop2part(state_space, cont_props_dict):
     """
     first_poly = [] #Initial Region's polytopes
     first_poly.append(state_space)
-
     regions = [pc.Region(first_poly)]
-
     for cur_prop in cont_props_dict:
         cur_prop_poly = cont_props_dict[cur_prop]
-
         num_reg = len(regions)
         prop_holds_reg = []
-
         for i in range(num_reg): #i region counter
             region_now = regions[i].copy()
             #loop for prop holds
             prop_holds_reg.append(0)
-
             prop_now = regions[i].props.copy()
-
             dummy = region_now.intersect(cur_prop_poly)
-
             # does cur_prop hold in dummy ?
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
                 dum_prop.add(cur_prop)
-
                 # is dummy a Polytope ?
                 if len(dummy) == 0:
                     regions[i] = pc.Region([dummy], dum_prop)
@@ -124,14 +116,11 @@ def prop2part(state_space, cont_props_dict):
                 # (-> no need for the 2nd loop)
                 regions.append(region_now)
                 continue
-
             #loop for prop does not hold
             regions.append(pc.Region([], props=prop_now) )
             dummy = region_now.diff(cur_prop_poly)
-
             if pc.is_fulldim(dummy):
                 dum_prop = prop_now.copy()
-
                 # is dummy a Polytope ?
                 if len(dummy) == 0:
                     regions[-1] = pc.Region([pc.reduce(dummy)], dum_prop)
@@ -141,13 +130,11 @@ def prop2part(state_space, cont_props_dict):
                     regions[-1] = dummy.copy()
             else:
                 regions.pop()
-
         count = 0
         for hold_count in range(len(prop_holds_reg)):
             if prop_holds_reg[hold_count]==0:
                 regions.pop(hold_count-count)
                 count+=1
-
     mypartition = PropPreservingPartition(
         domain = copy.deepcopy(state_space),
         regions = regions,

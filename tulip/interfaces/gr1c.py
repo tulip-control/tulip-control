@@ -209,6 +209,7 @@ def _untagdict(
     else:
         return (elem.tag, di)
 
+
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return strategy constructed from output of `gr1c`.
 
@@ -322,6 +323,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
             A.add_edge(this_id, next_node)
     return A
 
+
 def _parse_vars(variables, vardict):
     """Helper for parsing env, sys variables.
     """
@@ -351,6 +353,7 @@ def _parse_vars(variables, vardict):
         for i, v in enumerate(variables)
     ])
     return variables
+
 
 def load_aut_json(x):
     """Return strategy constructed from output of `gr1c`
@@ -385,6 +388,7 @@ def load_aut_json(x):
             A.add_edge(node_ID, to_node)
     return A
 
+
 def check_syntax(spec_str):
     """Check whether given string has correct `gr1c` specification syntax.
 
@@ -412,6 +416,7 @@ def check_syntax(spec_str):
     else:
         logger.info(p.stdout.read() )
         return False
+
 
 def check_realizable(spec):
     """Decide realizability of specification.
@@ -445,6 +450,7 @@ def check_realizable(spec):
     else:
         logger.info(p.stdout.read() )
         return False
+
 
 def synthesize(spec):
     """Synthesize strategy realizing the given specification.

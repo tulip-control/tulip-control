@@ -199,11 +199,9 @@ def get_input(
     """
     part = abstraction.ppp
     regions = part.regions
-
     ofts = abstraction.ts
     original_regions = abstraction.orig_ppp
     orig = abstraction._ppp2orig
-
     params = abstraction.disc_params
     N = params['N']  # horizon length
     conservative = params['conservative']
@@ -228,7 +226,6 @@ def get_input(
         Q = np.eye(N * ssys.B.shape[1])
     if r is None:
         r = np.zeros([N * x0.size, 1])
-
     if (R.shape[0] != R.shape[1]) or (R.shape[0] != N * x0.size):
         raise Exception("get_input: "
                         "R must be square and have side N * dim(state space)")
@@ -239,7 +236,6 @@ def get_input(
     if ofts is not None:
         start_state = start
         end_state = end
-
         if end_state not in ofts.states.post(start_state):
             raise Exception('get_input: '
                             'no transition from state s' + str(start) +
@@ -253,15 +249,11 @@ def get_input(
         print("List of original proposition preserving "
               "partitions not given, reverting to conservative mode")
         conservative = True
-
     P_start = regions[start]
     P_end = regions[end]
-
     n = ssys.A.shape[1]
     m = ssys.B.shape[1]
-
     idx = range((N - 1) * n, N * n)
-
     if conservative:
         # Take convex hull or P_start as constraint
         if len(P_start) > 0:
@@ -290,11 +282,9 @@ def get_input(
             raise Exception(
                 '`conservative = False` arg requires '
                 'that original regions be convex')
-
     if len(P_end) > 0:
         low_cost = np.inf
         low_u = np.zeros([N, m])
-
         # for each polytope in target region
         for P3 in P_end:
             cost = np.inf
@@ -306,7 +296,6 @@ def get_input(
                         range(n * (N - 1), n * N)
                     )
                 ] += mid_weight * np.eye(n)
-
                 r[idx, 0] += -mid_weight * xc
                 try:
                     u, cost = get_input_helper(
@@ -330,11 +319,9 @@ def get_input(
                         "Target polytope:\n{P3}").format(
                             x0=x0, start=start, end=end, P3=P3))
                 r[idx, 0] += mid_weight * xc
-
             if cost < low_cost:
                 low_u = u
                 low_cost = cost
-
         if low_cost == np.inf:
             raise Exception("get_input: Did not find any trajectory")
     else:
@@ -399,16 +386,13 @@ def get_input_helper(
             list_P.append(P1)
         list_P.append(P3)
         L, M = createLM(ssys, N, list_P)
-
     # Remove first constraint on x(0)
     L = L[range(list_P[0].A.shape[0], L.shape[0]), :]
     M = M[range(list_P[0].A.shape[0], M.shape[0]), :]
-
     # Separate L matrix
     Lx = L[:, range(n)]
     Lu = L[:, range(n, L.shape[1])]
     M = M - Lx.dot(x0).reshape(Lx.shape[0], 1)
-
     B_diag = ssys.B
     for i in range(N - 1):
         B_diag = _block_diag2(B_diag, ssys.B)
@@ -417,24 +401,20 @@ def get_input_helper(
     A_row = np.zeros([n, n * N])
     A_K = np.zeros([n * N, n * N])
     A_N = np.zeros([n * N, n])
-
     for i in range(N):
         A_row = ssys.A.dot(A_row)
         A_row[np.ix_(
             range(n),
             range(i * n, (i + 1) * n)
         )] = np.eye(n)
-
         A_N[np.ix_(
             range(i * n, (i + 1) * n),
             range(n)
         )] = A_it
-
         A_K[np.ix_(
             range(i * n, (i + 1) * n),
             range(A_K.shape[1])
         )] = A_row
-
         A_it = ssys.A.dot(A_it)
     Ct = A_K.dot(B_diag)
     if ord == 1:
@@ -547,28 +527,22 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     """
     N = u_seq.shape[0]
     x = x0.reshape(x0.size, 1)
-
     A = ssys.A
     B = ssys.B
     if len(ssys.K) == 0:
         K = np.zeros(x.shape)
     else:
         K = ssys.K
-
     inside = True
     for i in range(N - 1):
         u = u_seq[i, :].reshape(u_seq[i, :].size, 1)
         x = A.dot(x) + B.dot(u) + K
-
         if not pc.is_inside(P0, x):
             inside = False
-
     un_1 = u_seq[N - 1, :].reshape(u_seq[N - 1, :].size, 1)
     xn = A.dot(x) + B.dot(un_1) + K
-
     if not pc.is_inside(P1, xn):
         inside = False
-
     return inside
 
 

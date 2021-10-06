@@ -119,7 +119,6 @@ class AbstractSwitched:
             ppp2modes=None):
         if modes is None:
             modes = dict()
-
         self.ppp = ppp
         self.ts = ts
         self.ppp2ts = ppp2ts
@@ -177,7 +176,6 @@ class AbstractSwitched:
         """
         axs = []
         color_seed = 0
-
         # merged partition exists ?
         if self.ppp is not None:
             for mode in self.modes:
@@ -283,7 +281,6 @@ class AbstractPwa:
             disc_params=None):
         if disc_params is None:
             disc_params = dict()
-
         self.ppp = ppp
         self.ts = ts
         self.ppp2ts = ppp2ts
@@ -295,11 +292,9 @@ class AbstractPwa:
 
         self.orig_ppp = orig_ppp
         self._ppp2orig = ppp2orig
-
         # original_regions -> pwa_ppp
         # ppp2orig -> ppp2pwa_ppp
         # ppp2pwa -> ppp2pwa_sys
-
         self.disc_params = disc_params
 
     def __str__(self):
@@ -359,7 +354,6 @@ class AbstractPwa:
         # LtiSysDyn ?
         if self._ppp2sys is None:
             return (0, self.pwa)
-
         subsystem_idx = self._ppp2sys[region_index]
         subsystem = self.pwa.list_subsys[subsystem_idx]
         return (subsystem_idx, subsystem)
@@ -418,13 +412,10 @@ class AbstractPwa:
 
     def verify_transitions(self):
         logger.info('verifying transitions...')
-
         for from_state, to_state in self.ts.transitions():
             i, from_region = self.ts2ppp(from_state)
             j, to_region = self.ts2ppp(to_state)
-
             trans_set, sys = self.ppp2trans(i)
-
             params = {'N', 'close_loop', 'use_all_horizon'}
             disc_params = {k:v for k,v in self.disc_params.items()
                            if k in params}
@@ -451,14 +442,12 @@ def _plot_abstraction(
     if ab.ppp is None or ab.ts is None:
         warnings.warn('Either ppp or ts is None.')
         return
-
     if show_ts:
         ts = ab.ts
         ppp2ts = ab.ppp2ts
     else:
         ts = None
         ppp2ts = None
-
     ax = ab.ppp.plot(
         ts, ppp2ts, only_adjacent=only_adjacent,
         color_seed=color_seed
@@ -574,6 +563,7 @@ def discretize(
             st=simu_type))
     return AbstractPwa
 
+
 def _discretize_bi(
         part, ssys,
         N=10,
@@ -664,7 +654,6 @@ def _discretize_bi(
     else:
         (part, new2old) = part2convex(part) # convexify
         part2orig = [part2orig[i] for i in new2old]
-
         # map new regions to pwa subsystems
         if ispwa:
             ppp2pwa = [ppp2pwa[i] for i in new2old]
@@ -711,7 +700,6 @@ def _discretize_bi(
     if plotit:
         try:
             import matplotlib.pyplot as plt
-
             plt.ion()
             fig, (ax1, ax2) = plt.subplots(1, 2)
             ax1.axis('scaled')
@@ -1469,6 +1457,7 @@ def _discretize_dual(
         disc_params=param
     )
 
+
 def reachable_within(trans_length, adj_k, adj):
     """Find cells reachable within trans_length hops.
     """
@@ -1480,15 +1469,15 @@ def reachable_within(trans_length, adj_k, adj):
         adj_k = (np.dot(adj_k, adj)!=0).astype(int)
         k += 1
     adj_k = (adj_k > 0).astype(int)
-
     return adj_k
+
 
 def sym_adj_change(IJ, adj_k, transitions, i):
     horizontal = adj_k[i, :] -transitions[i, :] > 0
     vertical = adj_k[:, i] -transitions[:, i] > 0
-
     IJ[i, :] = horizontal.astype(int)
     IJ[:, i] = vertical.astype(int)
+
 
 # DEFUNCT until further notice
 def discretize_overlap(
@@ -1574,12 +1563,12 @@ def discretize_overlap(
 #                    original_regions=orig_list, orig=orig)
 #     return new_part
 
+
 def multiproc_discretize(
         q, mode, ppp,
         cont_dyn, disc_params):
     global logger
     logger = mp.log_to_stderr()
-
     name = mp.current_process().name
     print('Abstracting mode: ' + str(mode) + ', on: ' + str(name))
 
@@ -1587,6 +1576,7 @@ def multiproc_discretize(
 
     q.put((mode, absys))
     print('Worker: ' + str(name) + 'finished.')
+
 
 def multiproc_get_transitions(
     q, absys, mode, ssys, params
@@ -1602,6 +1592,7 @@ def multiproc_get_transitions(
     q.put((mode, trans))
     print('Worker: ' + str(name) + 'finished.')
 
+
 def multiproc_discretize_switched(
         ppp, hybrid_sys,
         disc_params=None,
@@ -1616,9 +1607,7 @@ def multiproc_discretize_switched(
 
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
-
     q = mp.Queue()
-
     mode_args = dict()
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
@@ -1628,17 +1617,14 @@ def multiproc_discretize_switched(
             for args in mode_args.values()]
     for job in jobs:
         job.start()
-
     # flush before join:
     #   http://stackoverflow.com/questions/19071529/
     abstractions = dict()
     for job in jobs:
         mode, absys = q.get()
         abstractions[mode] = absys
-
     for job in jobs:
         job.join()
-
     # merge their domains
     (merged_abstr, ap_labeling) = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
@@ -1656,12 +1642,10 @@ def multiproc_discretize_switched(
 
     for job in jobs:
         job.start()
-
     trans = dict()
     for job in jobs:
         mode, t = q.get()
         trans[mode] = t
-
     # merge the abstractions, creating a common TS
     merge_abstractions(merged_abstr, trans,
                        abstractions, modes, mode_nums)
@@ -1748,18 +1732,14 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition.
     """
     axs = swab.plot(show_ts, only_adjacent)
-
     if not axs:
         logger.error('failed to plot the partitions.')
         return
-
     n = len(swab.modes)
     assert(len(axs) == 2*n)
-
     # annotate
     for ax in axs:
         plot_annot(ax)
-
     # save mode partitions
     for ax, mode in zip(axs[:n], swab.modes):
         fname = 'merged_' + str(mode) + '.pdf'
@@ -1770,15 +1750,16 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
         fname = 'part_' + str(mode) + '.pdf'
         ax.figure.savefig(fname)
 
+
 def plot_annot(ax):
     fontsize = 5
-
     for tick in ax.xaxis.get_major_ticks():
         tick.label1.set_fontsize(fontsize)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize(fontsize)
     ax.set_xlabel('$v_1$', fontsize=fontsize+6)
     ax.set_ylabel('$v_2$', fontsize=fontsize+6)
+
 
 def merge_abstractions(
         merged_abstr, trans,
@@ -1799,9 +1780,7 @@ def merge_abstractions(
     n = len(merged_abstr.ppp)
     states = range(n)
     sys_ts.states.add_from(states)
-
     sys_ts.atomic_propositions.add_from(aps)
-
     # copy AP labels from regions to discrete states
     ppp2ts = states
     for (i, state) in enumerate(ppp2ts):
@@ -1837,7 +1816,6 @@ def merge_abstractions(
     for mode in modes:
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
-
         sys_ts.transitions.add_adj(
             adj = adj,
             adj2states = states,
@@ -1846,6 +1824,7 @@ def merge_abstractions(
 
     merged_abstr.ts = sys_ts
     merged_abstr.ppp2ts = ppp2ts
+
 
 def get_transitions(
         abstract_sys, mode, ssys,
@@ -1862,7 +1841,6 @@ def get_transitions(
         'checking which transitions remain '
         'feasible after merging')
     part = abstract_sys.ppp
-
     # Initialize matrix for pairs to check
     IJ = part.adj.copy()
     if trans_length > 1:
@@ -1871,7 +1849,6 @@ def get_transitions(
             IJ = np.dot(IJ, part.adj)
             k += 1
         IJ = (IJ > 0).astype(int)
-
     # Initialize output
     n = len(part)
     transitions = sp.lil_matrix((n, n), dtype=int)
@@ -1881,7 +1858,6 @@ def get_transitions(
     n_found = 0
     while np.sum(IJ) > 0:
         n_checked += 1
-
         ind = np.nonzero(IJ)
         i = ind[1][0]
         j = ind[0][0]
@@ -1891,11 +1867,9 @@ def get_transitions(
 
         si = part[i]
         sj = part[j]
-
         # Use original cell as trans_set
         trans_set = abstract_sys.ppp2pwa(mode, i)[1]
         active_subsystem = abstract_sys.ppp2sys(mode, i)[1]
-
         trans_feasible = is_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
@@ -1917,6 +1891,7 @@ def get_transitions(
 
     return transitions
 
+
 def multiproc_merge_partitions(abstractions):
     """LOGTIME in #processors parallel merging.
 
@@ -1927,6 +1902,7 @@ def multiproc_merge_partitions(abstractions):
     Calling will result in `NotImplementedError`.
     """
     raise NotImplementedError
+
 
 def merge_partitions(abstractions):
     """Merge multiple abstractions.
@@ -1942,7 +1918,6 @@ def merge_partitions(abstractions):
     if len(abstractions) == 0:
         warnings.warn('Abstractions empty, nothing to merge.')
         return
-
     # consistency check
     for ab1 in abstractions.values():
         for ab2 in abstractions.values():
@@ -1988,7 +1963,6 @@ def merge_partitions(abstractions):
         regions, parents, ap_labeling = r
         prev_modes.append(cur_mode)
     new_list = regions
-
     # build adjacency based on spatial adjacencies of
     # component abstractions.
     # which justifies the assumed symmetry of part1.adj, part2.adj
@@ -1996,7 +1970,6 @@ def merge_partitions(abstractions):
 	# the abstractions or 2) adjacent in one of the abstractions, then the two
 	# regions are adjacent in the switched dynamics.
     n_reg = len(new_list)
-
     adj = np.zeros([n_reg, n_reg], dtype=int)
     for i, reg_i in enumerate(new_list):
         for j, reg_j in enumerate(new_list[0:i]):
@@ -2004,16 +1977,13 @@ def merge_partitions(abstractions):
             for mode in abstractions:
                 pi = parents[mode][i]
                 pj = parents[mode][j]
-
                 part = abstractions[mode].ppp
 
                 if (part.adj[pi, pj] == 1) or (pi == pj):
                     touching = True
                     break
-
             if not touching:
                 continue
-
             if pc.is_adjacent(reg_i, reg_j):
                 adj[i,j] = 1
                 adj[j,i] = 1
@@ -2033,6 +2003,7 @@ def merge_partitions(abstractions):
     )
 
     return (abstraction, ap_labeling)
+
 
 def merge_partition_pair(
         old_regions, ab2,
@@ -2073,20 +2044,16 @@ def merge_partition_pair(
           includes the mode that was just merged.
     """
     logger.info('merging partitions')
-
     part2 = ab2.ppp
-
     modes = prev_modes + [cur_mode]
     new_list = list()
     parents = {mode:dict() for mode in modes}
     ap_labeling = dict()
-
     for i in range(len(old_regions)):
         for j in range(len(part2)):
             isect = pc.intersect(old_regions[i],
                                  part2[j])
             rc, xc = pc.cheby_ball(isect)
-
             # no intersection ?
             if rc < 1e-5:
                 continue
@@ -2096,18 +2063,14 @@ def merge_partition_pair(
             # if Polytope, make it Region
             if len(isect) == 0:
                 isect = pc.Region([isect])
-
             # label the Region with propositions
             isect.props = old_regions[i].props.copy()
-
             new_list.append(isect)
             idx = new_list.index(isect)
-
             # keep track of parents
             for mode in prev_modes:
                 parents[mode][idx] = old_parents[mode][i]
             parents[cur_mode][idx] = j
-
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
             ap_label_2 = ab2.ts.states[j]['ap']

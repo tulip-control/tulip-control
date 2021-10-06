@@ -125,22 +125,17 @@ def check(formula):
 
         if isinstance(s, sast.Unary):
             op = s.operator
-
             if op in {'!', 'G', 'F'}:
                 t = dfa.transitions.find(q, letter=op)
-
                 if not t:
                     raise Exception('not in fragment')
-
                 qi, qj, w = t[0]
-
                 Q.append((s.operand, qj))
             else:
                 # ignore
                 Q.append((s.operand, q))
         elif isinstance(s, sast.Binary):
             op = s.operator
-
             if op in {'W', 'U'}:
                 t = dfa.transitions.find(q, letter=op)
                 if t:
@@ -152,18 +147,14 @@ def check(formula):
 
                     if not t:
                         raise Exception('not in fragment')
-
                     qi, qj, w = t[0]
-
                     Q.append((s.op_l, qj))
 
                     t = dfa.transitions.find(q, letter=op + '_right')
 
                     if not t:
                         raise Exception('not in fragment')
-
                     qi, qj, w = t[0]
-
                     Q.append((s.op_r, qj))
             else:
                 # ignore
@@ -171,7 +162,6 @@ def check(formula):
                 Q.append((s.op_r, q))
         elif isinstance(s, sast.Var):
             print('reached var')
-
     return ast
 
 
@@ -339,12 +329,9 @@ def stability_to_gr1(p, aux='aux'):
 
     a = aux
     a0 = a
-
     p = _paren(p)
     a = _paren(a)
-
     v = tx.check_var_name_conflict(p, a0)
-
     sys_vars = v | {a0}
     sys_init = {'!' + a}
     sys_safe = {a + ' -> ' + p,
@@ -375,7 +362,6 @@ def response_to_gr1(p, q, aux='aux'):
     """
     a = aux
     a0 = a
-
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
@@ -415,12 +401,9 @@ def eventually_to_gr1(p, aux='aux'):
     """
     a = aux
     a0 = a
-
     p = _paren(p)
     a = _paren(a)
-
     v = tx.check_var_name_conflict(p, a0)
-
     sys_vars = v | {a0}
     sys_init = {'!(' + a + ')'}
     sys_safe = {
@@ -455,14 +438,11 @@ def until_to_gr1(p, q, aux='aux'):
     """
     a = aux
     a0 = a
-
     p = _paren(p)
     q = _paren(q)
     a = _paren(a)
-
     s = p + ' && ' + q
     v = tx.check_var_name_conflict(s, a0)
-
     sys_vars = v | {a0}
     sys_init = {'!' + q + ' -> !' + a}
     sys_safe = {

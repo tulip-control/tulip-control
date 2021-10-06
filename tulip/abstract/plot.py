@@ -91,6 +91,7 @@ def plot_abstraction_scc(ab, ax=None):
             ppp[i].plot(ax=ax, color=color)
     return ax
 
+
 def plot_ts_on_partition(
         ppp, ts, ppp2ts,
         edge_label, only_adjacent, ax):
@@ -150,11 +151,11 @@ def plot_strategy(ab, mealy):
     ax = plot_partition(ab.ppp, proj_mealy, color_seed=0)
     return ax
 
+
 def plot_trajectory(
         ppp, x0, u_seq, ssys,
         ax=None,
         color_seed=None):
-
     """Plot partition and trajectory, starting from `x0`.
 
     Plots a `PropPreservingPartition` and

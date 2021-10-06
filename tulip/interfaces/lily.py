@@ -89,7 +89,6 @@ def synthesize(
     elif isinstance(formula, LTL):
         env_vars = formula.input_variables
         sys_vars = formula.output_variables
-
     all_vars = dict(env_vars)
     all_vars.update(sys_vars)
     if not all(v == 'boolean' for v in all_vars.values()):
@@ -110,7 +109,6 @@ def synthesize(
     )
     with open(IO_PARTITION_FILE, 'w') as fid:
         fid.write(s)
-
     # call lily
     try:
         p = subprocess.Popen([LILY, '-f', f, '-syn', IO_PARTITION_FILE],

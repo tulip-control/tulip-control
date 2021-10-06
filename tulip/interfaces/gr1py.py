@@ -64,6 +64,7 @@ def check_realizable(spec):
     return gr1py.solve.check_realizable(
         tsys, exprtab, init_flags=init_option)
 
+
 def synthesize(spec):
     """Synthesize strategy realizing the given specification.
 

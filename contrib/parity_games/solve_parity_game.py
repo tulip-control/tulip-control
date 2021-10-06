@@ -22,7 +22,6 @@ def McNaughton(p):
     p = copy.deepcopy(p)
     if p.has_deadends():
         raise Exception('The GameGraph has sinks !')
-
     c = p.max_color
     print('highest color occurring in P: c = ' + str(c))
 
@@ -97,12 +96,10 @@ if __name__ == '__main__':
     p.states.add('p0', player=0, color=1)
     p.states.add('p1', player=1, color=0)
     p.states.add('p2', player=1, color=1)
-
     p.transitions.add('p0', 'p1')
     p.transitions.add('p1', 'p0')
     p.transitions.add('p0', 'p2')
     p.transitions.add('p2', 'p2')
-
     print(p)
     W0, W1 = McNaughton(p)
 

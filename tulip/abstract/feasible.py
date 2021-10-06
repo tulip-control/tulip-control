@@ -273,21 +273,17 @@ def solve_open_loop(
 ):
     r1 = P1.copy() # Initial set
     r2 = P2.copy() # Terminal set
-
     # use the max_num_poly largest volumes for reachability
     r1 = volumes_for_reachability(r1, max_num_poly)
     r2 = volumes_for_reachability(r2, max_num_poly)
-
     if len(r1) > 0:
         start_polys = r1
     else:
         start_polys = [r1]
-
     if len(r2) > 0:
         target_polys = r2
     else:
         target_polys = [r2]
-
     # union of s0 over all polytope combinations
     s0 = pc.Polytope()
     for p1 in start_polys:
@@ -297,6 +293,7 @@ def solve_open_loop(
 
     return s0
 
+
 def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     """Compute `s0` for open-loop `N`-reachability.
 
@@ -305,15 +302,12 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     """
     p1 = p1.copy()
     p2 = p2.copy()
-
     if trans_set is None:
         trans_set = p1
-
     # stack polytope constraints
     L, M = createLM(ssys, N, p1, trans_set, p2)
     s0 = pc.Polytope(L, M)
     s0 = pc.reduce(s0)
-
     # Project polytope s0 onto lower dim
     n = np.shape(ssys.A)[1]
     dims = range(1, n+1)
@@ -321,6 +315,7 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     s0 = s0.project(dims)
 
     return pc.reduce(s0)
+
 
 def volumes_for_reachability(part, max_num_poly):
     if len(part) <= max_num_poly:
@@ -388,14 +383,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     B = ssys.B
     E = ssys.E
     K = ssys.K
-
     D = ssys.Wset
     PU = ssys.Uset
-
     n = A.shape[1]  # State space dimension
     m = B.shape[1]  # Input space dimension
     p = E.shape[1]  # Disturbance space dimension
-
     # non-zero disturbance matrix E ?
     if not np.all(E==0):
         if not pc.is_fulldim(D):
@@ -509,12 +501,11 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
     M = np.vstack([Mk, MU]) - D_hat
-
     msg = 'Computed S0 polytope: L x <= M, where:\n\t L = \n'
     msg += str(L) +'\n\t M = \n' + str(M) +'\n'
     logger.debug(msg)
-
     return L,M
+
 
 def get_max_extreme(G,D,N):
     """Calculate the array `d_hat` such that:
@@ -553,7 +544,6 @@ def get_max_extreme(G,D,N):
     nv = D_extreme.shape[0]
     dim = D_extreme.shape[1]
     DN_extreme = np.zeros([dim*N, nv**N])
-
     for i in range(nv**N):
         # Last N digits are indices we want!
         ind = np.base_repr(i, base=nv, padding=N)
@@ -562,6 +552,8 @@ def get_max_extreme(G,D,N):
 
     d_hat = np.amax(np.dot(G,DN_extreme), axis=1)
     return d_hat.reshape(d_hat.size,1)
+
+
 def _block_diag2(A, B):
     """Similar to `block_diag()` in `scipy.linalg`.
 
