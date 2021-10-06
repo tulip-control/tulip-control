@@ -32,10 +32,10 @@
 #
 """Classes representing hybrid dynamical systems."""
 from __future__ import absolute_import
-import logging
-from warnings import warn
 import itertools
+import logging
 from pprint import pformat
+from warnings import warn
 
 import numpy as np
 import polytope as pc
