@@ -2,6 +2,7 @@
 
 
 ## 1.4.0
+(future)
 
 - require Python >= 3.7
 
