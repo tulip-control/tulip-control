@@ -183,7 +183,10 @@ def write_startline(enviroment, system, f):
         else:
             f.write(temp+',')
         enviroment.put(temp)
-    f.write(")\nglobal state;\ncoder.extrinsic('disp');\nswitch state\n")
+    f.write(
+        ")\nglobal state;\n"
+        "coder.extrinsic('disp');\n"
+        "switch state\n")
 
 
 def write_case(enviroment, system, f, verbosem):
@@ -252,7 +255,9 @@ def write_case(enviroment, system, f, verbosem):
                 system.put(temp1)
         else:
             f.write('\t\telse\n')
-            f.write("\t\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
+            f.write(
+                "\t\t\tdisp('Cannot find a valid successor, "
+                "environment assumption is like to be violated')\n")
             for l in range(system.qsize()):
                 temp1 = system.get()
                 if verbosem == 1:
@@ -266,7 +271,9 @@ def write_case(enviroment, system, f, verbosem):
         queue.put(temp)
     # the last case is an otherwise statement
     f.write('\totherwise\n')
-    f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
+    f.write(
+        "\t\tdisp('Cannot find a valid successor, "
+        "environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
         temp1 = system.get()
         if verbosem==1:
@@ -351,7 +358,9 @@ def write_case_no(enviroment, system, f, verbosem):
                 system.put(temp1)
         else:
             f.write('\t\telse\n')
-            f.write("\t\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
+            f.write(
+                "\t\t\tdisp('Cannot find a valid successor, "
+                "environment assumption is like to be violated')\n")
             for l in range(system.qsize()):
                 temp1=system.get()
                 if verbosem==1:
@@ -367,7 +376,9 @@ def write_case_no(enviroment, system, f, verbosem):
         queue.put(temp)
     # the last case is an otherwise statement
     f.write('\totherwise\n')
-    f.write("\t\tdisp('Cannot find a valid successor, environment assumption is like to be violated')\n")
+    f.write(
+        "\t\tdisp('Cannot find a valid successor, "
+        "environment assumption is like to be violated')\n")
     for l in range(system.qsize()):
         temp1 = system.get()
         if verbosem == 1:
@@ -388,8 +399,11 @@ system = _queue.Queue()
 try:
     load_file(f'{sys.argv[1]}.aut')
     read_variables(f'{sys.argv[1]}.smv')
-    q=question('Shall there be a semicolon printed after each variable assignment? [Y/n]')
-    q2=question('Shall the script exclude no successors? [Y/n]')
+    q = question(
+        'Shall there be a semicolon printed after '
+        'each variable assignment? [Y/n]')
+    q2 = question(
+        'Shall the script exclude no successors? [Y/n]')
     if q:
         verbosem = 1
     else:
