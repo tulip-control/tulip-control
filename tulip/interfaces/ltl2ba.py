@@ -127,7 +127,8 @@ class Parser:
         # ('right', 'NEXT'),
         ('right', 'NOT'),
         # ('left', 'PRIME'),
-        ('nonassoc', 'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE'),
+        ('nonassoc', 'EQUALS', 'NEQUALS',
+         'LT', 'LE', 'GT', 'GE'),
         ('nonassoc', 'TIMES', 'DIV'),
         ('nonassoc', 'PLUS', 'MINUS'),
         ('nonassoc', 'TRUE', 'FALSE'))
