@@ -300,13 +300,13 @@ def add_grid(
     the grid, resulting in very small regions.
     Performace significantly degrades without `glpk`.
     """
-    if (grid_size!=None)&(num_grid_pnts!=None):
+    if grid_size != None and num_grid_pnts != None:
         raise Exception(
             'Only one of '
             'the grid size or number of '
             'grid points parameters is '
             'allowed to be given.')
-    if (grid_size==None)&(num_grid_pnts==None):
+    if grid_size == None and num_grid_pnts == None:
         raise Exception(
             'At least one of the '
             'grid size or number of '
