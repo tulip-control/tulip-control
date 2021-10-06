@@ -64,9 +64,9 @@ def plot_abstraction_scc(ab, ax=None):
     try:
         import matplotlib as mpl
     except:
-        logger.error('failed to load matplotlib')
+        logger.error(
+            'failed to load `matplotlib`')
         return
-
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
