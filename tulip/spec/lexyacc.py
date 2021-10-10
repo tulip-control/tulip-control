@@ -159,36 +159,59 @@ class Lexer:
         t.value = '|'
         return t
 
-    t_NOT = r'''
+    def t_NOT(self, t):
+        r"""
           !
         | \~
-        '''
+        """
+        t.value = '!'
+        return t
+
     t_XOR = r' \^ '
     t_EQUALS = r' = '
         # a declarative language
         # has no assignment
-    t_NEQUALS = r'''
+
+    def t_NEQUALS(self, t):
+        r"""
           !=
         | /=
-        '''
+        """
+        t.value = '!='
+        return t
+
     t_LT = r' < '
-    t_LE = r'''
+
+    def t_LE(self, t):
+        r"""
           <=
         | =<
-        '''
+        """
+        t.value = '<='
+        return t
+
     t_GT = r' >= '
     t_GE = r' > '
     t_LPAREN = r' \( '
     t_RPAREN = r' \) '
     t_NUMBER = r' \d+ '
-    t_IMP = r'''
+
+    def t_IMP(self, t):
+        r"""
           \- >
         | =>
-        '''
-    t_BIMP = r'''
+        """
+        t.value = '->'
+        return t
+
+    def t_BIMP(self, t):
+        r"""
           < \- >
         | <=>
-        '''
+        """
+        t.value = '<->'
+        return t
+
     t_PLUS = r' \+ '
     t_MINUS = r' \- '
     t_TIMES = r' \* '
