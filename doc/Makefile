@@ -33,6 +33,7 @@ clean:
 html:
 	@echo "Generating bibliography.rst..."
 	./genbib.py bib.txt
+	mkdir -p _static  # because it is mentioned in `conf.py`
 	$(SPHINXBUILD) -b html $(SPHINXOPTS) . $(BUILDDIR)html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)html."
