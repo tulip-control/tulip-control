@@ -210,7 +210,15 @@ entirely ignored.
   contains a summary of common abbreviations.
   Suggested abbreviations:
 
-  - API: backward incompatible change
+  - API: backward incompatible change to
+    the interface
+  - _API: backward incompatible change to
+    the internal interface (the prefix is based on
+    `PEP 8 conventions
+    <https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_). 
+    In Python an element is internal if
+    its identifier starts with an underscore.
+  - CLI: command-line interface
   - BIB: biliography (for BibTeX files)
   - BIN: for generated files (usually those are binaries)
   - BLD: related to building
@@ -223,8 +231,11 @@ entirely ignored.
   - DRAFT: to be rewritten / fixed up (to be rebased, never in master)
   - ENH: enhancement
   - EXP: experimental (to be rebased, never in master)
+  - FUTURE: change depends on facilities that
+    are forthcoming. Usually combined with "DRAFT: ".
   - GIT: related to ``git`` configuration, for example changes to
     the files ``.gitignore`` and ``.gitattributes``
+  - GUI: graphical user-interface
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
   - MNT: same as "MAI"
@@ -234,8 +245,10 @@ entirely ignored.
   - REF: refactoring
   - REL: release-related
   - REV: revert an earlier commit
+  - SGN: signature of callable, e.g., of a function
   - STY: style correction
   - TST: testing
+  - TUI: text user-interface
   - UI: user interface, e.g., command-line options,
     printing messages, logging, and similar changes
   - WEB: changes to website; mostly relevant to branch `gh-pages`
