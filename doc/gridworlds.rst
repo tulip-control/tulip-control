@@ -13,6 +13,7 @@ in the source code itself. There are several ways to get at this;
 e.g., you could use `pydoc <http://docs.python.org/library/pydoc.html>`_ by
 
 .. highlight:: none
+
 ::
 
   $ pydoc tulip.gridworld
@@ -23,6 +24,7 @@ code below, we assume the ``gridworld`` module has been imported as
 ``gw``
 
 .. highlight:: python
+
 ::
 
   import tulip.gridworld as gw
@@ -35,7 +37,7 @@ A gridworld problem can be defined by a "gridworld description
 string." The core parsing routine is the ``GridWorld.loads``; it is
 the current reference implementation.
 
-.. automethod:: gridworld.GridWorld.loads
+.. automethod:: tulip.gridworld.GridWorld.loads
 
 Examples
 ````````
@@ -45,6 +47,7 @@ Consider a 2 x 3 gridworld where you wish to declare the cell at (1,2)
 cell. This is achieved with the description string
 
 .. highlight:: none
+
 ::
 
   #    0 1 2
@@ -104,6 +107,7 @@ continuous state space dynamics, as shown in the code below. Note that
 we use mostly default argument values to minimize clutter.
 
 .. highlight:: python
+
 ::
 
   import numpy as np

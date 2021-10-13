@@ -249,8 +249,8 @@ appropriate alias is similar to::
   $ alias pydoc='PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc'
 
 To set this alias for every new terminal session, add the line to your shell
-startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc`` for zsh.  To test
-it, try looking at the transys subpackage by entering::
+startup script; e.g., ``~/.bashrc`` for bash, or ``~/.zshrc`` for zsh [#f1]_.
+To test it, try looking at the transys subpackage by entering::
 
   $ pydoc tulip.transys
 

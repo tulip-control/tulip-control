@@ -49,9 +49,9 @@ be followed:
   <http://docutils.sourceforge.net/docs/user/rst/quickref.html>`_.
 
 - Besides the previous two sources, documentation can appear in plaintext files,
-notably in README files.  These should have line widths of at most 80 characters.
-E.g., this can be achieved at the command-line using ``fold -s -w 80`` or
-in `Emacs <http://www.gnu.org/software/emacs>`_ by ``C-u 80 M-x set-fill-column``.
+  notably in README files.  These should have line widths of at most 80 characters.
+  E.g., this can be achieved at the command-line using ``fold -s -w 80`` or
+  in `Emacs <http://www.gnu.org/software/emacs>`_ by ``C-u 80 M-x set-fill-column``.
 
 - When committing to the repository, you should write a summary line, at most 60
   characters in length, and if elaboration is necessary, then first skip a line
@@ -164,9 +164,11 @@ entirely ignored.
     `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_
     included the rule that no function should be longer than 75 lines of code.
     The Linux coding style guide is succinct
+
       "The answer to that is that if you need more than 3 levels of indentation,
        you're screwed anyway,
        and should fix your program."
+
     For example, within any iteration, usually the iterated code block deserves
     its own function (or method).
     This changes context, helping to focus at each level individually.
@@ -192,7 +194,8 @@ entirely ignored.
     `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled
     (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis
     (pyflakes) checked).
-.. advice for emacs users ?
+
+  .. advice for emacs users ?
 
 - Modules shouldn't become
   `God objects <http://en.wikipedia.org/wiki/God_object>`_.
@@ -266,4 +269,4 @@ Further reading, of general interest:
   <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
 
 - `NumPy development documentation
-      <https://numpy.org/doc/stable/dev/index.html>`_
+  <https://numpy.org/doc/stable/dev/index.html>`_
