@@ -209,13 +209,21 @@ entirely ignored.
   contains a summary of common abbreviations.
   Suggested abbreviations:
 
-  - API: backward incompatible change
+  - API: backward incompatible change to
+    the interface
+  - _API: backward incompatible change to
+    the internal interface (the prefix is based on
+    `PEP 8 conventions
+    <https://www.python.org/dev/peps/pep-0008/#descriptive-naming-styles>`_).
+    In Python an element is internal if
+    its identifier starts with an underscore.
   - BIB: biliography (for BibTeX files)
   - BIN: for generated files (usually those are binaries)
   - BLD: related to building
   - BUG: error correction
   - CI: related to continuous integration tests (usually ``.travis.yml``)
   - CHG: change the code
+  - CLI: command-line interface
   - DEP: deprecate something, or remove a deprecated object
   - DEV: development utility
   - DOC: documentation (docstrings too)
@@ -224,6 +232,7 @@ entirely ignored.
   - EXP: experimental (to be rebased, never in master)
   - GIT: related to ``git`` configuration, for example changes to
     the files ``.gitignore`` and ``.gitattributes``
+  - GUI: graphical user-interface
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
   - MNT: same as "MAI"
