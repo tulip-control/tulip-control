@@ -37,8 +37,6 @@ Suggested abbreviation:
 from tulip import transys as trs
 ```
 """
-from __future__ import absolute_import
-
 __all__ = list()
 
 from . import algorithms

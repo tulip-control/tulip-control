@@ -31,8 +31,6 @@
 # SUCH DAMAGE.
 #
 """Functions for plotting Partitions."""
-from __future__ import division
-
 import logging
 logger = logging.getLogger(__name__)
 

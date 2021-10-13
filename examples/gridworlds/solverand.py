@@ -9,8 +9,6 @@ is a Mealy machine.  Example usage for 3 by 5 size is
 
   $ ./solverand.py 3 5
 """
-from __future__ import print_function
-
 import sys
 import tulip.gridworld as gw
 from tulip import synth

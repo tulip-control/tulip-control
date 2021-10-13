@@ -32,8 +32,6 @@
 """
 Transition System module developer examples
 """
-from __future__ import print_function
-
 from scipy.sparse import lil_matrix
 from numpy.random import rand
 import networkx as nx

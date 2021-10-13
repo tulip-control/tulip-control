@@ -44,8 +44,6 @@ interacting with the `gr1c` executable.
 
 Use the `logging` module to throttle verbosity.
 """
-from __future__ import print_function
-
 import errno
 from pkg_resources import parse_version
 import logging

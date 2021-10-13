@@ -15,8 +15,6 @@ We will assume, we have the 6 cell robot example.
      +---+---+---+
 """
 # NO, 26 Jul 2013.
-from __future__ import print_function
-
 import numpy as np
 from scipy import sparse as sp
 from tulip import spec

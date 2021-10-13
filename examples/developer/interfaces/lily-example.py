@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import print_function
 from tulip.spec.form import LTL
 from tulip.interfaces import lily
 

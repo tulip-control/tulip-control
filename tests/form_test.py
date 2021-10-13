@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Tests for GR(1) specification formulas module."""
-from __future__ import print_function
-
 import logging
 logging.basicConfig(level=logging.ERROR)
 logging.getLogger('ltl_parser_log').setLevel(logging.WARNING)

@@ -41,7 +41,6 @@ Written by Robert Rogersten during SURF June 2012,
 Co-mentors Mumu Xu, Necmiye Ozay and Ufuk Topcu.
 """
 
-from __future__ import print_function
 import re, copy, os, sys
 try:
     import queue as _queue

@@ -30,9 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Algorithms on Kripke structures and Automata."""
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
 import copy
 from tulip.transys.transys import FiniteTransitionSystem

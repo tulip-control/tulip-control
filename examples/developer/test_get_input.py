@@ -9,8 +9,6 @@ run ../continuous.py
 run -i test_get_input.py
 ```
 """
-from __future__ import print_function
-
 from tulip.abstract import get_input, find_discrete_state
 from polytope import is_inside
 import numpy as np

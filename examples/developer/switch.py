@@ -8,8 +8,6 @@ Simple example with uncontrolled switching, for debugging
      | 0 | 1 | 2 |
      +---+---+---+
 """
-from __future__ import print_function
-
 from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp

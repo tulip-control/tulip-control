@@ -12,7 +12,6 @@ G. H. Mealy. `A Method for Synthesizing Sequential Circuits
 Technical Journal (BSTJ)*, Vol.34, No.5, pp. 1045 -- 1079, September,
 1955.
 """
-from __future__ import print_function
 import sys
 import io
 

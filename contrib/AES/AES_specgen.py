@@ -3,9 +3,6 @@
 Huan Xu (mumu@caltech.edu)
 October 30, 2012
 """
-from __future__ import division
-from __future__ import print_function
-
 import sys, os
 import copy
 import numpy as np

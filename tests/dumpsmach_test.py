@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 """Tests for the export mechanisms of tulip.dumpsmach."""
-from __future__ import print_function
-
 import logging
 
 import networkx as nx

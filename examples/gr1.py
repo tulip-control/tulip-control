@@ -33,8 +33,6 @@ We must convert this specification into GR(1) form:
 """
 # 21 Jul 2013, Richard M. Murray (murray@cds.caltech.edu)
 # Import the packages that we need
-from __future__ import print_function
-
 import logging
 
 from tulip import spec

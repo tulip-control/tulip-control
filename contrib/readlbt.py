@@ -61,8 +61,6 @@ where a fork of it is maintained.
 
 SCL; 2017.
 """
-from __future__ import print_function
-
 import sys
 import networkx as nx
 

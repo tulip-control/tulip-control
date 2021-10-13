@@ -34,7 +34,6 @@
 Relevant links:
 - [slugs](https://github.com/LTLMoP/slugs)
 """
-from __future__ import absolute_import
 import errno
 import logging
 import json

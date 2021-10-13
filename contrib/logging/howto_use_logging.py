@@ -8,8 +8,6 @@ You can configure it also directly in python, but
 rewriting or copy/pasting again and again the same
 base configuration is not very efficient.
 """
-from __future__ import print_function
-
 import logging.config
 import json
 import pprint

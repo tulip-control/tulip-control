@@ -30,8 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets."""
-from __future__ import print_function
-
 import logging
 import warnings
 from itertools import chain, combinations

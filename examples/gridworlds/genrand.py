@@ -20,8 +20,6 @@ Use the flag -b to use a representation where there is one boolean
 variable in the specification per grid cell.  Otherwise (default),
 support for nonboolean domains is used.
 """
-from __future__ import print_function
-
 from os import environ as os_environ
 import sys
 import tulip.gridworld as gw

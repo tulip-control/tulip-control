@@ -38,9 +38,6 @@ Also, those modules are for manipulating expressions.
 This module knows about program structure,
 namely the sections of a specification file.
 """
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
 logger = logging.getLogger(__name__)
 import pprint

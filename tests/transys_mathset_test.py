@@ -2,7 +2,6 @@
 """
 Tests for transys.mathset (part of transys subpackage)
 """
-from __future__ import print_function
 try:
     from collections.abc import Iterable
 except ImportError:

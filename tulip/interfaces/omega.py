@@ -10,9 +10,6 @@ to return enumerated transducers.
 
 <https://pypi.python.org/pypi/omega>
 """
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
 import time
 

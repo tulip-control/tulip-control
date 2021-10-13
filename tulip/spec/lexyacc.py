@@ -35,9 +35,6 @@
 This parser uses syntax-tree classes from
 the module `tulip.spec.ast`.
 """
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
 import warnings
 import ply.lex

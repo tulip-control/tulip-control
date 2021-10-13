@@ -1,7 +1,4 @@
 """Tests for the tulip.gridworld."""
-from __future__ import division
-from __future__ import print_function
-
 try:
     from dd import cudd as dd_cudd
 except ImportError:

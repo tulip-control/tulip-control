@@ -30,7 +30,6 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Transition System Module"""
-from __future__ import absolute_import
 import logging
 try:
     from collections.abc import Iterable

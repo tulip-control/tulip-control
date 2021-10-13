@@ -31,7 +31,6 @@
 # SUCH DAMAGE.
 #
 """Classes representing hybrid dynamical systems."""
-from __future__ import absolute_import
 import itertools
 import logging
 from pprint import pformat

@@ -34,7 +34,6 @@
 <https://pypi.python.org/pypi/gr1py>
 <https://github.com/slivingston/gr1py>
 """
-from __future__ import absolute_import
 import logging
 from tulip.spec import translate
 from tulip.interfaces.gr1c import load_aut_json

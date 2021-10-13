@@ -32,8 +32,6 @@
 #
 """TuLiP Toolbox Abstract subpackage
 """
-from __future__ import absolute_import
-
 from . import discretization
 from .discretization import *
 from . import feasible

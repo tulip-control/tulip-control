@@ -44,9 +44,6 @@ reference
    50, pp. 33--45, 2011,
    http://doi.org/10.4204/EPTCS.50.3
 """
-from __future__ import absolute_import
-from __future__ import print_function
-
 import logging
 logger = logging.getLogger(__name__)
 

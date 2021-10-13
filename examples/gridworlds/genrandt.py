@@ -13,8 +13,6 @@ flag is given in addition to -p, then save the plot to a PDF FILE.  If the
 flag -b is given, instead of integer-valued variables, use representation
 where there is one boolean variable in the specification per grid cell.
 """
-from __future__ import print_function
-
 import sys
 import matplotlib as mpl
 mpl.use('agg')  # change the backend as available in your environment

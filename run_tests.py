@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """Driver script for testing TuLiP.  Try calling it with "-h" flag."""
-from __future__ import print_function
 import argparse
 import importlib
 import os
