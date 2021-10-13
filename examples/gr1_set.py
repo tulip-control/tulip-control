@@ -57,7 +57,7 @@ env_prog = '!park'              # []<>(!park)
 # and what the system is required to do in response to an environmental
 # action.
 #
-sys_vars = {}
+sys_vars = dict()
 sys_vars['loc'] = (0, 5)
 
 sys_init = {'loc=0'}

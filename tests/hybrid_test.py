@@ -8,7 +8,7 @@ from tulip import hybrid
 import polytope as pc
 
 def switched_system_test():
-    subsystems = []
+    subsystems = list()
 
     # subsystem 0
     A = np.eye(2)

@@ -108,8 +108,8 @@ def write_discdc_con(G,rulist,dcbuslist,nullist):
     dcbuslist: list of all dc buses
 
     """
-    remove = []
-    remove2 = []
+    remove = list()
+    remove2 = list()
     for i in rulist:
         for j in dcbuslist:
             remove.append((i,j))
@@ -139,7 +139,7 @@ def write_discac_con(G,nullist):
     dcbuslist: list of all dc buses
 
     """
-    remove = []
+    remove = list()
     H = copy.deepcopy(G)
     if len(nullist) >= 2:
         remove = all_pairs(nullist)
@@ -204,7 +204,7 @@ def all_pairs(gens):
        list of all generator nodes
 
     """
-    answer = []
+    answer = list()
     for i in range(len(gens)):
         for j in range(i+1, len(gens)):
             if (gens[i],gens[j]) not in answer:
@@ -222,7 +222,7 @@ def all_gens(list,G):
        list of all generator pairs
 
     """
-    pgens = []
+    pgens = list()
     for i in range(len(list)):
         if nx.has_path(G,list[i][0], list[i][1]) is True:
             pgens.append(list[i])
@@ -242,7 +242,7 @@ def ppaths(i,j,G):
        Ending node for path
     """
     result = nx.shortest_path(G,source=i,target=j)
-    C = {}
+    C = dict()
     guarantees = 'guarantees += '"'"'&\\n\\t[](!('
     for k in range(0,len(result)-1):
         if result[k] < result[k+1]:
@@ -289,8 +289,8 @@ def faulttol(prob,allgens,genfail):
 
     """
     tuples = int(prob / genfail)
-    fails = []
-    temp = []
+    fails = list()
+    temp = list()
     if tuples <= 1:
         fails = allgens[:]
     else:
@@ -336,7 +336,7 @@ def write_ruassump(rufail,rulist):
         f.write('\n')
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def remove_ru_edges(G,buslist,rulist):
-    pairs = []
+    pairs = list()
     H = copy.deepcopy(G)
     if len(buslist) > 0:
         for i in busac:
@@ -345,7 +345,7 @@ def remove_ru_edges(G,buslist,rulist):
     return pairs
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def remove_rus(G,buslist,rulist):
-    pairs = []
+    pairs = list()
     H = copy.deepcopy(G)
     if len(buslist) > 0:
         for i in busac:
@@ -368,16 +368,16 @@ def buspathnodes(G,busno,source):
     G: NetworkX graph
 
     """
-    buspaths = []
+    buspaths = list()
     if nx.has_path(G,busno,source):
             buspaths.append((busno,source))
     return buspaths
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def acbusprop(G,source,target):
-    paths = []
-    C = []
-    temp = []
-    edges = []
+    paths = list()
+    C = list()
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     gens2.remove(target)
@@ -416,7 +416,7 @@ def acbusprop(G,source,target):
                 else:
                     f.write(' & (c'+str(C[k][1])+str(C[k][0])+'=1)')
             f.write("'"'\n')
-            C = []
+            C = list()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_acbusprop(G,buslist,genlist):
     """Writes dc bus properties
@@ -435,8 +435,8 @@ def write_acbusprop(G,buslist,genlist):
             acbusprop(G,i,j)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def acbusspec(G,busno,gen):
-    temp = []
-    edges = []
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     gens2.remove(gen)
@@ -445,7 +445,7 @@ def acbusspec(G,busno,gen):
     D.remove_edges_from(temp)
     edges = remove_ru_edges(G,busac,rus)
     D.remove_edges_from(edges)
-    paths = []
+    paths = list()
     for path in nx.all_simple_paths(D,busno,gen,cutoff=None):
         paths.append(path)
     for j in range(0,len(paths)):
@@ -479,9 +479,9 @@ def write_acbusspec2(G,buslist,genlist):
     genlist : list of all generators
 
     """
-    paths = []
-    temp = []
-    edges = []
+    paths = list()
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     edges = remove_ru_edges(G,busac,rus)
@@ -494,7 +494,7 @@ def write_acbusspec2(G,buslist,genlist):
             for path in nx.all_simple_paths(D,i,j):
                 paths.append(path)
                 f.write(' | (B' + str(i) + str(j) + str(len(paths)-1)+')')
-            paths = []
+            paths = list()
             gens2 = copy.deepcopy(gens)
             D = copy.deepcopy(G)
         f.write(') -> (b'+str(i)+'=0))'"'"'\n')
@@ -524,14 +524,14 @@ def dcbusprop(G,source,target):
        generator
 
     """
-    temp = []
-    edges = []
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     gens2.remove(target)
     D.remove_nodes_from(gens2)
-    paths = []
-    C = []
+    paths = list()
+    C = list()
     for path in nx.all_simple_paths(D,source,target,cutoff=None):
         paths.append(path)
     for p in range(0,len(paths)):
@@ -574,7 +574,7 @@ def dcbusprop(G,source,target):
             else:
                 f.write(' & (c'+str(C[k][1])+str(C[k][0])+'=1)')
         f.write("'"'\n')
-        C = []
+        C = list()
 
 def write_dcbusprop(G,buslist,genlist):
     """Writes dc bus properties
@@ -606,10 +606,10 @@ def dcbusspec(G,busno,gen):
        generator
 
     """
-    paths = []
-    C = []
-    temp = []
-    edges = []
+    paths = list()
+    C = list()
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     gens2.remove(gen)
@@ -631,7 +631,7 @@ def write_dcbusspec(G,buslist,genlist):
     genlist : list of all generators
 
     """
-    paths = []
+    paths = list()
     for i in buslist:
         for j in genlist:
             dcbusspec(G,i,j)
@@ -648,9 +648,9 @@ def write_dcbusspec2(G,buslist,genlist):
     genlist : list of all generators
 
     """
-    paths = []
-    temp = []
-    edges = []
+    paths = list()
+    temp = list()
+    edges = list()
     D = copy.deepcopy(G)
     gens2 = copy.deepcopy(gens)
     for i in buslist:
@@ -661,7 +661,7 @@ def write_dcbusspec2(G,buslist,genlist):
             for path in nx.all_simple_paths(D,i,j):
                 paths.append(path)
                 f.write(' | (B' + str(i) + str(j) + str(len(paths)-1)+')')
-            paths = []
+            paths = list()
             gens2 = copy.deepcopy(gens)
             D = copy.deepcopy(G)
         f.write(') -> (b'+str(i)+'=0))'"'"'\n')
@@ -698,8 +698,8 @@ def write_sat_con(G,rulist,dcbuslist,nullist):
     dcbuslist: list of all dc buses
 
     """
-    remove = []
-    remove2 = []
+    remove = list()
+    remove2 = list()
     for i in rulist:
         for j in dcbuslist:
             remove.append((i,j))
@@ -720,7 +720,7 @@ def write_sat_always(complist):
     complist : list of all components
 
     """
-    remove2 = []
+    remove2 = list()
     for i in complist:
         if i in busac:
             f.write('(assert (= b'+str(i)+' true))\n')
@@ -744,7 +744,7 @@ def write_sat_disconnectgen(G,genlist):
 
     genlist : list of all generators
     """
-    neighbor = []
+    neighbor = list()
     for i in genlist:
         neighbor = G.neighbors(i)
         for j in range(0, len(neighbor)):
@@ -752,7 +752,7 @@ def write_sat_disconnectgen(G,genlist):
                 f.write('(assert (=> (= g'+str(i)+' false) (= c'+str(i)+str(neighbor[j])+' false)))\n')
             elif i > neighbor[j]:
                 f.write('(assert (=> (= g'+str(i)+' false) (= c'+str(neighbor[j])+str(i)+' false)))\n')
-        neighbor = []
+        neighbor = list()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_disconnectru(G,rulist):
     """Writes specification disconnecting contactor if rectifier is unhealthy
@@ -763,7 +763,7 @@ def write_sat_disconnectru(G,rulist):
 
     genlist : list of all generators
     """
-    neighbor = []
+    neighbor = list()
     H = copy.deepcopy(G)
     H.remove_nodes_from(busdc)
     for i in rulist:
@@ -773,7 +773,7 @@ def write_sat_disconnectru(G,rulist):
                 f.write('(assert (=> (= r'+str(i)+' false) (= c'+str(i)+str(neighbor[j])+' false)))\n')
             elif i > neighbor[j]:
                 f.write('(assert (=> (= r'+str(i)+' false) (= c'+str(neighbor[j])+str(i)+' false)))\n')
-        neighbor = []
+        neighbor = list()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def write_sat_noparallel(G,genlist):
     pairs = all_pairs(genlist)
@@ -913,8 +913,8 @@ def write_sat_dcbusprop2(G,buslist, genlist):
 def write_sat_env(gfail,rfail):
     gentemp = [x for x in range(0,gfail+1)]
     rutemp = [x for x in range(0,rfail+1)]
-    allgens = []
-    allrus = []
+    allgens = list()
+    allrus = list()
     env_filename = 'env'
     count = 0
     for i in gentemp:
@@ -981,7 +981,7 @@ busfail = 0
 busac = [2,3]
 busess = [2,3]
 busdc = [6,7]
-null = []
+null = list()
 rus = [4,5]
 gens = [0,1]
 

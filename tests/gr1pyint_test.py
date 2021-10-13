@@ -41,7 +41,7 @@ class basic_test:
     def test_check_realizable(self):
         # f_un
         assert not gr1py.check_realizable(self.f_un)
-        self.f_un.sys_safety = []
+        self.f_un.sys_safety = list()
         assert gr1py.check_realizable(self.f_un)
         self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x & y']
@@ -56,7 +56,7 @@ class basic_test:
             assert gr1py.check_realizable(self.dcounter)
 
     def test_synthesize(self):
-        self.f_un.sys_safety = []  # Make it realizable
+        self.f_un.sys_safety = list()  # Make it realizable
         g = gr1py.synthesize(self.f_un)
         assert g is not None
         assert len(g.env_vars) == 1 and 'x' in g.env_vars

@@ -125,7 +125,7 @@ class States:
         @type graph: `LabeledDiGraph`
         """
         self.graph = graph
-        self.initial = []
+        self.initial = list()
 
     def __getitem__(self, state):
         return self.graph.nodes[state]
@@ -374,7 +374,7 @@ class States:
                 msg += f'Replaced given states = {state}'
                 msg += f' with states = {states}'
                 logger.debug(msg)
-        found_state_label_pairs = []
+        found_state_label_pairs = list()
         for state, attr_dict in self.graph.nodes(data=True):
             logger.debug(
                 f'Checking state_id = {state}'
@@ -648,7 +648,7 @@ class Transitions:
         except:
             raise TypeError(
                 '`with_attr_dict` must be a `dict`')
-        found_transitions = []
+        found_transitions = list()
         u_v_edges = self.graph.edges(
             nbunch=from_states,
             data=True)
@@ -1162,7 +1162,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 key = None
             elif ne == 2:
                 u, v = e
-                dd = {}
+                dd = dict()
                 key = None
             else:
                 raise ValueError(

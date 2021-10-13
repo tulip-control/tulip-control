@@ -66,8 +66,8 @@ class PrioritizedSpecification:
     """A class for defining a prioritized safety specification."""
 
     def __init__(self):
-        self._Psi = []
-        self.atomic_propositions = []
+        self._Psi = list()
+        self.atomic_propositions = list()
 
     def __getitem__(self, key):
         assert key >= 0
@@ -133,10 +133,8 @@ class PrioritizedSpecification:
             assert self.atomic_propositions == fa.atomic_propositions
         # Add the rule
         rule = FAWithPriority(fa, priority, level)
-
         for l in range(len(self._Psi), level + 1):
-            self._Psi.append([])
-
+            self._Psi.append(list())
         self._Psi[level].append(rule)
 
     def get_rules_at(self, level):
@@ -145,7 +143,7 @@ class PrioritizedSpecification:
         @rtype: `list` of `FAWithPriority`
         """
         if level >= len(self._Psi):
-            return []
+            return list()
         return self._Psi[level]
 
     def get_rules(self):

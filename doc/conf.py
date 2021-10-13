@@ -88,7 +88,7 @@ exclude_patterns = ['_build', 'formats']
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+#modindex_common_prefix = list()
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -103,7 +103,7 @@ html_theme = 'default'
 html_theme_options = {"collapsiblesidebar":True}
 
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = []
+#html_theme_path = list()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -135,11 +135,11 @@ html_last_updated_fmt = '%d %B %Y'
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-#html_sidebars = {}
+#html_sidebars = dict()
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-#html_additional_pages = {}
+#html_additional_pages = dict()
 
 # If false, no module index is generated.
 #html_domain_indices = True

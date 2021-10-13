@@ -121,7 +121,7 @@ class basic_test:
 
     def test_check_realizable(self):
         assert not gr1c.check_realizable(self.f_un)
-        self.f_un.sys_safety = []
+        self.f_un.sys_safety = list()
         assert gr1c.check_realizable(self.f_un)
         self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x', '!y']

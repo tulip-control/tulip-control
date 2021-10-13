@@ -399,7 +399,7 @@ class RabinPairs:
 
     def __init__(self, automaton_states):
         self._states = automaton_states
-        self._pairs = []
+        self._pairs = list()
 
     def __str__(self):
         dashes = 30 * '-'
@@ -566,7 +566,7 @@ class ParityGame(GameGraph):
             default=
                 0)]
         super().__init__(
-            node_label_types, [])
+            node_label_types, list())
 
     def __str__(self):
         s = (

@@ -103,7 +103,7 @@ def reverse_lookup(d, value):
         if v == value:
             return k
 
-expr_stack = []
+expr_stack = list()
 def push_op(toks):
     canonized_tok = reverse_lookup(SPIN_SYN, toks[0])
     if canonized_tok in ("!", "[]", "<>", "X"):  # Unary

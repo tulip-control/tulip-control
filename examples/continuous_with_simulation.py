@@ -39,7 +39,7 @@ W = box2poly(W)
 # Construct the LTI system describing the dynamics
 sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, cont_state_space)
 # Define atomic propositions for relevant regions of state space
-cont_props = {}
+cont_props = dict()
 cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
 cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 # Compute the proposition preserving partition of

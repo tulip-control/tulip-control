@@ -112,8 +112,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     # prod of initial states
     inits1 = self.states.initial
     inits2 = other.states.initial
-
-    prod_init = []
+    prod_init = list()
     for (init1, init2) in zip(inits1, inits2):
         new_init = (init1, init2)
         prod_init.append(new_init)

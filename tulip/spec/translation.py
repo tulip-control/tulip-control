@@ -363,7 +363,7 @@ def _slugs_str(r, name, sep='\n'):
 
 
 def _format_slugs_vars(vardict, name):
-    a = []
+    a = list()
     for var, dom in vardict.items():
         if dom == 'boolean':
             a.append(var)

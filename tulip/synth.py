@@ -656,7 +656,7 @@ def env_to_spec(
 
 def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
     """Initial state, including enforcement of exactly one."""
-    init = []
+    init = list()
     # skip ?
     if ignore_initial:
         return init

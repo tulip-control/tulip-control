@@ -123,7 +123,7 @@ def test_stability():
 
     assert synth.is_realizable(s | s3)
 
-    s3.env_prog = []
+    s3.env_prog = list()
     assert not synth.is_realizable(s | s3)
 
     # s4 = s | s3

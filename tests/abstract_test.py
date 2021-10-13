@@ -217,12 +217,12 @@ def define_dynamics_dual():
 
     # @partition_section@
     # Define atomic propositions for relevant regions of state space
-    cont_props = {}
+    cont_props = dict()
     cont_props['a'] = pc.box2poly([[-1.5, -1]])
     cont_props['b'] = pc.box2poly([[-1, 1]])
     cont_props['c'] = pc.box2poly([[1, 1.5]])
 
-    part = []
+    part = list()
     part.append(pc.box2poly([[-1.5, -1]]))
     part.append(pc.box2poly([[-1, 1]]))
     part.append(pc.box2poly([[1, 1.5]]))

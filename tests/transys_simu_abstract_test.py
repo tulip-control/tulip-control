@@ -46,7 +46,7 @@ def build_FTS(index):
         U = box2poly(U)
         sys_dyn = hybrid.LtiSysDyn(
             A, B, None, None, U, None, cont_state_space)
-        cont_props = {}
+        cont_props = dict()
         cont_props['a'] = box2poly([[-0.5, 0.5], [-0.5, 0.5]])
         cont_props['b'] = box2poly([[-1, -0.5], [-1, 1]])
         cont_props['c'] = box2poly([[-0.5, 1], [0.5, 1]])

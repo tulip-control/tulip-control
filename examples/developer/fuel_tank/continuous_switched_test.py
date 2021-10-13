@@ -16,7 +16,7 @@ uncertainty = 0.05
 
 cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
-cont_props = {}
+cont_props = dict()
 cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
 cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 
@@ -24,7 +24,7 @@ sys_dyn = dict()
 
 allh = [0.5, 1.1, 1.5]
 
-modes = []
+modes = list()
 modes.append(('normal', 'fly'))
 modes.append(('refuel', 'fly'))
 modes.append(('emergency', 'fly'))
@@ -95,7 +95,7 @@ start = time.time()
 N = 8
 trans_len=1
 
-disc_params = {}
+disc_params = dict()
 for mode in modes:
     disc_params[mode] = {'N':N, 'trans_length':trans_len}
 

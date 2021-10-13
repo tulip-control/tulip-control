@@ -136,7 +136,7 @@ def readlbt(gbastr):
             if len(x) > 2:
                 acceptance_sets=[int(ac) for ac in x[2].split()]
             else:
-                acceptance_sets = []
+                acceptance_sets = list()
             A.add_node(state_name,
                        initial=initial,
                        acceptance_sets=acceptance_sets)

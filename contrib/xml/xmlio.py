@@ -254,7 +254,7 @@ def _import_ppp(node):
     if regions_node:
         list_regions = _import_xml(regions_node[0])
     else:
-        list_regions = []
+        list_regions = list()
     # adj
     adj_node = node.findall('adj')
     if adj_node:
@@ -275,7 +275,7 @@ def _import_ppp(node):
 
 
 def _import_list(node, type_str=T_LIST):
-    all_stuff = []
+    all_stuff = list()
     for child in node:
         all_stuff.append(_import_xml(child))
     if type_str==T_SET:
@@ -286,7 +286,7 @@ def _import_list(node, type_str=T_LIST):
 
 
 def _import_dictionary(node):
-    dictionary = {}
+    dictionary = dict()
     for keyvaluepair in node:
         key = _import_xml(keyvaluepair.findall(N_KEY)[0])
         value = _import_xml(keyvaluepair.findall(N_VALUE)[0])
@@ -819,7 +819,7 @@ def _export_adj(matrix, parent, tag=None):
     _export_xml(N, tree, 'num_states')
     # list of nonzero indices
     (row_indices, col_indices) = matrix.nonzero()
-    indices = []
+    indices = list()
     for i, row_ind in enumerate(row_indices):
         col_ind = col_indices[i]
         indices.append((row_ind, col_ind))

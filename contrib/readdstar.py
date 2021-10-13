@@ -143,7 +143,7 @@ def readdstar(getline):
     """
     A = None
     aut_type = None
-    comments = []
+    comments = list()
 
     last_state = -1
         # -1 indicates unset

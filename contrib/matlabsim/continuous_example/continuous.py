@@ -52,7 +52,7 @@ sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, cont_state_space)
 
 # @partition_section@
 # Define atomic propositions for relevant regions of state space
-cont_props = {}
+cont_props = dict()
 cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
 cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 

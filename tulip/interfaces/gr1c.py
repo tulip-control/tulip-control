@@ -151,7 +151,7 @@ def _untaglist(x, cast_f=float,
     if len(litems) > 0:
         li = [cast_f(k.attrib['value']) for k in litems]
     elif elem.text is None:
-        li = []
+        li = list()
     else:
         li = [cast_f(k) for k in elem.text.split()]
     return (elem.tag, li)
@@ -199,7 +199,7 @@ def _untagdict(
         cast_f_values = str
     di = dict()
     if get_order:
-        key_list = []
+        key_list = list()
     for item in items_li:
         # N.B., we will overwrite duplicate keys without warning!
         di[cast_f_keys(item.attrib["key"])] = cast_f_values(
@@ -291,7 +291,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
         raise ValueError(
             'Automaton class only recognizes type "basic".')
     node_list = aut_elem.findall(f'{ns_prefix}node')
-    id_list = []
+    id_list = list()
         # For more convenient searching, and
         # to catch redundancy
     A = nx.DiGraph()
@@ -345,7 +345,7 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
 
 def _parse_vars(variables, vardict):
     """Helper for parsing env, sys variables."""
-    domains = []
+    domains = list()
     for v in variables:
         dom = vardict[v]
         if dom[0] == "[":
@@ -682,7 +682,7 @@ class GR1CSession:
             'envnext ' +
             ' '.join(map(str, state_vector)) +
             '\n')
-        env_moves = []
+        env_moves = list()
         line = self.p.stdout.readline()
         while '---\n' not in line:
             if len(self.prompt) > 0:
@@ -721,7 +721,7 @@ class GR1CSession:
             ' '.join(
                 map(str, emove_vector)) +
             f' {goal_mode}\n')
-        sys_moves = []
+        sys_moves = list()
         line = self.p.stdout.readline()
         while '---\n' not in line:
             if len(self.prompt) > 0:
@@ -754,9 +754,9 @@ class GR1CSession:
             ' '.join(map(str, state_vector)) +
             " " +
             ' '.join(map(str, emove_vector)) +
-            "\n"
+            '\n'
         )
-        sys_moves = []
+        sys_moves = list()
         line = self.p.stdout.readline()
         while '---\n' not in line:
             if len(self.prompt) > 0:

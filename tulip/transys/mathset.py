@@ -573,7 +573,7 @@ class CartesianProduct:
     """List of MathSets, with Cartesian semantics."""
 
     def __init__(self):
-        self.mathsets = []
+        self.mathsets = list()
 
     def __contains__(self, element):
         # TODO check ordered
@@ -627,7 +627,7 @@ def unique(iterable):
     try:
         unique_items = set(iterable)
     except:
-        unique_items = []
+        unique_items = list()
         for item in iterable:
             if item not in unique_items:
                 unique_items.append(item)
@@ -759,7 +759,7 @@ class PowerSet:
             can be hashable or not.
         """
         if iterable is None:
-            iterable = []
+            iterable = list()
         self.math_set = MathSet(iterable)
 
     def __get__(self, instance, value):

@@ -87,7 +87,7 @@ if plotting:
 # @pwasystem_end@
 
 # Continuous proposition
-cont_props = {}
+cont_props = dict()
 cont_props['home'] = box2poly([[0., 1.], [0., 1.]])
 cont_props['lot'] = box2poly([[2., 3.], [1., 2.]])
 

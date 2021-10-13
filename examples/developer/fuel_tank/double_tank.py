@@ -95,7 +95,7 @@ else:
         np.array([tank_capacity, 0, tank_capacity, 0])
     )
 
-cont_props = {}
+cont_props = dict()
 cont_props['no_refuel'] = pc.Polytope(
     np.array([[1,0],
               [-1,0],
@@ -199,7 +199,7 @@ if os.name == "posix":
 else:
     logger.info('Timing currently only available for POSIX platforms (not Windows)')
 
-disc_params = {}
+disc_params = dict()
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
 disc_params[('refuel', 'fly')] = {'N':N, 'trans_length':3}
 
@@ -267,7 +267,7 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 
 ## Simulate
 # num_it = 25
-# init_state = {}
+# init_state = dict()
 # init_state['u_in'] = 0
 
 # destfile = 'rsdisturbance_example.gexf'
@@ -277,8 +277,8 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 #     destfile=destfile
 # )
 
-# uin_arr = []
-# cellid_arr = []
+# uin_arr = list()
+# cellid_arr = list()
 # for (autID, state) in states:
 #     uin_arr.append(state.state['u_in'])
 #     cellid_arr.append(state.state['cellID'])
@@ -310,7 +310,7 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 #     u_arr = np.hstack([u_arr, u.flatten()])
 #     x_arr = np.vstack([x_arr, x])
 
-# data = {}
+# data = dict()
 # data['x'] = x_arr
 # data['u'] = u_arr[range(1,u_arr.shape[0]), :]
 # data['u_in'] = uin_arr

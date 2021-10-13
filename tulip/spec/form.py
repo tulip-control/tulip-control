@@ -914,7 +914,7 @@ def replace_dependent_vars(spec, bool2form):
     for s in {'env_init', 'env_safety', 'env_prog',
               'sys_init', 'sys_safety', 'sys_prog'}:
         part = getattr(spec, s)
-        new = []
+        new = list()
         for clause in part:
             logger.debug(
                 f'replacing in clause:\n\t{clause}')

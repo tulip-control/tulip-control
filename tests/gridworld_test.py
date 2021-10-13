@@ -239,7 +239,7 @@ class RandomWorld_test:
             for r in range(len(self.sizes))]
 
     def teardown_method(self):
-        self.rworlds = []
+        self.rworlds = list()
 
     def test_feasibility(self):
         for r in range(len(self.rworlds_ensuredfeasible)):

@@ -75,8 +75,8 @@ class GridWorld:
             self.loads(gw_desc)
         else:
             self.W = None
-            self.init_list = []
-            self.goal_list = []
+            self.init_list = list()
+            self.goal_list = list()
         self.prefix = prefix
         self.offset = (0, 0)
 
@@ -301,7 +301,7 @@ class GridWorld:
 
         # Similar to depth-first search
         OPEN = [start]
-        CLOSED = []
+        CLOSED = list()
         while len(OPEN) > 0:
             current = OPEN.pop()
             if current == stop:
@@ -540,8 +540,8 @@ class GridWorld:
         # 1 - statically (permanently) occupied.
         ###################################################
         W = None
-        init_list = []
-        goal_list = []
+        init_list = list()
+        goal_list = list()
         row_index = -1
         for line in gw_desc.splitlines():
             if row_index != -1:
@@ -720,7 +720,7 @@ class GridWorld:
                                       offset[0] +
                                       self.W.shape[1] * side_lengths[0]],
                                      dtype=np.float64))
-        cells = {}
+        cells = dict()
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
                 if nonbool:
@@ -783,7 +783,7 @@ class GridWorld:
         row_high = self.W.shape[0]
         col_low = 0
         col_high = self.W.shape[1]
-        spec_trans = []
+        spec_trans = list()
         orig_offset = copy.copy(self.offset)
         if nonbool:
             self.offset = (0, 0)
@@ -837,9 +837,9 @@ class GridWorld:
         if not nonbool:
             pos_indices = [k for k in itertools.product(
                 range(row_low, row_high), range(col_low, col_high))]
-            disj = []
+            disj = list()
             for outer_ind in pos_indices:
-                conj = []
+                conj = list()
                 if (
                         outer_ind != (-1, -1) and
                         self.W[outer_ind[0]][outer_ind[1]] == 1):
@@ -884,7 +884,7 @@ class GridWorld:
             initspec = [self.__getitem__(loc, nonbool=nonbool)
                         for loc in self.init_list]
         else:
-            initspec = []
+            initspec = list()
             for loc in self.init_list:
                 mutex = [self.__getitem__((loc[0], loc[1]), nonbool=nonbool)]
                 mutex.extend([f"!{ovar}" for ovar in sys_vars if ovar !=
@@ -892,7 +892,7 @@ class GridWorld:
                 initspec.append("(" + " && ".join(mutex) + ")")
         init_str = " || ".join(initspec)
 
-        spec_goal = []
+        spec_goal = list()
         for loc in self.goal_list:
             spec_goal.append(self.__getitem__(loc, nonbool=nonbool))
 
@@ -923,8 +923,8 @@ class GridWorld:
         """
         shape_scaled = (self.W.shape[0] * yf, self.W.shape[1] * xf)
         scaleW = np.zeros(shape_scaled, dtype=np.int32)
-        scale_goal = []
-        scale_init = []
+        scale_goal = list()
+        scale_init = list()
         for row in range(shape_scaled[0]):
             for col in range(shape_scaled[1]):
                 (y, x) = (row // yf, col // xf)
@@ -981,9 +981,9 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     if ensure_feasible and timeout is not None:
         st = time.time()
     num_cells = size[0] * size[1]
-    goal_list = []
-    init_list = []
-    troll_list = []
+    goal_list = list()
+    init_list = list()
+    troll_list = list()
     W = np.zeros(num_cells, dtype=np.int32)
     num_blocks = int(np.round(wall_density * num_cells))
     for i in range(num_goals):
@@ -1155,10 +1155,10 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
              (dynamic obstacle).  If get_moves_lists is False, then
              moves_N is not returned and not computed.
     """
-    X = []
+    X = list()
     X_ID = -1
     if get_moves_lists:
-        moves_N = []
+        moves_N = list()
     (num_rows, num_cols) = Y.size()
     for (center, radius) in troll_list:
         if (
@@ -1182,7 +1182,7 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
         X[-1][1].goal_list = [(center[0] - t_offset[0],
                                center[1] - t_offset[1])]
         if start_anywhere:
-            X[-1][1].init_list = []
+            X[-1][1].init_list = list()
             for i in range(X[-1][1].size()[0]):
                 for j in range(X[-1][1].size()[1]):
                     if X[-1][1].is_empty((i, j)):
@@ -1302,8 +1302,8 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
             fig.savefig(save_prefix + "%03d.png" % num)
         return lines,
 
-    data = []
-    lines = []
+    data = list()
+    lines = list()
     for n, path in enumerate(paths):
         arr = np.array([[x, y] for (y, x) in path]).transpose()
         arr = np.add(arr, jitter * (np.random.rand(*arr.shape) - 0.5))

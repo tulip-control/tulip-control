@@ -65,7 +65,7 @@ class basic_test:
 
     def test_check_realizable(self):
         assert not self.check_realizable(self.f_un)
-        self.f_un.sys_safety = []
+        self.f_un.sys_safety = list()
         assert self.check_realizable(self.f_un)
         assert self.check_realizable(self.dcounter)
 

@@ -9,9 +9,9 @@ import numpy as np
 def prop2part_test():
     state_space = pc.Polytope.from_box(np.array([[0., 2.],[0., 2.]]))
 
-    cont_props = []
-    A = []
-    b = []
+    cont_props = list()
+    A = list()
+    b = list()
 
     A.append(np.array([[1., 0.],
                        [-1., 0.],

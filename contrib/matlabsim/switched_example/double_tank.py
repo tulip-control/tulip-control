@@ -57,7 +57,7 @@ cont_ss = pc.Polytope(
     np.array([tank_capacity, 0, tank_capacity, 0])
 )
 
-cont_props = {}
+cont_props = dict()
 cont_props['no_refuel'] = pc.Polytope(
     np.array([[1,0],
               [-1,0],
@@ -144,7 +144,7 @@ ppp, new2old = abstract.part2convex(ppp)
 
 """Discretize to establish transitions"""
 
-disc_params = {}
+disc_params = dict()
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
 disc_params[('refuel', 'fly')] = {'N':N, 'trans_length':3}
 

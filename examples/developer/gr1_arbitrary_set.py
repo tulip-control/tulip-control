@@ -12,7 +12,7 @@ from tulip import transys as trs
 env_vars = {'park'}
 env_prog = '!park'
 
-sys_vars = {}
+sys_vars = dict()
 sys_vars['loc'] = ['a', 'b', 'c', 'd', 'e', 'foo']
 
 sys_init = {'loc= "a"'}

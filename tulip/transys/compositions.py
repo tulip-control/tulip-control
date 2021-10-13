@@ -116,8 +116,8 @@ def synchronous_parallel(models, transition_attr_operations={}):
     # * prod_states = [S_1, ..., S_n] where S_i is the set of states of K_i
     # * prod_initials = [I_1, ..., I_n] where I_i is the set of initial
     #   states of K_i
-    prod_states = []
-    prod_initials = []
+    prod_states = list()
+    prod_initials = list()
     #
     # Construct prod_states and prod_initials and
     # construct the composed model ts with all the atomic propositions.
@@ -225,7 +225,7 @@ def _get_transition_attr(trans_prod, transition_attr_operations):
         For an attribute whose operation is not specified,
         a tuple of attribute values from all models will be used.
     """
-    trans_attr = {}
+    trans_attr = dict()
     for idx, trans in enumerate(trans_prod):
         for trans_attr_key, trans_attr_value in trans[2].items():
             if trans_attr_key not in trans_attr:

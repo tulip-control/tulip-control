@@ -76,7 +76,7 @@ def get_action_map(stormpy_model, tulip_transys):
         the string representation of an action of `stormpy_model`
         and value is the corresponding action of `tulip_transys`
     """
-    action_map = {}
+    action_map = dict()
     for from_state_stormpy in stormpy_model.states:
         from_state_tulip = to_tulip_state(
             from_state_stormpy, tulip_transys)
@@ -243,13 +243,13 @@ def to_prism_file(ts, path):
     # indicating the transition probability
     # from state s to to_state under action a.
     def get_transition_dict(state_transitions):
-        transition_dict = {}
+        transition_dict = dict()
         for transition in state_transitions:
             action = transition[2].get(MDP.action_label, None)
             if action is None:
                 action = 0
             if action not in transition_dict:
-                transition_dict[action] = []
+                transition_dict[action] = list()
             transition_dict[action].append(
                 (transition[2].get(MC.probability_label),
                  transition[1]))
@@ -282,7 +282,7 @@ def to_prism_file(ts, path):
     # and whose value is a list of state such that the atomic proposition]
     # is in its state labels.
     def get_label_dict():
-        label_dict = {}
+        label_dict = dict()
         for label in ts.atomic_propositions:
             label_dict[label] = [
                 state for state in ts.states

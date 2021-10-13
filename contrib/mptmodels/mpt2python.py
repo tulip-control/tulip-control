@@ -21,7 +21,7 @@ def load(filename):
 
     elif ispwa:
         nlti = len(data['A'][0])
-        lti_systems = []
+        lti_systems = list()
 
         for i in range(nlti):
             A = data['A'][0][i]

@@ -87,13 +87,13 @@ def prop2part(state_space, cont_props_dict):
         by propositions
     @rtype: `PropPreservingPartition`
     """
-    first_poly = [] #Initial Region's polytopes
+    first_poly = list()  # Initial Region's polytopes
     first_poly.append(state_space)
     regions = [pc.Region(first_poly)]
     for cur_prop in cont_props_dict:
         cur_prop_poly = cont_props_dict[cur_prop]
         num_reg = len(regions)
-        prop_holds_reg = []
+        prop_holds_reg = list()
         for i in range(num_reg): #i region counter
             region_now = regions[i].copy()
             #loop for prop holds
@@ -162,7 +162,7 @@ def part2convex(ppp):
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
         prop_regions=copy.deepcopy(ppp.prop_regions))
-    new2old = []
+    new2old = list()
     for i in range(len(ppp.regions)):
         simplified_reg = pc.union(
             ppp.regions[i],
@@ -220,9 +220,9 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     # for each subsystem's domain, cut it into pieces
     # each piece is the intersection with
     # a unique Region in ppp.regions
-    new_list = []
-    subsys_list = []
-    parents = []
+    new_list = list()
+    subsys_list = list()
+    parents = list()
     for i, subsys in enumerate(pwa_sys.list_subsys):
         for j, region in enumerate(ppp.regions):
             isect = region.intersect(subsys.domain)
@@ -372,8 +372,8 @@ def add_grid(
                 re_list = product_interval(
                     re_list, list_grid[j])
         j += 1
-    new_list = []
-    parent = []
+    new_list = list()
+    parent = list()
     for i in range(len(re_list)):
         temp_list = list()
         j = 0
