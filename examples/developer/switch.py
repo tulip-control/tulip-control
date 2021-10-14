@@ -8,9 +8,10 @@ Simple example with uncontrolled switching, for debugging
      | 0 | 1 | 2 |
      +---+---+---+
 """
-from tulip import spec, synth, transys
 import numpy as np
 from scipy import sparse as sp
+from tulip import spec, synth, transys
+
 
 sys_swe = transys.FTS()
 sys_swe.env_actions.add_from({'sun', 'rain'})

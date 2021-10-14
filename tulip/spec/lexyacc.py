@@ -37,8 +37,10 @@ the module `tulip.spec.ast`.
 """
 import logging
 import warnings
+
 import ply.lex
 import ply.yacc
+
 import tulip.spec.ast
 
 

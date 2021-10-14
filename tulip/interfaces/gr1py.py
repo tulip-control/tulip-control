@@ -35,9 +35,10 @@
 <https://github.com/slivingston/gr1py>
 """
 import logging
-from tulip.spec import translate
+
 from tulip.interfaces.gr1c import load_aut_json
 from tulip.interfaces.gr1c import select_options
+from tulip.spec import translate
 try:
     import gr1py
     import gr1py.cli

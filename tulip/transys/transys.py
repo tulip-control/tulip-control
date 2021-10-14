@@ -33,12 +33,13 @@
 from collections.abc import Iterable
 import logging
 from pprint import pformat
+
+from networkx import MultiDiGraph
+import numpy as np
+from tulip.transys.cost import ValidTransitionCost
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import PowerSet, MathSet
-from tulip.transys.cost import ValidTransitionCost
-from networkx import MultiDiGraph
-import numpy as np
 # inline imports
 #
 # from tulip.transys.export import graph2promela

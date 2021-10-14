@@ -40,7 +40,6 @@ Example usage:
 
 SCL; 3 Sep 2013
 """
-
 import sys
 from pyparsing import * #Literal, Forward, Word, alphanums, alphas
 

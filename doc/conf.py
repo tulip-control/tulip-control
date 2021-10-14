@@ -10,8 +10,10 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+#
+import os
+import sys
 
-import sys, os
 
 # Make tulip package contents visible
 sys.path.append(os.path.abspath('..'))

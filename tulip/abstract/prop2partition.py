@@ -33,16 +33,16 @@
 """
 Proposition preserving partition module.
 """
+import copy
 import logging
 import warnings
-import copy
 
 import numpy as np
-from scipy import sparse as sp
 import polytope as pc
 from polytope.plot import plot_partition
+import scipy.sparse as sp
 
-from tulip import transys as trs
+import tulip.transys as trs
 
 # inline imports:
 #

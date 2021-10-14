@@ -10,8 +10,9 @@ is a Mealy machine.  Example usage for 3 by 5 size is
   $ ./solverand.py 3 5
 """
 import sys
-import tulip.gridworld as gw
+
 from tulip import synth
+import tulip.gridworld as gw
 
 
 if len(sys.argv) > 3 or "-h" in sys.argv:

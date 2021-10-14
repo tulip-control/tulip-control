@@ -4,7 +4,6 @@ Regression tests for spin2dstar.py
 
 SCL; 1 Sep 2013
 """
-
 import sys
 
 import pytest

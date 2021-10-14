@@ -11,8 +11,8 @@
 # * graph_algorithm_test(): a unit test for tulip.transys.graph_algorithms module
 # * mvp_test(): an integration test for minimum-violation planning based
 #   on the EECI 2020 computer lab.
-
 import copy
+
 from tulip.transys.cost import VectorCost
 from tulip.transys import WeightedKripkeStructure as WKS
 from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA

@@ -22,7 +22,9 @@ support for nonboolean domains is used.
 """
 from os import environ as os_environ
 import sys
+
 import tulip.gridworld as gw
+
 
 if "TULIP_REGRESS" in os_environ:
     import numpy

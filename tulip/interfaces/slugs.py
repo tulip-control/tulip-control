@@ -35,11 +35,12 @@ Relevant links:
 - [slugs](https://github.com/LTLMoP/slugs)
 """
 import errno
-import logging
 import json
+import logging
 import os
 import subprocess
 import tempfile
+
 import networkx as nx
 from tulip.spec import GRSpec, translate
 

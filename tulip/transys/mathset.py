@@ -31,11 +31,11 @@
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets."""
 from collections.abc import Iterable, Hashable, Container
-import logging
-import warnings
 from itertools import chain, combinations
+import logging
 from pprint import pformat
 from random import randint
+import warnings
 
 
 __all__ = [

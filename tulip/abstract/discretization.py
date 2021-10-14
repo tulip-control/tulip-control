@@ -45,18 +45,24 @@ from copy import deepcopy
 import multiprocessing as mp
 
 import numpy as np
-from scipy import sparse as sp
+import scipy.sparse as sp
 import polytope as pc
 
-from polytope.plot import plot_partition, plot_transition_arrow
-from tulip import transys as trs
-from tulip.hybrid import LtiSysDyn, PwaSysDyn
-
-from .prop2partition import (PropPreservingPartition,
-                             pwa_partition, part2convex)
-from .feasible import is_feasible, solve_feasible
-from .plot import plot_ts_on_partition
-
+from polytope.plot import (
+    plot_partition,
+    plot_transition_arrow)
+import tulip.transys as trs
+from tulip.hybrid import (
+    LtiSysDyn,
+    PwaSysDyn)
+from tulip.abstract.prop2partition import (
+    PropPreservingPartition,
+    pwa_partition,
+    part2convex)
+from tulip.abstract.feasible import (
+    is_feasible,
+    solve_feasible)
+from tulip.abstract.plot import plot_ts_on_partition
 # inline imports:
 #
 # inline: import matplotlib.pyplot as plt

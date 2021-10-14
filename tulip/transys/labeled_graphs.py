@@ -31,10 +31,11 @@
 # SUCH DAMAGE.
 """Base classes for labeled directed graphs"""
 from collections.abc import Iterable
+import copy
 import logging
 import os
-import copy
 from pprint import pformat
+
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:

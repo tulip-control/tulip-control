@@ -5,9 +5,9 @@ Two examples for arbitrary finite domains:
     - one with arbitrary (unnumbered) sys TS states
 """
 # will probably need also a flag which type to use
-
 from tulip import spec, synth
 from tulip import transys as trs
+
 
 env_vars = {'park'}
 env_prog = '!park'

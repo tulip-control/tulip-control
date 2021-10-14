@@ -9,9 +9,10 @@ run ../continuous.py
 run -i test_get_input.py
 ```
 """
-from tulip.abstract import get_input, find_discrete_state
-from polytope import is_inside
 import numpy as np
+from polytope import is_inside
+from tulip.abstract import get_input, find_discrete_state
+
 
 def integrate(sys_dyn, x0, u_seq):
     # is the continuous transition correct ?

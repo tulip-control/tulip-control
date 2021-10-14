@@ -31,13 +31,14 @@
 # SUCH DAMAGE.
 """Automata Module."""
 from collections.abc import Iterable
-import logging
 import copy
+import logging
 from pprint import pformat
+
+from tulip.transys.cost import ValidTransitionCost
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)
 from tulip.transys.mathset import SubSet, PowerSet
-from tulip.transys.cost import ValidTransitionCost
 from tulip.transys.transys import GameGraph
 
 

@@ -44,15 +44,16 @@ interacting with the `gr1c` executable.
 
 Use the `logging` module to throttle verbosity.
 """
-import errno
-from pkg_resources import parse_version
-import logging
 import copy
+import errno
+import json
+import logging
 import os
+from pkg_resources import parse_version
 import subprocess
 import tempfile
-import json
 import xml.etree.ElementTree as ET
+
 import networkx as nx
 from tulip.spec import GRSpec, translate
 

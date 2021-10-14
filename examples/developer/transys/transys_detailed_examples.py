@@ -32,11 +32,12 @@
 """
 Transition System module developer examples
 """
-from scipy.sparse import lil_matrix
-from numpy.random import rand
 import networkx as nx
+from numpy.random import rand
+from scipy.sparse import lil_matrix
 import tulip.transys as trs
 import warnings
+
 
 hl = 60*'='
 save_fig = False

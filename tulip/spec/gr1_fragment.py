@@ -47,10 +47,12 @@ reference
 import logging
 
 import networkx as nx
+
 from tulip.spec import lexyacc, GRSpec
 from tulip.spec import transformation as tx
 from tulip.spec import parser
 from tulip.spec import ast as sast
+import tulip.transys as trs
 
 
 __all__ = [

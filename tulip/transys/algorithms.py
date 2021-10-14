@@ -30,16 +30,18 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Algorithms on Kripke structures and Automata."""
-import logging
 import copy
-from tulip.transys.transys import FiniteTransitionSystem
-from tulip.transys.automata import BuchiAutomaton
+import logging
+
 import networkx as nx
+
 from tulip.interfaces import ltl2ba as ltl2baint
+from tulip.transys.automata import BuchiAutomaton
+from tulip.transys.labeled_graphs import LabeledDiGraph
+from tulip.transys.transys import FiniteTransitionSystem
 # possible future:
 # from tulip.transys.transys import TransitionSystem
 # from tulip.transys.automata import Automaton
-from tulip.transys.labeled_graphs import LabeledDiGraph
 
 
 __all__ = [

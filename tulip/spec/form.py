@@ -38,11 +38,12 @@ Also, those modules are for manipulating expressions.
 This module knows about program structure,
 namely the sections of a specification file.
 """
+import copy
 import logging
 import pprint
 import time
 import re
-import copy
+
 from tulip.spec import parser
 from tulip.spec import transformation as tx
 from tulip.spec import translation as ts
