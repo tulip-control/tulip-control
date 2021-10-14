@@ -29,9 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Convert labeled graph to dot, with custom filtering
-"""
-
+"""Convert labeled graph to GraphViz DOT, with custom filtering."""
 from collections.abc import Iterable
 import io
 import logging

@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Specification subpackage of TuLiP"""
+"""Specification subpackage of TuLiP."""
 from . import form
 from .form import *
 from . import gr1_fragment

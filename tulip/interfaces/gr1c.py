@@ -29,8 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Interface to `gr1c`.
+"""Interface to `gr1c`.
 
 - <http://scottman.net/2012/gr1c>
 - release documentation at

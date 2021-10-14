@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Tests for transys.labeled_graphs (part of transys subpackage)"""
+"""Tests for transys.labeled_graphs (part of transys subpackage)."""
 import pytest
 from tulip.transys import labeled_graphs
 from tulip.transys.mathset import PowerSet, MathSet

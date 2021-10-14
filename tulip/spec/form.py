@@ -29,7 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Formulae constituting specifications
+"""Formulae constituting specifications.
 
 what this module adds to the pure syntactic manipulations of
 `transformation` is a variable table, with game semantics in particular.

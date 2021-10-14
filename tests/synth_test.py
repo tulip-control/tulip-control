@@ -1,6 +1,4 @@
-"""
-Tests for the tulip.synth module.
-"""
+"""Tests for the tulip.synth module."""
 import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)

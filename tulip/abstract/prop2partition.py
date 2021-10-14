@@ -30,9 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""
-Proposition preserving partition module.
-"""
+"""Proposition-preserving partition module."""
 import copy
 import logging
 import warnings

@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for the interface with Lily.
-"""
+"""Tests for the interface with Lily."""
 import pytest
 from tulip.spec.form import LTL, GRSpec
 from tulip.interfaces import lily

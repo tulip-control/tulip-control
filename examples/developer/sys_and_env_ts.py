@@ -1,5 +1,4 @@
-"""
-example to illustrate the combined use of
+"""Example to illustrate the combined use of
 an environment and a system transition system.
 """
 import logging

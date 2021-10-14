@@ -30,8 +30,10 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-"""
-Check Linear Discrete-Time-Invariant System reachability between polytopes
+"""Reachability between polytopes.
+
+Functions to check reachability between polytopes,
+for linear discrete-time and time-invariant system.
 
 Primary functions:
 - `solve_feasible`

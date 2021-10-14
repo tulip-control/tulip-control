@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 
-"""A module for defining functions"""
+"""A module for defining functions."""
 from collections.abc import Iterable
 import json
 

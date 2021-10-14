@@ -30,8 +30,7 @@
 # IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-"""
-Algorithms related to discretization of continuous dynamics.
+"""Algorithms related to discretization of continuous dynamics.
 
 See Also
 ========

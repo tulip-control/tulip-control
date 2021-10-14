@@ -29,9 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""
-Transition System module developer examples
-"""
+"""Transition System module developer examples."""
 import networkx as nx
 from numpy.random import rand
 from scipy.sparse import lil_matrix
@@ -44,8 +42,7 @@ save_fig = False
 
 
 def fts_maximal_example():
-    """Finite-Transition System demo.
-    """
+    """Finite-Transition System demo."""
 
     print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
     fts = trs.FiniteTransitionSystem()
@@ -246,8 +243,7 @@ def fts_maximal_example():
         #fts.save(dot_fname, 'dot')
 
 def ba_maximal_example():
-    """Buchi Automaton demo.
-    """
+    """Buchi Automaton demo."""
     print(hl +'\nBuchi Automaton\n' +hl)
     ba = trs.BuchiAutomaton(atomic_proposition_based=True)
 
@@ -342,8 +338,7 @@ def scipy_sparse_labeled_adj():
     return ofts
 
 def label_per_state():
-    """Add states with (possibly) different AP labels each.
-    """
+    """Add states with (possibly) different AP labels each."""
     fts = trs.FTS()
     fts.states.add_from(['s0', 's1'] )
     fts.atomic_propositions.add('p')

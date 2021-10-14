@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""
-Tests for abstract.prop2partition
-"""
+"""Tests for abstract.prop2partition."""
 from tulip.abstract import prop2part
 import polytope as pc
 import numpy as np
