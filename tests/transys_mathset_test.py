@@ -2,10 +2,7 @@
 """
 Tests for transys.mathset (part of transys subpackage)
 """
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
+from collections.abc import Iterable
 
 import pytest
 from tulip.transys.mathset import MathSet, SubSet, PowerSet, TypedDict

@@ -43,13 +43,9 @@ Relevant
 ========
 `find_controller`
 """
+from collections.abc import Iterable
 import logging
 logger = logging.getLogger(__name__)
-
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 
 import numpy as np
 import polytope as pc

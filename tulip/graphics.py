@@ -42,10 +42,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from warnings import warn
-try:
-    from itertools import zip_longest as izip_longest
-except ImportError:
-    from itertools import izip_longest
+from itertools import zip_longest as izip_longest
 
 import numpy as np
 

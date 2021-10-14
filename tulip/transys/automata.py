@@ -30,12 +30,9 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Automata Module."""
+from collections.abc import Iterable
 import logging
 import copy
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 from pprint import pformat
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)

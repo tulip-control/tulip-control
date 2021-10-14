@@ -30,13 +30,10 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets."""
+from collections.abc import Iterable, Hashable, Container
 import logging
 import warnings
 from itertools import chain, combinations
-try:
-    from collections.abc import Iterable, Hashable, Container
-except ImportError:
-    from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 

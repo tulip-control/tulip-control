@@ -30,14 +30,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Base classes for labeled directed graphs"""
+from collections.abc import Iterable
 import logging
 import os
 import copy
 from pprint import pformat
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:

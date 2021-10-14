@@ -40,12 +40,9 @@ Do not include file extensions.
 Written by Robert Rogersten during SURF June 2012,
 Co-mentors Mumu Xu, Necmiye Ozay and Ufuk Topcu.
 """
+import queue as _queue
 
 import re, copy, os, sys
-try:
-    import queue as _queue
-except ImportError:
-    import Queue as _queue
 
 
 class AutomatonState:
