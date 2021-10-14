@@ -32,7 +32,6 @@
 #
 """Functions for plotting Partitions."""
 import logging
-logger = logging.getLogger(__name__)
 
 import networkx as nx
 import numpy as np
@@ -57,6 +56,9 @@ __all__ = [
     'project_strategy_on_partition',
     'plot_strategy',
     'plot_trajectory']
+
+
+logger = logging.getLogger(__name__)
 
 
 def plot_abstraction_scc(ab, ax=None):

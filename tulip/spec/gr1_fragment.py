@@ -45,7 +45,6 @@ reference
    http://doi.org/10.4204/EPTCS.50.3
 """
 import logging
-logger = logging.getLogger(__name__)
 
 import networkx as nx
 from tulip.spec import lexyacc, GRSpec
@@ -63,6 +62,9 @@ __all__ = [
     'response_to_gr1',
     'eventually_to_gr1',
     'until_to_gr1']
+
+
+logger = logging.getLogger(__name__)
 
 
 def check(formula):

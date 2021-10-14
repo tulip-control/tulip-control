@@ -3,11 +3,16 @@ example to illustrate the combined use of
 an environment and a system transition system.
 """
 import logging
-logging.basicConfig(filename='sys_and_env_ts.log',
-                    level=logging.DEBUG, filemode='w')
-logger = logging.getLogger(__name__)
 
 from tulip import transys, spec, synth
+
+
+logging.basicConfig(
+    filename='sys_and_env_ts.log',
+    level=logging.DEBUG,
+    filemode='w')
+logger = logging.getLogger(__name__)
+
 
 # the system's spatial layout:
 #     +----+----+----+

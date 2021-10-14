@@ -39,7 +39,6 @@ This module knows about program structure,
 namely the sections of a specification file.
 """
 import logging
-logger = logging.getLogger(__name__)
 import pprint
 import time
 import re
@@ -53,6 +52,9 @@ __all__ = [
     'LTL',
     'GRSpec',
     'replace_dependent_vars']
+
+
+logger = logging.getLogger(__name__)
 
 
 class LTL:

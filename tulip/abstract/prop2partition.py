@@ -34,7 +34,6 @@
 Proposition preserving partition module.
 """
 import logging
-
 import warnings
 import copy
 

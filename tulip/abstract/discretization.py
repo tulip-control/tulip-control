@@ -38,8 +38,6 @@ See Also
 `find_controller`
 """
 import logging
-logger = logging.getLogger(__name__)
-
 import os
 import warnings
 import pprint
@@ -72,6 +70,8 @@ __all__ = [
     'multiproc_discretize',
     'multiproc_discretize_switched']
 
+
+logger = logging.getLogger(__name__)
 debug = False
 
 class AbstractSwitched:

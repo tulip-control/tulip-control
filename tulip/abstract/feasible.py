@@ -45,7 +45,6 @@ Relevant
 """
 from collections.abc import Iterable
 import logging
-logger = logging.getLogger(__name__)
 
 import numpy as np
 import polytope as pc
@@ -54,6 +53,9 @@ import polytope as pc
 __all__ = [
     'is_feasible',
     'solve_feasible']
+
+
+logger = logging.getLogger(__name__)
 
 
 def is_feasible(
