@@ -15,20 +15,19 @@ logging.getLogger('omega').setLevel('ERROR')
 
 class basic_test:
     def setup_method(self):
-        self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
-                                env_init="x & y", env_prog="x",
-                                sys_init="y", sys_prog="y && x")
+        self.triv = spec.GRSpec(
+            env_vars="x", sys_vars="y",
+            env_init="x & y", env_prog="x",
+            sys_init="y", sys_prog="y && x")
         self.triv.qinit = r'\E \A'
         self.triv_M = synth.synthesize(
             self.triv, solver='omega')
-
         self.dcounter = spec.GRSpec(
             sys_vars={"y": (0, 5)},
             env_init=['y = 0'],
             sys_prog=["y=0", "y=5"])
         self.dcounter_M = synth.synthesize(
             self.dcounter, solver='omega')
-
         self.enumf = spec.GRSpec(
             sys_vars={'y': ['a', 'b']},
             env_init=['y="a"'],
@@ -62,8 +61,12 @@ def test_nx():
     g.add_edge(1, 2, a=1, b=0, c=1, d=1)
     print(dumpsmach.python_case(g, classname='Machine', start='Sinit'))
     exe_globals = dict()
-    exec(dumpsmach.python_case(g, classname='Machine', start='Sinit'), exe_globals)
-    m = exe_globals['Machine']()  # previous line creates the class `Machine`
+    exec(
+        dumpsmach.python_case(
+            g, classname='Machine', start='Sinit'),
+        exe_globals)
+    m = exe_globals['Machine']()
+        # previous line creates the class `Machine`
     # Sinit -> 0
     out = m.move(a=0, b=0)
     assert out == dict(c=0, d=0)
