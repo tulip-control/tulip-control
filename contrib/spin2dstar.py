@@ -41,7 +41,8 @@ Example usage:
 SCL; 3 Sep 2013
 """
 import sys
-from pyparsing import * #Literal, Forward, Word, alphanums, alphas
+
+import pyparsing as prs
 
 
 SPIN_SYN = {"&": "&&",
@@ -119,28 +120,35 @@ def push_ident(toks):
 
 
 def spin_to_AST(inform):
-    spin_G = Literal(SPIN_SYN["[]"])
-    spin_F = Literal(SPIN_SYN["<>"])
-    spin_X = Literal(SPIN_SYN["X"])
-    spin_U = Literal(SPIN_SYN["U"])
-    spin_negate = Literal(SPIN_SYN["!"])
-    spin_and = Literal(SPIN_SYN["&"])
-    spin_or = Literal(SPIN_SYN["|"])
-    spin_implies = Literal(SPIN_SYN["->"])
-    spin_equiv = Literal(SPIN_SYN["<->"])
+    spin_G = prs.Literal(SPIN_SYN["[]"])
+    spin_F = prs.Literal(SPIN_SYN["<>"])
+    spin_X = prs.Literal(SPIN_SYN["X"])
+    spin_U = prs.Literal(SPIN_SYN["U"])
+    spin_negate = prs.Literal(SPIN_SYN["!"])
+    spin_and = prs.Literal(SPIN_SYN["&"])
+    spin_or = prs.Literal(SPIN_SYN["|"])
+    spin_implies = prs.Literal(SPIN_SYN["->"])
+    spin_equiv = prs.Literal(SPIN_SYN["<->"])
 
-    identifier = Word(alphas+"_", alphanums+"_")
+    identifier = prs.Word(
+        prs.alphas + "_",
+        prs.alphanums + "_")
 
-    form = Forward()
-    unary_or_less = Forward()
+    form = prs.Forward()
+    unary_or_less = prs.Forward()
     unary_or_less << ((spin_negate + unary_or_less).setParseAction(push_op)
                       | (spin_X + unary_or_less).setParseAction(push_op)
                       | (spin_G + unary_or_less).setParseAction(push_op)
                       | (spin_F + unary_or_less).setParseAction(push_op)
                       | identifier.setParseAction(push_ident)
-                      | (Suppress("(") + form + Suppress(")")))
-    form << ((unary_or_less + ZeroOrMore(((spin_U | spin_and | spin_or | spin_implies | spin_equiv) + form).setParseAction(push_op)))
-             | unary_or_less)
+                      | (prs.Suppress("(") + form + prs.Suppress(")")))
+    form << ((unary_or_less + prs.ZeroOrMore(
+        ((spin_U
+         | spin_and
+         | spin_or
+         | spin_implies
+         | spin_equiv) + form).setParseAction(push_op)))
+         | unary_or_less)
 
     form.parseString(inform, parseAll=True)
 
