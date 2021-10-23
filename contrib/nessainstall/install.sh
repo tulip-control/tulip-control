@@ -314,7 +314,7 @@ else
 	fi
 	cd cvxopt
 
-	python setup.py install
+	pip install .
 fi
 
 #------------------------------------------------------------
@@ -331,7 +331,7 @@ else
 		git clone https://github.com/tulip-control/polytope.git
 	fi
 	cd polytope
-	python setup.py install
+	pip install .
 fi
 
 #------------------------------------------------------------
@@ -348,7 +348,7 @@ cd tulip-control
 if [ "$tulip_develop" = "true" ]; then
 	python setup.py develop
 else
-	python setup.py install
+    pip install .
 fi
 python run_tests.py --fast
 
