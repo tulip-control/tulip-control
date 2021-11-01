@@ -126,7 +126,6 @@ def run_setup():
         tests_require=[
             'matplotlib >= 2.0.0',
             'gr1py >= 0.2.0',
-            'mock',
             'pytest',
             'setuptools >= 39.0.0'],
         packages=[

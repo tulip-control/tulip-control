@@ -154,7 +154,6 @@ jobs:
             - name: Install Python requirements for development testing
               run: |
                 pip install gitpython
-                pip install mock
             - name: Install `stormpy` and its dependencies
               run: |
                 ./extern/get-stormpy.sh

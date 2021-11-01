@@ -12,8 +12,5 @@ gr1py>=0.2.0
     # package `polytope` that is installed.
 # matplotlib  # for plots
 
-# tests
-mock
-
 # dev
 gitpython==3.1.41

@@ -7,9 +7,9 @@ import importlib
 import os
 import os.path
 import sys
+import unittest.mock as mock
 
 import git
-import mock
 import pkg_resources
 from pkg_resources.extern import packaging
 import pytest
