@@ -902,7 +902,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         return attr_dict
 
     def add_node(
-            self, n,
+            self, node_for_adding,
             attr_dict=None,
             check=True,
             **attr):
@@ -927,10 +927,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self._check_for_untyped_keys(typed_attr,
                                      self._node_label_types,
                                      check)
-        nx.MultiDiGraph.add_node(self, n, **typed_attr)
+        nx.MultiDiGraph.add_node(self, node_for_adding, **typed_attr)
 
     def add_nodes_from(
-            self, nodes,
+            self, nodes_for_adding,
             check=True,
             **attr):
         """Create or label multiple nodes.
@@ -938,7 +938,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Overrides C{networkx.MultiDiGraph.add_nodes_from},
         for details see that and L{LabeledDiGraph.add_node}.
         """
-        for n in nodes:
+        for n in nodes_for_adding:
             try:
                 n not in self._succ
                 node = n
@@ -950,7 +950,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self.add_node(node, attr_dict=attr_dict, check=check)
 
     def add_edge(
-            self, u, v,
+            self, u_for_edge, v_for_edge,
             key=None,
             attr_dict=None,
             check=True,
@@ -960,9 +960,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Overrides C{networkx.MultiDiGraph.add_edge},
         see that for details.
 
-          - Raise ValueError if C{u} or C{v} are not already nodes.
-          - Raise Exception if edge (u, v, {}) exists.
-          - Log warning if edge (u, v, attr_dict) exists.
+          - Raise ValueError if C{u_for_edge} or C{v_for_edge}
+            are not already nodes.
+          - Raise Exception if edge (u_for_edge, v_for_edge, {}) exists.
+          - Log warning if edge (u_for_edge, v_for_edge, attr_dict) exists.
           - Raise ValueError if C{attr_dict} contains
             typed key with invalid value.
           - Raise AttributeError if C{attr_dict} contains untyped keys,
@@ -990,10 +991,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 'firstly add the new nodes.')
             logger.warning(msg)
         # check nodes exist
-        if u not in self._succ:
-            raise ValueError('Graph does not have node u: ' + str(u))
-        if v not in self._succ:
-            raise ValueError('Graph does not have node v: ' + str(v))
+        if u_for_edge not in self._succ:
+            raise ValueError('Graph does not have node u: ' + str(u_for_edge))
+        if v_for_edge not in self._succ:
+            raise ValueError('Graph does not have node v: ' + str(v_for_edge))
         attr_dict = self._update_attr_dict_with_attr(attr_dict, attr)
         # define typed dict
         typed_attr = TypedDict()
@@ -1001,13 +1002,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
         typed_attr.update(copy.deepcopy(self._edge_label_defaults))
         # type checking happens here
         typed_attr.update(attr_dict)
-        existing_u_v = self.get_edge_data(u, v, default={})
+        existing_u_v = self.get_edge_data(
+            u_for_edge, v_for_edge, default={})
         if dict() in existing_u_v.values():
             msg = (
                 'Unlabeled transition: '
                 'from_state-> to_state already exists,\n'
-                'where:\t from_state = ' + str(u) + '\n'
-                'and:\t to_state = ' + str(v) + '\n')
+                'where:\t from_state = ' + str(u_for_edge) + '\n'
+                'and:\t to_state = ' + str(v_for_edge) + '\n')
             raise Exception(msg)
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
@@ -1015,8 +1017,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 'Same labeled transition:\n'
                 'from_state---[label]---> to_state\n'
                 'already exists, where:\n'
-                '\t from_state = ' + str(u) + '\n'
-                '\t to_state = ' + str(v) + '\n'
+                '\t from_state = ' + str(u_for_edge) + '\n'
+                '\t to_state = ' + str(v_for_edge) + '\n'
                 '\t label = ' + str(typed_attr) + '\n')
             logger.warning(msg)
             return
@@ -1025,17 +1027,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
                                      self._edge_label_types,
                                      check)
         # the only change from nx in this clause is using TypedDict
-        logger.debug('adding edge: ' + str(u) + ' ---> ' + str(v))
+        logger.debug(
+            'adding edge: ' + str(u_for_edge) + ' ---> ' + str(v_for_edge))
         if key is None:
-            key = self.new_edge_key(u, v)
-        if v in self._succ[u]:
-            keydict = self._adj[u][v]
+            key = self.new_edge_key(u_for_edge, v_for_edge)
+        if v_for_edge in self._succ[u_for_edge]:
+            keydict = self._adj[u_for_edge][v_for_edge]
             datadict = keydict.get(key, typed_attr)
             datadict.update(typed_attr)
-            nx.MultiDiGraph.add_edge(self, u, v, key, **datadict)
+            nx.MultiDiGraph.add_edge(
+                self, u_for_edge, v_for_edge, key, **datadict)
         else:
             # selfloops work this way without special treatment
-            nx.MultiDiGraph.add_edge(self, u, v, **typed_attr)
+            nx.MultiDiGraph.add_edge(
+                self, u_for_edge, v_for_edge, **typed_attr)
 
     def add_edges_from(self, labeled_ebunch, attr_dict=None,
                        check=True, **attr):
