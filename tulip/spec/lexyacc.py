@@ -69,7 +69,8 @@ class Lexer(object):
     delimiters = ['LPAREN', 'RPAREN', 'DQUOTES', 'COMMA']
     operators = [
         'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
-        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
+        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE', 'DOUBLE_DOT',
+        'IN_SET', 'NOT_IN_SET',
         'PLUS', 'MINUS', 'TIMES', 'DIV', 'TRUNCATE', 'PRIME']
     misc = ['NAME', 'NUMBER']
 
@@ -117,8 +118,11 @@ class Lexer(object):
 
     t_XOR = r'\^'
 
+    t_IN_SET = r'\\in'
+    t_NOT_IN_SET = r'\notin'
+    t_DOUBLE_DOT = r'\.\.'
     t_EQUALS = r'='  # a declarative language has no assignment
-    
+
     def t_NEQUALS(self, t):
         r'!=|/='
         t.value = '!='
@@ -204,8 +208,10 @@ class Parser(object):
         ('left', 'AND'),
         ('left', 'ALWAYS', 'EVENTUALLY'),
         ('left', 'UNTIL', 'WEAK_UNTIL', 'RELEASE'),
+        ('nonassoc', 'IN_SET', 'NOT_IN_SET'),
         ('left', 'EQUALS', 'NEQUALS'),
         ('left', 'LT', 'LE', 'GT', 'GE'),
+        ('nonassoc', 'DOUBLE_DOT'),
         ('left', 'PLUS', 'MINUS'),
         ('left', 'TIMES', 'DIV'),
         ('right', 'NOT', 'UMINUS'),
@@ -279,12 +285,15 @@ class Parser(object):
         """expr : expr PRIME"""
         p[0] = self.ast.Unary('X', p[1])
 
-    def p_binary_connective(self, p):
+    def p_binary_operator(self, p):
         """expr : expr AND expr
                 | expr OR expr
                 | expr XOR expr
                 | expr IMP expr
                 | expr BIMP expr
+                | expr IN_SET expr
+                | expr NOT_IN_SET expr
+                | expr DOUBLE_DOT expr
                 | expr UNTIL expr
                 | expr WEAK_UNTIL expr
                 | expr RELEASE expr
@@ -310,7 +319,7 @@ class Parser(object):
         """expr : expr TRUNCATE number"""
         p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
 
-    def p_binary_function(self, p):
+    def p_binary_arithmetic_operator(self, p):
         """expr : expr TIMES expr
                 | expr DIV expr
                 | expr PLUS expr
