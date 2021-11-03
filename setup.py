@@ -110,7 +110,8 @@ def run_setup():
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
             'pydot >= 1.2.0',
-            'scipy'],
+            'scipy',
+            'tla'],
         tests_require=[
             'matplotlib >= 2.0.0',
             'gr1py >= 0.2.0',
