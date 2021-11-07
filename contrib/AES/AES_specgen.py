@@ -269,18 +269,18 @@ def ppaths(i,j,G):
     return guarantees
 
 
-def noparallel(G,list):
+def noparallel(G, pairs):
     """Writes non-paralleling specifications to file.
 
     Parameters
     ----------
     G : NetworkX graph
 
-    list : tuples
+    pairs : tuples
        list of all generator pairs with paths in G
 
     """
-    sourcetemp = (all_pairs(list))
+    sourcetemp = (all_pairs(pairs))
     source = all_gens(sourcetemp,G)
     for i in range(0,len(source)):
         mat = ppaths(source[i][0], source[i][1], G)
