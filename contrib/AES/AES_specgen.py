@@ -226,22 +226,19 @@ def _all_pairs(items):
         yield item
 
 
-def all_gens(list,G):
+def all_gens(pairs, G):
     """Finds all generator pairs that are connected through graph.
 
     Parameters
     ----------
     G : NetworkX graph
 
-    list : tuples
+    pairs : tuples
        list of all generator pairs
 
     """
-    pgens = list()
-    for i in range(len(list)):
-        if nx.has_path(G,list[i][0], list[i][1]) is True:
-            pgens.append(list[i])
-    return pgens
+    has_path = lambda p: nx.has_path(G, p[0], p[1])
+    return list(filter(has_path, pairs))
 
 
 def ppaths(i,j,G):
