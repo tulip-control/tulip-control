@@ -213,12 +213,17 @@ def all_pairs(gens):
        list of all generator nodes
 
     """
-    answer = list()
-    for i in range(len(gens)):
-        for j in range(i+1, len(gens)):
-            if (gens[i],gens[j]) not in answer:
-                answer.append((gens[i],gens[j]))
-    return answer
+    items = itertools.combinations(gens, 2)
+    return list(_all_pairs(items))
+
+
+def _all_pairs(items):
+    memo = set()
+    itr = itertools.filterfalse(
+        memo.__contains__, items)
+    for item in itr:
+        memo.add(item)
+        yield item
 
 
 def all_gens(list,G):
