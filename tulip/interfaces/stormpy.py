@@ -379,15 +379,18 @@ def model_checking(
     to_prism_file(tulip_transys, prism_file_path)
     prism_program = stormpy.parse_prism_program(prism_file_path)
     stormpy_model = stormpy.build_model(prism_program)
-    properties = stormpy.parse_properties(formula, prism_program)
+    properties = stormpy.parse_properties(
+        formula, prism_program)
     result = stormpy.model_checking(
         stormpy_model,
         properties[0],
         extract_scheduler=extract_policy)
-    prob = _extract_probability(result, stormpy_model, tulip_transys)
+    prob = _extract_probability(
+        result, stormpy_model, tulip_transys)
     if not extract_policy:
         return prob
-    policy = _extract_policy(result, stormpy_model, tulip_transys)
+    policy = _extract_policy(
+        result, stormpy_model, tulip_transys)
     return (prob, policy)
 
 

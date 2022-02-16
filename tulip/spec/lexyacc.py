@@ -358,11 +358,13 @@ class Parser:
                 | expr GT expr
                 | expr GE expr
         """
-        p[0] = self.ast.Comparator(p[2], p[1], p[3])
+        p[0] = self.ast.Comparator(
+            p[2], p[1], p[3])
 
     def p_truncator(self, p):
         """expr : expr TRUNCATE number"""
-        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
+        p[0] = self.ast.Arithmetic(
+            p[2], p[1], p[3])
 
     def p_binary_function(self, p):
         """expr : expr TIMES expr
@@ -370,7 +372,8 @@ class Parser:
                 | expr PLUS expr
                 | expr MINUS expr
         """
-        p[0] = self.ast.Arithmetic(p[2], p[1], p[3])
+        p[0] = self.ast.Arithmetic(
+            p[2], p[1], p[3])
 
     def p_paren(self, p):
         """expr : LPAREN expr RPAREN"""
