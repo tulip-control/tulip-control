@@ -121,7 +121,8 @@ def _construct_weighted_product_automaton(ks, spec):
     @param spec: the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
 
-    @return (fa, null_state) where fa is the weighted product automaton of type
+    @return:
+        (fa, null_state) where fa is the weighted product automaton of type
         tulip.transys.automata.WeightedFiniteStateAutomaton
         and null_state is the null state
     """

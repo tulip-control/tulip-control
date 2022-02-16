@@ -347,7 +347,8 @@ def model_checking(
         whether to extract policy
     @type extract_policy: `bool`
 
-    @return result
+    @return:
+        result
         - If `extract_policy == False`,
           then for each `state` in `model.states`,
           `result[state]` is the probability of
