@@ -55,7 +55,8 @@ def check_realizable(spec):
 
     Consult the documentation of `synthesize` about parameters.
 
-    @return: `True` if realizable,
+    @return:
+        `True` if realizable,
         `False` if not, or
         an error occurs.
     """

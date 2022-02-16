@@ -195,8 +195,8 @@ def _format_color(color, prog='tikz'):
     @type color:
       - `str` for single color or
       - `dict` for weighted color mix
-
-    @type prog: 'tikz' or 'dot'
+    @type prog:
+        'tikz' or 'dot'
     """
     if isinstance(color, str):
         return color
@@ -330,7 +330,8 @@ def _is_accepting(graph, state):
 def _transitions2dot_str(trans, to_dot_graph, tikz=False):
     """Convert transitions to dot str.
 
-    @rtype: str
+    @rtype:
+        str
     """
     if not hasattr(trans.graph, '_transition_label_def'):
         return
@@ -405,9 +406,10 @@ def _graph2dot(
         rankdir='TB'):
     """Convert (possibly labeled) state graph to dot str.
 
-    @type graph: `LabeledDiGraph`
-
-    @rtype: str
+    @type graph:
+        `LabeledDiGraph`
+    @rtype:
+        str
     """
     dummy_nx_graph = nx.MultiDiGraph()
     _states2dot_str(
@@ -434,11 +436,14 @@ def _graph2dot(
 def graph2dot_str(graph, wrap=10, tikz=False):
     """Convert graph to DOT string.
 
-    @type graph: L{LabeledDiGraph}
-
-    @type graph: `LabeledDiGraph`
-    @param wrap: textwrap width
-    @rtype: `str`
+    @type graph:
+        L{LabeledDiGraph}
+    @type graph:
+        `LabeledDiGraph`
+    @param wrap:
+        textwrap width
+    @rtype:
+        `str`
     """
     dot_graph = _graph2dot(
         graph,
@@ -453,9 +458,12 @@ def save_dot(
         tikz=False):
     """Save state graph to dot file.
 
-    @type graph: `LabeledDiGraph`
-    @return: `True` upon success
-    @rtype: `bool`
+    @type graph:
+        `LabeledDiGraph`
+    @return:
+        `True` upon success
+    @rtype:
+        `bool`
     """
     dot_graph = _graph2dot(
         graph,
@@ -495,17 +503,21 @@ def plot_dot(
     ========
     `dot` documentation
 
-    @param graph: to plot
-    @type graph: `networkx.Graph`
-
-    @param prog: GraphViz program to use
-    @type prog: `'dot'` | `'neato'` | `'circo'` | `'twopi'`
+    @param graph:
+        to plot
+    @type graph:
+        `networkx.Graph`
+    @param prog:
+        GraphViz program to use
+    @type prog:
+        `'dot'` | `'neato'` | `'circo'` | `'twopi'`
         | `'fdp'` | `'sfdp'` | etc
-
-    @param rankdir: direction to layout nodes
-    @type rankdir: 'LR' | 'TB'
-
-    @param ax: axes
+    @param rankdir:
+        direction to layout nodes
+    @type rankdir:
+        'LR' | 'TB'
+    @param ax:
+        axes
     """
     if not isinstance(graph, nx.Graph):
         raise TypeError(

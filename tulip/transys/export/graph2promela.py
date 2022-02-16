@@ -55,10 +55,12 @@ def fts2promela(graph, procname=None):
     especially if intermediate states are introduced in
     one of multiple processes.
 
-    @param graph: networkx
-
-    @param procname: Promela process name (after proctype)
-    @type procname: str (default: system name)
+    @param graph:
+        networkx
+    @param procname:
+        Promela process name (after proctype)
+    @type procname:
+        str (default: system name)
     """
     def state_ap2promela(
             state,

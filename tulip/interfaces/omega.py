@@ -42,8 +42,10 @@ def is_realizable(spec):
 def synthesize_enumerated_streett(spec):
     """Return transducer enumerated as a graph.
 
-    @type spec: `tulip.spec.form.GRSpec`
-    @rtype: `networkx.DiGraph`
+    @type spec:
+        `tulip.spec.form.GRSpec`
+    @rtype:
+        `networkx.DiGraph`
     """
     aut = _grspec_to_automaton(spec)
     assert aut.action['sys'] != aut.false
@@ -75,8 +77,10 @@ def synthesize_enumerated_streett(spec):
 def is_circular(spec):
     """Return `True` if trivial winning set non-empty.
 
-    @type spec: `tulip.spec.form.GRSpec`
-    @rtype: `bool`
+    @type spec:
+        `tulip.spec.form.GRSpec`
+    @rtype:
+        `bool`
     """
     aut = _grspec_to_automaton(spec)
     triv, t = gr1.trivial_winning_set(aut)
@@ -86,9 +90,12 @@ def is_circular(spec):
 def _int_bounds(aut):
     """Create care set for enumeration.
 
-    @type aut: `omega.symbolic.symbolic.Automaton`
-    @return: node in a `dd.bdd.BDD`
-    @rtype: `int`
+    @type aut:
+        `omega.symbolic.symbolic.Automaton`
+    @return:
+        node in a `dd.bdd.BDD`
+    @rtype:
+        `int`
     """
     int_types = {'int', 'saturating', 'modwrap'}
     bdd = aut.bdd
@@ -109,9 +116,12 @@ def _int_bounds(aut):
 def _strategy_to_state_annotated(g, aut):
     """Move annotation to `dict` as value of `'state'` key.
 
-    @type g: `nx.DiGraph`
-    @type: aut: `omega.symbolic.symbolic.Automaton`
-    @rtype: `nx.DiGraph`
+    @type g:
+        `nx.DiGraph`
+    @type: aut:
+        `omega.symbolic.symbolic.Automaton`
+    @rtype:
+        `nx.DiGraph`
     """
     h = nx.DiGraph()
     for u, d in g.nodes(data=True):
@@ -129,8 +139,10 @@ def _strategy_to_state_annotated(g, aut):
 def _grspec_to_automaton(g):
     """Return `omega.symbolic.temporal.Automaton` from `GRSpec`.
 
-    @type g: `tulip.spec.form.GRSpec`
-    @rtype: `omega.symbolic.temporal.Automaton`
+    @type g:
+        `tulip.spec.form.GRSpec`
+    @rtype:
+        `omega.symbolic.temporal.Automaton`
     """
     if omega is None:
         raise ImportError(

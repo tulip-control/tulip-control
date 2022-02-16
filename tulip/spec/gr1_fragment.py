@@ -75,7 +75,8 @@ def check(formula):
     Parse `formula` and create abstract
     syntax tree (AST).
 
-    @type formula: `str`
+    @type formula:
+        `str`
     """
     from tulip import transys as trs
 
@@ -183,8 +184,10 @@ def str_to_grspec(f):
     terms: `B`, `[]C`, `[]<>B`.
     For more details on `B, C`, see `split_gr1`.
 
-    @type f: `str`
-    @rtype: `GRSpec`
+    @type f:
+        `str`
+    @rtype:
+        `GRSpec`
     """
     t = parser.parse(f)
     assert t.operator == '->'
@@ -210,12 +213,15 @@ def split_gr1(f):
       - `C` can contain "next"
       - `B` cannot contain "next"
 
-    @param f: temporal logic formula
-    @type f: `str` or AST
-
-    @return: conjunctions of formulae A, B as `str`, grouped by keys:
+    @param f:
+        temporal logic formula
+    @type f:
+        `str` or AST
+    @return:
+        conjunctions of formulae A, B as `str`, grouped by keys:
         `'init', 'G', 'GF'`
-    @rtype: `dict` of `str`: `list` of `str`
+    @rtype:
+        `dict` of `str`: `list` of `str`
     """
     # TODO: preprocess by applying syntactic identities: [][] = [] etc
     try:
@@ -322,10 +328,14 @@ def stability_to_gr1(p, aux='aux'):
     [](aux -> p)
     ```
 
-    @type p: `str`
-    @param aux: name to use for auxiliary variable
-    @type aux: `str`
-    @rtype: `GRSpec`
+    @type p:
+        `str`
+    @param aux:
+        name to use for auxiliary variable
+    @type aux:
+        `str`
+    @rtype:
+        `GRSpec`
     """
     logging.warning(
         'Conversion of stability (<>[]p) to GR(1)'
@@ -360,11 +370,16 @@ def response_to_gr1(p, q, aux='aux'):
     []( (! aux && !q) -> X ! aux)
     ```
 
-    @type p: `str`
-    @type q: `str`
-    @param aux: name to use for auxiliary variable
-    @type aux: `str`
-    @rtype: `GRSpec`
+    @type p:
+        `str`
+    @type q:
+        `str`
+    @param aux:
+        name to use for auxiliary variable
+    @type aux:
+        `str`
+    @rtype:
+        `GRSpec`
     """
     a = aux
     a0 = a
@@ -399,10 +414,14 @@ def eventually_to_gr1(p, aux='aux'):
     []( (!p && !aux) -> X!(aux))
     ```
 
-    @type p: `str`
-    @param aux: name to use for auxiliary variable
-    @type aux: `str`
-    @rtype: `GRSpec`
+    @type p:
+        `str`
+    @param aux:
+        name to use for auxiliary variable
+    @type aux:
+        `str`
+    @rtype:
+        `GRSpec`
     """
     a = aux
     a0 = a
@@ -437,10 +456,14 @@ def until_to_gr1(p, q, aux='aux'):
     [](!aux -> p)
     ```
 
-    @type p: `str`
-    @param aux: name to use for auxiliary variable
-    @type aux: `str`
-    @rtype: `GRSpec`
+    @type p:
+        `str`
+    @param aux:
+        name to use for auxiliary variable
+    @type aux:
+        `str`
+    @rtype:
+        `GRSpec`
     """
     a = aux
     a0 = a

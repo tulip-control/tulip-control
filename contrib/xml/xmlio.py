@@ -127,7 +127,8 @@ def _make_pretty(tree, indent=1):
 def exportXML(data, filename, tag=None):
     """Exports a Tulip data structure into an XML file.
 
-    @param data: The Tulip data structure to export into an xml lfile
+    @param data:
+        The Tulip data structure to export into an xml lfile
     @type data:
         `Polytope` or
         `Region` or
@@ -135,13 +136,19 @@ def exportXML(data, filename, tag=None):
         `SwitchedSysDyn` or
         `PwaSysDyn` or
         `LtiSysDyn`
-    @param filename: The name of the XML file to export to.
-    @type filename: `str`
-    @param tag: (Optional) What we want
+    @param filename:
+        The name of the XML file to export to.
+    @type filename:
+        `str`
+    @param tag:
+        (Optional) What we want
         the first tag of the XML file to read.
-    @type tag: `str`
-    @return: No return, just writes text.
-    @rtype: `None`
+    @type tag:
+        `str`
+    @return:
+        No return, just writes text.
+    @rtype:
+        `None`
     """
     if tag is None:
         tag = 'object'
@@ -156,10 +163,12 @@ def exportXML(data, filename, tag=None):
 def importXML(filename):
     """Takes a Tulip XML file and returns a Tulip data structure.
 
-    @param filename: XML file containing exported data to import
-    @type filename: string
-
-    @return: the data structure exported into the file.
+    @param filename:
+        XML file containing exported data to import
+    @type filename:
+        string
+    @return:
+        the data structure exported into the file.
     @rtype:
         `Polytope` or
         `Region` or
@@ -387,8 +396,10 @@ def _export_xml(
 
     This function is called both internal
 
-    @param data: the data structure to be exported into an XML tree.
-    @type data: `numpy.ndarray` or
+    @param data:
+        the data structure to be exported into an XML tree.
+    @type data:
+        `numpy.ndarray` or
         `Polytope` or
         `Region` or
         `FiniteTransitionSystem` or
@@ -396,12 +407,19 @@ def _export_xml(
         `AbstractSysDyn` or
         `dict`
     @param parent:
-    @type parent: `None` or
+    @type parent:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
-    @type tag: `None` or `str`
-    @return: `None` (if parent is `None`), or an xml tree
-    @rtype: `None` or `xml.etree.ElementTree.Element` or
+    @type tag:
+        `None` or
+        `str`
+    @return:
+        `None` (if parent is `None`), or
+        an xml tree
+    @rtype:
+        `None` or
+        `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
     """
     if tag_list is None:
@@ -695,11 +713,15 @@ def _export_hybridsys(hybridsys, parent, tag=None):
 def _export_polytope(poly, parent, tag=None):
     """Builds an XML tree from a polytope.
 
-    @param poly: polytope to export
-    @type poly: `Polytope`
-    @return: `None` (if parent is `None`), or
+    @param poly:
+        polytope to export
+    @type poly:
+        `Polytope`
+    @return:
+        `None` (if parent is `None`), or
         an xml tree
-    @rtype: `None` or
+    @rtype:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
     """
@@ -795,16 +817,21 @@ def _export_adj(matrix, parent, tag=None):
     """Converts an adjacency matrix (`scipy.sparse.lil.lil_matrix`) into an xml
     tree.
 
-    @param matrix: Sparce adjacency matrix.
-    @type matrix: `scipy.sparse.lil.lil_matrix`
-    @type parent: `None` or
+    @param matrix:
+        Sparce adjacency matrix.
+    @type matrix:
+        `scipy.sparse.lil.lil_matrix`
+    @type parent:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
-    @type tag: `str`
-
-    @return: `None` (if `parent` is `None`), or
+    @type tag:
+        `str`
+    @return:
+        `None` (if `parent` is `None`), or
         an xml tree
-    @rtype: `None` or
+    @rtype:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
 	"""

@@ -94,18 +94,21 @@ def synchronous_parallel(models, transition_attr_operations={}):
     with the only exception that Act does not have the be the same
     for all the models in models.
 
-    @type models: `list` of objects of type
+    @type models:
+        `list` of objects of type
         `KripeStructure` or `WeightedKripkeStructure` or
         `MarkovChain` or `MarkovDecisionProcess`
-    @type transition_attr_operations: `dict` whose key is the
+    @type transition_attr_operations:
+        `dict` whose key is the
         transition attribute key and
         value is the operation to be performed for this transition attribute.
         For an attribute whose operation is not specified,
         a tuple of attribute values from all models will be used.
-
-    @return: the synchronous parallel composition of
+    @return:
+        the synchronous parallel composition of
         all the objects in models
-    @rtype: one of the following types:
+    @rtype:
+        one of the following types:
         * `transys.KripkeStructure`
         * `transys.WeightedKripkeStructure`
         * `transys.MarkovChain`
@@ -184,12 +187,15 @@ def apply_policy(model, policy):
     Apply the policy `policy` on the Markov decision process `model`
     and return the induced Markov chain.
 
-    @type model: `MarkovDecisionProcess`
-    @type policy: An object such that for any state in `model.states`,
+    @type model:
+        `MarkovDecisionProcess`
+    @type policy:
+        An object such that for any state in `model.states`,
         `policy[state]` is an action in `model.actions`
-
-    @return: the induced Markov chain
-    @rtype: `MarkovChain`
+    @return:
+        the induced Markov chain
+    @rtype:
+        `MarkovChain`
     """
     result_model_type = _get_apply_policy_model_type(model)
     result = result_model_type()
@@ -218,8 +224,10 @@ def _get_transition_attr(trans_prod, transition_attr_operations):
     Return the attribute of a transition constructed by taking the product
     of transitions in `trans_prod`.
 
-    @type trans_prod: `list` of `Transitions` objects
-    @type transition_attr_operations: `dict` whose key is the
+    @type trans_prod:
+        `list` of `Transitions` objects
+    @type transition_attr_operations:
+        `dict` whose key is the
         transition attribute key and value is the operation to
         be performed for this transition attribute.
         For an attribute whose operation is not specified,
@@ -247,9 +255,12 @@ def _get_composed_model_type(models):
     Return the class of model obtained from taking a composition of
     those given in `models`.
 
-    @type models: `list` of objects of type
-        `KripkeStructure` or `WeightedKripkeStructure` or
-        `MarkovChain` or `MarkovDecisionProcess`
+    @type models:
+        `list` of objects of type
+        `KripkeStructure` or
+        `WeightedKripkeStructure` or
+        `MarkovChain` or
+        `MarkovDecisionProcess`
     """
     if all(type(m) in [MDP, MC, KS] for m in models):
         if any(type(m) == MDP for m in models):
@@ -270,7 +281,9 @@ def _get_apply_policy_model_type(model):
     Return the class of model obtained from applying
     a policy on the given `model`.
 
-    @type model: `KripkeStructure` or `WeightedKripkeStructure` or
+    @type model:
+        `KripkeStructure` or
+        `WeightedKripkeStructure` or
         `MarkovDecisionProcess`
     """
     if type(model) == MDP:

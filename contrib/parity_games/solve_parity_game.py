@@ -45,12 +45,14 @@ def McNaughton(p):
 def attractor(W, pg, player):
     """Find attractor set.
 
-    @param w: winning region
-    @type w: set
-
-    @type pg: `ParityGame`
-
-    @param player: for whom to calculate attractor
+    @param w:
+        winning region
+    @type w:
+        set
+    @type pg:
+        `ParityGame`
+    @param player:
+        for whom to calculate attractor
     """
     W = set(W)
     Wold = set()

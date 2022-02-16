@@ -53,10 +53,12 @@ def mealy2scxml(mealy):
     ========
     `transys.machines.mealy`
 
-    @param mealy: machine to export as SCXML
-    @type mealy: `MealyMachine`
-
-    @rtype: SCXML `str`
+    @param mealy:
+        machine to export as SCXML
+    @type mealy:
+        `MealyMachine`
+    @rtype:
+        SCXML `str`
     """
     def indent(n):
         return '\n' + n * '\t'

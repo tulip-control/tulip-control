@@ -136,7 +136,8 @@ class LTL:
     def dumps(self, timestamp=False):
         """Dump TuLiP LTL file string.
 
-        @param timestamp: If True, then add comment to file with
+        @param timestamp:
+            If True, then add comment to file with
             current time in UTC.
         """
         if timestamp:
@@ -259,7 +260,8 @@ class LTL:
     def load(f):
         """Wrap `loads` for reading from files.
 
-        @param f: file or str.  In the latter case, attempt to open a
+        @param f:
+            file or str.  In the latter case, attempt to open a
             file named "f" read-only.
         """
         if isinstance(f, str):
@@ -404,25 +406,29 @@ class GRSpec(LTL):
         Instantiating GRSpec without arguments results in an empty
         formula.  The default domain of a variable is "boolean".
 
-        @type env_vars: dict or iterable
-        @param env_vars: If env_vars is a dictionary, then its keys
+        @type env_vars:
+            dict or iterable
+        @param env_vars:
+            If env_vars is a dictionary, then its keys
             should be variable names, and values are domains of the
             corresponding variable.  Else, if env_vars is an iterable,
             then assume all environment variables are `boolean` (or
             "atomic propositions").  Cf. `GRSpec` for details.
-
-        @type sys_vars: dict or iterable
-        @param sys_vars: Mutatis mutandis, env_vars.
-
+        @type sys_vars:
+            dict or iterable
+        @param sys_vars:
+            Mutatis mutandis, env_vars.
         @param env_init, env_safety, env_prog,
                 sys_init, sys_safety, sys_prog:
             A string or iterable of strings.  An empty string is
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. `GRSpec`.
-
-        @type moore: bool
-        @type plus_one: bool
-        @param qinit: see class docstring
+        @type moore:
+            bool
+        @type plus_one:
+            bool
+        @param qinit:
+            see class docstring
         """
         self.parser = parser
         self._ast = dict()
@@ -746,7 +752,8 @@ class GRSpec(LTL):
         For converting non-integer finite types to
         integer types, use `replace_finite_by_int`.
 
-        @return: `dict` of ASTs after the substitutions,
+        @return:
+            `dict` of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
         logger.info('substitute values for variables...')
@@ -776,12 +783,14 @@ class GRSpec(LTL):
               - `int` for integers
               - `str` for arbitrary finite types
 
-        @param no_str: if True, then compile the formula
+        @param no_str:
+            if True, then compile the formula
             where all string variables have been replaced by integers.
             Otherwise compile the original formula containing strings.
-
-        @return: python expression compiled for `eval`
-        @rtype: `code`
+        @return:
+            python expression compiled for `eval`
+        @rtype:
+            `code`
         """
         self.str_to_int()
         init = {'env': self.env_init, 'sys': self.sys_init}

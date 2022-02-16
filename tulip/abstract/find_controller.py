@@ -149,41 +149,58 @@ def get_input(
        If the original proposition-preserving partition
        is not convex, then safety cannot be guaranteed.
 
-    @param x0: initial continuous state
-    @type x0: `numpy` 1darray
-    @param ssys: system dynamics
-    @type ssys: `LtiSysDyn`
-    @param abstraction: abstract system dynamics
-    @type abstraction: `AbstractPwa`
-    @param start: index of the initial state in `abstraction.ts`
-    @type start: `int` >= 0
-    @param end: index of the end state in `abstraction.ts`
-    @type end: `int` >= 0
-    @param R: state cost matrix for:
+    @param x0:
+        initial continuous state
+    @type x0:
+        `numpy` 1darray
+    @param ssys:
+        system dynamics
+    @type ssys:
+        `LtiSysDyn`
+    @param abstraction:
+        abstract system dynamics
+    @type abstraction:
+        `AbstractPwa`
+    @param start:
+        index of the initial state in `abstraction.ts`
+    @type start:
+        `int` >= 0
+    @param end:
+        index of the end state in `abstraction.ts`
+    @type end:
+        `int` >= 0
+    @param R:
+        state cost matrix for:
 
         ```
         x = [x(1)' x(2)' .. x(N)']'
         ```
 
         If empty, then the zero matrix is used.
-    @type R: `size(N * xdim x N * xdim)`
-    @param r: cost vector for state trajectory:
+    @type R:
+        `size(N * xdim x N * xdim)`
+    @param r:
+        cost vector for state trajectory:
 
         ```
         x = [x(1)' x(2)' .. x(N)']'
         ```
-
-    @type r: `size(N * xdim x 1)`
-    @param Q: input cost matrix for control input:
+    @type r:
+        `size(N * xdim x 1)`
+    @param Q:
+        input cost matrix for control input:
 
         ```
         u = [u(0)' u(1)' .. u(N-1)']'
         ```
 
         If empty, then the identity matrix is used.
-    @type Q: `size(N * udim x N * udim)`
-    @param mid_weight: cost weight for |x(N)-xc|_{ord}
-    @param ord: norm used for cost function:
+    @type Q:
+        `size(N * udim x N * udim)`
+    @param mid_weight:
+        cost weight for |x(N)-xc|_{ord}
+    @param ord:
+        norm used for cost function:
 
         ```
         f(x, u) ==
@@ -192,11 +209,14 @@ def get_input(
             + r'x
             + mid_weight * |xc - x(N)|_{ord}
         ```
-    @type ord: `ord \in {1, 2, np.inf}`
-    @return: array `A`, where row `k` contains the
+    @type ord:
+        `ord \in {1, 2, np.inf}`
+    @return:
+        array `A`, where row `k` contains the
         control input: `u(k)`,
         for `k \in 0..(N - 1)`
-    @rtype: `N x m` `numpy` 2darray
+    @rtype:
+        `N x m` `numpy` 2darray
     """
     part = abstraction.ppp
     regions = part.regions
@@ -517,14 +537,20 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     Used to test a computed input sequence.
     No disturbance is taken into account.
 
-    @param x0: initial point for execution
-    @param u_seq: `N \X m` array where row `k`
+    @param x0:
+        initial point for execution
+    @param u_seq:
+        `N \X m` array where row `k`
         is input for `t = k`
-    @param ssys: dynamics
-    @type ssys: `LtiSysDyn`
-    @param P0: `Polytope` where we want
+    @param ssys:
+        dynamics
+    @type ssys:
+        `LtiSysDyn`
+    @param P0:
+        `Polytope` where we want
         `x(k)` to remain for `k \in 1..(N - 1)`
-    @return: `True` if `x(k) \in P0` for
+    @return:
+        `True` if `x(k) \in P0` for
         `k \in 1..(N - 1)` and `x(N) \in P1`.
         `False` otherwise.
     """
@@ -563,19 +589,23 @@ def find_discrete_state(x0, part):
        (i.e., `x0` belongs to more than one discrete state),
        then return the first discrete state ID
 
-    @param x0: initial continuous state
-    @type x0: `numpy` 1darray
-
-    @param part: state-space partition
-    @type part: `PropPreservingPartition`
-
-    @return: if `x0` belongs to some
+    @param x0:
+        initial continuous state
+    @type x0:
+        `numpy` 1darray
+    @param part:
+        state-space partition
+    @type part:
+        `PropPreservingPartition`
+    @return:
+        if `x0` belongs to some
         discrete state in `part`,
         then return the index of that state
 
         Otherwise return `None`, i.e., in case
         `x0` does not belong to any discrete state.
-    @rtype: `int`
+    @rtype:
+        `int`
     """
     for i, region in enumerate(part):
         if x0 in region:

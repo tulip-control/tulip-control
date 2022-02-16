@@ -110,13 +110,19 @@ class PrioritizedSpecification:
         Add rule with automaton `fa`, `priority`,
         and `level` to the specification.
 
-        @param fa: automaton that represents
+        @param fa:
+            automaton that represents
             the correctness of the rule
-        @type fa: `FiniteStateAutomaton`
-        @param priority: number that represents
+        @type fa:
+            `FiniteStateAutomaton`
+        @param priority:
+            number that represents
             the priority of the rule
-        @type priority: `float` or `int`
-        @param level: `int` that represents
+        @type priority:
+            `float` or
+            `int`
+        @param level:
+            `int` that represents
             the level of the rule in the hierarchy
         """
         assert isinstance(fa, FA)
@@ -140,7 +146,8 @@ class PrioritizedSpecification:
     def get_rules_at(self, level):
         """Return the `list` of rules at the given level.
 
-        @rtype: `list` of `FAWithPriority`
+        @rtype:
+            `list` of `FAWithPriority`
         """
         if level >= len(self._Psi):
             return list()
@@ -149,7 +156,8 @@ class PrioritizedSpecification:
     def get_rules(self):
         """Return the `list` of all the rules.
 
-        @rtype: `list` of `FAWithPriority`
+        @rtype:
+            `list` of `FAWithPriority`
         """
         rules = list()
         for psi in self._Psi:

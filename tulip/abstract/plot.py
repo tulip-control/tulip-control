@@ -105,8 +105,10 @@ def plot_ts_on_partition(
     So it can plot transitions of
     a single mode for a switched system.
 
-    @param edge_label: desired label
-    @type edge_label: `dict`
+    @param edge_label:
+        desired label
+    @type edge_label:
+        `dict`
     """
     l,u = ppp.domain.bounding_box
     arr_size = (u[0, 0] - l[0, 0]) / 50.0
@@ -132,8 +134,10 @@ def project_strategy_on_partition(ppp, mealy):
     Returns an `FTS` with the `PPP` (spatial)
     transitions used by the Mealy strategy.
 
-    @type ppp: `PropPreservingPartition`
-    @type mealy: `transys.MealyMachine`
+    @type ppp:
+        `PropPreservingPartition`
+    @type mealy:
+        `transys.MealyMachine`
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))
@@ -153,8 +157,11 @@ def plot_strategy(ab, mealy):
 
     Assumes that `mealy` is feasible for `ab`.
 
-    @type ab: `AbstractPwa` or `AbstractSwitched`
-    @type mealy: `transys.MealyMachine`
+    @type ab:
+        `AbstractPwa` or
+        `AbstractSwitched`
+    @type mealy:
+        `transys.MealyMachine`
     """
     proj_mealy = project_strategy_on_partition(
         ab.ppp, mealy)
@@ -180,12 +187,18 @@ def plot_trajectory(
     ========
     `plot_partition`, plot
 
-    @type ppp: `PropPreservingPartition`
-    @param x0: initial state
-    @param u_seq: matrix where each row contains an input
-    @param ssys: system dynamics
-    @param color_seed: see `plot_partition`
-    @return: axis object
+    @type ppp:
+        `PropPreservingPartition`
+    @param x0:
+        initial state
+    @param u_seq:
+        matrix where each row contains an input
+    @param ssys:
+        system dynamics
+    @param color_seed:
+        see `plot_partition`
+    @return:
+        axis object
     """
     try:
         from tulip.graphics import newax
@@ -241,19 +254,27 @@ def simulate2d(
     The initial discrete state is `d_init` if `qinit == '\A \A'`,
     and is used to find the initial transition in `ctrl`.
 
-    @param env_inputs: `list` of `dict`, with length `T + 1`
-    @param sys_dyn: system dynamics
-    @type sys_dyn: `tulip.hybrid.LtiSysDyn`
-    @type ctrl: `tulip.transys.machines.MealyMachine`
-    @type disc_dynamics: `tulip.abstract.discretization.AbstractPwa`
-    @param T: number of simulation steps
-    @param qinit: quantification of initial conditions
-    @param d_init: initial discrete state,
+    @param env_inputs:
+        `list` of `dict`, with length `T + 1`
+    @param sys_dyn:
+        system dynamics
+    @type sys_dyn:
+        `tulip.hybrid.LtiSysDyn`
+    @type ctrl:
+        `tulip.transys.machines.MealyMachine`
+    @type disc_dynamics:
+        `tulip.abstract.discretization.AbstractPwa`
+    @param T:
+        number of simulation steps
+    @param qinit:
+        quantification of initial conditions
+    @param d_init:
+        initial discrete state,
         given when `qinit == '\A \A'`
     @param x_init: initial continuous state,
         given when `qinit == '\A \A'`
-
-    @param show_traj: plot trajectory
+    @param show_traj:
+        plot trajectory
     """
     N = disc_dynamics.disc_params['N']
     # initialization:

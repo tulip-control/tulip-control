@@ -75,7 +75,8 @@ def is_valuation(
 def create_machine_ports(spc_vars):
     """Create proper port domains of valuations, given port types.
 
-    @param spc_vars: port names and types inside tulip.
+    @param spc_vars:
+        port names and types inside tulip.
         For arbitrary finite types the type can be a list of strings,
         instead of a range of integers.
         These are as originally defined by the user or synth.
@@ -263,18 +264,21 @@ class Transducer(LabeledDiGraph):
     def add_inputs(self, new_inputs, masks=None):
         """Create new inputs.
 
-        @param new_inputs: `dict` of pairs {port_name : port_type}
+        @param new_inputs:
+            `dict` of pairs {port_name : port_type}
             where:
             - port_name: str
             - port_type: Iterable | check class
-        @type new_inputs: dict
-
-        @param masks: custom mask functions, for each sublabel
+        @type new_inputs:
+            dict
+        @param masks:
+            custom mask functions, for each sublabel
             based on its current value
             each such function returns:
             - True, if the sublabel should be shown
             - False, otherwise (to hide it)
-        @type masks: `dict` of functions `{port_name : mask_function}`
+        @type masks:
+            `dict` of functions `{port_name : mask_function}`
             each `mask_function` returns bool
         """
         for port_name, port_type in new_inputs.items():
@@ -511,7 +515,8 @@ class MealyMachine(Transducer):
     def _save(self, path, fileformat):
         """Export options available only for Mealy machines.
 
-        @type fileformat: 'scxml'
+        @type fileformat:
+            'scxml'
         """
         if fileformat != 'scxml':
             return False
@@ -526,18 +531,21 @@ class MealyMachine(Transducer):
     def add_outputs(self, new_outputs, masks=None):
         """Add new outputs.
 
-        @param new_outputs: dict of pairs {port_name : port_type}
-          where:
-          - port_name: str
-          - port_type: Iterable | check class
-        @type new_outputs: dict
-
-        @param masks: custom mask functions, for each sublabel
+        @param new_outputs:
+            dict of pairs {port_name : port_type}
+            where:
+            - port_name: str
+            - port_type: Iterable | check class
+        @type new_outputs:
+            dict
+        @param masks:
+            custom mask functions, for each sublabel
             based on its current value
             each such function returns:
             - True, if the sublabel should be shown
             - False, otherwise (to hide it)
-        @type masks: dict of functions
+        @type masks:
+            dict of functions
             keys are port_names (see arg: new_outputs)
             each function returns bool
         """
@@ -567,19 +575,24 @@ class MealyMachine(Transducer):
         because it matches only that part of an edge label
         that corresponds to the inputs.
 
-        @param from_state: transition starts from this state.
-        @type from_state: element of `self.states`
-
-        @param inputs: `dict` assigning a valid value to each input port.
-        @type inputs: {'port_name':port_value, ...}
-
-        @param lazy: Lazy evaluation of inputs? If lazy=True, then
+        @param from_state:
+            transition starts from this state.
+        @type from_state:
+            element of `self.states`
+        @param inputs:
+            `dict` assigning a valid value to each input port.
+        @type inputs:
+            {'port_name':port_value, ...}
+        @param lazy:
+            Lazy evaluation of inputs? If lazy=True, then
             allow an incomplete specification of input if there is
             precisely one enabled transition.
-        @type lazy: bool
-
-        @return: output values and next state.
-        @rtype: (next_state, outputs)
+        @type lazy:
+            bool
+        @return:
+            output values and next state.
+        @rtype:
+            (next_state, outputs)
           where `outputs`: `{'port_name':port_value, ...}`
         """
         if lazy:
@@ -633,10 +646,11 @@ class MealyMachine(Transducer):
     def run(self, from_state=None, input_sequences=None):
         """Guided or interactive run.
 
-        @param input_sequences: if `None`, then call `interactive_run`,
+        @param input_sequences:
+            if `None`, then call `interactive_run`,
             otherwise call `guided_run`.
-
-        @return: output of `guided_run`, otherwise `None`.
+        @return:
+            output of `guided_run`, otherwise `None`.
         """
         if input_sequences is None:
             interactive_run(
@@ -652,20 +666,24 @@ class MealyMachine(Transducer):
 def guided_run(mealy, from_state=None, input_sequences=None):
     """Run deterministic machine reacting to given inputs.
 
-    @param from_state: start simulation
-
-    @param mealy: input-deterministic Mealy machine
-    @type mealy: `MealyMachine`
-
-    @param from_state: start simulation at this state.
+    @param from_state:
+        start simulation
+    @param mealy:
+        input-deterministic Mealy machine
+    @type mealy:
+        `MealyMachine`
+    @param from_state:
+        start simulation at this state.
         If `None`, then use the unique initial state `Sinit`.
-
-    @param input_sequences: one sequence of values for each input port
-    @type input_sequences: `dict` of `lists`
-
-    @return: sequence of states and sequence of output valuations
-    @rtype: (states, output_sequences)
-      where:
+    @param input_sequences:
+        one sequence of values for each input port
+    @type input_sequences:
+        `dict` of `lists`
+    @return:
+        sequence of states and sequence of output valuations
+    @rtype:
+        (states, output_sequences)
+        where:
         - `states` is a `list` of states excluding `from_state`
         - `output_sequences` is a `dict` of `lists`
     """
@@ -714,13 +732,16 @@ def random_run(mealy, from_state=None, N=10):
 
     Randomly generated inputs may violate liveness assumption on environment.
 
-    @param mealy: input-deterministic Mealy machine
-    @type mealy: `MealyMachine`
-
-    @param N: number of reactions (inputs)
-    @type N: int
-
-    @return: same as `guided_run`
+    @param mealy:
+        input-deterministic Mealy machine
+    @type mealy:
+        `MealyMachine`
+    @param N:
+        number of reactions (inputs)
+    @type N:
+        int
+    @return:
+        same as `guided_run`
     """
     if from_state is None:
         state = next(iter(mealy.states.initial))
@@ -758,8 +779,10 @@ def random_run(mealy, from_state=None, N=10):
 def interactive_run(mealy, from_state=None):
     """Run input-deterministic Mealy machine using user input.
 
-    @param mealy: input-deterministic Mealy machine
-    @type mealy: `MealyMachine`
+    @param mealy:
+        input-deterministic Mealy machine
+    @type mealy:
+        `MealyMachine`
     """
     if from_state is None:
         state = next(iter(mealy.states.initial))
@@ -838,9 +861,10 @@ def moore2mealy(moore):
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
-    @type moore: `MooreMachine`
-
-    @rtype: `MealyMachine`
+    @type moore:
+        `MooreMachine`
+    @rtype:
+        `MealyMachine`
     """
     if not isinstance(moore, MooreMachine):
         raise TypeError(
@@ -892,8 +916,10 @@ def mealy2moore(mealy):
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
 
-    @type mealy: `MealyMachine`
-    @rtype: `MooreMachine`
+    @type mealy:
+        `MealyMachine`
+    @rtype:
+        `MooreMachine`
     """
     # TODO: check for when Mealy is exactly convertible to Moore
     if not isinstance(mealy, MealyMachine):
@@ -1006,8 +1032,10 @@ def strip_ports(mealy, names):
     strip_ports(mealy, ts.atomic_propositions)
     ```
 
-    @type mealy: `MealyMachine`
-    @type names: iterable container of `str`
+    @type mealy:
+        `MealyMachine`
+    @type names:
+        iterable container of `str`
     """
     new = MealyMachine()
     new.add_inputs(trim_dict(mealy.inputs, names))

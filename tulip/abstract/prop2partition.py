@@ -76,13 +76,19 @@ def prop2part(state_space, cont_props_dict):
     `polytope.Polytope`
 
 
-    @param state_space: problem domain
-    @type state_space: `polytope.Polytope`
-    @param cont_props_dict: propositions
-    @type cont_props_dict: `dict` of `polytope.Polytope`
-    @return: state-space quotient partition induced
+    @param state_space:
+        problem domain
+    @type state_space:
+        `polytope.Polytope`
+    @param cont_props_dict:
+        propositions
+    @type cont_props_dict:
+        `dict` of `polytope.Polytope`
+    @return:
+        state-space quotient partition induced
         by propositions
-    @rtype: `PropPreservingPartition`
+    @rtype:
+        `PropPreservingPartition`
     """
     first_poly = list()  # Initial Region's polytopes
     first_poly.append(state_space)
@@ -151,10 +157,13 @@ def part2convex(ppp):
     such that each cell in the new partition is
     a convex polytope.
 
-    @type ppp: `PropPreservingPartition`
-    @return: refinement into convex polytopes and
+    @type ppp:
+        `PropPreservingPartition`
+    @return:
+        refinement into convex polytopes and
         map from new to old Regions
-    @rtype: (`PropPreservingPartition`, list)
+    @rtype:
+        (`PropPreservingPartition`, list)
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
@@ -201,13 +210,17 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     `discretize`
 
 
-    @type pwa_sys: `hybrid.PwaSysDyn`
-    @type ppp: `PropPreservingPartition`
-    @return: new partition and associated maps:
+    @type pwa_sys:
+        `hybrid.PwaSysDyn`
+    @type ppp:
+        `PropPreservingPartition`
+    @return:
+        new partition and associated maps:
         - new partition `new_ppp`
         - map of `new_ppp.regions` to `pwa_sys.list_subsys`
         - map of `new_ppp.regions` to `ppp.regions`
-    @rtype: `(PropPreservingPartition, list, list)`
+    @rtype:
+        `(PropPreservingPartition, list, list)`
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain)):
         raise Exception(
@@ -647,16 +660,18 @@ class PPP(PropPreservingPartition):
 def ppp2ts(part):
     """Derive transition system from proposition preserving partition.
 
-    @param part: labeled polytopic partition from
+    @param part:
+        labeled polytopic partition from
         which to derive the transition system
-    @type part: `PropPreservingPartition`
-
-    @return: `(ts, state_map)`
+    @type part:
+        `PropPreservingPartition`
+    @return:
+        `(ts, state_map)`
         finite transition system labeled with propositions
         from the given partition, and map of
         polytope indices to transition system states.
-
-    @rtype: `(transys.FTS, dict)`
+    @rtype:
+        `(transys.FTS, dict)`
     """
     # generate transition system and add transitions
     ofts = trs.FTS()

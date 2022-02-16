@@ -291,7 +291,8 @@ class PwaSysDyn:
             overwrite_time=True):
         """Constructor.
 
-        @type overwrite_time: `bool`
+        @type overwrite_time:
+            `bool`
         @param overwrite_time:
             If `True`, then overwrite any time data
             in the objects in `list_subsys` with
@@ -495,7 +496,8 @@ class SwitchedSysDyn:
             overwrite_time=True):
         """Constructor.
 
-        @type overwrite_time: `bool`
+        @type overwrite_time:
+            `bool`
         @param overwrite_time:
             If `True`, then overwrite any time data in
             the objects in `list_subsys` with the data in
@@ -731,9 +733,13 @@ def _check_time_data(semantics, timestep):
 
     If not, then raise `ValueError`.
 
-    @type semantics: `str`
-    @param timestep: any positive number
-    @type timestep: `int` or `float`
+    @type semantics:
+        `str`
+    @param timestep:
+        any positive number
+    @type timestep:
+        `int` or
+        `float`
     """
     if semantics not in ['sampled', 'discrete', None]:
         raise ValueError(
@@ -762,7 +768,9 @@ def _check_time_consistency(
     have the same time semantics and timestep.
     Raises `ValueError` if not.
 
-    @type system_list: `list` of `LtiSysDyn` or `PwaSysDyn`
+    @type system_list:
+        `list` of `LtiSysDyn` or
+        `PwaSysDyn`
     """
     # Check that time semantics for all subsystems match
     for ind in range(len(system_list) - 1):

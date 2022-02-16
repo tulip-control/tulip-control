@@ -47,8 +47,10 @@ __all__ = [
 def write_python_case(filename, *args, **kwargs):
     """Convenience wrapper for writing output of python_case to file.
 
-    @type  filename: str
-    @param filename: Name of file in which to place the code generated
+    @type filename:
+        str
+    @param filename:
+        Name of file in which to place the code generated
         by `python_case`.
     """
     with open(filename, 'w') as f:
@@ -61,12 +63,16 @@ def python_case(M, classname="TulipStrategy", start='Sinit'):
     Usage documentation for the generated code is included in the output.
     Consult the docstrings of the class and move() method.
 
-    @type M: `MealyMachine`
-    @type classname: `str`
-    @param start: initial node in `M`
-
-    @rtype: str
-    @return: The returned string is valid Python code and can, for
+    @type M:
+        `MealyMachine`
+    @type classname:
+        `str`
+    @param start:
+        initial node in `M`
+    @rtype:
+        str
+    @return:
+        The returned string is valid Python code and can, for
         example, be:
           - saved directly into a ".*.py" file, or
           - passed to "exec".

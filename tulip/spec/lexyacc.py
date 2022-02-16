@@ -189,7 +189,8 @@ class Lexer:
             **kwargs):
         """Create a lexer.
 
-        @param kwargs: same arguments as
+        @param kwargs:
+            same arguments as
             for the function `ply.lex.lex`,
             - except for `module`
               (fixed to `self`)
@@ -277,18 +278,24 @@ class Parser:
     def parse(self, formula, debuglog=None):
         """Return syntax tree for `formula`.
 
-        @param formula: logic formula
-        @type formula: `str`
-        @param debuglog: logger passed as
+        @param formula:
+            logic formula
+        @type formula:
+            `str`
+        @param debuglog:
+            logger passed as
             keyword parameter `debuglog` to
             the method
             `ply.yacc.LRParser.parse`.
             The default value is the logger
             with name `PARSER_LOGGER`.
-        @type logger: `logging.Logger`
-        @return: abstract syntax tree that
+        @type logger:
+            `logging.Logger`
+        @return:
+            abstract syntax tree that
             results from parsing `formula`
-        @rtype: `tulip.spec.ast.nodes.Node`,
+        @rtype:
+            `tulip.spec.ast.nodes.Node`,
             unless parameter `ast` was
             passed to `self.__init__`
         """

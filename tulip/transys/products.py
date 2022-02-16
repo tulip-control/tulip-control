@@ -108,9 +108,12 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
     def add_successors(self, s, q):
         """Add the successors of (s, q) to the state space.
 
-        @param s: TS state
-        @param q: BA state
-        @return: those successors that are new states
+        @param s:
+            TS state
+        @param q:
+            BA state
+        @return:
+            those successors that are new states
         """
         sq = (s, q)
         ts = self.ts
@@ -174,7 +177,8 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     ========
     `ba_ts_sync_prod`, `sync_prod`
 
-    @return: `(product_ts, persistent_states)`, where:
+    @return:
+        `(product_ts, persistent_states)`, where:
         - `product_ts` is the synchronous product TS * BA
         - `persistent_states` are those in TS * BA which
             project on accepting states of BA.
@@ -379,7 +383,8 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     ========
     `ts_ba_sync_prod`, `sync_prod`
 
-    @return: `prod_ba`, the product `BuchiAutomaton`.
+    @return:
+        `prod_ba`, the product `BuchiAutomaton`.
     """
     logger.debug(
         f'\n{_hl}\n'

@@ -59,11 +59,13 @@ parser = ltl2baint.Parser()
 def ltl2ba(formula):
     """Convert LTL formula to Buchi Automaton using `ltl2ba`.
 
-    @type formula: `str(formula)` must be admissible `ltl2ba` input
-
-    @return: Buchi automaton whose edges are annotated
+    @type formula:
+        `str(formula)` must be admissible `ltl2ba` input
+    @return:
+        Buchi automaton whose edges are annotated
         with Boolean formulas as `str`
-    @rtype: [`Automaton`]
+    @rtype:
+        [`Automaton`]
     """
     ltl2ba_out = ltl2baint.call_ltl2ba(str(formula))
     symbols, g, initial, accepting = parser.parse(ltl2ba_out)
@@ -213,7 +215,8 @@ def cartesian_product(self, other, prod_sys=None):
 def ts_sync_prod(ts1, ts2):
     """Synchronous (tensor) product with other `FTS`.
 
-    @type ts1, ts2: `FiniteTransitionSystem`
+    @type ts1, ts2:
+        `FiniteTransitionSystem`
     """
     prod_ts = FiniteTransitionSystem()
     # union of AP sets
@@ -270,11 +273,15 @@ def sync_prod(ts, ba):
     ========
     `_ts_ba_sync_prod`
 
-    @param ts_or_ba: other with which to take synchronous product
-    @type ts_or_ba: `FiniteTransitionSystem` or `BuchiAutomaton`
-
-    @return: self * ts_or_ba
-    @rtype: `BuchiAutomaton`
+    @param ts_or_ba:
+        other with which to take synchronous product
+    @type ts_or_ba:
+        `FiniteTransitionSystem` or
+        `BuchiAutomaton`
+    @return:
+        self * ts_or_ba
+    @rtype:
+        `BuchiAutomaton`
 
     See Also
     ========
@@ -284,11 +291,15 @@ def sync_prod(ts, ba):
     Def. 4.62, p.200 U{[BK08]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
 
-    @param ts_or_ba: system with which to take synchronous product
-    @type ts_or_ba: `FiniteTransitionSystem` or `BuchiAutomaton`
-
-    @return: synchronous product `self` x `ts_or_ba`
-    @rtype: `FiniteTransitionSystem`
+    @param ts_or_ba:
+        system with which to take synchronous product
+    @type ts_or_ba:
+        `FiniteTransitionSystem` or
+        `BuchiAutomaton`
+    @return:
+        synchronous product `self` x `ts_or_ba`
+    @rtype:
+        `FiniteTransitionSystem`
     """
     if not isinstance(ba, BuchiAutomaton):
         raise Exception
@@ -332,13 +343,16 @@ def add(self, other):
     `line_labeled_with`,
     `cycle_labeled_with`
 
-    @param other: system to merge with
-    @type other: `FiniteTransitionSystem`
-
-    @return: merge of `self` with `other`, union of states,
+    @param other:
+        system to merge with
+    @type other:
+        `FiniteTransitionSystem`
+    @return:
+        merge of `self` with `other`, union of states,
         initial states, atomic propositions, actions, edges and
         labelings, those of `other` taking precedence over `self`.
-    @rtype: `FiniteTransitionSystem`
+    @rtype:
+        `FiniteTransitionSystem`
     """
     if not isinstance(other, FiniteTransitionSystem):
         raise TypeError(

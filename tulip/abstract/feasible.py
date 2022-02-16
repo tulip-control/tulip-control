@@ -107,30 +107,40 @@ def solve_feasible(
       in the computation. Consider decreasing the sampling period
       used for discretizing the associated continuous-time dynamical system.
 
-    @type P1: `Polytope` or `Region`
-    @type P2: `Polytope` or `Region`
-    @type ssys: `LtiSysDyn`
-    @param N: horizon length
-    @param closed_loop: If `True`, then take 1 step at a time.
+    @type P1:
+        `Polytope` or
+        `Region`
+    @type P2:
+        `Polytope` or
+        `Region`
+    @type ssys:
+        `LtiSysDyn`
+    @param N:
+        horizon length
+    @param closed_loop:
+        If `True`, then take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
-    @type closed_loop: bool
-
-    @param use_all_horizon: Used for closed loop algorithm.
+    @type closed_loop:
+        bool
+    @param use_all_horizon:
+        Used for closed loop algorithm.
 
         - If `True`, then check for
           reachability in `< N` steps,
 
         - otherwise, in exactly `N` steps.
-
-    @type use_all_horizon: `bool`
-
-    @param trans_set: If specified,
+    @type use_all_horizon:
+        `bool`
+    @param trans_set:
+        If specified,
         then force transitions to be in this set.
         Otherwise, `P1` is used.
-
-    @return: states from which `P2` is reachable
-    @rtype: `Polytope` or `Region`
+    @return:
+        states from which `P2` is reachable
+    @rtype:
+        `Polytope` or
+        `Region`
     """
     if closed_loop:
         if use_all_horizon:
@@ -164,12 +174,20 @@ def _solve_closed_loop_fixed_horizon(
     If intermediate polytopes are convex,
     then the result is exact and not an underapproximation.
 
-    @type P1: `Polytope` or `Region`
-    @type P2: `Polytope` or `Region`
-    @param ssys: system dynamics
-    @param N: horizon length
-    @type N: positive `int`
-    @param trans_set: If provided,
+    @type P1:
+        `Polytope` or
+        `Region`
+    @type P2:
+        `Polytope` or
+        `Region`
+    @param ssys:
+        system dynamics
+    @param N:
+        horizon length
+    @type N:
+        positive `int`
+    @param trans_set:
+        If provided,
         then intermediate steps are allowed
         to be in `trans_set`.
         Otherwise, `P1` is used.
@@ -376,14 +394,21 @@ def createLM(
     intersection of the polytopes
     for all possible
 
-    @param ssys: system dynamics
-    @type ssys: `LtiSysDyn`
-    @param N: horizon length
-    @type list_P: `list` of `Polytope`,
-        or `Polytope`
-    @type Pk: `Polytope`
-    @type PN: `Polytope`
-    @param disturbance_ind: `list`
+    @param ssys:
+        system dynamics
+    @type ssys:
+        `LtiSysDyn`
+    @param N:
+        horizon length
+    @type list_P:
+        `list` of `Polytope`, or
+        `Polytope`
+    @type Pk:
+        `Polytope`
+    @type PN:
+        `Polytope`
+    @param disturbance_ind:
+        `list`
         that indicates which `k`'s
         that disturbance should be
         taken into account.
@@ -556,10 +581,14 @@ def get_max_extreme(G,D,N):
     for every possible `d_i` in the set of
     extreme points to `D^N`.
 
-    @param G: The matrix to maximize with respect to
-    @param D: Polytope describing the disturbance set
-    @param N: Horizon length
-    @return: d_hat: Array describing the maximum possible
+    @param G:
+        The matrix to maximize with respect to
+    @param D:
+        Polytope describing the disturbance set
+    @param N:
+        Horizon length
+    @return: d_hat:
+        Array describing the maximum possible
         effect from the disturbance
     """
     D_extreme = pc.extreme(D)

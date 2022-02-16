@@ -66,10 +66,12 @@ class GridWorld:
     def __init__(self, gw_desc=None, prefix="Y"):
         """Load gridworld described in given string, or make empty instance.
 
-        @param gw_desc: String containing a gridworld description, or
-                        None to create an empty instance.
-        @param prefix: String to be used as prefix for naming
-                       gridworld cell variables.
+        @param gw_desc:
+            String containing a gridworld description, or
+            None to create an empty instance.
+        @param prefix:
+            String to be used as prefix for naming
+            gridworld cell variables.
         """
         if gw_desc is not None:
             self.loads(gw_desc)
@@ -116,9 +118,11 @@ class GridWorld:
         top-right corner cell, etc.  As usual in Python, you can only
         wrap around once.
 
-        @param next: Use the primed (i.e., state at next time step)
-                 form of the variable.
-        @param nonbool: If True, then use variables with integer domains.
+        @param next:
+            Use the primed (i.e., state at next time step)
+            form of the variable.
+        @param nonbool:
+            If True, then use variables with integer domains.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
@@ -182,7 +186,8 @@ class GridWorld:
         who interact in a shared space; with an offset, we can make
         "sub-gridworlds" and enforce rules like mutual exclusion.
 
-        @param nonbool: If True, then use variables with integer domains.
+        @param nonbool:
+            If True, then use variables with integer domains.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
@@ -220,9 +225,11 @@ class GridWorld:
     def is_empty(self, coord, extend=False):
         """Is cell at coord empty?
 
-        @param coord: (row, column) pair; supports negative indices.
-        @param extend: If True, then do not wrap indices and treat any
-                 cell outside the grid as being occupied.
+        @param coord:
+            (row, column) pair; supports negative indices.
+        @param extend:
+            If True, then do not wrap indices and treat any
+            cell outside the grid as being occupied.
         """
         if self.W is None:
             raise ValueError("Gridworld is empty; no cells exist.")
@@ -257,10 +264,12 @@ class GridWorld:
 
         Assume the gridworld is 4-connected.
 
-        @param start: (row, column) pair; supports negative indices.
-        @param stop: same as start argument.
-
-        @return: True if there is a path, False otherwise.
+        @param start:
+            (row, column) pair; supports negative indices.
+        @param stop:
+            same as start argument.
+        @return:
+            True if there is a path, False otherwise.
         """
         # Check input values and handle negative coordinates
         if self.W is None:
@@ -330,14 +339,16 @@ class GridWorld:
           - "G" ('r*') : goal;
           - "E" ('gx') : goal of a troll; its extent is indicated by gray cells
 
-        @param font_pt: size (in points) for rendering text in the
-                 figure.  If 0, then use symbols instead (see legend above).
-        @param troll_list: ...same as the argument with the same name
-                 given to `add_trolls`.
-
-        @param axes: Instance of matplotlib.axes._subplots.AxesSubplot
-                 on which to draw, or None, in which case a new figure
-                 is created.
+        @param font_pt:
+            size (in points) for rendering text in the
+            figure.  If 0, then use symbols instead (see legend above).
+        @param troll_list:
+            ...same as the argument with the same name
+            given to `add_trolls`.
+        @param axes:
+            Instance of matplotlib.axes._subplots.AxesSubplot
+            on which to draw, or None, in which case a new figure
+            is created.
         """
         if troll_list is None:
             troll_list = list()
@@ -412,9 +423,11 @@ class GridWorld:
                path=None, goal_order=False):
         """Return pretty-for-printing string.
 
-        @param show_grid: If True, then grid the pretty world and show
-                          row and column labels along the outer edges.
-        @param line_prefix: prefix each line with this string.
+        @param show_grid:
+            If True, then grid the pretty world and show
+            row and column labels along the outer edges.
+        @param line_prefix:
+            prefix each line with this string.
         """
         if path is None:
             path = list()
@@ -503,7 +516,8 @@ class GridWorld:
     def loads(self, gw_desc):
         """Reincarnate using given gridworld description string.
 
-        @param gw_desc: String containing a gridworld description.
+        @param gw_desc:
+            String containing a gridworld description.
 
         In a gridworld description, any line beginning with # is
         ignored (regarded as a comment). The first non-blank and
@@ -592,7 +606,8 @@ class GridWorld:
     def dumps(self, line_prefix=""):
         """Dump gridworld description string.
 
-        @param line_prefix: prefix each line with this string.
+        @param line_prefix:
+            prefix each line with this string.
         """
         if self.W is None:
             raise ValueError(
@@ -627,14 +642,17 @@ class GridWorld:
         Possible initial positions and goals are not included in the
         returned GridWorld instance.
 
-        @param size: (height, width)
-        @param prefix: String to be used as prefix for naming
-                 subgridworld cell variables.
-        @param extend: If True, then any size and offset is permitted,
-                 where any positions outside the actual gridworld are
-                 assumed to be occupied.
-
-        @rtype: `GridWorld`
+        @param size:
+            (height, width)
+        @param prefix:
+            String to be used as prefix for naming
+            subgridworld cell variables.
+        @param extend:
+            If True, then any size and offset is permitted,
+            where any positions outside the actual gridworld are
+            assumed to be occupied.
+        @rtype:
+            `GridWorld`
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
@@ -685,13 +703,15 @@ class GridWorld:
 
         Adjacency of cells is as returned by prop2partition.prop2part().
 
-        @param side_lengths: pair (W, H) giving width and height of
-                 each cell, assumed to be the same across the grid.
-        @param offset: 2-dimensional coordinate declaring where the
-                 bottom-left corner of the gridworld should be placed
-                 in the continuous space; default places it at the origin.
-
-        @rtype: `PropPreservingPartition<prop2part.PropPreservingPartition>`
+        @param side_lengths:
+            pair (W, H) giving width and height of
+            each cell, assumed to be the same across the grid.
+        @param offset:
+            2-dimensional coordinate declaring where the
+            bottom-left corner of the gridworld should be placed
+            in the continuous space; default places it at the origin.
+        @rtype:
+            `PropPreservingPartition<prop2part.PropPreservingPartition>`
         """
         try:
             from polytope import Polytope
@@ -763,18 +783,19 @@ class GridWorld:
         `GridWorld.__getitem__` and `extract_coord` provide
         reference implementations.
 
-        @param offset: index offset to apply when generating the
-                 specification; e.g., given prefix of "Y",
-                 offset=(2,1) would cause the variable for the cell at
-                 (0,3) to be named Y_2_4.
-
-        @param controlled_dyn: whether to treat this gridworld as
-                 describing controlled ("system") or uncontrolled
-                 ("environment") variables.
-
-        @param nonbool: If True, then use variables with integer domains.
-
-        @rtype: `GRSpec`
+        @param offset:
+            index offset to apply when generating the
+            specification; e.g., given prefix of "Y",
+            offset=(2,1) would cause the variable for the cell at
+            (0,3) to be named Y_2_4.
+        @param controlled_dyn:
+            whether to treat this gridworld as
+            describing controlled ("system") or uncontrolled
+            ("environment") variables.
+        @param nonbool:
+            If True, then use variables with integer domains.
+        @rtype:
+            `GRSpec`
         """
         if self.W is None:
             raise ValueError(
@@ -916,10 +937,12 @@ class GridWorld:
         initials and goals change their position only. If this world is of size
         (h, w) then the returned world will be of size (h*yf, w*xf).
 
-        @param xf: integer scaling factor for columns
-        @param yf: integer scaling factor for rows
-
-        @rtype: `GridWorld`
+        @param xf:
+            integer scaling factor for columns
+        @param yf:
+            integer scaling factor for rows
+        @rtype:
+            `GridWorld`
         """
         shape_scaled = (self.W.shape[0] * yf, self.W.shape[1] * xf)
         scaleW = np.zeros(shape_scaled, dtype=np.int32)
@@ -952,31 +975,36 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     result are possible; e.g., to obtain a description string, use
     `GridWorld.dumps`.
 
-    @param size: a pair, indicating number of rows and columns.
-    @param wall_density: the ratio of walls to total number of cells.
-    @param num_init: number of possible initial positions.
-    @param num_goals: number of positions to be visited infinitely often.
-    @param prefix: string to be used as prefix for naming gridworld
-             cell variables.
-
-    @param num_trolls: number of random trolls to generate, each
-             occupies an area of radius 1.  If nonzero, then a list
-             specifying the trolls will also be returned.
-
-    @param ensure_feasible: guarantee that all goals and initial
-             positions are mutually reachable, assuming a 4-connected
-             grid. This method may not be complete, i.e., may fail to
-             return a feasible random gridworld with the given
-             parameters.  Note that "feasibility" does not account for
-             nondeterminism (in particular, nonzero num_trolls
-             argument has no effect.)
-
-    @param timeout: if ensure_feasible, then quit if no correct random
-             world is found before timeout seconds.  If timeout is
-             None (default), then do not impose time constraints.
-
-    @rtype: `GridWorld`, or None if timeout occurs.
-
+    @param size:
+        a pair, indicating number of rows and columns.
+    @param wall_density:
+        the ratio of walls to total number of cells.
+    @param num_init:
+        number of possible initial positions.
+    @param num_goals:
+        number of positions to be visited infinitely often.
+    @param prefix:
+        string to be used as prefix for naming gridworld
+        cell variables.
+    @param num_trolls:
+        number of random trolls to generate, each
+        occupies an area of radius 1.  If nonzero, then a list
+        specifying the trolls will also be returned.
+    @param ensure_feasible:
+        guarantee that all goals and initial
+        positions are mutually reachable, assuming a 4-connected
+        grid. This method may not be complete, i.e., may fail to
+        return a feasible random gridworld with the given
+        parameters.  Note that "feasibility" does not account for
+        nondeterminism (in particular, nonzero num_trolls
+        argument has no effect.)
+    @param timeout:
+        if ensure_feasible, then quit if no correct random
+        world is found before timeout seconds.  If timeout is
+        None (default), then do not impose time constraints.
+    @rtype:
+        `GridWorld`, or
+        None if timeout occurs.
     """
     if ensure_feasible and timeout is not None:
         st = time.time()
@@ -1064,17 +1092,24 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     """Generate a narrow-passage world: this is a world containing
     two zones (initial, final) with a tube connecting them.
 
-    @param size: a pair, indicating number of rows and columns.
-    @param passage_width: the width of the connecting passage in cells.
-    @param passage_length: the length of the passage as a proportion of the
-                           width of the world.
-    @param num_init: number of possible initial positions.
-    @param num_goals: number of positions to be visited infinitely often.
-    @param ptop: row number of top of passage, default (None) is random
-    @param prefix: string to be used as prefix for naming gridworld
-                   cell variables.
-
-    @rtype: `GridWorld`
+    @param size:
+        a pair, indicating number of rows and columns.
+    @param passage_width:
+        the width of the connecting passage in cells.
+    @param passage_length:
+        the length of the passage as a proportion of the
+        width of the world.
+    @param num_init:
+        number of possible initial positions.
+    @param num_goals:
+        number of positions to be visited infinitely often.
+    @param ptop:
+        row number of top of passage, default (None) is random
+    @param prefix:
+        string to be used as prefix for naming gridworld
+        cell variables.
+    @rtype:
+        `GridWorld`
     """
     (w, h) = size
     if w < 3 or h < 3:
@@ -1107,10 +1142,13 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
 def unoccupied(size, prefix="Y"):
     """Generate entirely unoccupied gridworld of given size.
 
-    @param size: a pair, indicating number of rows and columns.
-    @param prefix: String to be used as prefix for naming gridworld
-                   cell variables.
-    @rtype: `GridWorld`
+    @param size:
+        a pair, indicating number of rows and columns.
+    @param prefix:
+        String to be used as prefix for naming gridworld
+        cell variables.
+    @rtype:
+        `GridWorld`
     """
     if len(size) < 2:
         raise TypeError("invalid gridworld size.")
@@ -1129,31 +1167,36 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
     controlled "Y gridworld" position and each troll, but not
     between trolls.
 
-    @type Y: `GridWorld`
-    @param Y: The controlled gridworld, describing in particular
-             static obstacles that must be respected by the trolls.
-
-    @param troll_list: List of pairs of center position, to which the
-             troll must always eventually return, and radius defining
-             the extent of the trollspace.  The radius is measured
-             using infinity-norm.
-    @param start_anywhere: If True, then initial troll position can be
-             anywhere in its trollspace.  Else (default), the troll is
-             assumed to begin each game at its center position.
-    @param nonbool: If True, then use variables with integer domains.
-    @param get_moves_lists: Consult returned value description below.
-
-    @rtype: (`GRSpec`, list)
-
-    @return: If get_moves_lists is True, then returns (spec, moves_N)
-             where spec is the specification incorporating all of the
-             trolls, and moves_N is a list of lists of states (where
-             "state" is given as a dictionary with keys of variable
-             names), where the length of moves_N is equal to the
-             number of trolls, and each element of moves_N is a list
-             of possible states of that the corresponding troll
-             (dynamic obstacle).  If get_moves_lists is False, then
-             moves_N is not returned and not computed.
+    @type Y:
+        `GridWorld`
+    @param Y:
+        The controlled gridworld, describing in particular
+        static obstacles that must be respected by the trolls.
+    @param troll_list:
+        List of pairs of center position, to which the
+        troll must always eventually return, and radius defining
+        the extent of the trollspace.  The radius is measured
+        using infinity-norm.
+    @param start_anywhere:
+        If True, then initial troll position can be
+        anywhere in its trollspace.  Else (default), the troll is
+        assumed to begin each game at its center position.
+    @param nonbool:
+        If True, then use variables with integer domains.
+    @param get_moves_lists:
+        Consult returned value description below.
+    @rtype:
+        (`GRSpec`, list)
+    @return:
+        If get_moves_lists is True, then returns (spec, moves_N)
+        where spec is the specification incorporating all of the
+        trolls, and moves_N is a list of lists of states (where
+        "state" is given as a dictionary with keys of variable
+        names), where the length of moves_N is equal to the
+        number of trolls, and each element of moves_N is a list
+        of possible states of that the corresponding troll
+        (dynamic obstacle).  If get_moves_lists is False, then
+        moves_N is not returned and not computed.
     """
     X = list()
     X_ID = -1
@@ -1261,20 +1304,21 @@ def extract_coord(var_name):
 def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
     """Animate a list of paths simultaneously in world Z using matplotlib.
 
-    @param Z: Gridworld for which paths were generated.
-
-    @param paths: List of paths to animate (one per robot). Each path
-             is a list of pairs of gridworld cells, i.e., of the form
-             [(r0, c0), (r1, c1), ...], where the first position is
-             row r0 and column c0, etc.
-
-    @param jitter: Random jitter added to each coordinate value in
-             animation.  Makes the robot's path more visible by
-             avoiding overlap.
-
-    @param save_prefix: If not None, do not show an animation but
-             produce a series of images "<save_prefix>nnn.png" which
-             can be compiled into an animated GIF.
+    @param Z:
+        Gridworld for which paths were generated.
+    @param paths:
+        List of paths to animate (one per robot). Each path
+        is a list of pairs of gridworld cells, i.e., of the form
+        [(r0, c0), (r1, c1), ...], where the first position is
+        row r0 and column c0, etc.
+    @param jitter:
+        Random jitter added to each coordinate value in
+        animation.  Makes the robot's path more visible by
+        avoiding overlap.
+    @param save_prefix:
+        If not None, do not show an animation but
+        produce a series of images "<save_prefix>nnn.png" which
+        can be compiled into an animated GIF.
     """
     try:
         import matplotlib.animation

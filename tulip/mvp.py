@@ -53,11 +53,13 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
         where ks_state is the state of the Kripke struture
         and aut_state is a tuple, representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
-    @param spec: the prioritized safety specification of type
+    @param spec:
+        the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
-    @param to_ap: the atomic proposition of to_prod_state
-
-    @rtype list of float
+    @param to_ap:
+        the atomic proposition of to_prod_state
+    @rtype:
+        list of float
     """
     from_spec_state = from_prod_state[1]
     to_spec_state = to_prod_state[1]
@@ -91,12 +93,16 @@ def _add_transition(
         where ks_state is the state of the Kripke struture
         and aut_state is a tuple, representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
-    @param ks: the Kripke structure
-    @param spec: the prioritized safety specification of type
+    @param ks:
+        the Kripke structure
+    @param spec:
+        the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
-    @param trans_ks_cost: the cost of transition from from_prod_state[0] to to_prod_state[0]
+    @param trans_ks_cost:
+        the cost of transition from from_prod_state[0] to to_prod_state[0]
         in ks
-    @param fa: the finite automaton
+    @param fa:
+        the finite automaton
     """
     for from_prod_state in from_prod_states:
         for to_prod_state in to_prod_states:
@@ -117,10 +123,11 @@ def _construct_weighted_product_automaton(ks, spec):
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param ks: the Kripke structure
-    @param spec: the prioritized safety specification of type
+    @param ks:
+        the Kripke structure
+    @param spec:
+        the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
-
     @return:
         (fa, null_state) where fa is the weighted product automaton of type
         tulip.transys.automata.WeightedFiniteStateAutomaton
@@ -165,15 +172,19 @@ def solve(ks, goal_label, spec):
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param ks: the Kripke structure
-    @param goal_label: a label in ks.atomic_propositions that indicates the goal
-    @param spec: the prioritized safety specification of type
+    @param ks:
+        the Kripke structure
+    @param goal_label:
+        a label in ks.atomic_propositions that indicates the goal
+    @param spec:
+        the prioritized safety specification of type
         tulip.spec.prioritized_safety.PrioritizedSpecification
-
-    @return: (best_cost, best_path, weighted_product_automaton) where
-       * best_cost is the optimal cost of reaching the goal
-       * best_path is the optimal path to the goal
-       * weighted_product_automaton is the weighted product automaton ks times spec
+    @return:
+        (best_cost, best_path, weighted_product_automaton) where
+        * best_cost is the optimal cost of reaching the goal
+        * best_path is the optimal path to the goal
+        * weighted_product_automaton is the weighted product
+          automaton ks times spec
     """
     assert isinstance(ks, KS)
     assert isinstance(spec, PrioritizedSpecification)

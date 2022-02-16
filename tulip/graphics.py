@@ -86,23 +86,32 @@ def newax(
         dim=2):
     """Create (possibly multiple) new axes handles.  (DEPRECATED)
 
-    @param fig: attach axes to this figure
-    @type fig: figure object,
+    @param fig:
+        attach axes to this figure
+    @type fig:
+        figure object,
         should be consistent with `dim`
-    @param subplots: number or layout of subplots
+    @param subplots:
+        number or
+        layout of subplots
     @type subplots:
         `int` or
         2-`tuple` of subplot layout
-    @param mode: return the axes shaped as a
+    @param mode:
+        return the axes shaped as a
         vector or as a matrix.
         This is a convenience for later iterations
         over the axes.
-    @type mode: 'matrix' | ['list']
-    @param dim: plot dimension:
+    @type mode:
+        'matrix'
+        | ['list']
+    @param dim:
+        plot dimension:
         - if `dim == 2`, then use `matplotlib`
         - if `dim == 3`, then use `mayavi`
         So the figure type depends on `dim`.
-    @return: `(ax, fig)` where:
+    @return:
+        `(ax, fig)` where:
         - `ax`: axes created
         - `fig`: parent of `ax`
     @rtype:
@@ -170,13 +179,19 @@ def dom2vec(domain, resolution):
     q = domain2vec(domain, resolution)
     ```
 
-    @param domain: extremal values of parallelepiped
-    @type domain: `[xmin, xmax, ymin, ymax, ...]`
-    @param resolution: # points / dimension
-    @type resolution: `[nx, ny, ...]`
-    @return: q = matrix of column vectors
+    @param domain:
+        extremal values of parallelepiped
+    @type domain:
+        `[xmin, xmax, ymin, ymax, ...]`
+    @param resolution:
+        # points / dimension
+    @type resolution:
+        `[nx, ny, ...]`
+    @return:
+        q = matrix of column vectors
         (meshgrid point coordinates)
-    @rtype: [#dim x #points]
+    @rtype:
+        [#dim x #points]
 
     See also:
         `vec2meshgrid`,
@@ -213,18 +228,31 @@ def quiver(x, v, ax=None, **kwargs):
         `matplotlib.quiver`,
         `mayavi.quiver3`
 
-    @param x: points where vectors are based
+    @param x:
+        points where vectors are based
         each column is a coordinate tuple
-    @type x: 2d lil | `numpy.ndarray`
-    @param v: vectors which to base at points x
-    @type v: 2d lil | `numpy.ndarray`
-    @param ax: axes handle, e.g., `ax = gca()`
-    @param x: matrix of points where vectors are plotted
-    @type x: [#dim x #points]
-    @param v: matrix of column vectors to plot at points x
-    @type v: [#dim x #points]
-    @param kwargs: plot formatting
-    @return: handle to plotted object(s)
+    @type x:
+        2d lil
+        | `numpy.ndarray`
+    @param v:
+        vectors which to base at points x
+    @type v:
+        2d lil
+        | `numpy.ndarray`
+    @param ax:
+        axes handle, e.g., `ax = gca()`
+    @param x:
+        matrix of points where vectors are plotted
+    @type x:
+        [#dim x #points]
+    @param v:
+        matrix of column vectors to plot at points x
+    @type v:
+        [#dim x #points]
+    @param kwargs:
+        plot formatting
+    @return:
+        handle to plotted object(s)
     """
     _assert_pyplot()
     # multiple axes ?

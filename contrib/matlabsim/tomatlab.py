@@ -27,17 +27,23 @@ def export(
     continuous state to discrete state,
     and a block that times simulation of `get_input`.
 
-    @param filename: string ending in `'.mat'`
-    @type filename: `str`
-    @param system: object to be saved in the `.mat` file.
+    @param filename:
+        string ending in `'.mat'`
+    @type filename:
+        `str`
+    @param system:
+        object to be saved in the `.mat` file.
     @type system:
         `LtiSysDyn` or
         `PwaSysDyn` or
         `HybridSysDyn`
-    @param filename: string containing name of
+    @param filename:
+        string containing name of
         the `.mat` file to be created
-    @type filename: `str`
-    @rtype: `None`
+    @type filename:
+        `str`
+    @rtype:
+        `None`
     """
     # Check whether we're discrete or continuous
     if (
@@ -184,10 +190,14 @@ def switched_export(switchedsys):
 def poly_export(poly):
     """Saves parts of a polytope as a dictionary for export to MATLAB.
 
-    @param poly: polytope that will be exported
-    @type poly: `Polytope`
-    @return: dictionary containing fields of `poly`
-    @rtype: `dict`
+    @param poly:
+        polytope that will be exported
+    @type poly:
+        `Polytope`
+    @return:
+        dictionary containing fields of `poly`
+    @rtype:
+        `dict`
     """
     if poly is None:
         return dict()
@@ -197,9 +207,12 @@ def poly_export(poly):
 def reg_export(reg):
     """Saves a region as a dictionary for export to MATLAB.
 
-    @type reg: `Region`
-    @return: dictionary containing a list of polytopes.
-    @rtype: `dict`
+    @type reg:
+        `Region`
+    @return:
+        dictionary containing a list of polytopes.
+    @rtype:
+        `dict`
     """
     return dict(list_poly=[poly_export(p) for p in reg.list_poly])
 
@@ -210,7 +223,8 @@ def export_locations(abstraction):
     @type abstraction:
         `AbstractPwa` or
         `AbstractSwitched`
-    @rtype output: `dict`
+    @rtype output:
+        `dict`
     """
     location_list = list()
     for i, region in enumerate(abstraction.ppp.regions):
@@ -224,7 +238,8 @@ def export_locations(abstraction):
 def export_mealy_io(variables, values):
     """Return declarations of variable types.
 
-    @rtype: `list` of `dict`
+    @rtype:
+        `list` of `dict`
     """
     vrs = list()
     for i, var in enumerate(variables):
@@ -247,7 +262,8 @@ def export_mealy(mealy_machine, is_continuous):
     a bit redundant, but makes writing the
     MATLAB code easier.
 
-    @rtype: `dict`
+    @rtype:
+        `dict`
     """
     SINIT = 'Sinit'
     # map from Mealy nodes to value of variable "loc"

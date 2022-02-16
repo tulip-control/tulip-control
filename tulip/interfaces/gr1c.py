@@ -98,7 +98,8 @@ def get_version():
     Failure to find the `gr1c` program or errors in parsing the received
     version string will cause an exception.
 
-    @return: `(major, minor, micro)`, a `tuple` of `int`
+    @return:
+        `(major, minor, micro)`, a `tuple` of `int`
     """
     try:
         v_str = subprocess.check_output(
@@ -215,19 +216,21 @@ def _untagdict(
 def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     """Return strategy constructed from output of `gr1c`.
 
-    @param x: a string or an instance of
+    @param x:
+        a string or an instance of
         `xml.etree.ElementTree.fromstring()`
-
-    @type spec0: `GRSpec`
-    @param spec0: GR(1) specification with which to interpret the
+    @type spec0:
+        `GRSpec`
+    @param spec0:
+        GR(1) specification with which to interpret the
         output of `gr1c` while constructing a `MealyMachine`, or
         `None` if the output from `gr1c` should be used as is.
         Note that `spec0` may differ from the specification in
         the given tulipcon XML string `x`.
         If you are unsure what to do, try setting `spec0` to
         whatever `gr1cint.synthesize` was invoked with.
-
-    @return: if a strategy is given in the XML string,
+    @return:
+        if a strategy is given in the XML string,
         return it as `networkx.DiGraph`.
         Else, return `(GRSpec, None)`,
         where the first element is the specification
@@ -373,8 +376,11 @@ def _parse_vars(variables, vardict):
 def load_aut_json(x):
     """Return strategy constructed from output of `gr1c`
 
-    @param x: string or file-like object
-    @return: strategy as `networkx.DiGraph`,
+    @param x:
+        string or
+        file-like object
+    @return:
+        strategy as `networkx.DiGraph`,
         like the return value of `load_aut_xml`
     """
     try:
@@ -436,7 +442,8 @@ def check_realizable(spec):
 
     Consult the documentation of `synthesize` about parameters.
 
-    @return: `True` if realizable, `False` if not,
+    @return:
+        `True` if realizable, `False` if not,
         or an error occurs.
     """
     logger.info('checking realizability...')
@@ -468,14 +475,17 @@ def check_realizable(spec):
 def synthesize(spec):
     """Synthesize strategy realizing the given specification.
 
-    @type spec: `GRSpec`
-    @param spec: specification.
+    @type spec:
+        `GRSpec`
+    @param spec:
+        specification.
 
     Consult the [documentation of `gr1c`](
         https://tulip-control.github.io/gr1c/md_spc_format.html#initconditions)
     for a detailed description.
 
-    @return: strategy as `networkx.DiGraph`,
+    @return:
+        strategy as `networkx.DiGraph`,
         or `None` if unrealizable or error occurs.
     """
     _assert_gr1c()
@@ -560,14 +570,20 @@ def select_options(spec):
 def load_mealy(filename, fformat='tulipxml'):
     """Load `gr1c` strategy from file.
 
-    @param filename: file name
-    @type filename: `str`
-    @param fformat: file format; can be one of
+    @param filename:
+        file name
+    @type filename:
+        `str`
+    @param fformat:
+        file format; can be one of
         `"tulipxml"` (default),
         `"json"`. Not case sensitive.
-    @type fformat: `str`
-    @return: loaded strategy as an annotated graph.
-    @rtype: `networkx.Digraph`
+    @type fformat:
+        `str`
+    @return:
+        loaded strategy as an annotated graph.
+    @rtype:
+        `networkx.Digraph`
     """
     s = open(filename, 'r').read()
     if fformat.lower() == 'tulipxml':

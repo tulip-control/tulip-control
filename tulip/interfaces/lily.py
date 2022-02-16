@@ -67,20 +67,29 @@ def synthesize(
     used if formula is of type `str`. Else, the variable dictionaries
     associated with the `LTL` or `GRSpec` object are used.
 
-    @param formula: linear temporal logic formula
-    @type formula: `str`, `LTL`, or `GRSpec`
-
-    @param env_vars: uncontrolled variables (inputs); used only if
+    @param formula:
+        linear temporal logic formula
+    @type formula:
+        `str`,
+        `LTL`, or
+        `GRSpec`
+    @param env_vars:
+        uncontrolled variables (inputs); used only if
         `formula` is of type `str`
-    @type env_vars: `dict` or None
-
-    @param sys_vars: controlled variables (outputs); used only if
+    @type env_vars:
+        `dict` or
+        None
+    @param sys_vars:
+        controlled variables (outputs); used only if
         `formula` is of type `str`
-    @type sys_vars: `dict` or None
-
-    @return: symbolic Moore transducer
+    @type sys_vars:
+        `dict` or
+        None
+    @return:
+        symbolic Moore transducer
         (guards are conjunctions, not sets)
-    @rtype: `MooreMachine`
+    @rtype:
+        `MooreMachine`
     """
     if isinstance(formula, GRSpec):
         env_vars = formula.env_vars
@@ -148,8 +157,8 @@ def _lily_strategy2moore(
     @param text:
         Moore strategy game graph,
         described in output from Lily
-
-    @rtype: `MooreMachine`
+    @rtype:
+        `MooreMachine`
     """
     lines = text.splitlines()
     def is_node_or_edge(line):
@@ -244,8 +253,10 @@ def _lily_strategy2moore(
 def _parse_label(s):
     """Return `dict` from variable conjunction.
 
-    @type s: `str`
-    @rtype: `dict`
+    @type s:
+        `str`
+    @rtype:
+        `dict`
     """
     l = re.findall(r'(\w+)=(0|1)', s)
     return {k: bool(int(v)) for k, v in l}

@@ -454,10 +454,11 @@ class FiniteTransitionSystem(LabeledDiGraph):
             sys_actions=None):
         """Instantiate finite transition system.
 
-        @param env_actions: environment (uncontrolled) actions,
+        @param env_actions:
+            environment (uncontrolled) actions,
             defined as `edge_label_types` in `LabeledDiGraph.__init__`
-
-        @param sys_actions: system (controlled) actions, defined as
+        @param sys_actions:
+            system (controlled) actions, defined as
             `edge_label_types` in `LabeledDiGraph.__init__`
         """
         self._owner = 'sys'
@@ -621,31 +622,39 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     ========
     `tuple2ba`
 
-    @param S: set of states
-    @type S: iterable of hashables
-
-    @param S0: set of initial states, must be \\subset S
-    @type S0: iterable of elements from S
-
-    @param AP: set of Atomic Propositions for state labeling:
+    @param S:
+        set of states
+    @type S:
+        iterable of hashables
+    @param S0:
+        set of initial states, must be \\subset S
+    @type S0:
+        iterable of elements from S
+    @param AP:
+        set of Atomic Propositions for state labeling:
             L: S-> 2^AP
-    @type AP: iterable of hashables
-
-    @param L: state labeling definition
-    @type L: iterable of (state, AP_label) pairs:
+    @type AP:
+        iterable of hashables
+    @param L:
+        state labeling definition
+    @type L:
+        iterable of (state, AP_label) pairs:
         [(state0, {'p'} ), ...]
         | None, to skip state labeling.
-
-    @param Act: set of Actions for edge labeling:
+    @param Act:
+        set of Actions for edge labeling:
             R: E-> Act
-    @type Act: iterable of hashables
-
-    @param trans: transition relation
-    @type trans: list of triples: [(from_state, to_state, act), ...]
+    @type Act:
+        iterable of hashables
+    @param trans:
+        transition relation
+    @type trans:
+        list of triples: [(from_state, to_state, act), ...]
         where act \\in Act
-
-    @param name: used for file export
-    @type name: str
+    @param name:
+        used for file export
+    @type name:
+        str
     """
     def pair_labels_with_states(states, state_labeling):
         if state_labeling is None:
@@ -758,20 +767,23 @@ def line_labeled_with(L, m=0):
     ========
     `cycle_labeled_with`
 
-    @param L: state labeling
-    @type L: iterable of state labels, e.g.,:
+    @param L:
+        state labeling
+    @type L:
+        iterable of state labels, e.g.,:
 
-    ```
-    [{'p', '!p', 'q',...]
-    ```
+        ```
+        [{'p', '!p', 'q',...]
+        ```
 
-    Single strings are identified with singleton Atomic Propositions,
-    so [..., 'p',...] and [...,{'p'},...] are equivalent.
-
-    @param m: starting index
-    @type m: int
-
-    @return: `FTS` with:
+        Single strings are identified with singleton Atomic Propositions,
+        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+    @param m:
+        starting index
+    @type m:
+        int
+    @return:
+        `FTS` with:
         - states `['s0', ..., 'sN']`, where `N = len(L) - 1`
         - state labels defined by `L`,
           so `s0` is labeled with `L[0]`, etc.
@@ -814,15 +826,17 @@ def cycle_labeled_with(L):
     ========
     `line_labeled_with`
 
-    @param L: state labeling
-    @type L: iterable of state labels, e.g.,
+    @param L:
+        state labeling
+    @type L:
+        iterable of state labels, e.g.,
         `[{'p', 'q'}, ...]`
         Single strings are identified with
         singleton Atomic Propositions,
         so `[..., 'p',...]` and `[...,{'p'},...]`
         are equivalent.
-
-    @return: `FTS` with:
+    @return:
+        `FTS` with:
         - states `['s0', ..., 'sN']`,
           where `N = len(L) - 1`
         - state labels defined by `L`,
@@ -851,10 +865,12 @@ def add_initial_states(ts, ap_labels):
     add_initial_states(ofts, initial_labels)
     ```
 
-    @type ts: `FiniteTransitionSystem`
-
-    @param ap_labels: labels, each comprised of atomic propositions
-    @type ap_labels: iterable of sets of elements from
+    @type ts:
+        `FiniteTransitionSystem`
+    @param ap_labels:
+        labels, each comprised of atomic propositions
+    @type ap_labels:
+        iterable of sets of elements from
         ts.atomic_propositions
     """
     for label in ap_labels:
@@ -865,7 +881,8 @@ def add_initial_states(ts, ap_labels):
 def _dumps_states(g):
     """Dump string of transition system states.
 
-    @type g: `FTS`
+    @type g:
+        `FTS`
     """
     nodes = g
     a = list()
@@ -917,20 +934,24 @@ class GameGraph(LabeledDiGraph):
         "controlled" means that player `n`
         gets to decide the successor state.
 
-        @param n: player index (id number)
-        @type n: 0 or 1
-
-        @return: set of states
-        @rtype: `set`
+        @param n:
+            player index (id number)
+        @type n:
+            0 or 1
+        @return:
+            set of states
+        @rtype:
+            `set`
         """
         return {x for x in self if self.nodes[x]['player'] == n}
 
     def edge_controlled_by(self, e):
         """Return the index of the player controlling edge `e`.
 
-        @type e: 2-tuple of nodes `(n1, n2)`
-
-        @rtype: integer 0 or 1
+        @type e:
+            2-tuple of nodes `(n1, n2)`
+        @rtype:
+            integer 0 or 1
         """
         from_state = e[0]
         return self.nodes[from_state]['player']
@@ -972,12 +993,18 @@ class LabeledGameGraph(GameGraph):
 def _pre(graph, list_n):
     """Find union of predecessors of nodes in graph defined by `MultiDiGraph`.
 
-    @param graph: a graph structure corresponding to a FTS.
-    @type graph: `networkx.MultiDiGraph`
-    @param list_n: list of nodes whose predecessors need to be returned
-    @type list_n: list of nodes in `graph`
-    @return: set of predecessors of `list_n`
-    @rtype: `set`
+    @param graph:
+        a graph structure corresponding to a FTS.
+    @type graph:
+        `networkx.MultiDiGraph`
+    @param list_n:
+        list of nodes whose predecessors need to be returned
+    @type list_n:
+        list of nodes in `graph`
+    @return:
+        set of predecessors of `list_n`
+    @rtype:
+        `set`
     """
     pre_set = set()
     for n in list_n:
@@ -991,14 +1018,19 @@ def _output_fts(ts, transitions, sol):
     The returned FTS does not contain any edge attribute in the original FTS.
     All the transitions are assumed to be controllable.
 
-    @param ts: the input finite transition system
-    @type ts: `FTS`
-    @param Part: the final partition
-    @type Part: `networkx.MultiDiGraph`
-
-    @return: the bi/dual simulation abstraction, and the
+    @param ts:
+        the input finite transition system
+    @type ts:
+        `FTS`
+    @param Part:
+        the final partition
+    @type Part:
+        `networkx.MultiDiGraph`
+    @return:
+        the bi/dual simulation abstraction, and the
         partition of states in input ts
-    @rtype: `FTS`, and `dict` with keys `ts2simu` and `simu2ts`.
+    @rtype:
+        `FTS`, and `dict` with keys `ts2simu` and `simu2ts`.
         `ts2simu` maps nodes from input FTS to output FTS and `simu2ts`
         maps the nodes of two FTS in the other direction.
     """
@@ -1046,13 +1078,18 @@ def _output_fts(ts, transitions, sol):
 def simu_abstract(ts, simu_type):
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
 
-    @param ts: input finite transition system, the one you want to get
-                    its bi/dual-simulation abstraction.
-    @type ts: `FTS`
-    @param simu_type: string 'bi'/'dual', flag used to switch b.w.
-                      bisimulation algorithm and dual-simulation algorithm.
-    @return: the bi/dual simulation, and the corresponding partition.
-    @rtype: `FTS`, `dict`
+    @param ts:
+        input finite transition system, the one you want to get
+        its bi/dual-simulation abstraction.
+    @type ts:
+        `FTS`
+    @param simu_type:
+        string 'bi'/'dual', flag used to switch b.w.
+        bisimulation algorithm and dual-simulation algorithm.
+    @return:
+        the bi/dual simulation, and the corresponding partition.
+    @rtype:
+        `FTS`, `dict`
 
 
     References

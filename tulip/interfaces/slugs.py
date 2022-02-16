@@ -59,7 +59,8 @@ def check_realizable(spec):
 
     Consult the documentation of `synthesize` about parameters.
 
-    @return: `True` if realizable,
+    @return:
+        `True` if realizable,
         `False` if not, or an error occurs.
     """
     if isinstance(spec, GRSpec):
@@ -77,10 +78,14 @@ def check_realizable(spec):
 def synthesize(spec, symbolic=False):
     """Return strategy satisfying the specification `spec`.
 
-    @type spec: `GRSpec` or `str` in structured slugs syntax.
-    @return: If realizable return synthesized strategy,
+    @type spec:
+        `GRSpec` or
+        `str` in structured slugs syntax.
+    @return:
+        If realizable return synthesized strategy,
         otherwise `None`.
-    @rtype: `networkx.DiGraph`
+    @rtype:
+        `networkx.DiGraph`
     """
     if isinstance(spec, GRSpec):
         assert not spec.moore
@@ -126,8 +131,10 @@ def synthesize(spec, symbolic=False):
 def _bitfields_to_ints(bit_state, vrs):
     """Convert bitfield representation to integers.
 
-    @type line: `str`
-    @type vrs: `dict`
+    @type line:
+        `str`
+    @type vrs:
+        `dict`
     """
     int_state = dict()
     for var, dom in vrs.items():

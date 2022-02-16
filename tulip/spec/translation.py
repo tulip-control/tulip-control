@@ -321,8 +321,11 @@ def _to_wring(d):
 def convert_domain(dom):
     """Return equivalent integer domain if `dom` contais strings.
 
-    @type dom: `list` of `str`
-    @rtype: `'boolean'` or `(min_int, max_int)`
+    @type dom:
+        `list` of `str`
+    @rtype:
+        `'boolean'` or
+        `(min_int, max_int)`
     """
     # not a string variable ?
     if not isinstance(dom, list):
@@ -386,12 +389,16 @@ def translate(spec, lang):
     Consult the respective documentation in `tulip.interfaces`
     concerning formats and links to further reading.
 
-    @type spec: `GRSpec`
-    @type lang: 'gr1c', 'slugs', 'jtlv', or 'wring'
-
-    @return: spec formatted for input to tool; the type of the return
-    value depends on the tool:
-
+    @type spec:
+        `GRSpec`
+    @type lang:
+        'gr1c',
+        'slugs',
+        'jtlv', or
+        'wring'
+    @return:
+        spec formatted for input to tool; the type of the return
+        value depends on the tool:
         - `str` if gr1c or slugs
         - (assumption, guarantee), where each element of the tuple is `str`
     """
@@ -412,12 +419,20 @@ def translate(spec, lang):
 def translate_ast(tree, lang):
     """Return AST of formula `tree`.
 
-    @type tree: `Nodes.Node`
-    @type lang: 'gr1c' or 'slugs' or 'jtlv' or
-      'promela' or 'smv' or 'python' or 'wring'
-
-    @return: tree using AST nodes of `lang`
-    @rtype: `FOL.Node`
+    @type tree:
+        `Nodes.Node`
+    @type lang:
+        'gr1c' or
+        'slugs' or
+        'jtlv' or
+        'promela' or
+        'smv' or
+        'python' or
+        'wring'
+    @return:
+        tree using AST nodes of `lang`
+    @rtype:
+        `FOL.Node`
     """
     if lang == 'python':
         return _ast_to_python(tree, lang2nodes[lang])

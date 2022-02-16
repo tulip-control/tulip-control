@@ -150,12 +150,13 @@ class Parser:
     def parse(self, ltl2ba_output):
         """Return a Buchi automaton from parsing `ltl2ba_output`.
 
-        @return: Buchi automaton as a 3-`tuple` containing:
-          - `dict` mapping symbols to types (all `"boolean"`)
-          - `networkx.MultiDiGraph`, each edge labeled with a
-            `"guard"` that is a Boolean formula as `str`
-          - `set` of initial nodes
-          - `set` of accepting nodes
+        @return:
+            Buchi automaton as a 3-`tuple` containing:
+            - `dict` mapping symbols to types (all `"boolean"`)
+            - `networkx.MultiDiGraph`, each edge labeled with a
+              `"guard"` that is a Boolean formula as `str`
+            - `set` of initial nodes
+            - `set` of accepting nodes
         """
         self.g = nx.MultiDiGraph()
         # flat is better than nested
@@ -265,11 +266,14 @@ def call_ltl2ba(formula, prefix=''):
     =======
     `ltl2ba`: <http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/>
 
-    @param formula: LTL formula for input to `ltl2ba`
-    @type formula: `str`
-
-    @return: Buchi Automaton
-    @rtype: `tulip.transys.BA`
+    @param formula:
+        LTL formula for input to `ltl2ba`
+    @type formula:
+        `str`
+    @return:
+        Buchi Automaton
+    @rtype:
+        `tulip.transys.BA`
     """
     try:
         subprocess.call(

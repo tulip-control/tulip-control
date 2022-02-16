@@ -46,7 +46,8 @@ from tulip.transys.mathfunc import FunctionOnLabeledState
 def build_stormpy_model(path):
     """Return the `stormpy` model created from the `prism` file.
 
-    @type path: a string indicating the path to the `prism` file
+    @type path:
+        a string indicating the path to the `prism` file
     """
     prism_program = stormpy.parse_prism_program(path)
     return stormpy.build_model(prism_program)
@@ -72,7 +73,8 @@ def print_stormpy_model(model):
 def get_action_map(stormpy_model, tulip_transys):
     """Get a map of action of `stormpy_model` and that of `tulip_transys`.
 
-    @return a dictionary whose key is
+    @return:
+        a dictionary whose key is
         the string representation of an action of `stormpy_model`
         and value is the corresponding action of `tulip_transys`
     """
@@ -128,7 +130,8 @@ def to_tulip_labels(stormpy_state, tulip_transys):
     This typically involves getting rid of `stormpy` internal labels such as
     `"init"`, `"deadlock"`, etc.
 
-    @return a `MathSet` object corresponding to
+    @return:
+        a `MathSet` object corresponding to
         the set of atomicic propositions
         of `stormpy_state` in `tulip_transys`
     """
@@ -166,7 +169,8 @@ def to_tulip_transys(path):
     `MarkovDecisionProcess` object,
     created from the `prism` file.
 
-    @type path: a string indicating the path to the `prism` file
+    @type path:
+        a string indicating the path to the `prism` file
     """
     # Convert a state of prism file
     # (typically represented by an integer) to
@@ -216,9 +220,13 @@ def to_tulip_transys(path):
 def to_prism_file(ts, path):
     """Write a prism file corresponding to ts
 
-    @type ts: `MarkovChain` or `MarkovDecisionProcess`
-    @param path: path of output `prism` file
-    @type path: `str`
+    @type ts:
+        `MarkovChain` or
+        `MarkovDecisionProcess`
+    @param path:
+        path of output `prism` file
+    @type path:
+        `str`
     """
     # Only deal with MDP and MC with a unique initial state
     assert type(ts) == MDP or type(ts) == MC
@@ -334,19 +342,25 @@ def model_checking(
         extract_policy=False):
     """Model check `tulip_transys` against `formula`.
 
-    @type tulip_transys: `MarkovChain` or
+    @type tulip_transys:
+        `MarkovChain` or
         `MarkovDecisionProcess`
-    @param formula: a string describing PCTL formula
+    @param formula:
+        a string describing PCTL formula
         according to Prism format
-    @type formula: `str`
-    @param prism_file_path: a string indicating the
+    @type formula:
+        `str`
+    @param prism_file_path:
+        a string indicating the
         path to export the intermediate
         `prism` file (mostly for debugging purposes)
-    @type prism_file_path: `str`
-    @param extract_policy: boolean that indicates
+    @type prism_file_path:
+        `str`
+    @param extract_policy:
+        boolean that indicates
         whether to extract policy
-    @type extract_policy: `bool`
-
+    @type extract_policy:
+        `bool`
     @return:
         result
         - If `extract_policy == False`,

@@ -75,8 +75,10 @@ def labeled_digraph2d3(
     ========
     `FSM`, `BA`, `Mealy`
 
-    @param graph: labeled graph to export
-    @type graph: `LabeledDiGraph`
+    @param graph:
+        labeled graph to export
+    @type graph:
+        `LabeledDiGraph`
     """
     file_path = inspect.getfile(
         inspect.currentframe())

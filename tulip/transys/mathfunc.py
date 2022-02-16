@@ -151,7 +151,8 @@ class FunctionOnLabeledState:
     def get_state_and_input_dict(self, input_tuple):
         """Separate a given tuple into state and other input.
 
-        @return: a `tuple` `(state, input_dict)` where
+        @return:
+            a `tuple` `(state, input_dict)` where
             - `state` is the state
             - `input_dict` is a dictionary of input keys and values
         """
@@ -169,7 +170,8 @@ class FunctionOnLabeledState:
     def get_output_dict(self, output_tuple):
         """Convert a tuple of outputs to a dictionary.
 
-        @return: `dict` whose keys are the output keys and
+        @return:
+            `dict` whose keys are the output keys and
             values are their corresponding values
             obtained from the given tuple
         """
@@ -184,7 +186,8 @@ class FunctionOnLabeledState:
     def get_output_tuple(self, output_dict):
         """Convert an output dictionary to a tuple.
 
-        @return: a tuple of output
+        @return:
+            a tuple of output
         """
         if len(output_dict) == 0:
             return None
@@ -195,7 +198,8 @@ class FunctionOnLabeledState:
     def get_state_input_output_pair(self, state, input_dict):
         """Find the first element with the given state and additional input.
 
-        @return: a `LabeledStateInputOutputPair` object `obj`
+        @return:
+            a `LabeledStateInputOutputPair` object `obj`
             in `self._state_input_output_list`
             such that `obj.is_at(state, input_dict)`
         """

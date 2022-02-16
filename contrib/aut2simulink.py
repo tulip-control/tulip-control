@@ -75,9 +75,10 @@ class AutomatonState:
 def question(string):
     """This function asks a yes/no question and returns the answer.
 
-    @param string: The question to use as the prompt.
-
-    @return: The "answer" return value is one of "yes" or "no".  The
+    @param string:
+        The question to use as the prompt.
+    @return:
+        The "answer" return value is one of "yes" or "no".  The
         default is "yes". (The default occurs if the user only presses
         the RETURN button.)
     """
@@ -103,7 +104,8 @@ def question(string):
 def load_file(aut_file):
     """Construct an AutomatonState object from aut_file and place in a Queue.
 
-    @param aut_file: the name of the text file containing the
+    @param aut_file:
+        the name of the text file containing the
         automaton, or an (open) file-like object.
     """
     if isinstance(aut_file, str):
@@ -130,7 +132,8 @@ def read_variables(smv_file):
     """Put the enviroment and system variables from smv_file in two different
     Queues called system and enviroment.
 
-    @param smv_file: the name of the text file containing the
+    @param smv_file:
+        the name of the text file containing the
         automaton, or an (open) file-like object.
     """
     if isinstance(smv_file, str):
