@@ -49,7 +49,8 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param from_prod_state, to_prod_state are tuple (ks_state, aut_state)
+    @param from_prod_state, to_prod_state:
+        tuple (ks_state, aut_state)
         where ks_state is the state of the Kripke struture
         and aut_state is a tuple, representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
@@ -89,7 +90,8 @@ def _add_transition(
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param from_prod_state, to_prod_state are tuple (ks_state, aut_state)
+    @param from_prod_state, to_prod_state:
+        tuple (ks_state, aut_state)
         where ks_state is the state of the Kripke struture
         and aut_state is a tuple, representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
