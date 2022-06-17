@@ -37,7 +37,7 @@ else:
 try:
     targ_ind = sys.argv.index("-t")
     if targ_ind > len(sys.argv)-2:
-        print("Invalid use of -t flag.  Try \"-h\"")
+        print('Invalid use of -t flag.  Try "-h"')
         sys.exit(1)
 except ValueError:
     targ_ind = -1
@@ -49,7 +49,7 @@ else:
 try:
     garg_ind = sys.argv.index("-g")
     if garg_ind > len(sys.argv)-2:
-        print("Invalid use of -g flag.  Try \"-h\"")
+        print('Invalid use of -g flag.  Try "-h"')
         sys.exit(1)
 except ValueError:
     garg_ind = -1
@@ -64,7 +64,7 @@ if "-p" in sys.argv:
     try:
         iarg_ind = sys.argv.index("-i")+1
         if iarg_ind > len(sys.argv)-1:
-            print("Invalid use of -i flag.  Try \"-h\"")
+            print('Invalid use of -i flag.  Try "-h"')
             sys.exit(1)
     except ValueError:
         iarg_ind = -1

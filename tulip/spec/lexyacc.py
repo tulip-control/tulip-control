@@ -37,13 +37,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import logging
-logger = logging.getLogger(__name__)
 import warnings
 import ply.lex
 import ply.yacc
 import tulip.spec.ast
 
 
+logger = logging.getLogger(__name__)
 TABMODULE = 'tulip.spec.ltl_parsetab'
 LEX_LOGGER = 'tulip.ltl_lex_log'
 YACC_LOGGER = 'tulip.ltl_yacc_log'
@@ -58,8 +58,8 @@ class Lexer(object):
         'ite': 'ITE',
         'next': 'NEXT',
         'X': 'NEXT',
-        'false': 'FALSE',
-        'true': 'TRUE',
+        'FALSE': 'FALSE',
+        'TRUE': 'TRUE',
         'G': 'ALWAYS',
         'F': 'EVENTUALLY',
         'U': 'UNTIL',
@@ -85,11 +85,9 @@ class Lexer(object):
         t.value = self.values.get(t.value, t.value)
         t.type = self.reserved.get(t.value, 'NAME')
         # special treatment
-        if t.value.lower() in {'false', 'true'}:
-            t.type = self.reserved[t.value.lower()]
+        if t.value.upper() in {'FALSE', 'TRUE'}:
+            t.type = self.reserved[t.value.upper()]
         return t
-
-    # t_PRIME  = r'\''
 
     def t_ALWAYS(self, t):
         r'\[\]'
@@ -98,49 +96,49 @@ class Lexer(object):
         return t
 
     def t_EVENTUALLY(self, t):
-        r'\<\>'
+        r'<>'
         t.value = 'F'
         return t
 
     def t_AND(self, t):
-        r'\&\&|\&'
+        r'\&\&|\&|/\\'
         t.value = '&'
         return t
 
     def t_OR(self, t):
-        r'\|\||\|'
+        r'\|\||\||\\/'
         t.value = '|'
         return t
 
-    t_NOT = r'\!'
+    t_NOT = r'!|\~'
 
     t_XOR = r'\^'
 
-    t_EQUALS = r'\='  # a declarative language has no assignment
-    t_NEQUALS = r'\!\='
-    t_LT = r'\<'
-    t_LE = r'\<\='
-    t_GT = r'>\='
+    t_EQUALS = r'='  # a declarative language has no assignment
+    t_NEQUALS = r'!=|/='
+    t_LT = r'<'
+    t_LE = r'<=|=<'
+    t_GT = r'>='
     t_GE = r'>'
 
     t_LPAREN = r'\('
     t_RPAREN = r'\)'
     t_NUMBER = r'\d+'
 
-    t_IMP = '->'
-    t_BIMP = '\<->'
+    t_IMP = r'\->|=>'
+    t_BIMP = r'<\->|<=>'
 
     t_PLUS = r'\+'
-    t_MINUS = r'-'
+    t_MINUS = r'\-'
     t_TIMES = r'\*'
     t_DIV = r'/'
     t_TRUNCATE = r'<<>>'
     t_COMMA = r','
 
-    t_DQUOTES = r'\"'
-    t_PRIME = r"\'"
+    t_DQUOTES = r'"'
+    t_PRIME = r"'"
 
-    t_ignore = " \t"
+    t_ignore = ' \t'
 
     def t_comment(self, t):
         r'\#.*'
@@ -148,7 +146,7 @@ class Lexer(object):
 
     def t_newline(self, t):
         r'\n+'
-        t.lexer.lineno += t.value.count("\n")
+        t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
         warnings.warn('Illegal character "{t}"'.format(t=t.value[0]))

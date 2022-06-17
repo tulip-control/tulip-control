@@ -5,10 +5,34 @@ TuLiP is developed for synthesis of discrete controllers for hybrid control
 systems, including supervisory controllers, switching controllers and
 receding horizon temporal logic planners (not supported in this version).
 
+To design a system, humans start by expressing the intended design in
+mathematics. This mathematical description is then given to a computer,
+which computes a controller to be used for creating the physical system.
+
+.. image:: tulip_workflow.png
+   :alt: Overview of what TuLiP does.
+
+Whether a controller exists, and whether the computer succeeds in finding
+a controller, depend on the feasibility of the specification, as well as the
+computational resources available and the algorithms used.
+
+The main elements that the mathematical specification describes are:
+
+* Goal
+* Physics
+* Environment
+
+The goal is what we want the system to accomplish.
+The physics is how the system behaves in the real world, e.g., inertia.
+The environment is the rest of the world, and what assumptions are made
+about how it interacts with the system that is being designed.
+
+
 Synthesis of Reactive Controllers
 ---------------------------------
 To illustrate the basic synthesis capabilities of TuLiP, we synthesize a
 simple discrete state controller for a robotic motion control system.
+
 
 Problem Formulation
 ```````````````````
@@ -120,6 +144,16 @@ system synthesis consists of the following main steps:
    3. :ref:`Digital design synthesis,<ssec:syn>`
       by solving games of infinite duration.
 
+These steps are summarized in the following figure:
+
+.. image:: tulip_summary.png
+   :alt: Overview of TuLiP input, computation, and output.
+
+In particular, realizability of the specification (together with the
+abstracted continuous dynamics) is decided in the middle of this image,
+by using reactive synthesis algorithms.
+
+
 .. _ssec:prop-part:
 
 Proposition Preserving Partition of Continuous State Space
@@ -149,6 +183,41 @@ the evolution of the continuous state as in :eq:`dynamics`,
 we refine the partition based on the reachability relation between cells
 and obtain a finite state abstraction of the evolution of the continuous state,
 represented by a finite transition system.
+
+The abstraction algorithms that are implemented in TuLiP take the:
+
+* description of the dynamics as difference equations that
+  are piecewise-affine over a polytopic partition, together with the
+
+* proposition-preserving partition of the continuous state space,
+
+and refine them into a (discrete) graph and a new partition of the state space
+into polytopes. These polytopes can be smaller in size than the polytopes
+that comprise the proposition-preserving partition.
+
+The nodes of this graph (which is generated from the abstraction algorithm)
+correspond to the polytopes of this new partition of the state space.
+The arcs (directed edges) that connect the nodes represent feasible transitions
+in the continuous state space.
+
+When creating these arcs, the abstraction algorithm ensures that it will be
+possible to guide the system from the source region (polytope) of the arc,
+to the destination region of the arc, in the presence of any environment
+disturbances specified in the difference equations.
+
+Ensuring this property during abstraction is necessary to enable the
+implementation of the discrete controller, that is synthesized automatically
+in a later step described below, by continuous feedback controllers.
+
+The next figure shows this abstraction step. We start from the proposition
+preserving partition on the left, together with the dynamics, and
+obtain by abstraction the discrete graph and matching partition on the right.
+
+.. image:: abstracting_dynamics.png
+   :alt: Abstracting the dynamics by refining the polytopic partition of
+         the state space, and creating a graph that corresponds to this
+         partition, and to the transitions that are implementable between
+         regions of this partition.
 
 The LtiSysDyn class is used to define continuous dynamics.
 
@@ -209,7 +278,7 @@ continuous state variables by the formula :math:`\displaystyle{\bigvee_{j
 
 Putting everything together, we now obtain a specification of the form in
 :eq:`spec` (see also :doc:`specifications`).  We can then use a GR(1) game
-solver, as those available in `omega <https://github.com/johnyf/omega>`_
+solver, as those available in `omega <https://github.com/tulip-control/omega>`_
 and `gr1c <http://scottman.net/2012/gr1c>`_
 to automatically synthesize a strategy that
 ensures the satisfaction of the specification, taking into account all the
@@ -218,6 +287,14 @@ possible behaviors of the environment.  This is done using the
 
     .. autofunction:: synth.synthesize
 	:noindex:
+
+This synthesis step is conceptually depicted in the next figure,
+where the synthesis algorithms are used to decide whether a strategy exists
+that guarantees the specification requirements, under the specification
+assumptions. If such a strategy exists, then it is constructed.
+
+.. image:: strategy_synthesis.png
+   :alt: Reactive synthesis can be regarded as solving a discrete game.
 
 More details about how Moore/Mealy capability,
 the assume-guarantee form of specification, and

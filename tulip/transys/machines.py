@@ -90,7 +90,7 @@ def create_machine_ports(spc_vars):
 
 
 class Transducer(LabeledDiGraph):
-    """Sequential Transducer, i.e., a letter-to-letter function.
+    r"""Sequential Transducer, i.e., a letter-to-letter function.
 
     Inputs
     ======
@@ -133,7 +133,7 @@ class Transducer(LabeledDiGraph):
             in the set of possible values Vp.
 
           - C{__call__(guard_set, input_port_value) }:
-            check if C{input_port_value} \\in C{guard_set}
+            check if C{input_port_value} \in C{guard_set}
             This allows symbolic type definitions.
 
             For example, C{input_port_value} might be assigned
@@ -354,8 +354,8 @@ class MooreMachine(Transducer):
             # inform state vars
             self.outputs[port_name] = port_type
             # printing format
-            self._state_dot_label_format[port_name] = \
-                '/' + str(port_name)
+            self._state_dot_label_format[port_name] = (
+                '/' + str(port_name))
             if masks is None:
                 continue
             if port_name in masks:
@@ -493,11 +493,11 @@ class MealyMachine(Transducer):
             # append
             self._transition_label_def[port_name] = port_type
             # inform state vars
-            self.outputs[port_name] = \
-                self._transition_label_def[port_name]
+            self.outputs[port_name] = (
+                self._transition_label_def[port_name])
             # printing format
-            self._transition_dot_label_format[port_name] = \
-                '/' + str(port_name)
+            self._transition_dot_label_format[port_name] = (
+                '/' + str(port_name))
             if masks is None:
                 continue
             if port_name in masks:

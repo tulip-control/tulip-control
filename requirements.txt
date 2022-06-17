@@ -1,16 +1,15 @@
 # usage: `pip install -r requirements.txt`
-pip>=7.1.2
-
-ply==3.10
-networkx==2.4
-scipy
+pip>=9.0.0
+setuptools>=39.0.0
 
 # easy extras
-omega==0.3.1
 gr1py==0.2.0
 
 # extras (uncomment as needed)
-# cvxopt==1.1.7  # for faster polytopic operations
+# cvxopt==...  # for faster polytopic operations.
+    # Choose the version of `cvxopt` based on
+    # what is required by the version of the
+    # package `polytope` that is installed.
 # matplotlib  # for plots
 
 # tests

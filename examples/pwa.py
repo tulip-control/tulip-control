@@ -40,8 +40,8 @@ cont_state_space = box2poly([[0., 3.], [0., 2.]])
 
 # @subsystem0@
 def subsys0():
-    A = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    B = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    A = np.array([[1.105_2, 0.], [ 0., 1.105_2]])
+    B = np.array([[1.105_2, 0.], [ 0., 1.105_2]])
     E = np.array([[1,0], [0,1]])
 
     U = box2poly([[-1., 1.], [-1., 1.]])
@@ -60,8 +60,8 @@ def subsys0():
 
 # @subsystem1@
 def subsys1():
-    A = np.array([[0.9948, 0.], [0., 1.1052]])
-    B = np.array([[-1.1052, 0.], [0., 1.1052]])
+    A = np.array([[0.994_8, 0.], [0., 1.105_2]])
+    B = np.array([[-1.105_2, 0.], [0., 1.105_2]])
     E = np.array([[1, 0], [0, 1]])
 
     U = box2poly([[-1., 1.], [-1., 1.]])
@@ -133,7 +133,7 @@ sys_prog |= {'X0reach'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 specs.moore = True
-specs.qinit = '\E \A'
+specs.qinit = r'\E \A'
 
 # Synthesize
 ctrl = synth.synthesize(specs,

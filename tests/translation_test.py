@@ -3,7 +3,8 @@ from __future__ import print_function
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.ltl_parser_log').setLevel(logging.ERROR)
-from nose.tools import raises
+
+import pytest
 #from tulip.spec.parser import parse
 from tulip import spec
 from tulip.spec import translation as ts
@@ -28,10 +29,7 @@ def test_translate_ast_to_gr1c():
                            "( ( env_alice' = 0 ) & ( env_bob' = 1 ) ) )")
 
 
-@raises(TypeError)
-def check_translate_unrecognized_types(spc):
+@pytest.mark.parametrize('spc', [form.LTL(), 'a -> b'])
+@pytest.mark.xfail(raises=TypeError)
+def test_translate_unrecognized_types(spc):
     ts.translate(spc, 'gr1c')
-
-def test_translate_unrecognized_types():
-    for spc in [form.LTL(), 'a -> b']:
-        yield check_translate_unrecognized_types, spc

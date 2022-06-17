@@ -64,7 +64,7 @@ sys_prog |= {'mem'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 specs.moore = False
-specs.qinit = '\A \E'
+specs.qinit = r'\A \E'
 # Controller synthesis
 ctrl = synth.synthesize(specs, sys=sys_swe,
                         ignore_sys_init=True)

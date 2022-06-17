@@ -37,12 +37,14 @@ from __future__ import print_function
 
 import logging
 import re
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from textwrap import fill
-from io import StringIO
+import io
 import numpy as np
 import networkx as nx
-from networkx.utils import make_str
 import pydot
 # inline:
 #
@@ -103,13 +105,13 @@ def _state2dot(graph, to_pydot_graph, state,
     accept_shape = graph.dot_node_shape.get('accepting', '')
 
     shape = accept_shape if is_accepting else normal_shape
-    corners = 'rounded' if shape is 'rectangle' else ''
+    corners = 'rounded' if shape == 'rectangle' else ''
 
     rim_color = '"' + _format_color(rim_color, 'dot') + '"'
 
     fc = d.get('fillcolor', 'none')
-    filled = '' if fc is 'none' else 'filled'
-    if fc is 'gradient':
+    filled = '' if fc == 'none' else 'filled'
+    if fc == 'gradient':
         # top/bottom colors not supported for dot
 
         lc = d.get('left_color', d['top_color'])
@@ -152,13 +154,13 @@ def _state2tikz(graph, to_pydot_graph, state,
                 rim_color, d, node_dot_label):
     style = 'state'
 
-    if rankdir is 'LR':
+    if rankdir == 'LR':
         init_dir = 'initial left'
-    elif rankdir is 'RL':
+    elif rankdir == 'RL':
         init_dir = 'initial right'
-    elif rankdir is 'TB':
+    elif rankdir == 'TB':
         init_dir = 'initial above'
-    elif rankdir is 'BT':
+    elif rankdir == 'BT':
         init_dir = 'initial below'
     else:
         raise ValueError('Unknown rankdir')
@@ -168,7 +170,7 @@ def _state2tikz(graph, to_pydot_graph, state,
     if is_accepting:
         style += ', accepting'
 
-    if graph.dot_node_shape['normal'] is 'rectangle':
+    if graph.dot_node_shape['normal'] == 'rectangle':
         style += ', shape = rectangle, rounded corners'
 
     # darken the rim
@@ -181,7 +183,7 @@ def _state2tikz(graph, to_pydot_graph, state,
 
     fill = d.get('fillcolor')
 
-    if fill is 'gradient':
+    if fill == 'gradient':
         s = {'top_color', 'bottom_color',
              'left_color', 'right_color'}
         for x in s:
@@ -214,9 +216,9 @@ def _format_color(color, prog='tikz'):
     if not isinstance(color, dict):
         raise Exception('color must be str or dict')
 
-    if prog is 'tikz':
+    if prog == 'tikz':
         s = '!'.join([k + '!' + str(v) for k, v in color.items()])
-    elif prog is 'dot':
+    elif prog == 'dot':
         t = sum(color.values())
 
         try:
@@ -241,11 +243,11 @@ def _place_initial_states(trs_graph, pd_graph, tikz):
     init_subg.set_rank('source')
 
     for node in trs_graph.states.initial:
-        pd_node = pydot.Node(make_str(node))
+        pd_node = pydot.Node(str(node))
         init_subg.add_node(pd_node)
 
         phantom_node = 'phantominit' + str(node)
-        pd_node = pydot.Node(make_str(phantom_node))
+        pd_node = pydot.Node(str(phantom_node))
         init_subg.add_node(pd_node)
 
     pd_graph.add_subgraph(init_subg)
@@ -270,7 +272,7 @@ def _form_node_label(state, state_data, label_def,
 
     # make indices subscripts
     if tikz:
-        pattern = '([a-zA-Z]\d+)'
+        pattern = r'([a-zA-Z]\d+)'
         make_subscript = lambda x: x.group(0)[0] + '_' + x.group(0)[1:]
         state_str = re.sub(pattern, make_subscript, state_str)
 
@@ -558,7 +560,7 @@ def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-    sio = StringIO()
+    sio = io.BytesIO()
     sio.write(png_str)
     sio.seek(0)
     img = mpimg.imread(sio)

@@ -7,6 +7,7 @@ try:
 except ImportError:
     dd_cudd = None
 import numpy as np
+import pytest
 import tulip.gridworld as gw
 import unittest
 
@@ -39,18 +40,18 @@ TRIVIAL_GWFILE = """
 
 
 # Module-level fixture setup
-def setUp():
+def setup_module():
     np.random.seed(0)  # Make pseudorandom number sequence repeatable
 
 
 class GridWorld_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.prefix = "testworld"
         self.X = gw.GridWorld(REFERENCE_GWFILE, prefix=self.prefix)
         self.Y_testpaths = gw.GridWorld(UNREACHABLE_GOAL_GWFILE,
                                         prefix=self.prefix)
 
-    def tearDown(self):
+    def teardown_method(self):
         self.X = None
         self.Y_testpaths = None
 
@@ -169,21 +170,17 @@ class GridWorld_test(object):
         spec.qinit = r'\A \E'
         assert is_realizable(spec)
 
-    def check_is_empty(self, coord, expected):
+    @pytest.mark.parametrize('coord,expected',
+        [((0, 0), False), ((0, 1), True),
+         ((-1, 0), False), ((0, -1), True)])
+    def test_is_empty(self, coord, expected):
         assert self.X.is_empty(coord) == expected
 
-    def test_is_empty(self):
-        for coord, expected in [((0, 0), False), ((0, 1), True),
-                                ((-1, 0), False), ((0, -1), True)]:
-            yield self.check_is_empty, coord, expected
-
-    def check_is_empty_extend(self, coord, expected):
+    @pytest.mark.parametrize('coord,expected',
+        [((0, 0), False), ((0, 1), True),
+         ((-1, 0), False), ((0, -1), False)])
+    def test_is_empty_extend(self, coord, expected):
         assert self.X.is_empty(coord, extend=True) == expected
-
-    def test_is_empty_extend(self):
-        for coord, expected in [((0, 0), False), ((0, 1), True),
-                                ((-1, 0), False), ((0, -1), False)]:
-            yield self.check_is_empty_extend, coord, expected
 
     def test_dump_subworld(self):
         # No offset
@@ -229,8 +226,9 @@ class GridWorld_test(object):
         assert X_local.is_empty((1,1))
 
 
+@pytest.mark.slow
 class RandomWorld_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.wall_densities = [.2, .4, .6]
         self.sizes = [(4,5), (4,5), (10,20)]
         self.rworlds = [
@@ -243,12 +241,12 @@ class RandomWorld_test(object):
                 num_goals=2, ensure_feasible=True)
             for r in range(len(self.sizes))]
 
-    def tearDown(self):
+    def teardown_method(self):
         self.rworlds = []
 
     def test_feasibility(self):
         for r in range(len(self.rworlds_ensuredfeasible)):
-            print("test \"ensured feasible\" world index", r)
+            print('test "ensured feasible" world index', r)
             print(self.rworlds_ensuredfeasible[r])
             assert self.rworlds_ensuredfeasible[r].is_reachable(
                 self.rworlds_ensuredfeasible[r].init_list[0],
@@ -283,29 +281,16 @@ class RandomWorld_test(object):
                 float(num_occupied) / (num_rows*num_cols) ==
                 self.wall_densities[r])
 
-RandomWorld_test.slow = True
 
-
-def extract_coord_check(label, expected_coord):
+@pytest.mark.parametrize('label,expected_coord',
+    [('test_3_0', ('test', 3, 0)),
+     ('obstacle_5_4_11', ('obstacle_5', 4, 11)),
+     ('test3_0', None)])
+def extract_coord_test(label, expected_coord):
     assert gw.extract_coord(label) == expected_coord
 
 
-def extract_coord_test():
-    for (label, expected_coord) in [
-            ("test_3_0", ("test", 3, 0)),
-            ("obstacle_5_4_11", ("obstacle_5", 4, 11)),
-            ("test3_0", None)]:
-        yield extract_coord_check, label, expected_coord
-
-
-def eq_gridworld_check(G, H, eq):
-    if eq:
-        G == H
-    else:
-        not (G == H)
-
-
-def eq_gridworld_test():
+def eq_gridworld_param():
     empty = gw.GridWorld()
     trivial_nonempty = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_diff = gw.GridWorld(TRIVIAL_GWFILE)
@@ -324,7 +309,15 @@ def eq_gridworld_test():
             (trivial_nonempty_2init, trivial_nonempty, False),
             (trivial_nonempty, trivial_diff, False),
             (gw.unoccupied((3, 5)), gw.unoccupied((1, 1)), False)]:
-        yield eq_gridworld_check, G, H, is_equal
+        yield (G, H, is_equal)
+
+
+@pytest.mark.parametrize('G,H,eq', eq_gridworld_param())
+def eq_gridworld_test(G, H, eq):
+    if eq:
+        G == H
+    else:
+        not (G == H)
 
 
 def narrow_passage_test():

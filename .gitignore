@@ -1,4 +1,5 @@
 tulip/_version.py
+.pytest_cache/
 htmlcov/
 *~
 *.log
@@ -29,5 +30,7 @@ __pycache__
 /MANIFEST
 /.coverage
 /tests/cover/
+/tests/ltl2vl-verilog.v
+/tests/uct.uct
 
 .ipynb_checkpoints/

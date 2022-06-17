@@ -66,9 +66,9 @@ def parse(formula, full_operators=False):
 def _replace_full_name_operators(formula):
     """Replace full names with symbols for temporal and Boolean operators.
 
-    Each operator must be a word (as defined by \b in regexp).
+    Each operator must be a word (as defined by \\b in regexp).
     Substitution is case insensitive.
     """
     for name, symbol in ast.FULL_OPERATOR_NAMES.items():
-        formula = re.sub(r'\b(?i)' + name + r'\b', symbol, formula)
+        formula = re.sub(r'(?i)\b' + name + r'\b', symbol, formula)
     return formula

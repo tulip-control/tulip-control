@@ -165,7 +165,7 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
     action = actions_dict[action_type]
     if ids is not None:
         action = ids[action]
-    if action is '':
+    if action == '':
         return ''
     if nxt:
         return ' X' + _pstr(action)
@@ -786,7 +786,7 @@ def _env_trans_from_env_ts(
     states, state_ids, trans,
     action_ids=None, env_action_ids=None, sys_action_ids=None
 ):
-    """Convert environment TS transitions to GR(1) representation.
+    r"""Convert environment TS transitions to GR(1) representation.
 
     This contributes to the \rho_e(X, Y, X') part of the spec,
     i.e., constrains the next environment state variables' valuation
@@ -829,8 +829,9 @@ def _env_trans_from_env_ts(
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
-            msg = 'no free env outgoing transition found\n' +\
-                  'instead will take disjunction with negated sys actions'
+            msg = (
+                'no free env outgoing transition found\n' +
+                'instead will take disjunction with negated sys actions')
             logger.debug(msg)
             for action_type, codomain in sys_action_ids.items():
                 conj = _conj_neg(codomain.values())

@@ -37,8 +37,10 @@ import logging
 import os
 import copy
 from pprint import pformat
-from collections import Iterable
-import warnings
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 import networkx as nx
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:
@@ -806,6 +808,20 @@ class LabeledDiGraph(nx.MultiDiGraph):
         self.dot_node_shape = {'normal': 'circle'}
         self.default_layout = 'dot'
 
+    def add_label_types(self, label_types, is_edge):
+        """Add label_types to node or edge depending on is_edge param
+
+        @param label_types: see L{__init__}.
+        @param is_edge: whether to add label_types to node (False) or edge (True)
+        """
+        labeling, defaults = self._init_labeling(label_types)
+        if is_edge:
+            self._edge_label_types.update(labeling)
+            self._edge_label_defaults.update(defaults)
+        else:
+            self._node_label_types.update(labeling)
+            self._node_label_defaults.update(defaults)
+
     def _init_labeling(self, label_types):
         """Initialize labeling.
 
@@ -959,9 +975,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # legacy
         if 'check_states' in attr:
-            msg = 'saw keyword argument: check_states ' +\
-                  'which is no longer available, ' +\
-                  'firstly add the new nodes.'
+            msg = (
+                'saw keyword argument: check_states '
+                'which is no longer available, '
+                'firstly add the new nodes.')
             logger.warning(msg)
         # check nodes exist
         if u not in self._succ:
@@ -1120,7 +1137,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
                  if d == 0}
             self.states.remove_from(s)
         m = len(self)
-        assert n == 0 or m > 0, 'removed all {n} nodes!'.format(n=n)
+        assert n == 0 or m > 0, (
+            'removed all {n} nodes!'.format(n=n) + '\n'
+            ' Please check env_init and env_safety to avoid trivial'
+            ' realizability. Alternatively, you can set "rm_deadends = 0"'
+            ' in the options for "synthesize" to get the trivial strategy.')
         assert n >= 0, 'added {n} nodes'.format(n=n)
         print('removed {r} nodes from '
               '{n} total'.format(r=n - m, n=n))
@@ -1205,7 +1226,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 filename = self.name
         fname, fextension = os.path.splitext(filename)
         # default extension
-        if not fextension or fextension is '.':
+        if not fextension or fextension == '.':
             fextension = '.pdf'
         if fileformat:
             fextension = '.' + fileformat
@@ -1213,7 +1234,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # drop '.'
         fileformat = fextension[1:]
         # check for html
-        if fileformat is 'html':
+        if fileformat == 'html':
             from tulip.transys.export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         # subclass has extra export formats ?

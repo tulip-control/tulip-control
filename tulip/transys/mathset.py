@@ -35,7 +35,10 @@ from __future__ import print_function
 import logging
 import warnings
 from itertools import chain, combinations
-from collections import Iterable, Hashable, Container
+try:
+    from collections.abc import Iterable, Hashable, Container
+except ImportError:
+    from collections import Iterable, Hashable, Container
 from pprint import pformat
 from random import randint
 
@@ -384,9 +387,7 @@ class MathSet(object):
         """
         s = MathSet()
         for item in iterable:
-            print(item)
             if item in self:
-                print('Adding...\n')
                 s.add(item)
         return s
 
@@ -721,7 +722,7 @@ class PowerSet(object):
         return other.math_set == self.math_set
 
     def __setattr__(self, name, value):
-        if name is 'math_set' and not isinstance(value, MathSet):
+        if name == 'math_set' and not isinstance(value, MathSet):
             msg = (
                 'PowerSet.math_set must be of class MathSet.\n'
                 'Got instead:\n\t' + str(value) +

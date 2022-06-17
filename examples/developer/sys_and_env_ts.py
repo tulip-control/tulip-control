@@ -67,7 +67,7 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     sys_safety=sys_safe,
                     env_prog=env_prog, sys_prog=sys_prog)
 specs.moore = False
-specs.qinit = '\A \E'
+specs.qinit = r'\A \E'
 ctrl = synth.synthesize(specs, sys=sys, env=env0)
 ctrl.save('sys_and_env_ts0.pdf')
 logger.info(ctrl)
@@ -93,7 +93,7 @@ specs = spec.GRSpec(sys_vars=sys_vars, sys_init=sys_init,
                     sys_safety=sys_safe,
                     env_prog=env_prog, sys_prog=sys_prog)
 specs.moore = False
-specs.qinit = '\A \E'
+specs.qinit = r'\A \E'
 ctrl = synth.synthesize('omega', specs, sys=sys, env=env1)
 ctrl.save('sys_and_env_ts1.pdf')
 env1.save('env1.pdf')

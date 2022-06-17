@@ -164,7 +164,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 specs.moore = False
 # Pick initial values for system variables that
 # work for all assumed environment initial conditions.
-specs.qinit = '\E \A'
+specs.qinit = r'\E \A'
 
 
 # Controller synthesis

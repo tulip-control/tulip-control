@@ -33,8 +33,8 @@ modes.append(('emergency', 'fly'))
 
 """First PWA mode"""
 def subsys0(h):
-    A = np.array([[1.1052, 0.], [ 0., 1.1052]])
-    B = np.array([[1.1052, 0.], [ 0., 1.1052]])
+    A = np.array([[1.105_2, 0.], [ 0., 1.105_2]])
+    B = np.array([[1.105_2, 0.], [ 0., 1.105_2]])
     E = np.array([[1,0], [0,1]])
 
     U = box2poly([[-1., 1.], [-1., 1.]])
@@ -50,8 +50,8 @@ def subsys0(h):
     return sys_dyn
 
 def subsys1(h):
-    A = np.array([[0.9948, 0.], [0., 1.1052]])
-    B = np.array([[-1.1052, 0.], [0., 1.1052]])
+    A = np.array([[0.994_8, 0.], [0., 1.105_2]])
+    B = np.array([[-1.105_2, 0.], [0., 1.105_2]])
     E = np.array([[1, 0], [0, 1]])
 
     U = box2poly([[-1., 1.], [-1., 1.]])

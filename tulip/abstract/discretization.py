@@ -648,13 +648,11 @@ def _discretize_bi(
         else:
             rd = 0.
     # Initialize matrix for pairs to check
-    IJ = part.adj.copy()
-    IJ = IJ.todense()
-    IJ = np.array(IJ)
+    IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
-                          np.array(part.adj.todense()) )
+                          part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -662,9 +660,7 @@ def _discretize_bi(
         dtype = int
     )
     sol = deepcopy(part.regions)
-    adj = part.adj.copy()
-    adj = adj.todense()
-    adj = np.array(adj)
+    adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
     if ispwa:
         subsys_list = list(ppp2pwa)
@@ -733,11 +729,11 @@ def _discretize_bi(
         msg += '\t Computed reachable set S0 with volume: '
         msg += '{vol}\n'.format(vol=S0.volume)
         logger.debug(msg)
-        #logger.debug('si \cap s0')
+        #logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug('si \ s0')
+        #logger.debug(r'si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
@@ -765,23 +761,26 @@ def _discretize_bi(
         #     ax.axis([0.0, 1.0, 0.0, 2.0])
         #     ax.figure.savefig('./img/diff_cap_isect.pdf')
         #
-        #     logger.error('Intersection \cap Difference != \emptyset')
+        #     logger.error(r'Intersection \cap Difference != \emptyset')
         #
         #     assert(False)
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), '
+            logger.warning('\t too small: si \\cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
             logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \ Pre(sj), so not reached it')
+            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) and (risect > rd) and \
-           (vol2 > min_cell_volume) and (rdiff > rd):
+        if (
+                vol1 > min_cell_volume and
+                risect > rd and
+                vol2 > min_cell_volume and
+                rdiff > rd):
             # Make sure new areas are Regions and add proposition lists
             if len(isect) == 0:
                 isect = pc.Region([isect], si.props)
@@ -1109,13 +1108,11 @@ def _discretize_dual(
         else:
             rd = 0.
     # Initialize matrix for pairs to check
-    IJ = part.adj.copy()
-    IJ = IJ.todense()
-    IJ = np.array(IJ)
+    IJ = part.adj.copy().toarray()
     logger.debug("\n Starting IJ: \n" + str(IJ) )
     # next line omitted in discretize_overlap
     IJ = reachable_within(trans_length, IJ,
-                          np.array(part.adj.todense()))
+                          part.adj.toarray())
     # Initialize output
     num_regions = len(part)
     transitions = np.zeros(
@@ -1123,9 +1120,7 @@ def _discretize_dual(
         dtype = int
     )
     sol = deepcopy(part.regions)
-    adj = part.adj.copy()
-    adj = adj.todense()
-    adj = np.array(adj)
+    adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
     if ispwa:
         subsys_list = list(ppp2pwa)
@@ -1195,29 +1190,32 @@ def _discretize_dual(
         msg += '\t Computed reachable set S0 with volume: '
         msg += '{vol}\n'.format(vol=S0.volume)
         logger.debug(msg)
-        #logger.debug('si \cap s0')
+        #logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug('si \ s0')
+        #logger.debug(r'si \ s0')
         rsi, xd = pc.cheby_ball(si)
         vol2 = si.volume-vol1 # not accurate. need to check polytope class
         if vol1 <= min_cell_volume:
-            logger.warning('\t too small: si \cap Pre(sj), '
+            logger.warning('\t too small: si \\cap Pre(sj), '
                            'so discard intersection')
         if vol1 <= min_cell_volume and isect:
             logger.warning('\t discarded non-empty intersection: '
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning('\t too small: si \ Pre(sj), so not reached it')
+            logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # indicate if S0 has exists in sol
         check_isect = False
         # We don't want our partitions to be smaller than the disturbance set
         # Could be a problem since cheby radius is calculated for smallest
         # convex polytope, so if we have a region we might throw away a good
         # cell.
-        if (vol1 > min_cell_volume) and (risect > rd) and \
-           (vol2 > min_cell_volume) and (rsi > rd):
+        if (
+                vol1 > min_cell_volume and
+                risect > rd and
+                vol2 > min_cell_volume and
+                rsi > rd):
             # check if the intersection has existed in current partitions
             for idx in range(len(sol)):
                 if(sol[idx] == isect):
@@ -1382,8 +1380,8 @@ def _discretize_dual(
     }
     ppp2orig = [part2orig[x] for x in orig]
     end_time = os.times()[0]
-    msg = 'Total abstraction time: ' +\
-          str(end_time - start_time) + '[sec]'
+    msg = 'Total abstraction time: {t} [sec]'.format(
+        t=end_time - start_time)
     print(msg)
     logger.info(msg)
     if save_img and plt is not None:
@@ -1439,8 +1437,8 @@ def discretize_overlap(closed_loop=False, conservative=False):
 #             logger.info("Transition found")
 #             transitions[i,j] = 1
 #
-#         elif (vol1 > min_cell_volume) & (risect > rd) & \
-#                 (num_new_reg[i] <= num_orig_neigh[i]+1):
+#         elif ((vol1 > min_cell_volume) & (risect > rd) &
+#                 (num_new_reg[i] <= num_orig_neigh[i]+1)):
 #
 #             # Make sure new cell is Region and add proposition lists
 #             if len(isect) == 0:
@@ -1880,8 +1878,9 @@ def merge_partitions(abstractions):
                 msg += 'of continuous propositions'
                 raise Exception(msg)
 
-            if not (p1.domain.A == p2.domain.A).all() or \
-            not (p1.domain.b == p2.domain.b).all():
+            if (
+                    not (p1.domain.A == p2.domain.A).all() or
+                    not (p1.domain.b == p2.domain.b).all()):
                 raise Exception('merge: partitions have different domains')
 
             # check equality of original PPP partitions

@@ -102,13 +102,13 @@ def load_file(aut_file):
     for line in f:
         # parse states
         if (line.find('State ') >= 0):
-            stateid = re.search('State (\d+)', line)
+            stateid = re.search(r'State\ (\d+)', line)
             stateid = int(stateid.group(1))
-            state = dict(re.findall('(\w+):(\w+)', line))
-            state1 = dict(re.findall('(\w+):(-\w+)', line))
+            state = dict(re.findall(r'(\w+):(\w+)', line))
+            state1 = dict(re.findall(r'(\w+):(-\w+)', line))
             state.update(state1)
         if re.search('successors', line):
-            transition = list(re.findall('\d+', line))
+            transition = list(re.findall(r'\d+', line))
             automaton=(stateid,state,transition)
             queue.put(automaton)
             queue1.put(automaton)
@@ -126,18 +126,18 @@ def read_variables(smv_file):
     else:
         f = smv_file
     for line in f:
-        if re.search('MODULE env',line):
+        if re.search(r'MODULE\ env',line):
             for line in f:
-                if re.search(' : ', line):
-                    env = str(re.findall('(\w+) :', line))
+                if re.search(r'\ :\ ', line):
+                    env = str(re.findall(r'(\w+)\ :', line))
                     env = env[2:len(env)-2]
                     enviroment.put(env)
-                if re.search('MODULE sys',line):
+                if re.search(r'MODULE\ sys',line):
                     break
-        if re.search('MODULE sys',line):
+        if re.search(r'MODULE\ sys',line):
             for line in f:
-                if re.search(' : ', line):
-                    sys = str(re.findall('(\w+) :', line))
+                if re.search(r'\ :\ ', line):
+                    sys = str(re.findall(r'(\w+)\ :', line))
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 
@@ -397,9 +397,11 @@ try:
     else:
         print('Enter a matlab filename that does not exist.')
 except IOError:
-    print('Enter correct filename for a TuLiP generated controller, '+ \
+    print(
+        'Enter correct filename for a TuLiP generated controller, '
         'aut and\nsmv file must have the same name')
 except IndexError:
-    print('Usage: aut2simulink.py JTLV-AUT-FILE MATLAB-FILE\n\n'+ \
-          '    aut and smv file must have the same name.\n'+ \
-          '    Do not include file extensions.')
+    print(
+        'Usage: aut2simulink.py JTLV-AUT-FILE MATLAB-FILE\n\n'
+        '    aut and smv file must have the same name.\n'
+        '    Do not include file extensions.')

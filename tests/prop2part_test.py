@@ -35,7 +35,7 @@ def prop2part_test():
     print(mypartition)
 
     ref_adjacency = np.array([[1,0,1],[0,1,1],[1,1,1]])
-    assert np.all(mypartition.adj.todense() == ref_adjacency)
+    assert np.all(mypartition.adj.toarray() == ref_adjacency)
 
     assert len(mypartition.regions) == 3
 

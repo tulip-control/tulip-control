@@ -10,4 +10,6 @@ python hybrid.py
 python only_mode_controlled.py
 python environment_switching.py
 python continuous.py
+python continuous_with_simulation.py
+python controlled_switching.py
 python pwa.py

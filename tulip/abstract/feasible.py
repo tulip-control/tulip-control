@@ -47,7 +47,10 @@ from __future__ import print_function
 import logging
 logger = logging.getLogger(__name__)
 
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 
 import numpy as np
 import polytope as pc
@@ -324,7 +327,7 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope::
+    r"""Compute the components of the polytope::
 
         L [x(0)' u(0)' ... u(N-1)']' <= M
 
@@ -416,8 +419,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
         ######### FOR M #########
         idx = range(sum_vert, sum_vert + Li.A.shape[0])
-        Mk[idx, :] = Li.b.reshape(Li.b.size,1) - \
-                     Li.A.dot(A_k).dot(K_hat)
+        Mk[idx, :] = (
+            Li.b.reshape(Li.b.size,1) -
+            Li.A.dot(A_k).dot(K_hat))
 
         ######### FOR G #########
         if i in disturbance_ind:

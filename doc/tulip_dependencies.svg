@@ -295,7 +295,7 @@
        y="215.39603" />
     <a
        id="a4659"
-       xlink:href="https://github.com/johnyf/omega"
+       xlink:href="https://github.com/tulip-control/omega"
        style="fill:#000000;fill-opacity:1">
       <text
          xml:space="preserve"
@@ -437,7 +437,7 @@
        style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     <a
        id="a4651"
-       xlink:href="https://github.com/johnyf/dd"
+       xlink:href="https://github.com/tulip-control/dd"
        style="fill:#000000;fill-opacity:1">
       <text
          id="text1047"
@@ -460,7 +460,7 @@
        y="243.40834" />
     <a
        id="a4647"
-       xlink:href="https://github.com/johnyf/dd/blob/master/dd/cudd.pyx"
+       xlink:href="https://github.com/tulip-control/dd/blob/master/dd/cudd.pyx"
        style="fill:#000000;fill-opacity:1">
       <text
          xml:space="preserve"

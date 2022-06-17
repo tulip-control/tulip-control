@@ -6,8 +6,8 @@ SCL; 1 Sep 2013
 """
 
 import sys
-import nose
 
+import pytest
 from spin2dstar import spin_to_dstar
 
 
@@ -29,5 +29,4 @@ def test_spin_to_dstar():
 
 
 if __name__ == "__main__":
-    sys.argv.append("--verbose")
-    nose.run()
+    pytest.main(['--verbose'])
