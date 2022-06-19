@@ -1276,7 +1276,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         if prog is None:
             prog = self.default_layout
         from tulip.transys.export import graph2dot
-        return graph2dot.plot_pydot(self, prog, rankdir, wrap, ax=ax)
+        return graph2dot.plot_dot(self, prog, rankdir, wrap, ax=ax)
 
 
 def str2singleton(ap_label):

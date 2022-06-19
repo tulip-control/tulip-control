@@ -481,7 +481,12 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, tikz=False):
     return True
 
 
-def plot_pydot(graph, prog='dot', rankdir='LR', wrap=10, ax=None):
+def plot_dot(
+        graph,
+        prog='dot',
+        rankdir='LR',
+        wrap=10,
+        ax=None):
     """Plot a networkx or pydot graph using dot.
 
     No files written or deleted from the disk.
