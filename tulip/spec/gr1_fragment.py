@@ -51,16 +51,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 import networkx as nx
-from tulip import transys as trs
 from tulip.spec import lexyacc, GRSpec
 from tulip.spec import transformation as tx
 from tulip.spec import parser
 from tulip.spec import ast as sast
 
 
+__all__ = [
+    'check', 'str_to_grspec', 'split_gr1',
+    'has_operator', 'stability_to_gr1',
+    'response_to_gr1', 'eventually_to_gr1', 'until_to_gr1']
+
+
 def check(formula):
     """Parse formula string and create abstract syntax tree (AST).
     """
+    from tulip import transys as trs
+
     ast = lexyacc.parse(formula)
 
     dfa = trs.automata.FiniteWordAutomaton(atomic_proposition_based=False,

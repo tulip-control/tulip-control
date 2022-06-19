@@ -37,6 +37,9 @@ from tulip.transys import transys
 from tulip.transys import automata
 
 
+__all__ = ['OnTheFlyProductAutomaton']
+
+
 logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 

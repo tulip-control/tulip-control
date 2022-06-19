@@ -47,6 +47,13 @@ from tulip.spec import GRSpec
 from tulip import transys
 
 
+__all__ = [
+    'mutex', 'exactly_one', 'sys_to_spec', 'env_to_spec',
+    'build_dependent_var_table',
+    'synthesize_many', 'synthesize', 'is_realizable',
+    'strategy2mealy', 'mask_outputs', 'determinize_machine_init']
+
+
 logger = logging.getLogger(__name__)
 _hl = '\n' + 60 * '-'
 

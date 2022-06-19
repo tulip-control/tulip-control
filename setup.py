@@ -76,6 +76,13 @@ def run_setup():
         parser.build(tabmodule, outputdir=outputdir,
                      write_tables=True,
                      debug=True, debuglog=logger)
+        import tulip.interfaces.ltl2ba
+        tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
+        outputdir = 'tulip/interfaces'
+        parser = tulip.interfaces.ltl2ba.Parser()
+        parser.build(tabmodule, outputdir=outputdir,
+                     write_tables=True,
+                     debug=True, debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
         print('Failed to build PLY tables: {e}'.format(e=e))
@@ -109,6 +116,7 @@ def run_setup():
             'omega >= 0.3.1, < 0.4.0',
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
+            'pyparsing == 2.4.7',  # Temporary, https://github.com/pydot/pydot/issues/277
             'pydot >= 1.2.0',
             'scipy'],
         tests_require=[

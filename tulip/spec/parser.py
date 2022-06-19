@@ -37,6 +37,9 @@ import re
 from tulip.spec import ast, lexyacc
 
 
+__all__ = ['parse']
+
+
 # cache
 parsers = dict()
 
