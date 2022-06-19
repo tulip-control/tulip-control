@@ -54,7 +54,7 @@ import pydot
 logger = logging.getLogger(__name__)
 
 
-def _states2dot_str(graph, to_pydot_graph, wrap=10,
+def _states2dot_str(graph, to_dot_graph, wrap=10,
                     tikz=False, rankdir='TB'):
     """Copy nodes to given Pydot graph, with attributes for dot export."""
     # TODO generate LaTeX legend table for edge labels
@@ -86,20 +86,20 @@ def _states2dot_str(graph, to_pydot_graph, wrap=10,
         rim_color = d.get('color', 'black')
 
         if tikz:
-            _state2tikz(graph, to_pydot_graph, u,
+            _state2tikz(graph, to_dot_graph, u,
                         is_initial, is_accepting, rankdir,
                         rim_color, d, node_dot_label)
         else:
-            _state2dot(graph, to_pydot_graph, u,
+            _state2dot(graph, to_dot_graph, u,
                        is_initial, is_accepting,
                        rim_color, d, node_dot_label)
 
 
-def _state2dot(graph, to_pydot_graph, state,
+def _state2dot(graph, to_dot_graph, state,
                is_initial, is_accepting,
                rim_color, d, node_dot_label):
     if is_initial:
-        _add_incoming_edge(to_pydot_graph, state)
+        _add_incoming_edge(to_dot_graph, state)
 
     normal_shape = graph.dot_node_shape['normal']
     accept_shape = graph.dot_node_shape.get('accepting', '')
@@ -140,7 +140,7 @@ def _state2dot(graph, to_pydot_graph, state,
     else:
         node_style = '"' + filled + '"'
 
-    to_pydot_graph.add_node(
+    to_dot_graph.add_node(
         state,
         label=node_dot_label,
         shape=shape,
@@ -149,7 +149,7 @@ def _state2dot(graph, to_pydot_graph, state,
         fillcolor='"' + fillcolor + '"')
 
 
-def _state2tikz(graph, to_pydot_graph, state,
+def _state2tikz(graph, to_dot_graph, state,
                 is_initial, is_accepting, rankdir,
                 rim_color, d, node_dot_label):
     style = 'state'
@@ -195,7 +195,7 @@ def _state2tikz(graph, to_pydot_graph, state,
     else:
         logger.debug('fillcolor is None')
 
-    to_pydot_graph.add_node(
+    to_dot_graph.add_node(
         state,
         texlbl=node_dot_label,
         style=style)
@@ -335,7 +335,7 @@ def _is_accepting(graph, state):
     return state in graph.states.accepting
 
 
-def _transitions2dot_str(trans, to_pydot_graph, tikz=False):
+def _transitions2dot_str(trans, to_dot_graph, tikz=False):
     """Convert transitions to dot str.
 
     @rtype: str
@@ -362,7 +362,7 @@ def _transitions2dot_str(trans, to_pydot_graph, tikz=False):
 
         edge_color = edge_data.get('color', 'black')
 
-        to_pydot_graph.add_edge(u, v, key=key,
+        to_dot_graph.add_edge(u, v, key=key,
                                 label=edge_dot_label,
                                 color=edge_color)
 
