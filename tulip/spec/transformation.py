@@ -38,6 +38,8 @@ import warnings
 import networkx as nx
 from tulip.spec.ast import nodes
 from tulip.spec import parser
+# inline:
+# import tulip.graphics as _graphics
 
 
 __all__ = [
@@ -138,22 +140,25 @@ class Tree(nx.MultiDiGraph):
             self.root = tree.root
         self.remove_node(leaf)
 
-    def to_pydot(self, detailed=False):
+    def _to_dot(self, detailed=False):
         """Create GraphViz dot string from given AST.
 
         @type ast: L{ASTNode}
         @rtype: str
         """
         g = ast_to_labeled_graph(self, detailed)
-        return nx.drawing.nx_pydot.to_pydot(g)
+        import tulip.graphics as _graphics
+        return _graphics.networkx_to_graphviz(g)
 
     def write(self, filename, detailed=False):
         """Layout AST and save result in PDF file."""
         fname, fext = os.path.splitext(filename)
         fext = fext[1:]  # drop .
-        p = self.to_pydot(detailed)
-        p.set_ordering('out')
-        p.write(filename, format=fext)
+        p = self._to_dot(detailed)
+        p.graph_attr['ordering'] = 'out'
+        p.render(
+            filename=filename,
+            format=fext)
 
 
 def ast_to_labeled_graph(tree, detailed):

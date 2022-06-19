@@ -29,8 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Convert labeled graph to dot using
-pydot and custom filtering
+"""Convert labeled graph to dot, with custom filtering
 """
 from __future__ import division
 from __future__ import print_function
@@ -45,10 +44,11 @@ from textwrap import fill
 import io
 import numpy as np
 import networkx as nx
-import pydot
 # inline:
 #
 # import webcolors
+
+import tulip.graphics as _graphics
 
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 def _states2dot_str(graph, to_dot_graph, wrap=10,
                     tikz=False, rankdir='TB'):
-    """Copy nodes to given Pydot graph, with attributes for dot export."""
+    """Copy nodes to given graph, with attributes for dot export."""
     # TODO generate LaTeX legend table for edge labels
 
     states = graph.states
@@ -239,18 +239,14 @@ def _format_color(color, prog='tikz'):
 
 
 def _place_initial_states(trs_graph, pd_graph, tikz):
-    init_subg = pydot.Subgraph('initial')
-    init_subg.set_rank('source')
-
+    empty = nx.DiGraph()
+    init_subg = _graphics.networkx_to_graphviz(empty)
+    init_subg.graph_attr['rank'] = 'source'
     for node in trs_graph.states.initial:
-        pd_node = pydot.Node(str(node))
-        init_subg.add_node(pd_node)
-
+        init_subg.node(str(node))
         phantom_node = 'phantominit' + str(node)
-        pd_node = pydot.Node(str(phantom_node))
-        init_subg.add_node(pd_node)
-
-    pd_graph.add_subgraph(init_subg)
+        init_subg.node(str(phantom_node))
+    pd_graph.subgraph(init_subg)
 
 
 def _add_incoming_edge(g, state):
@@ -416,8 +412,11 @@ def _form_edge_label(edge_data, label_def,
     return label
 
 
-def _graph2pydot(graph, wrap=10, tikz=False,
-                 rankdir='TB'):
+def _graph2dot(
+        graph,
+        wrap=10,
+        tikz=False,
+        rankdir='TB'):
     """Convert (possibly labeled) state graph to dot str.
 
     @type graph: L{LabeledDiGraph}
@@ -425,27 +424,21 @@ def _graph2pydot(graph, wrap=10, tikz=False,
     @rtype: str
     """
     dummy_nx_graph = nx.MultiDiGraph()
-
     _states2dot_str(graph, dummy_nx_graph, wrap=wrap, tikz=tikz,
                     rankdir=rankdir)
     _transitions2dot_str(graph.transitions, dummy_nx_graph, tikz=tikz)
-
-    pydot_graph = nx.drawing.nx_pydot.to_pydot(dummy_nx_graph)
-    _place_initial_states(graph, pydot_graph, tikz)
-
-    pydot_graph.set_overlap('false')
-    # pydot_graph.set_size('"0.25,1"')
-    # pydot_graph.set_ratio('"compress"')
-    pydot_graph.set_nodesep(0.5)
-    pydot_graph.set_ranksep(0.1)
-
-    return pydot_graph
+    dot_graph = _graphics.networkx_to_graphviz(dummy_nx_graph)
+    _place_initial_states(graph, dot_graph, tikz)
+    dot_graph.graph_attr['overlap'] = 'false'
+    # dot_graph.graph_attr['size'] = '"0.25,1"'
+    # dot_graph.graph_attr['ratio'] = '"compress"'
+    dot_graph.graph_attr['nodesep'] = '0.5'
+    dot_graph.graph_attr['ranksep'] = '0.1'
+    return dot_graph
 
 
 def graph2dot_str(graph, wrap=10, tikz=False):
     """Convert graph to dot string.
-
-    Requires pydot.
 
     @type graph: L{LabeledDiGraph}
 
@@ -453,12 +446,14 @@ def graph2dot_str(graph, wrap=10, tikz=False):
 
     @rtype: str
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, tikz=tikz)
+    dot_graph = _graph2dot(graph, wrap=wrap, tikz=tikz)
+    return dot_graph.source
 
-    return pydot_graph.to_string()
 
-
-def save_dot(graph, path, fileformat, rankdir, prog, wrap, tikz=False):
+def save_dot(
+        graph, path, fileformat,
+        rankdir, prog, wrap,
+        tikz=False):
     """Save state graph to dot file.
 
     @type graph: L{LabeledDiGraph}
@@ -466,18 +461,23 @@ def save_dot(graph, path, fileformat, rankdir, prog, wrap, tikz=False):
     @return: True upon success
     @rtype: bool
     """
-    pydot_graph = _graph2pydot(graph, wrap=wrap, tikz=tikz,
-                               rankdir=rankdir)
-    if pydot_graph is None:
+    dot_graph = _graph2dot(
+        graph,
+        wrap=wrap,
+        tikz=tikz,
+        rankdir=rankdir)
+    if dot_graph is None:
         # graph2dot must have printed warning already
         return False
-    pydot_graph.set_rankdir(rankdir)
-    pydot_graph.set_splines('true')
-
-    # turn off graphviz warnings caused by tikz labels
-    if tikz:
-        prog = [prog, '-q 1']
-    pydot_graph.write(path, format=fileformat, prog=prog)
+    dot_graph.graph_attr['rankdir'] = rankdir
+    dot_graph.graph_attr['splines'] = 'true'
+    dot_graph.render(
+        filename=path,
+        format=fileformat,
+        engine=prog,
+        quiet=tikz)
+            # tikz labels can raise
+            # graphviz warnings
     return True
 
 
@@ -514,13 +514,15 @@ def plot_dot(
         raise TypeError(
             'graph not networkx class.' +
             'Got instead: ' + str(type(graph)))
-    pydot_graph = nx.drawing.nx_pydot.to_pydot(graph)
-    pydot_graph.set_rankdir(rankdir)
-    pydot_graph.set_splines('true')
-    pydot_graph.set_bgcolor('gray')
-
-    png_str = pydot_graph.create_png(prog=prog)
-
+    dot_graph = _graphics.networkx_to_graphviz(graph)
+    dot_graph.graph_attr['rankdir'] = rankdir
+    dot_graph.graph_attr['splines'] = 'true'
+    dot_graph.graph_attr['bgcolor'] = 'gray'
+    # layout
+    png_str = dot_graph.pipe(
+        format='png',
+        engine=prog,
+        encoding='utf-8')
     # installed ?
     try:
         from IPython.display import display, Image

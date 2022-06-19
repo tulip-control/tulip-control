@@ -1147,10 +1147,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
               '{n} total'.format(r=n - m, n=n))
 
     def dot_str(self, wrap=10, **kwargs):
-        """Return dot string.
-
-        Requires pydot.
-        """
+        """Return dot string."""
         from tulip.transys.export import graph2dot
         return graph2dot.graph2dot_str(self, wrap, **kwargs)
 
@@ -1167,8 +1164,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             - dot
             - png
 
-        Any other format supported by C{pydot.write} is available.
-
         Experimental:
 
             - html (uses d3.js)
@@ -1177,7 +1172,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Requires
         ========
           - graphviz dot: http://www.graphviz.org/
-          - pydot: https://pypi.python.org/pypi/pydot
+          - Python package `graphviz`:
+            <https://pypi.org/project/graphviz>
 
         and for tikz:
 
@@ -1187,7 +1183,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         See Also
         ========
-        L{plot}, C{pydot.Dot.write}
+        L{plot}
 
         @param filename: file path to save image to
             Default is C{self.name}, unless C{name} is empty,
@@ -1209,7 +1205,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             (i.e., Top->Bottom | Left->Right)
 
         @param prog: executable to call
-        @type prog: dot | circo | ... see pydot.Dot.write
+        @type prog: dot | circo | ... read GraphViz
+            documentation
 
         @param wrap: max width of node strings
         @type wrap: int

@@ -111,12 +111,12 @@ def run_setup():
         classifiers=classifiers,
         python_requires='>=3.7',
         install_requires=[
+            'graphviz >= 0.20',
             'networkx >= 2.0',
             'numpy >= 1.7',
             'omega >= 0.3.1, < 0.4.0',
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
-            'pydot >= 1.2.0',
             'scipy'],
         tests_require=[
             'matplotlib >= 2.0.0',

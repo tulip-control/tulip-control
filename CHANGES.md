@@ -7,6 +7,10 @@
 
 - TST: use `pytest`, instead of `nose`
 
+- REL: require Python package [`graphviz >= 0.20`](
+    https://pypi.org/project/graphviz),
+  instead of `pydot`
+
 - CI: run all tests on [GitHub Actions](
       https://github.com/tulip-control/tulip-control/actions)
 
