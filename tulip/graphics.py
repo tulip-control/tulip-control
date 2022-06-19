@@ -54,6 +54,7 @@ import numpy as np
 # from matplotlib import pyplot as plt
 # from mpl_toolkits.mplot3d import axes3d
 # from mayavi.mlab import quiver3d
+# import graphviz as _gv
 
 
 __all__ = ['dimension', 'newax', 'dom2vec', 'quiver']
@@ -267,3 +268,19 @@ def _import_pyplot():
     except Exception as e:
         raise ImportError('Failed to import `matplotlib.pyplot`')
     return plt
+
+
+def networkx_to_graphviz(graph):
+    """Convert `networkx` `graph` to `graphviz.Digraph`."""
+    import graphviz as _gv
+    if graph.is_directed():
+        gv_graph = _gv.Digraph()
+    else:
+        gv_graph = _gv.Graph()
+    for u, d in graph.nodes(data=True):
+        gv_graph.node(
+            str(u), **d)
+    for u, v, d in graph.edges(data=True):
+        gv_graph.edge(
+            str(u), str(v), **d)
+    return gv_graph
