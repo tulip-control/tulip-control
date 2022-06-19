@@ -38,7 +38,7 @@ import ply.lex
 import ply.yacc
 
 
-TABMODULE = 'ltl2ba_parsetab'
+TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
 
 
 class Lexer(object):
@@ -65,17 +65,17 @@ class Lexer(object):
     t_TRUE = 'TRUE|True|true'
     t_FALSE = 'FALSE|False|false'
 
-    t_COMMENT = '/\*.*\*/'
-    t_NOT = r'\!'
+    t_COMMENT = r'/\*.*\*/'
+    t_NOT = r'!'
     t_AND = r'\&\&|\&'
     t_OR = r'\|\||\|'
     t_XOR = r'\^'
 
-    t_EQUALS = r'\=|\=\='
-    t_NEQUALS = r'\!\='
-    t_LT = r'\<'
-    t_LE = r'\<\='
-    t_GT = r'>\='
+    t_EQUALS = r'=|=='
+    t_NEQUALS = r'!='
+    t_LT = r'<'
+    t_LE = r'<='
+    t_GT = r'>='
     t_GE = r'>'
 
     t_LPAREN = r'\('
@@ -88,7 +88,7 @@ class Lexer(object):
 
     t_NUMBER = r'\d+'
 
-    t_IMP = r'->'
+    t_IMP = r'\->'
 
     # Ignored characters
     t_ignore = ' \t'
@@ -98,7 +98,7 @@ class Lexer(object):
 
     def t_newline(self, t):
         r'\n+'
-        t.lexer.lineno += t.value.count("\n")
+        t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
         logger.warning("Illegal character '%s'" % t.value[0])

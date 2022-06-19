@@ -5,7 +5,7 @@ from __future__ import print_function
 import logging
 
 import networkx as nx
-from nose.tools import assert_raises
+import pytest
 
 from tulip import spec, synth, dumpsmach
 
@@ -16,11 +16,11 @@ logging.getLogger('omega').setLevel('ERROR')
 
 
 class basic_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.triv = spec.GRSpec(env_vars="x", sys_vars="y",
                                 env_init="x & y", env_prog="x",
                                 sys_init="y", sys_prog="y && x")
-        self.triv.qinit = '\E \A'
+        self.triv.qinit = r'\E \A'
         self.triv_M = synth.synthesize(
             self.triv, solver='omega')
 
@@ -39,7 +39,7 @@ class basic_test(object):
         self.enumf_M = synth.synthesize(
             self.enumf, solver='omega')
 
-    def tearDown(self):
+    def teardown_method(self):
         self.dcounter = None
         self.dcounter_M = None
 
@@ -73,11 +73,11 @@ def test_nx():
     out = m.move(a=0, b=1)
     assert out == dict(c=0, d=1)
     # invalid input for index 2 in time sequence
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         m.move(a=1, b=1)
     # 1 -> 2
     out = m.move(a=1, b=0)
     assert out == dict(c=1, d=1)
     # dead-end
-    with assert_raises(Exception):
+    with pytest.raises(Exception):
         m.move(a=1, b=0)

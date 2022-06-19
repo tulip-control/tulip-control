@@ -5,24 +5,23 @@ from __future__ import print_function
 import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('ltl_parser_log').setLevel(logging.ERROR)
-import nose.tools as nt
+
+import pytest
 from tulip.spec import ast, lexyacc
 from tulip.spec.parser import parse
 
 
-def parse_parse_check(formula, expected_length):
+@pytest.mark.parametrize('formula,expected_length',
+    [('G p', 2),
+     ('p G', None)])
+def parse_parse_test(formula, expected_length):
     # If expected_length is None, then the formula is malformed, and
     # thus we expect parsing to fail.
     if expected_length is not None:
         assert len(parse(formula)) == expected_length
     else:
-        nt.assert_raises(Exception, parse, formula)
-
-
-def parse_parse_test():
-    for (formula, expected_len) in [("G p", 2),
-                                    ("p G", None)]:
-        yield parse_parse_check, formula, expected_len
+        with pytest.raises(Exception):
+            parse(formula)
 
 
 def full_name_operators_test():
@@ -54,9 +53,12 @@ def test_ast_nodes():
     assert t != t2
     assert t.flatten() == 'a'
     # values and operators must be strings
-    nt.assert_raises(TypeError, nodes.Terminal, 2)
-    nt.assert_raises(TypeError, nodes.Unary, 2, 'v')
-    nt.assert_raises(TypeError, nodes.Binary, 2, 'v')
+    with pytest.raises(TypeError):
+        nodes.Terminal(2)
+    with pytest.raises(TypeError):
+        nodes.Unary(2, 'v')
+    with pytest.raises(TypeError):
+        nodes.Binary(2, 'v')
     # test Unary
     u = nodes.Unary('!', t)
     assert u.operator == '!'
@@ -88,14 +90,17 @@ def test_fol_nodes():
     # test Var
     v = nodes.Var('a')
     assert v.value == 'a'
-    nt.assert_raises(TypeError, nodes.Var, 2)
+    with pytest.raises(TypeError):
+        nodes.Var(2)
     # test Bool
     b = nodes.Bool('TRue')
     print(b.value)
     assert b.value == 'True'
     assert b.flatten() == 'True'
-    nt.assert_raises(TypeError, nodes.Bool, 2)
-    nt.assert_raises(TypeError, nodes.Bool, 'bee')
+    with pytest.raises(TypeError):
+        nodes.Bool(2)
+    with pytest.raises(TypeError):
+        nodes.Bool('bee')
 
 
 def test_lex():

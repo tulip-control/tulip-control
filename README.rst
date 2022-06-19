@@ -37,7 +37,7 @@ Documentation
 
 There are two main sources of documentation outside the code.  The "user"
 documentation is under ``doc/`` and is built with `Sphinx
-<http://sphinx.pocoo.org/>`_, so the usual steps apply, ::
+<https://www.sphinx-doc.org/>`_, so the usual steps apply, ::
 
   make html
 
@@ -60,7 +60,7 @@ may also read API documentation using the standard pydoc tool.  E.g., ::
 Testing
 -------
 
-Tests are performed using `nose <http://readthedocs.org/docs/nose/>`_.  From the
+Tests are performed using `pytest <https://pytest.org>`_.  From the
 root of the source tree (i.e., where ``setup.py`` is located), ::
 
   ./run_tests.py
@@ -82,7 +82,7 @@ License
 -------
 
 This is free software released under the terms of `the BSD 3-Clause License
-<http://opensource.org/licenses/BSD-3-Clause>`_.  There is no warranty; not even
+<https://opensource.org/licenses/BSD-3-Clause>`_.  There is no warranty; not even
 for merchantability or fitness for a particular purpose.  Consult LICENSE for
 copying conditions.
 

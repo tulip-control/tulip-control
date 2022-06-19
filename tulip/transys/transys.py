@@ -48,6 +48,13 @@ import numpy as np
 # from tulip.transys.export import graph2promela
 
 
+__all__ = [
+    'KripkeStructure', 'FiniteTransitionSystem', 'FTS',
+    'LabeledGameGraph',
+    'tuple2fts', 'line_labeled_with', 'cycle_labeled_with',
+    'simu_abstract']
+
+
 logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
@@ -172,7 +179,7 @@ class MarkovDecisionProcess(MarkovChain):
 
 
 class FiniteTransitionSystem(LabeledDiGraph):
-    """Kripke structure with labeled states and edges.
+    r"""Kripke structure with labeled states and edges.
 
     Who controls the state
     ======================
@@ -765,7 +772,7 @@ def _dumps_states(g):
             u=u, ap=g.nodes[u]['ap']) + ', '.join([
                 '{k}: {v}'.format(k=k, v=v)
                 for k, v in g.nodes[u].items()
-                if k is not 'ap'])
+                if k != 'ap'])
         a.append(s)
     return ''.join(a)
 

@@ -54,6 +54,13 @@ from tulip import transys as trs
 #
 # from tulip.graphics import newax
 
+
+__all__ = [
+    'prop2part', 'part2convex',
+    'pwa_partition', 'add_grid',
+    'PropPreservingPartition', 'PPP', 'ppp2ts']
+
+
 _hl = 40 * '-'
 
 def prop2part(state_space, cont_props_dict):
@@ -296,11 +303,13 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     regions. Performace significantly degrades without glpk.
     """
     if (grid_size!=None)&(num_grid_pnts!=None):
-        raise Exception("add_grid: Only one of the grid size or number of \
-                        grid points parameters is allowed to be given.")
+        raise Exception(
+            "add_grid: Only one of the grid size or number of "
+            "grid points parameters is allowed to be given.")
     if (grid_size==None)&(num_grid_pnts==None):
-        raise Exception("add_grid: At least one of the grid size or number of \
-                         grid points parameters must be given.")
+        raise Exception(
+            "add_grid: At least one of the grid size or number of "
+            "grid points parameters must be given.")
 
     dim=len(ppp.domain.A[0])
     domain_bb = ppp.domain.bounding_box
@@ -391,8 +400,8 @@ def add_grid(ppp, grid_size=None, num_grid_pnts=None, abs_tol=1e-10):
     for i in range(len(new_list)):
         adj[i,i] = 1
         for j in range(i+1, len(new_list)):
-            if (ppp.adj[parent[i], parent[j]] == 1) or \
-                    (parent[i] == parent[j]):
+            if (ppp.adj[parent[i], parent[j]] == 1 or
+                    parent[i] == parent[j]):
                 if pc.is_adjacent(new_list[i], new_list[j]):
                     adj[i,j] = 1
                     adj[j,i] = 1
@@ -584,9 +593,9 @@ class PropPreservingPartition(pc.MetricPartition):
 
             s += str(region)
 
-        if hasattr(self.adj, 'todense'):
+        if hasattr(self.adj, 'toarray'):
             s += 'Adjacency matrix:\n'
-            s += str(self.adj.todense()) + '\n'
+            s += str(self.adj.toarray()) + '\n'
         return s
 
     def plot(
@@ -643,7 +652,7 @@ def ppp2ts(part):
         from the given partition, and map of
         polytope indices to transition system states.
 
-    @rtype: (L{transys.FTS}, \C{dict})
+    @rtype: (L{transys.FTS}, C{dict})
     """
     # generate transition system and add transitions
     ofts = trs.FTS()

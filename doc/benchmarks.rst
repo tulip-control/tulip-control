@@ -31,7 +31,8 @@ such path exists.
 
 .. image:: spin-nusmv.png
 
-Please see [S12]_ in the :doc:`bibliography` for additional comparisons between
+Please see `[S12] <bibliography.html#s12>`_ in the :doc:`bibliography`
+for additional comparisons between
 NuSMV and SPIN with different sets of performance criteria and complexity
 measures.
 

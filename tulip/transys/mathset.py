@@ -43,6 +43,9 @@ from pprint import pformat
 from random import randint
 
 
+__all__ = ['MathSet', 'SubSet', 'PowerSet', 'TypedDict']
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -719,7 +722,7 @@ class PowerSet(object):
         return other.math_set == self.math_set
 
     def __setattr__(self, name, value):
-        if name is 'math_set' and not isinstance(value, MathSet):
+        if name == 'math_set' and not isinstance(value, MathSet):
             msg = (
                 'PowerSet.math_set must be of class MathSet.\n'
                 'Got instead:\n\t' + str(value) +

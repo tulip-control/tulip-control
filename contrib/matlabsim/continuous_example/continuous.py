@@ -90,7 +90,7 @@ sys_prog |= {'X0reach'}
 specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                     env_safe, sys_safe, env_prog, sys_prog)
 specs.moore = False
-specs.qinit = '\A \E'
+specs.qinit = r'\A \E'
 specs.plus_one = False
 
 # @synthesize_section@

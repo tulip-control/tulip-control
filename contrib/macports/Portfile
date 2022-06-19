@@ -11,7 +11,7 @@ PortSystem              1.0
 PortGroup               python 1.0
 PortGroup               github 1.0
 
-github.setup            tulip-control tulip-control 0.4a tulip-
+github.setup            tulip-control tulip-control 1.4.0 tulip-
 fetch.type              git
 
 name                    py-tulip
@@ -35,16 +35,16 @@ homepage                tulip-control.org
 checksums               rmd160  8bfab3e26055095475a02f3cf0e24103bf1597e7 \
                         sha256  752b03fb8be900f6c53cac257c2751675c1bbda0a04011efd9c1831fba514b29
 
-python.versions         27
+python.versions         39
 
-depends_lib-append      port:python27 \
-                        port:py27-setuptools \
-                        port:py27-numpy \
-                        port:py27-scipy \
-                        port:py27-networkx \
-                        port:py27-parsing \
+depends_lib-append      port:python39 \
+                        port:py39-setuptools \
+                        port:py39-numpy \
+                        port:py39-scipy \
+                        port:py39-networkx \
+                        port:py39-parsing \
                         port:gr1c
-                        #port:py27-cvxopt -dsdp +atlas \
+                        #port:py39-cvxopt -dsdp +atlas \
                         #port:yices: http://yices.csl.sri.com/
 
 configure.args          --complete
@@ -52,10 +52,10 @@ configure.args          --complete
 default_variants        +complete
 
 variant complete description {install also optional dependencies} {
-	depends_lib-append port:py27-matplotlib \
-	                   port:py27-pydot \
+	depends_lib-append port:py39-matplotlib \
+	                   port:py39-pydot \
                        port:graphviz \
-                       port:py27-ipython \
+                       port:py39-ipython \
 	                   port:glpk
 }
 

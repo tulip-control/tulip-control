@@ -52,6 +52,9 @@ from tulip.spec import transformation as tx
 from tulip.spec import translation as ts
 
 
+__all__ = ['LTL', 'GRSpec', 'replace_dependent_vars']
+
+
 class LTL(object):
     """LTL formula (specification)
 
@@ -106,7 +109,7 @@ class LTL(object):
         self.check_vars()
 
     def __repr__(self):
-        return ('LTL(\'{f}\', input_variables={inputv}, ' +
+        return ("LTL('{f}', input_variables={inputv}, " +
                 'output_variables={outv})').format(f=self.formula,
                                                    inputv=self.input_variables,
                                                    outv=self.output_variables)
@@ -189,7 +192,7 @@ class LTL(object):
                                      str(version))
                 break
         try:
-            s = re.sub(r'#.*(\n|$)', '', s)  # Strip comments
+            s = re.sub(r'\#.*(\n|$)', '', s)  # Strip comments
             preamble, declar, formula = s.split('%%\n')
             input_ind = declar.find('INPUT:')
             output_ind = declar.find('OUTPUT:')

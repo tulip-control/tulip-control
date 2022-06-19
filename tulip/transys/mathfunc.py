@@ -31,13 +31,16 @@
 # SUCH DAMAGE.
 
 """A module for defining functions"""
-
+from collections.abc import Iterable
 import json
-from collections import Iterable
 
 
 class LabeledStateInputOutputPair(object):
-    """A class for storing state and other inputs, outputs and labels on the state"""
+    """Stores state, inputs, outputs, and state labels.
+
+    A class for storing state and other inputs, outputs and
+    labels on the state.
+    """
 
     def __init__(self, state, input_dict, output_dict, labels=[]):
         self.state = state
@@ -63,7 +66,8 @@ class LabeledStateInputOutputPair(object):
     def to_json(self, transys=None):
         """Convert this object to a jsonable object, i.e., a dictionary"""
         labels = (
-            transys.states[self.state]["ap"] if transys is not None else self.labels
+            transys.states[self.state]["ap"]
+            if transys is not None else self.labels
         )
         ret = {
             "state": self.state,
@@ -77,19 +81,26 @@ class LabeledStateInputOutputPair(object):
 
 
 class FunctionOnLabeledState(object):
-    """A class that represents a function of a labeled state, with possibly additional inputs
+    r"""Represents a function of a labeled state.
+
+    A class that represents a function of a labeled state,
+    with possibly additional inputs.
 
     This class represents a function
 
-        f : S \times I_1 \times \ldots \times I_n \to O_1 \times \ldots \times O_m
+        f : S \times I_1 \times \ldots \times I_n
+            \to O_1 \times \ldots \times O_m
 
-    where I_1, \ldots, I_n are the sets of inputs and O_1, \ldots, O_m are the sets of outputs.
+    where
+        I_1, \ldots, I_n are the sets of inputs and
+        O_1, \ldots, O_m are the sets of outputs.
 
     Examples
     ========
     >>> f = FunctionOnLabeledState("state", "action")
 
-    Then f is a memoryless policy, i.e., f[s] = a where s is a state and a is an action.
+    Then f is a memoryless policy,
+    i.e., f[s] = a where s is a state and a is an action.
 
     >>> f = FunctionOnLabeledState(["state", "mode"], "action")
 
@@ -102,16 +113,18 @@ class FunctionOnLabeledState(object):
 
     def __init__(self, input_keys, output_keys):
         self._state_input_output_list = []
-        self._input_keys = (
-            input_keys
-            if isinstance(input_keys, Iterable) and not isinstance(input_keys, str)
-            else [input_keys]
-        )
-        self._output_keys = (
-            output_keys
-            if isinstance(output_keys, Iterable) and not isinstance(output_keys, str)
-            else [output_keys]
-        )
+        if (
+                isinstance(input_keys, Iterable) and
+                not isinstance(input_keys, str)):
+            self._input_keys = input_keys
+        else:
+            self._input_keys = [input_keys]
+        if (
+                isinstance(output_keys, Iterable) and
+                not isinstance(output_keys, str)):
+            self._output_keys = output_keys
+        else:
+            self._output_keys = [output_keys]
         self._state_index = input_keys.index("state")
 
     def __str__(self):
@@ -125,14 +138,16 @@ class FunctionOnLabeledState(object):
         (state, input_dict) = self.get_state_and_input_dict(input_tuple)
         pair = self.get_state_input_output_pair(state, input_dict)
         if pair is None:
-            raise KeyError("Input tuple {} does not exist".format(input_tuple))
+            raise KeyError(
+                "Input tuple {i} does not exist".format(i=input_tuple))
         return self.get_output_tuple(pair.output_dict)
 
     def get_state_and_input_dict(self, input_tuple):
-        """Separate a given tuple into state and other input
+        """Separate a given tuple into state and other input.
 
-        @return a tuple (state, input_dict) where state is the state and input_dict
-            is a dictionary of input keys and values.
+        @return: a `tuple` `(state, input_dict)` where
+            - `state` is the state
+            - `input_dict` is a dictionary of input keys and values
         """
         if len(self._input_keys) == 1:
             input_tuple = (input_tuple,)
@@ -146,10 +161,11 @@ class FunctionOnLabeledState(object):
         return (state, input_dict)
 
     def get_output_dict(self, output_tuple):
-        """Convert a tuple of outputs to a dictionary
+        """Convert a tuple of outputs to a dictionary.
 
-        @return a dictionary whose keys are the output keys and
-            values are their corresponding values obtained from the given tuple.
+        @return: `dict` whose keys are the output keys and
+            values are their corresponding values
+            obtained from the given tuple
         """
         if len(self._output_keys) == 1:
             output_tuple = (output_tuple,)
@@ -160,9 +176,9 @@ class FunctionOnLabeledState(object):
         return output_dict
 
     def get_output_tuple(self, output_dict):
-        """Convert an output dictionary to a tuple
+        """Convert an output dictionary to a tuple.
 
-        @return a tuple of output
+        @return: a tuple of output
         """
         if len(output_dict) == 0:
             return None
@@ -171,10 +187,11 @@ class FunctionOnLabeledState(object):
         return (output_dict[key] for key in self._output_keys)
 
     def get_state_input_output_pair(self, state, input_dict):
-        """Find the first element with the given state and additional input
+        """Find the first element with the given state and additional input.
 
-        @return a LabeledStateInputOutputPair object o in self._state_input_output_list
-           such that o.is_at(state, input_dict)
+        @return: a `LabeledStateInputOutputPair` object `obj`
+            in `self._state_input_output_list`
+            such that `obj.is_at(state, input_dict)`
         """
         return next(
             (
@@ -186,7 +203,7 @@ class FunctionOnLabeledState(object):
         )
 
     def add(self, input_tuple, output_tuple, labels=[]):
-        """Add a map input_tuple -> output_tuple to this function
+        """Add a map `input_tuple` -> `output_tuple` to this function.
 
         An optional label of the state may be provided.
         """
@@ -202,20 +219,21 @@ class FunctionOnLabeledState(object):
             pair.output_dict = output_dict
             pair.labels = labels
             return
-
         self._state_input_output_list.append(
-            LabeledStateInputOutputPair(state, input_dict, output_dict, labels)
+            LabeledStateInputOutputPair(
+                state, input_dict, output_dict, labels)
         )
 
     def save(self, path, transys=None):
-        """Export this to a json file
+        """Export this to a JSON file.
 
-        If transys is provided, the label at each state will be computed based on
-        the labeling function of transys
+        If transys is provided, the label at each state will be
+        computed based on the labeling function of `transys`.
         """
         with open(path, "w") as outfile:
             json.dump(
-                [pair.to_json(transys) for pair in self._state_input_output_list],
+                [pair.to_json(transys)
+                 for pair in self._state_input_output_list],
                 outfile,
                 indent=4,
             )

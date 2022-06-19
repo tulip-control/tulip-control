@@ -3,6 +3,13 @@
 
 ## 1.4.0
 
+- require Python >= 3.7
+
+- TST: use `pytest`, instead of `nose`
+
+- CI: run all tests on [GitHub Actions](
+      https://github.com/tulip-control/tulip-control/actions)
+
 - rm interface to `jtlv` solver in 9634403c4f6fc78deb09bdfce978569f878973b8
 
 

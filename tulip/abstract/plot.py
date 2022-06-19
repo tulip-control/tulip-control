@@ -51,6 +51,14 @@ from tulip.abstract import find_controller
 # import matplotlib as mpl
 # from tulip.graphics import newax
 
+
+__all__ = [
+    'plot_partition', 'plot_transition_arrow',
+    'plot_abstraction_scc', 'plot_ts_on_partition',
+    'project_strategy_on_partition', 'plot_strategy',
+    'plot_trajectory']
+
+
 def plot_abstraction_scc(ab, ax=None):
     """Plot Regions colored by strongly connected component.
 
@@ -187,9 +195,10 @@ def plot_trajectory(ppp, x0, u_seq, ssys,
     x = x0.flatten()
     x_arr = x0
     for i in range(u_seq.shape[0]):
-        x = np.dot(A, x).flatten() +\
-            np.dot(B, u_seq[i, :] ).flatten() +\
-            K.flatten()
+        x = (
+            np.dot(A, x).flatten() +
+            np.dot(B, u_seq[i, :] ).flatten() +
+            K.flatten())
         x_arr = np.vstack([x_arr, x.flatten()])
 
     ax.plot(x_arr[:,0], x_arr[:,1], 'o-')

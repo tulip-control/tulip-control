@@ -125,7 +125,7 @@ specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
 # and next values `env_vars'`. A controller with this
 # information flow is known as Mealy.
 specs.moore = False
-specs.qinit = '\A \E'
+specs.qinit = r'\A \E'
 
 # Controller synthesis
 #

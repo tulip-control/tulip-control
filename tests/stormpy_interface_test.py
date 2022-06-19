@@ -73,17 +73,17 @@ def compose_test():
     expected_result = [
         {"labels": {"h6", "green"}, "result": 1.0},
         {"labels": {"red", "h6"}, "result": 1.0},
-        {"labels": {"h2", "green"}, "result": 0.42122366709344317},
+        {"labels": {"h2", "green"}, "result": 0.421_223_667_093_443_17},
         {"labels": {"red", "h2"}, "result": 0.0},
-        {"labels": {"h4", "green"}, "result": 0.7256235827664395},
+        {"labels": {"h4", "green"}, "result": 0.725_623_582_766_439_5},
         {"labels": {"red", "h4"}, "result": 0.0},
-        {"labels": {"h5", "green"}, "result": 0.9523809523809521},
+        {"labels": {"h5", "green"}, "result": 0.952_380_952_380_952_1},
         {"labels": {"red", "h5"}, "result": 0.0},
-        {"labels": {"green", "h1"}, "result": 0.3209323177854804},
+        {"labels": {"green", "h1"}, "result": 0.320_932_317_785_480_4},
         {"labels": {"red", "h1"}, "result": 0.0},
-        {"labels": {"h0", "green"}, "result": 0.2445198611698898},
+        {"labels": {"h0", "green"}, "result": 0.244_519_861_169_889_8},
         {"labels": {"red", "h0"}, "result": 0.0},
-        {"labels": {"green", "h3"}, "result": 0.5528560630601442},
+        {"labels": {"green", "h3"}, "result": 0.552_856_063_060_144_2},
         {"labels": {"red", "h3"}, "result": 0.0},
     ]
 
@@ -111,7 +111,7 @@ def synthesis_test():
     )
     os.remove(out_model_path)
 
-    assert abs(result[list(composed.states.initial)[0]] - 0.7429340826573935) < 1e-6
+    assert abs(result[list(composed.states.initial)[0]] - 0.742_934_082_657_393_5) < 1e-6
 
     # Get the MC induced by applying policy_opt on model
     induced_mc = apply_policy(composed, policy)
@@ -121,33 +121,33 @@ def synthesis_test():
     os.remove(out_model_path)
 
     expected_result = [
-        {"labels": {"green", "h5", "a8"}, "result": 0.745341614906832},
+        {"labels": {"green", "h5", "a8"}, "result": 0.745_341_614_906_832},
         {"labels": {"h5", "red", "a8"}, "result": 0.0},
-        {"labels": {"green", "h0", "a8"}, "result": 0.7429340826573935},
+        {"labels": {"green", "h0", "a8"}, "result": 0.742_934_082_657_393_5},
         {"labels": {"h0", "red", "a8"}, "result": 0.0},
-        {"labels": {"green", "h1", "a8"}, "result": 0.7287988161717747},
+        {"labels": {"green", "h1", "a8"}, "result": 0.728_798_816_171_774_7},
         {"labels": {"h1", "a8", "red"}, "result": 0.0},
-        {"labels": {"green", "a8", "h4"}, "result": 0.6059687926071806},
+        {"labels": {"green", "a8", "h4"}, "result": 0.605_968_792_607_180_6},
         {"labels": {"red", "a8", "h4"}, "result": 0.0},
-        {"labels": {"green", "a8", "h6"}, "result": 0.745341614906832},
+        {"labels": {"green", "a8", "h6"}, "result": 0.745_341_614_906_832},
         {"labels": {"red", "a8", "h6"}, "result": 0.0},
-        {"labels": {"green", "a8", "h3"}, "result": 0.3861264940442798},
+        {"labels": {"green", "a8", "h3"}, "result": 0.386_126_494_044_279_8},
         {"labels": {"red", "a8", "h3"}, "result": 0.0},
-        {"labels": {"green", "h2", "a8"}, "result": 0.6458232194557872},
+        {"labels": {"green", "h2", "a8"}, "result": 0.645_823_219_455_787_2},
         {"labels": {"h2", "a8", "red"}, "result": 0.0},
-        {"labels": {"green", "h5", "a4"}, "result": 0.9523809523809523},
+        {"labels": {"green", "h5", "a4"}, "result": 0.952_380_952_380_952_3},
         {"labels": {"h5", "red", "a4"}, "result": 0.0},
-        {"labels": {"green", "h0", "a4"}, "result": 0.9520897806888625},
+        {"labels": {"green", "h0", "a4"}, "result": 0.952_089_780_688_862_5},
         {"labels": {"h0", "red", "a4"}, "result": 0.0},
-        {"labels": {"green", "h1", "a4"}, "result": 0.9501789664595234},
+        {"labels": {"green", "h1", "a4"}, "result": 0.950_178_966_459_523_4},
         {"labels": {"h1", "a4", "red"}, "result": 0.0},
         {"labels": {"green", "a4", "h4"}, "result": 0.0},
         {"labels": {"red", "a4", "h4"}, "result": 0.0},
-        {"labels": {"green", "a4", "h6"}, "result": 0.9523809523809521},
+        {"labels": {"green", "a4", "h6"}, "result": 0.952_380_952_380_952_1},
         {"labels": {"red", "a4", "h6"}, "result": 0.0},
-        {"labels": {"green", "a4", "h3"}, "result": 0.8264462809917354},
+        {"labels": {"green", "a4", "h3"}, "result": 0.826_446_280_991_735_4},
         {"labels": {"red", "a4", "h3"}, "result": 0.0},
-        {"labels": {"green", "h2", "a4"}, "result": 0.9357284338501467},
+        {"labels": {"green", "h2", "a4"}, "result": 0.935_728_433_850_146_7},
         {"labels": {"h2", "a4", "red"}, "result": 0.0},
         {"labels": {"green", "h5", "a9"}, "result": 1.0},
         {"labels": {"h5", "a9", "red"}, "result": 1.0},

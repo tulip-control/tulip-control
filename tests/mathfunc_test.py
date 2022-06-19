@@ -17,8 +17,10 @@ def single_input_test():
     assert state == (0, 0)
     assert len(input_dict) == 0
 
-    _get_state_input_output_pair_test(func, (0, 0), {}, {"action": str(1)}, [])
-    _get_state_input_output_pair_test(func, (1, 1), {}, {"action": str(2)}, ["odd"])
+    _get_state_input_output_pair(
+        func, (0, 0), {}, {"action": str(1)}, [])
+    _get_state_input_output_pair(
+        func, (1, 1), {}, {"action": str(2)}, ["odd"])
 
 
 def multiple_inputs_test():
@@ -31,8 +33,10 @@ def multiple_inputs_test():
     assert state == 0
     assert input_dict == {"mode": 0}
 
-    _get_state_input_output_pair_test(func, 0, {"mode": 0}, {"action": str(1)}, [])
-    _get_state_input_output_pair_test(func, 1, {"mode": 1}, {"action": str(2)}, ["odd"])
+    _get_state_input_output_pair(
+        func, 0, {"mode": 0}, {"action": str(1)}, [])
+    _get_state_input_output_pair(
+        func, 1, {"mode": 1}, {"action": str(2)}, ["odd"])
 
 
 def _fill(num, func):
@@ -59,7 +63,7 @@ def _common_tests(num, func):
     os.remove(path)
 
 
-def _get_state_input_output_pair_test(func, state, input_dict, output_dict, labels):
+def _get_state_input_output_pair(func, state, input_dict, output_dict, labels):
     pair = func.get_state_input_output_pair(state, input_dict)
     assert pair.state == state
     assert pair.input_dict == input_dict

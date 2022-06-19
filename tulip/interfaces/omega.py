@@ -153,16 +153,24 @@ def _grspec_to_automaton(g):
 
     # reverse mapping by `synth.strategy2mealy`
     a.declare_variables(**d)
-    a.varlist.update(env=list(g.env_vars.keys()), sys=list(g.sys_vars.keys()))
+    a.varlist.update(
+        env=list(g.env_vars.keys()),
+        sys=list(g.sys_vars.keys()))
 
     f = g._bool_int.__getitem__
-    a.init['env'] = " & ".join("( %s )" % f(ei) for ei in g.env_init) if len(g.env_init) > 0 else "TRUE"
-    a.init['sys'] = " & ".join("( %s )" % f(si) for si in g.sys_init) if len(g.sys_init) > 0 else "TRUE"
-    a.action['env'] = " & ".join("( %s )" % f(es) for es in g.env_safety) if len(g.env_safety) > 0 else "TRUE"
-    a.action['sys'] = " & ".join("( %s )" % f(ss) for ss in g.sys_safety) if len(g.sys_safety) > 0 else "TRUE"
 
-    w1 = ['!({s})'.format(s=s) for s in map(f, g.env_prog)] if len(g.env_prog) > 0 else ["FALSE"]
-    w2 = [f(sp) for sp in g.sys_prog] if len(g.sys_prog) > 0 else ["TRUE"]
+    a.init['env'] = _conj(g.env_init, f)
+    a.init['sys'] = _conj(g.sys_init, f)
+    a.action['env'] = _conj(g.env_safety, f)
+    a.action['sys'] = _conj(g.sys_safety, f)
+    if g.env_prog:
+        w1 = ['!({s})'.format(s=s) for s in map(f, g.env_prog)]
+    else:
+        w1 = ['FALSE']
+    if g.sys_prog:
+        w2 = [f(sp) for sp in g.sys_prog]
+    else:
+        w2 = ['TRUE']
     a.win['<>[]'] = a.bdds_from(*w1)
     a.win['[]<>'] = a.bdds_from(*w2)
 
@@ -171,3 +179,9 @@ def _grspec_to_automaton(g):
     a.qinit = g.qinit
 
     return a
+
+
+def _conj(strings, f):
+    if not strings:
+        return 'TRUE'
+    return ' & '.join(f(s) for s in strings)

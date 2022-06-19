@@ -8,8 +8,10 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.spec.lexyacc').setLevel(logging.WARNING)
 import networkx as nx
-from nose.tools import raises
+
 import os
+
+import pytest
 from tulip.spec import GRSpec, translate
 from tulip.interfaces import gr1c
 
@@ -86,7 +88,7 @@ REFERENCE_AUTJSON_smallbool = """
 
 
 class basic_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f_un = GRSpec(
             env_vars="x",
             sys_vars="y",
@@ -97,7 +99,7 @@ class basic_test(object):
             sys_prog="y && x",
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
         self.dcounter = GRSpec(
             env_init=['True'],
             sys_vars={"y": (0, 5)},
@@ -105,9 +107,9 @@ class basic_test(object):
             sys_prog=["y=0", "y=5"],
             moore=False,
             plus_one=False,
-            qinit='\A \E')
+            qinit=r'\A \E')
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f_un = None
         self.dcounter = None
 
@@ -123,12 +125,12 @@ class basic_test(object):
         assert not gr1c.check_realizable(self.f_un)
         self.f_un.sys_safety = []
         assert gr1c.check_realizable(self.f_un)
-        self.f_un.qinit = '\A \A'
+        self.f_un.qinit = r'\A \A'
         self.f_un.env_init = ['x', '!y']
         self.f_un.sys_init = list()
         assert gr1c.check_realizable(self.f_un)
         assert gr1c.check_realizable(self.dcounter)
-        self.dcounter.qinit = '\A \A'
+        self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
         assert gr1c.check_realizable(self.dcounter)
 
@@ -147,7 +149,7 @@ class basic_test(object):
 
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
-        self.dcounter.qinit = '\A \A'
+        self.dcounter.qinit = r'\A \A'
         self.dcounter.sys_init = list()
         g = gr1c.synthesize(self.dcounter)
         assert g is not None
@@ -158,7 +160,7 @@ class basic_test(object):
 
 
 class GR1CSession_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.spec_filename = "trivial_partwin.spc"
         with open(self.spec_filename, "w") as f:
             f.write(REFERENCE_SPECFILE)
@@ -166,7 +168,7 @@ class GR1CSession_test(object):
                                    env_vars=["x", "ze"],
                                    sys_vars=["y", "zs"])
 
-    def tearDown(self):
+    def teardown_method(self):
         self.gs.close()
         os.remove(self.spec_filename)
 
@@ -250,23 +252,15 @@ def test_load_aut_json():
     assert h_edges == g_edges, (h_edges, g_edges)
 
 
-@raises(ValueError)
-def synth_init_illegal_check(init_option):
-    spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
-    gr1c.synthesize(spc)
+@pytest.mark.parametrize('init_option', ['Caltech', 1])
+def synth_init_illegal_test(init_option):
+    with pytest.raises(ValueError):
+        spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
+        gr1c.synthesize(spc)
 
 
-def synth_init_illegal_test():
-    for init_option in ["Caltech", 1]:
-        yield synth_init_illegal_check, init_option
-
-
-@raises(ValueError)
-def realiz_init_illegal_check(init_option):
-    spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
-    gr1c.check_realizable(spc)
-
-
-def realiz_init_illegal_test():
-    for init_option in ["Caltech", 1]:
-        yield realiz_init_illegal_check, init_option
+@pytest.mark.parametrize('init_option', ['Caltech', 1])
+def realiz_init_illegal_test(init_option):
+    with pytest.raises(ValueError):
+        spc = GRSpec(moore=False, plus_one=False, qinit=init_option)
+        gr1c.check_realizable(spc)

@@ -49,13 +49,18 @@ import polytope as pc
 #
 # from tulip.graphics import newax, quiver
 
+
+__all__ = [
+    'LtiSysDyn', 'PwaSysDyn', 'SwitchedSysDyn']
+
+
 def _indent(s, n):
     s = s.split('\n')
     w = n*' '
     return w + ('\n'+w).join(s)
 
 class LtiSysDyn(object):
-    """Represent discrete-time continuous-state dynamics::
+    r"""Represent discrete-time continuous-state dynamics::
 
         s[t+1] = A*s[t] + B*u[t] + E*d[t] + K
 

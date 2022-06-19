@@ -31,7 +31,7 @@
 # SUCH DAMAGE.
 """Cost Module for state or transition cost/weight"""
 
-from collections import Iterable
+from collections.abc import Iterable
 
 
 class ValidTransitionCost(object):

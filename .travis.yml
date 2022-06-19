@@ -1,13 +1,14 @@
+# travis-ci.com is currently not used, and this file may be outdated.
+#
+# GitHub Actions are used: configured via the files in the directory:
+# `.github/workflows/`
 language: python
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
   - "3.7"
   - "3.8"
   - "3.9"
 
-dist: bionic
+dist: focal
 
 addons:
   apt:
@@ -27,13 +28,12 @@ addons:
     - libeigen3-dev
     - z3
     - libz3-dev
-    - python-z3
+    - python3-z3
     - libhwloc-dev
 
 before_install:
   - pip install --ignore-installed --upgrade pip setuptools wheel
   - pip install --upgrade --only-binary=numpy,scipy numpy scipy
-  - if test 2 = `python -c 'import sys; print(sys.version_info.major)'`; then pip install networkx==2.2; fi
   - pip install dd --no-binary dd
 
 install:
@@ -41,7 +41,7 @@ install:
   - pip install dist/tulip-*.tar.gz
 
 before_script:
-  - pip install nose
+  - pip install pytest
   - dot -V
 
 script:
@@ -69,10 +69,10 @@ script:
   # optional python packages
   - pip install gr1py
   # gr1c
-  - export GR1CVERSION=0.11.0
-  - curl -sSLO https://dl.bintray.com/slivingston/generic/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
+  - export GR1CVERSION=0.13.0
+  - curl -sSLO https://github.com/tulip-control/gr1c/releases/download/v${GR1CVERSION}/gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
   - expr `shasum -a 256 gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz|cut -d ' ' -f1`
-    = 563cc531bb034687c1d184b5d0da95e9f2b5699958912453894b53383cd0a298
+    = 1d45ca69d6acbf84ae6170de60b6c69073dffd3a6130c6213419e401d9d5c470
   - tar -xzf gr1c-${GR1CVERSION}-Linux_x86-64.tar.gz
   - export PATH=`pwd`/gr1c-${GR1CVERSION}-Linux_x86-64:$PATH
   # lily
@@ -92,7 +92,7 @@ script:
   - pip install gitpython
   - pip install mock
   # stormpy, requires Python 3
-  - if test 3 = `python -c 'import sys; print(sys.version_info.major)'`; then ./extern/get-stormpy.sh; fi
+  - ./extern/get-stormpy.sh
   # all tests, including slow hybrid and alternative game solvers
   - ./run_tests.py --outofsource full
 

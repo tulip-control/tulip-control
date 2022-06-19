@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 # logging.getLogger('tulip').setLevel(logging.ERROR)
 logger.setLevel(logging.DEBUG)
 
-from nose.tools import assert_raises
+import pytest
 
 import matplotlib
 # to avoid the need for using: ssh -X when running tests remotely
@@ -54,6 +54,7 @@ def subsys1():
     return sys_dyn
 
 
+@pytest.mark.slow
 def transition_directions_test():
     """Unit test for correctness of abstracted transition directions, with:
 
@@ -111,8 +112,6 @@ def transition_directions_test():
     for _, _, d in ts.edges(data=True):
         assert d['env_actions'] == 'normal'
         assert d['sys_actions'] == 'fly'
-
-transition_directions_test.slow = True
 
 
 def test_transient_regions():
@@ -238,6 +237,7 @@ def define_dynamics_dual():
     return sys_dyn, cont_partition, part
 
 
+@pytest.mark.slow
 def test_abstract_the_dynamics():
     """test_abstract_the_dynamics (known to fail without GLPK)"""
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
@@ -258,9 +258,8 @@ def test_abstract_the_dynamics():
     # self_loops = {i for i,j in ab.ts.transitions() if i==j}
     # print('self loops at states: ' + str(self_loops))
 
-test_abstract_the_dynamics.slow = True
 
-
+@pytest.mark.slow
 def test_abstract_the_dynamics_dual():
     """test_abstract_the_dynamics using dual-simulation algorithm"""
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
@@ -275,7 +274,7 @@ def test_abstract_the_dynamics_dual():
     assert ab.ppp.compute_adj()
 
     [sys_dyn, cont_partition, part] = define_dynamics_dual()
-    disc_options = {'N': 1, 'trans_length': 1000, 'min_cell_volume': 0.0}
+    disc_options = {'N': 1, 'trans_length': 1_000, 'min_cell_volume': 0.0}
     ab_2 = abstract.discretize(cont_partition, sys_dyn,
                                simu_type='dual', **disc_options)
 
@@ -285,8 +284,6 @@ def test_abstract_the_dynamics_dual():
             if i == part[j]:
                 table[j] = 1
     assert np.sum(table) == len(part)
-
-test_abstract_the_dynamics_dual.slow = True
 
 
 def test_is_feasible():
@@ -370,7 +367,8 @@ def test_find_controller_non_convex():
     assert 0.5 <= u <= 1.0, "u was " + str(u)
     # Try to find a control policy in the other direction and ascertain
     # an error is thrown
-    assert_raises(Exception, abstract.find_controller.get_input,
+    with pytest.raises(Exception):
+        abstract.find_controller.get_input(
                   x0=c_end_desired,
                   ssys=sys_dyn,
                   abstraction=disc_dynamics,

@@ -55,6 +55,10 @@ except ImportError:
 import numpy as np
 import polytope as pc
 
+
+__all__ = ['is_feasible', 'solve_feasible']
+
+
 def is_feasible(
     from_region, to_region, sys, N,
     closed_loop=True,
@@ -323,7 +327,7 @@ def volumes_for_reachability(part, max_num_poly):
     return part
 
 def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
-    """Compute the components of the polytope::
+    r"""Compute the components of the polytope::
 
         L [x(0)' u(0)' ... u(N-1)']' <= M
 
@@ -415,8 +419,9 @@ def createLM(ssys, N, list_P, Pk=None, PN=None, disturbance_ind=None):
 
         ######### FOR M #########
         idx = range(sum_vert, sum_vert + Li.A.shape[0])
-        Mk[idx, :] = Li.b.reshape(Li.b.size,1) - \
-                     Li.A.dot(A_k).dot(K_hat)
+        Mk[idx, :] = (
+            Li.b.reshape(Li.b.size,1) -
+            Li.A.dot(A_k).dot(K_hat))
 
         ######### FOR G #########
         if i in disturbance_ind:

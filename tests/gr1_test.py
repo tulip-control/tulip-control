@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.DEBUG)
 logging.getLogger('tulip.ltl_parser_log').setLevel(logging.WARNING)
 logging.getLogger('tulip.spec.form').setLevel(logging.WARNING)
 logging.getLogger('omega').setLevel(logging.WARNING)
-from nose.tools import assert_raises
+
+import pytest
 from tulip import spec, synth
 from tulip.spec import parser, transformation
 from tulip.spec import gr1_fragment as gr1
@@ -42,13 +43,13 @@ def test_split_gr1():
     assert d['G'] == ['( ( X y ) > 0 )'], d
     assert d['GF'] == ['( ( ( z - x ) <= 0 ) | ( p -> q ) )'], d
     # not in fragment
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('[]( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('<>( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('(X p ) & ( [] p )')
-    with assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         gr1.split_gr1('[]<> ( x & (X y) )')
 
 
@@ -60,7 +61,8 @@ def test_has_operator():
 
 
 def test_name_conflict():
-    assert_raises(ValueError, gr1.stability_to_gr1, 'a', aux='a')
+    with pytest.raises(ValueError):
+        gr1.stability_to_gr1('a', aux='a')
 
 
 def test_stability():
@@ -73,7 +75,7 @@ def test_stability():
 
     s.moore = False
     s.plus_one = False
-    s.qinit = '\A \E'
+    s.qinit = r'\A \E'
 
     # p && X[]!p
     s0 = spec.GRSpec(
@@ -82,7 +84,7 @@ def test_stability():
                     '!p -> X !p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
 
@@ -93,7 +95,7 @@ def test_stability():
                     'p -> X p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
 
@@ -103,7 +105,7 @@ def test_stability():
         sys_prog={'p', '!p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s2)
 
@@ -119,7 +121,7 @@ def test_stability():
         sys_safety={'(b && !p) -> X !p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E')
+        qinit=r'\A \E')
 
     assert synth.is_realizable(s | s3)
 
@@ -141,7 +143,7 @@ def test_response():
 
     s.moore = False
     s.plus_one = False
-    s.qinit = '\A \E'
+    s.qinit = r'\A \E'
 
     # p && []!q
     s0 = spec.GRSpec(
@@ -150,7 +152,7 @@ def test_response():
         sys_safety={'!q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
 
@@ -160,7 +162,7 @@ def test_response():
         sys_safety={'!p && !q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
 
@@ -170,7 +172,7 @@ def test_response():
         sys_init={'p && q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s2)
 
@@ -184,7 +186,7 @@ def test_response():
             'q -> X ! q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s3)
     # print((s | s2).pretty() )
@@ -200,7 +202,7 @@ def test_eventually():
 
     s.moore = False
     s.plus_one = False
-    s.qinit = '\A \E'
+    s.qinit = r'\A \E'
 
     # []!p
     s0 = spec.GRSpec(
@@ -208,7 +210,7 @@ def test_eventually():
         sys_safety={'!p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
 
@@ -219,7 +221,7 @@ def test_eventually():
         sys_prog={'!p', 'p'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
 
@@ -240,7 +242,7 @@ def test_until():
 
     s.moore = False
     s.plus_one = False
-    s.qinit = '\A \E'
+    s.qinit = r'\A \E'
 
     # []!q
     s0 = spec.GRSpec(
@@ -248,7 +250,7 @@ def test_until():
         sys_safety={'!q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
 
@@ -259,7 +261,7 @@ def test_until():
         sys_prog={'q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
 
@@ -271,7 +273,7 @@ def test_until():
         sys_prog={'q'},
         moore=False,
         plus_one=False,
-        qinit='\A \E'
+        qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s1)
 

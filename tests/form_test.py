@@ -5,16 +5,17 @@ from __future__ import print_function
 import logging
 logging.basicConfig(level=logging.ERROR)
 logging.getLogger('ltl_parser_log').setLevel(logging.WARNING)
-import nose.tools as nt
+
+import pytest
 from tulip.spec.form import LTL, GRSpec, replace_dependent_vars
 
 
 class LTL_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f = LTL("[](p -> <>q)", input_variables={"p": "boolean"},
                      output_variables={"q": "boolean"})
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f = None
 
     def test_loads_dumps_id(self):
@@ -62,7 +63,7 @@ def GR1specs_equal(s1, s2):
 
 
 class GRSpec_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f = GRSpec(env_vars={"x"}, sys_vars={"y"},
                         env_init=["x"], sys_safety=["y"],
                         env_prog=["!x", "x"], sys_prog=["y&&!x"])
@@ -70,7 +71,7 @@ class GRSpec_test(object):
                            env_init=["x && !x"])
         self.empty = GRSpec()
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f = None
 
     # def test_sym_to_prop(self):
@@ -90,12 +91,14 @@ class GRSpec_test(object):
 
         # Domain mismatch on system variable y
         g.sys_vars = {"y": (0, 5)}
-        nt.assert_raises(ValueError, self.f.__or__, g)
+        with pytest.raises(ValueError):
+            self.f.__or__(g)
 
         # Domain mismatch on environment variable x
         g.sys_vars = dict()
         g.env_vars["x"] = (0, 3)
-        nt.assert_raises(ValueError, self.f.__or__, g)
+        with pytest.raises(ValueError):
+            self.f.__or__(g)
 
     def test_to_canon(self):
         # Fragile!
@@ -127,7 +130,7 @@ def test_declare_boolean_vars():
     assert g.sys_vars == dict(a='boolean', b='boolean'), g.sys_vars
     assert g.env_vars == dict(c='boolean'), g.env_vars
     # attempt to redeclare "c" as sys var
-    with nt.assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         g.declare('c')
 
 
@@ -141,7 +144,7 @@ def test_declare_int_vars():
     assert g.sys_vars == dict(i=(0, 10)), g.sys_vars
     assert g.env_vars == dict(j=(-5, 14)), g.env_vars
     # attempt to redeclare "i" as env var
-    with nt.assert_raises(AssertionError):
+    with pytest.raises(AssertionError):
         g.declare(i=(0, 10), env=True)
 
 
@@ -149,7 +152,7 @@ def test_declare_str_vars():
     # declaring string-valued variables
     g = GRSpec()
     # neither int nor str values
-    with nt.assert_raises(TypeError):
+    with pytest.raises(TypeError):
         g.declare(i=(0, 10, 'wrong'))
     d = dict(name=['a', 'b', 'c', 'w'])
     g.declare(**d)

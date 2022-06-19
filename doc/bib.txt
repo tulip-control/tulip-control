@@ -3,6 +3,21 @@ C. Baier and J.-P. Katoen.
 *Principles of Model Checking*.
 MIT Press, 2008.
 
+[KPP2005]
+Y. Kesten, N. Piterman, and A. Pnueli (2005).
+`Bridging the gap between fair simulation and trace inclusion
+<https://doi.org/10.1016/j.ic.2005.01.006>`_.
+*Information and Computation*,
+Volume 200, Issue 1, pages 35--61
+
+[PPS2006]
+N. Piterman, A. Pnueli, and Y. Sa'ar (2006).
+`Synthesis of reactive(1) designs
+<https://doi.org/10.1007/11609773_24>`_.
+*Proc. of International Conference on Verification,
+Model Checking, and Abstract Interpretation (VMCAI)*,
+pages 364--380
+
 [BJPPS12]
 R. Bloem, B. Jobstmann, N. Piterman, A. Pnueli, and Y. Sa'ar (2012).
 `Synthesis of Reactive(1) designs
@@ -17,8 +32,9 @@ R. Ehlers (2010).
 
 [FDLOM16]
 I. Filippidis, S. Dathathri, S.C. Livingston, N. Ozay, and R.M. Murray (2016).
-Control design for hybrid systems with TuLiP:
-The temporal logic planning toolbox.
+`Control design for hybrid systems with TuLiP:
+The temporal logic planning toolbox
+<https://doi.org/10.1109/CCA.2016.7587949>`_.
 In *Proc. of IEEE Multi-Conference on Systems and Control (MSC)*.
 
 [LS11]

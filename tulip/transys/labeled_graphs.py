@@ -50,6 +50,9 @@ from tulip.transys.mathset import SubSet, TypedDict
 # from tulip.transys.export import graph2dot
 
 
+__all__ = ['LabeledDiGraph', 'prepend_with']
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -972,9 +975,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # legacy
         if 'check_states' in attr:
-            msg = 'saw keyword argument: check_states ' +\
-                  'which is no longer available, ' +\
-                  'firstly add the new nodes.'
+            msg = (
+                'saw keyword argument: check_states '
+                'which is no longer available, '
+                'firstly add the new nodes.')
             logger.warning(msg)
         # check nodes exist
         if u not in self._succ:
@@ -1222,7 +1226,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 filename = self.name
         fname, fextension = os.path.splitext(filename)
         # default extension
-        if not fextension or fextension is '.':
+        if not fextension or fextension == '.':
             fextension = '.pdf'
         if fileformat:
             fextension = '.' + fileformat
@@ -1230,7 +1234,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         # drop '.'
         fileformat = fextension[1:]
         # check for html
-        if fileformat is 'html':
+        if fileformat == 'html':
             from tulip.transys.export import save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         # subclass has extra export formats ?

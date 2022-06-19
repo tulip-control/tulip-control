@@ -50,14 +50,14 @@ except ImportError:
     from itertools import izip_longest
 
 import numpy as np
-try:
-    from matplotlib import pyplot as plt
-    from mpl_toolkits.mplot3d import axes3d
-except Exception as e:
-    plt = None
-    logger.error(e)
+# inline
+# from matplotlib import pyplot as plt
+# from mpl_toolkits.mplot3d import axes3d
+# from mayavi.mlab import quiver3d
 
-# from mayavi import mlab
+
+__all__ = ['dimension', 'newax', 'dom2vec', 'quiver']
+
 
 def dimension(ndarray):
     """dimension of ndarray  (DEPRECATED)
@@ -102,7 +102,7 @@ def newax(subplots=(1, 1), fig=None,
     @rtype: list or list of lists,
         depending on C{mode} above
     """
-    assert_pyplot()
+    plt = _import_pyplot()
     # layout or number of axes ?
     try:
         subplot_layout = tuple(subplots)
@@ -141,7 +141,7 @@ def newax(subplots=(1, 1), fig=None,
         if curdim > 3:
             warn('ndim > 3, but plot limited to 3.')
 
-    if mode is 'matrix':
+    if mode == 'matrix':
         ax = list(_grouper(nh, ax))
 
     # single axes ?
@@ -217,7 +217,7 @@ def quiver(x, v, ax=None, **kwargs):
 
     @return: handle to plotted object(s)
     """
-    assert_pyplot()
+    plt = _import_pyplot()
     # multiple axes ?
     try:
         fields = [quiver(x, v, i, **kwargs) for i in ax]
@@ -259,6 +259,11 @@ def _grouper(n, iterable, fillvalue=None):
     return izip_longest(fillvalue=fillvalue, *args)
 
 
-def assert_pyplot():
-    if plt is None:
+def _import_pyplot():
+    """Try to import `matplotlib.pyplot`, or raise `ImportError`."""
+    try:
+        from matplotlib import pyplot as plt
+        from mpl_toolkits.mplot3d import axes3d
+    except Exception as e:
         raise ImportError('Failed to import `matplotlib.pyplot`')
+    return plt

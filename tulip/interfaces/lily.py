@@ -202,5 +202,5 @@ def _parse_label(s):
 
     @rtype: C{dict}
     """
-    l = re.findall('(\w+)=(0|1)', s)
+    l = re.findall(r'(\w+)=(0|1)', s)
     return {k: bool(int(v)) for k, v in l}

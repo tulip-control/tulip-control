@@ -5,7 +5,7 @@ from __future__ import print_function
 
 import numpy as np
 
-from nose.tools import raises
+import pytest
 from tulip import hybrid
 import polytope as pc
 
@@ -36,6 +36,7 @@ def switched_system_test():
         ('a', 'c'):pwa,
         ('a', 'd'):pwa,
         ('b', 'c'):pwa,
+        ('b', 'd'): pwa,
     }
     env_labels = ['a', 'b']
     sys_labels = ['c', 'd']
@@ -55,11 +56,33 @@ def switched_system_test():
     assert(hyb.env_labels == env_labels)
     assert(hyb.disc_sys_labels == sys_labels)
     assert(hyb.cts_ss == domain)
+    #
+    # omitting a mode raises a warning
+    dyn = {
+        ('a', 'c'):pwa,
+        ('a', 'd'):pwa,
+        ('b', 'c'):pwa,
+    }
+    with pytest.warns(UserWarning):
+        hyb = hybrid.SwitchedSysDyn(
+            disc_domain_size=dom,
+            dynamics=dyn,
+            cts_ss=domain,
+            env_labels=env_labels,
+            disc_sys_labels=sys_labels)
+
+    print(hyb)
+
+    assert(hyb.disc_domain_size == dom)
+    assert(hyb.dynamics == dyn)
+    assert(hyb.env_labels == env_labels)
+    assert(hyb.disc_sys_labels == sys_labels)
+    assert(hyb.cts_ss == domain)
 
 
 class time_semantics_test(object):
     """Test out time semantics for hybrid systems module."""
-    def setUp(self):
+    def setup_method(self):
         self.A1 = np.eye(2)
         self.A2 = np.array([[0, 1], [0, 0]])
         self.B1 = np.array([[0] ,[1]])
@@ -69,7 +92,7 @@ class time_semantics_test(object):
         self.total_box = pc.Region(list_poly=[self.poly1, self.poly2])
         self.Uset = pc.Polytope.from_box([[0, 1]])
 
-    def tearDown(self):
+    def teardown_method(self):
         self.A1 = None
         self.A2 = None
         self.B1 = None
@@ -119,7 +142,7 @@ class time_semantics_test(object):
                                 time_semantics='sampled', timestep=.1,
                                 overwrite_time=True)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_pwa_difftseman_among_subsys(self):
         """Different time semantics among LtiSysDyn subsystems of PwaSysDyn"""
         LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
@@ -132,7 +155,7 @@ class time_semantics_test(object):
                                time_semantics='sampled', timestep=.1,
                                overwrite_time=False)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_pwa_difftstep_among_subsys(self):
         """Different timesteps among LtiSysDyn subsystems of PwaSysDyn"""
         LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
@@ -145,7 +168,7 @@ class time_semantics_test(object):
                                time_semantics='sampled', timestep=.1,
                                overwrite_time=False)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_pwa_difftseman_from_subsys(self):
         """LtiSysDyn subsystems time semantics do not match that of PwaSysDyn"""
         LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
@@ -157,7 +180,7 @@ class time_semantics_test(object):
         PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='discrete', overwrite_time=False)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_pwa_difftstep_from_subsys(self):
         """LtiSysDyn subsystems timesteps do not match that of PwaSysDyn"""
         LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
@@ -170,7 +193,7 @@ class time_semantics_test(object):
                                time_semantics='sampled', timestep=.2,
                                overwrite_time=False)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_pwa_invalid_semantics(self):
         LTI1 = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
                                 Uset=self.Uset, domain=self.poly1,
@@ -181,7 +204,7 @@ class time_semantics_test(object):
         PWA = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                time_semantics='hello')
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_disctime_errtstep(self):
         """Discrete time semantics yet given timestep"""
         LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
@@ -189,19 +212,19 @@ class time_semantics_test(object):
                                time_semantics='discrete', timestep=.1)
 
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_lti_invalid_semantics(self):
         LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
                                Uset=self.Uset, domain=self.poly1,
                                time_semantics='hello', timestep=.1)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_nonpositive_timestep(self):
         LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
                                Uset=self.Uset, domain=self.poly1,
                                time_semantics='sampled', timestep=0)
 
-    @raises(TypeError)
+    @pytest.mark.xfail(raises=TypeError)
     def test_timestep_wrong_type(self):
         LTI = hybrid.LtiSysDyn(A=self.A1, B=self.B1,
                                Uset=self.Uset, domain=self.poly1,
@@ -209,7 +232,7 @@ class time_semantics_test(object):
 
 
 class SwitchedSysDyn_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.A1 = np.eye(2)
         self.A2 = np.array([[0, 1], [0, 0]])
         self.B1 = np.array([[0] ,[1]])
@@ -242,7 +265,7 @@ class SwitchedSysDyn_test(object):
         self.dynamics1 = {(self.env_labels[0], self.sys_labels[0]): self.PWA1,
                           (self.env_labels[1], self.sys_labels[0]): self.PWA2}
 
-    def tearDown(self):
+    def teardown_method(self):
         self.A1 = None
         self.A2 = None
         self.B1 = None
@@ -262,20 +285,24 @@ class SwitchedSysDyn_test(object):
         self.PWA2 = None
         self.dynamics1 = None
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_hybrid_difftstep_from_subsys(self):
         """LtiSysDyn subsystems timesteps do not match that of SwitchedSysDyn"""
         hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
-                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            dynamics=self.dynamics1,
+                            cts_ss=self.total_box,
+                            env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='hello', timestep=.1,
                             overwrite_time=True)
 
-    @raises(ValueError)
+    @pytest.mark.xfail(raises=ValueError)
     def test_hybrid_fail_check_time_consistency(self):
         # fail _check_time_consistency
         hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
-                            dynamics=self.dynamics1, env_labels=self.env_labels,
+                            dynamics=self.dynamics1,
+                            cts_ss=self.total_box,
+                            env_labels=self.env_labels,
                             disc_sys_labels=self.sys_labels,
                             time_semantics='sampled', timestep=.2,
                             overwrite_time=False)
@@ -283,12 +310,14 @@ class SwitchedSysDyn_test(object):
     def test_correct_switched_construction(self):
         switched1 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
+                                        cts_ss=self.total_box,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
                                         time_semantics='sampled', timestep=.1,
                                         overwrite_time=True)
         switched2 = hybrid.SwitchedSysDyn(disc_domain_size=self.disc_domain_size,
                                         dynamics=self.dynamics1,
+                                        cts_ss=self.total_box,
                                         env_labels=self.env_labels,
                                         disc_sys_labels=self.sys_labels,
                                         time_semantics='sampled', timestep=.1,

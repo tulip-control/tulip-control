@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 """Installation script."""
 import logging
+import subprocess
+import sys
+
 from setuptools import setup
 # inline:
 # import git
+# import polytope
+# import tulip.spec.lexyacc
 
 
 NAME = 'tulip'
+PROJECT_URLS = {
+    'Bug Tracker': 'https://github.com/tulip-control/tulip-control/issues',
+    'Documentation': 'https://tulip-control.sourceforge.io/doc/',
+    'API Documentation': 'https://tulip-control.sourceforge.io/api-doc/',
+    'Source Code': 'https://github.com/tulip-control/tulip-control'}
 VERSION_FILE = '{name}/_version.py'.format(name=NAME)
 MAJOR = 1
 MINOR = 4
@@ -24,12 +34,7 @@ classifiers = [
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
-    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3 :: Only',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
@@ -71,6 +76,13 @@ def run_setup():
         parser.build(tabmodule, outputdir=outputdir,
                      write_tables=True,
                      debug=True, debuglog=logger)
+        import tulip.interfaces.ltl2ba
+        tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
+        outputdir = 'tulip/interfaces'
+        parser = tulip.interfaces.ltl2ba.Parser()
+        parser.build(tabmodule, outputdir=outputdir,
+                     write_tables=True,
+                     debug=True, debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
         print('Failed to build PLY tables: {e}'.format(e=e))
@@ -94,23 +106,24 @@ def run_setup():
         author='Caltech Control and Dynamical Systems',
         author_email='tulip@tulip-control.org',
         url='http://tulip-control.org',
-        bugtrack_url=('http://github.com/tulip-control/'
-                      'tulip-control/issues'),
+        project_urls=PROJECT_URLS,
         license='BSD',
         classifiers=classifiers,
+        python_requires='>=3.7',
         install_requires=[
-            'networkx >= 2.0, <= 2.4',
+            'networkx >= 2.0',
             'numpy >= 1.7',
             'omega >= 0.3.1, < 0.4.0',
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
+            'pyparsing == 2.4.7',  # Temporary, https://github.com/pydot/pydot/issues/277
             'pydot >= 1.2.0',
             'scipy'],
         tests_require=[
-            'nose',
             'matplotlib >= 2.0.0',
             'gr1py >= 0.2.0',
             'mock',
+            'pytest',
             'setuptools >= 39.0.0'],
         packages=[
             'tulip', 'tulip.transys', 'tulip.transys.export',
@@ -127,11 +140,8 @@ def run_setup():
 
 
 def install_cvxopt():
-    """Install a version of cvxopt that is compatible with polytope
-    requirements"""
+    """Install `cvxopt` version compatible with polytope requirements."""
     import polytope
-    import subprocess
-    import sys
     ver = polytope.__version__
     # Download all files for the current version of polytope
     subprocess.check_call([

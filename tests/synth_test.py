@@ -7,8 +7,9 @@ import logging
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('tulip.interfaces.omega').setLevel(logging.DEBUG)
 logging.getLogger('omega').setLevel(logging.WARNING)
-from nose.tools import assert_raises
+
 import numpy as np
+import pytest
 from scipy import sparse as sp
 from tulip import spec, synth, transys
 
@@ -123,14 +124,13 @@ def test_env_fts_int_states():
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
     env.states.add('e2')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     assert 'e0' not in spec.env_vars
     assert 'e1' not in spec.env_vars
     assert 'e2' not in spec.env_vars
@@ -158,14 +158,13 @@ def test_env_fts_bool_actions():
     """Env FTS has 2 actions, bools requested."""
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=True,
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=True)
     assert 'sys_actions' not in spec.env_vars
     assert 'env_actions' not in spec.env_vars
 
@@ -182,14 +181,13 @@ def test_env_fts_int_actions():
     env = env_fts_2_states()
     env.env_actions_must = 'mutex'
     env.env_actions.add('stop')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     assert 'park' not in spec.env_vars
     assert 'go' not in spec.env_vars
     assert 'stop' not in spec.env_vars
@@ -209,14 +207,13 @@ def test_env_ofts_bool_actions():
     env.env_actions_must = 'mutex'
     env.env_actions.remove('stop')
     env.sys_actions.remove('hover')
-
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=True
-    )
-
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=True)
     _check_ofts_bool_actions(spec)
 
 
@@ -261,11 +258,13 @@ def test_env_ofts_int_actions():
     """Env OpenFTS actions must become 1 int var in GR(1)."""
     env = env_ofts_int_actions()
     env.sys_actions_must = 'mutex'
-    spec = synth.env_to_spec(
-        env,
-        ignore_initial=False,
-        statevar='eloc',
-        bool_actions=False)
+    # there exists an env deadend, hence the warning
+    with pytest.warns(UserWarning):
+        spec = synth.env_to_spec(
+            env,
+            ignore_initial=False,
+            statevar='eloc',
+            bool_actions=False)
     _check_ofts_int_actions(spec)
 
 
@@ -364,7 +363,7 @@ def test_only_mode_control():
 
     specs = spec.GRSpec(env_vars, sys_vars, env_init, sys_init,
                         env_safe, sys_safe, env_prog, sys_prog)
-    specs.qinit = '\E \A'
+    specs.qinit = r'\E \A'
     r = synth.is_realizable(specs, env=env_sws, ignore_env_init=True)
     assert not r
 
@@ -412,7 +411,7 @@ def multiple_env_actions_check(solver='omega'):
         sys_prog=sys_prog,
         moore=False,
         plus_one=False,
-        qinit='\A \E')
+        qinit=r'\A \E')
     r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert r
     # slightly relax assumption
@@ -420,7 +419,7 @@ def multiple_env_actions_check(solver='omega'):
         sys_prog=sys_prog,
         moore=False,
         plus_one=False,
-        qinit='\A \E')
+        qinit=r'\A \E')
     r = synth.is_realizable(specs, sys=sys, solver=solver)
     assert not r
 
@@ -428,7 +427,7 @@ def multiple_env_actions_check(solver='omega'):
 def test_var_name_conflicts():
     """Check redefinitions between states, actions, atomic props."""
     def conversion_raises(f, ofts):
-        with assert_raises(AssertionError):
+        with pytest.raises(AssertionError):
             f(ofts, ignore_initial=True,
             statevar='loc', bool_actions=False)
 
@@ -640,7 +639,7 @@ def test_determinize_machine_init():
 
 
 class synthesize_test(object):
-    def setUp(self):
+    def setup_method(self):
         self.f_triv = spec.GRSpec(
             sys_vars="y",
             moore=False,
@@ -651,7 +650,7 @@ class synthesize_test(object):
             moore=False,
             plus_one=False)
 
-    def tearDown(self):
+    def teardown_method(self):
         self.f_triv = None
 
     def test_gr1c_basic(self):

@@ -36,7 +36,7 @@ be followed:
 - Be careful what you export, i.e., make sure that what is obtained when someone
   uses "from tulip.foo import \*" is what you intend.  Otherwise, hide names
   using the `"_" prefix
-  <http://docs.python.org/2.7/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
+  <http://docs.python.org/3/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
 - API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.
   Accordingly, docstrings should be marked up with `Epytext
   <http://epydoc.sourceforge.net/manual-epytext.html>`_.
@@ -88,9 +88,9 @@ tests and any tests that should pass given a successful ``pip install tulip[hybr
 namely, when the optional packages ``cvxopt`` and ``polytope`` are present.
 
 Provided the ``-f`` or ``--testfiles`` switch, it searches under the directory
-``tests/`` for files with names ending in "_test.py", and passes these to `nose
-<http://readthedocs.org/docs/nose/>`_.  Use the flag "-h" to see driver script
-options.  Extra details about options:
+``tests/`` for files with names ending in "_test.py", and passes these to
+`pytest <https://pytest.org>`_.  Use the flag "-h" to
+see driver script options.  Extra details about options:
 
 * The flag "--cover" to generate a coverage report, which will likely be placed
   under ``tests/cover/``.  It uses `Ned Batchelder's coverage module
@@ -206,7 +206,7 @@ entirely ignored.
 
 - Prefix commits to classify the changes.
   The `NumPy development workflow
-  <http://docs.scipy.org/doc/numpy/dev/gitwash/development_workflow.html>`_
+  <https://numpy.org/doc/stable/dev/development_workflow.html>`_
   contains a summary of common abbreviations.
   Suggested abbreviations:
 
@@ -216,14 +216,19 @@ entirely ignored.
   - BLD: related to building
   - BUG: error correction
   - CI: related to continuous integration tests (usually ``.travis.yml``)
+  - CHG: change the code
   - DEP: deprecate something, or remove a deprecated object
   - DEV: development utility
   - DOC: documentation (docstrings too)
   - DRAFT: to be rewritten / fixed up (to be rebased, never in master)
   - ENH: enhancement
   - EXP: experimental (to be rebased, never in master)
+  - GIT: related to ``git`` configuration, for example changes to
+    the files ``.gitignore`` and ``.gitattributes``
   - IMG: changes to sources of images (for example, SVG files)
   - MAI: maintenance
+  - MNT: same as "MAI"
+  - MV: move file(s)
   - PEP8: style convention
   - PEP*: change related to PEP*
   - REF: refactoring
@@ -231,6 +236,9 @@ entirely ignored.
   - REV: revert an earlier commit
   - STY: style correction
   - TST: testing
+  - UI: user interface, e.g., command-line options,
+    printing messages, logging, and similar changes
+  - WEB: changes to website; mostly relevant to branch `gh-pages`
 
   Deciding which prefix from the above to use is not always straightforward,
   but doing so is a good exercise. Choose the more severe prefix applicable
@@ -246,17 +254,16 @@ Further reading, of general interest:
   <http://who-t.blogspot.com/2009/12/on-commit-messages.html>`_" by Peter
   Hutterer (28 Dec 2009).
 
-- "`Commit often, perfect later, publish once: Git best practices
-  <https://sethrobertson.github.io/GitBestPractices/>`_"
-  by Seth Robertson (2012)
-
 - `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
 
-- Chapters 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
-  <https://www.kernel.org/doc/Documentation/CodingStyle>`_
+- Sections 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
+  <https://github.com/torvalds/linux/blob/master/Documentation/process/coding-style.rst>`_
 
 - `The Power of 10: Rules for Developing Safety-Critical Code
   <http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code>`_
 
 - Chapter 1: "Style", `The Practice of Programming
   <http://www.cs.princeton.edu/~bwk/tpop.webpage/>`_
+
+- `NumPy development documentation
+      <https://numpy.org/doc/stable/dev/index.html>`_

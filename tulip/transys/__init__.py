@@ -48,13 +48,27 @@ from .transys import (
     tuple2fts, line_labeled_with, cycle_labeled_with
 )
 
-from .automata import (
-    BuchiAutomaton, BA, tuple2ba,
-    RabinAutomaton, DRA,
-    ParityGame
-)
+__all__ = list()
 
+from . import algorithms
+from .algorithms import *
+from . import automata
+from .automata import *
+from . import labeled_graphs
+from .labeled_graphs import *
+from . import machines
+from .machines import *
+from . import mathset
+from .mathset import *
+from . import products
+from .products import *
+from . import transys
+from .transys import *
 
-from .machines import MooreMachine, MealyMachine
-
-from .products import OnTheFlyProductAutomaton
+__all__.extend(algorithms.__all__)
+__all__.extend(automata.__all__)
+__all__.extend(labeled_graphs.__all__)
+__all__.extend(machines.__all__)
+__all__.extend(mathset.__all__)
+__all__.extend(products.__all__)
+__all__.extend(transys.__all__)
