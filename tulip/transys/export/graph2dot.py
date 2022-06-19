@@ -487,7 +487,7 @@ def plot_dot(
         rankdir='LR',
         wrap=10,
         ax=None):
-    """Plot a networkx or pydot graph using dot.
+    """Plot a networkx graph using dot.
 
     No files written or deleted from the disk.
 
@@ -496,10 +496,10 @@ def plot_dot(
 
     See Also
     ========
-    dot & pydot documentation
+    dot documentation
 
     @param graph: to plot
-    @type graph: networkx.Graph | pydot.Graph
+    @type graph: networkx.Graph
 
     @param prog: GraphViz programto use
     @type prog: 'dot' | 'neato' | 'circo' | 'twopi'
@@ -510,15 +510,11 @@ def plot_dot(
 
     @param ax: axes
     """
-    try:
-        pydot_graph = _graph2pydot(graph, wrap=wrap)
-    except:
-        if isinstance(graph, nx.Graph):
-            pydot_graph = nx.drawing.nx_pydot.to_pydot(graph)
-        else:
-            raise TypeError(
-                'graph not networkx or pydot class.' +
-                'Got instead: ' + str(type(graph)))
+    if not isinstance(graph, nx.Graph):
+        raise TypeError(
+            'graph not networkx class.' +
+            'Got instead: ' + str(type(graph)))
+    pydot_graph = nx.drawing.nx_pydot.to_pydot(graph)
     pydot_graph.set_rankdir(rankdir)
     pydot_graph.set_splines('true')
     pydot_graph.set_bgcolor('gray')
