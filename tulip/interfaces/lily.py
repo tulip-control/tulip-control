@@ -32,19 +32,16 @@
 """
 Interface to Lily that solves LTL games.
 
-Requires pydot for networkx to load the Moore strategy graph.
-
 Relevant links:
   - U{Lily<http://www.ist.tugraz.at/staff/jobstmann/lily/>}
 """
+import collections as _cl
+import itertools as _itr
 import logging
 import errno
 import os
 import re
 import subprocess
-
-import networkx as nx
-import pydot
 
 from tulip.spec.parser import parse
 from tulip.spec.translation import translate
@@ -124,22 +121,21 @@ def synthesize(formula, env_vars=None, sys_vars=None):
                 'See the Lily docs for setting PERL5LIB and PATH.')
         else:
             raise
-
-    dotf = open(DOTFILE, 'r')
+    with open(DOTFILE, 'r') as dotf:
+        text = dotf.read()
     fail_msg = 'Formula is not realizable'
-    if dotf.read(len(fail_msg)) == fail_msg:
+    if text.startswith(fail_msg):
         return None
-    dotf.seek(0)
-    data = dotf.read()
-    (pd,) = pydot.graph_from_dot_data(data)
-    g = nx.drawing.nx_pydot.from_pydot(pd)
-    dotf.close()
-    moore = lily_strategy2moore(g, env_vars, sys_vars)
+    moore = _lily_strategy2moore(
+        text, env_vars, sys_vars)
     return moore
 
 
-def lily_strategy2moore(g, env_vars, sys_vars):
-    """Return Moore transducer from Lily strategy graph C{g}.
+def _lily_strategy2moore(
+        text,
+        env_vars,
+        sys_vars):
+    """Return Moore transducer from Lily strategy.
 
     Caution
     =======
@@ -147,52 +143,100 @@ def lily_strategy2moore(g, env_vars, sys_vars):
     in that the guards denote conjunctions,
     *not* subsets of ports.
 
-    @param g: Moore strategy game graph as output by Lily
-    @type g: C{networkx.MultiDiGraph}
+    @param text:
+        Moore strategy game graph,
+        described in output from Lily
 
     @rtype: L{MooreMachine}
     """
-    g.remove_node('title')
-    phantom_init = {x for x in g if x.startswith('init-')}
-    game_nodes = {x for x in g if x not in phantom_init}
-    sys_nodes = {x for x in game_nodes if g.nodes[x].get('shape') is None}
+    lines = text.splitlines()
+    def is_node_or_edge(line):
+        return line.startswith('"')
+    lines = filter(is_node_or_edge, lines)
+    def is_title_line(line):
+        return line.startswith('"title"')
+    lines = list(filter(
+        is_title_line, lines))
+    def line_is_edge(line):
+        return '->' in line
+    edge_lines = set(filter(
+        line_is_edge, lines))
+    node_lines = set(_itr.filterfalse(
+        line_is_edge, lines))
+    # collect nodes and edges
+    nodes = set()
+    edges = list()
+    for line in edge_lines:
+        edge, annot = line.split('[label="')
+        # edge
+        endpoints = edge.split('->')
+        start, end = list(map(
+            str.strip, endpoints))
+        edge = (start, end, annot)
+        edges.append(edge)
+        nodes.update((start, end))
+    def is_init(node):
+        return node.startswith('init-')
+    phantom_init = set(filter(
+        is_init, nodes))
+    game_nodes = set(_itr.filterfalse(
+        is_init, nodes))
+    env_nodes = set()
+    for line in node_lines:
+        node, annot = line.split('[')
+        node = node.strip()
+        if 'shape=' in annot:
+            continue
+        env_nodes.add(node)
+    def is_sys_node(node):
+        return node not in env_nodes
+    sys_nodes = set(filter(
+        is_sys_node, game_nodes))
+    # make machine
     mapping = {k: i for i, k in enumerate(sys_nodes)}
-    # avoid mapping MooreMachine, because it raises errors
-    h = nx.relabel_nodes(g, mapping)
-
-    m = MooreMachine()
-    inports = {k: {False, True} for k in env_vars}
-    outports = {k: {False, True} for k in sys_vars}
-    m.add_inputs(inports)
-    m.add_outputs(outports)
-    m.add_nodes_from(mapping[x] for x in sys_nodes)
-
+    successors = _cl.defaultdict(set)
+    edge_labels = dict()
+    for start, end, annot in edges:
+        start = mapping.get(start, start)
+        end = mapping.get(end, end)
+        successors[start].add(end)
+        edge_labels[start, end] = annot
+    machine = MooreMachine()
+    inports = {
+        name: {False, True}
+        for name in env_vars}
+    outports = {
+        name: {False, True}
+        for name in sys_vars}
+    machine.add_inputs(inports)
+    machine.add_outputs(outports)
+    machine.add_nodes_from(
+        mapping[x]
+        for x in sys_nodes)
     # add initial states
     for u in phantom_init:
-        for v in g.successors(u):
-            m.states.initial.add(mapping[v])
-
+        for v in successors[u]:
+            machine.states.initial.add(v)
     # label vertices with output values
-    for u in m:
-        oute = list(h.out_edges(u, data=True))
-        assert len(oute) == 1, oute
-        u_, v, attr = oute[0]
-        assert u_ is u
+    for u in machine:
+        succ = successors[u]
+        if len(succ) != 1:
+            raise AssertionError(succ)
+        v, = succ
+        attr = edge_labels[u, v]
         d = _parse_label(attr['label'])
-        m.add_node(u, **d)
-
-        # input doesn't matter for this reaction ?
-        if v in m:
-            m.add_edge(u, v)
+        machine.add_node(u, **d)
+        # input does not matter for this reaction ?
+        if v in machine:
+            machine.add_edge(u, v)
             continue
-
         # label edges with input values that matter
-        for v_, w, attr in h.out_edges(v, data=True):
-            assert v is v_, (v, v_)
-            assert w in m, w
+        for w in successors[v]:
+            assert w in machine, w
+            attr = edge_labels[v, w]
             d = _parse_label(attr['label'])
-            m.add_edge(u, w, **d)
-    return m
+            machine.add_edge(u, w, **d)
+    return machine
 
 
 def _parse_label(s):
