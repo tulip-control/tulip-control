@@ -449,8 +449,8 @@ function.
    :start-after: @synthesize@
    :end-before: @synthesize_end@
 
-The controller can now be saved in graphical form, or printed if pydot package
-is not available:
+The controller can now be saved in graphical form, or printed if
+the dependencies for DOT layout are not available:
 
 .. literalinclude:: ../examples/discrete.py
    :start-after: @plot_print@

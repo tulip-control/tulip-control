@@ -158,7 +158,7 @@ if [ "$install_glpk" = "true" ]; then
 fi
 
 #------------------------------------------------------------
-# install graphviz dot (needed by pydot)
+# install graphviz dot (needed for layout of DOT files)
 if [ "$install_graphviz" = "true" ]; then
 	if [ -f "$TMPBIN/dot" ]; then
 		echo "GraphViz already installed locally: skip"

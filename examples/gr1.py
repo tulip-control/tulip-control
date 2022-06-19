@@ -125,7 +125,7 @@ strategy = synth.synthesize(specs)
 assert strategy is not None, 'unrealizable'
 
 # Generate a graphical representation of the controller for viewing,
-# or a textual representation if pydot is missing.
+# or a textual representation if dependencies for layout of DOT are missing.
 if not strategy.save('gr1.png'):
     print(strategy)
 
