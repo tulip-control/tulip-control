@@ -20,7 +20,7 @@ install_dependencies = <<-SHELL
 sudo apt-get -y update
 sudo apt-get -y install python-pip python-pytest
 sudo apt-get -y install python-numpy python-networkx python-scipy python-ply python-matplotlib
-sudo apt-get -y install python-pydot
+sudo pip install graphviz
 sudo apt-get -y install libglpk-dev
 sudo apt-get -y install bison flex
 sudo apt-get -y install default-jre
