@@ -258,5 +258,8 @@ def _parse_label(s):
     @rtype:
         `dict`
     """
-    l = re.findall(r'(\w+)=(0|1)', s)
+    l = re.findall(
+        r' (\w+) = (0 | 1) ',
+        s,
+        flags=re.VERBOSE)
     return {k: bool(int(v)) for k, v in l}

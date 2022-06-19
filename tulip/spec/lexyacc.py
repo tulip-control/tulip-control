@@ -108,7 +108,10 @@ class Lexer:
         self.build(debug=debug)
 
     def t_NAME(self, t):
-        r'[A-Za-z_][A-za-z0-9._:]*'
+        r"""
+        [A-Za-z_]
+        [A-za-z0-9._:]*
+        """
         t.value = self.values.get(t.value, t.value)
         t.type = self.reserved.get(t.value, 'NAME')
         # special treatment
@@ -117,63 +120,86 @@ class Lexer:
         return t
 
     def t_ALWAYS(self, t):
-        r'\[\]'
+        r' \[ \] '
         t.value = 'G'
         return t
 
     def t_EVENTUALLY(self, t):
-        r'<>'
+        r' <> '
         t.value = 'F'
         return t
 
     def t_AND(self, t):
-        r'\&\&|\&|/\\'
+        r"""
+          \& \&
+        | \&
+        | / \\
+        """
         t.value = '&'
         return t
 
     def t_OR(self, t):
-        r'\|\||\||\\/'
+        r"""
+          \| \|
+        | \|
+        | \\ /
+        """
         t.value = '|'
         return t
 
-    t_NOT = r'!|\~'
+    t_NOT = r'''
+          !
+        | \~
+        '''
 
-    t_XOR = r'\^'
+    t_XOR = r' \^ '
 
-    t_EQUALS = r'='
+    t_EQUALS = r' = '
         # a declarative language
         # has no assignment
-    t_NEQUALS = r'!=|/='
-    t_LT = r'<'
-    t_LE = r'<=|=<'
-    t_GT = r'>='
-    t_GE = r'>'
-
-    t_LPAREN = r'\('
-    t_RPAREN = r'\)'
-    t_NUMBER = r'\d+'
-
-    t_IMP = r'\->|=>'
-    t_BIMP = r'<\->|<=>'
-
-    t_PLUS = r'\+'
-    t_MINUS = r'\-'
-    t_TIMES = r'\*'
-    t_DIV = r'/'
-    t_TRUNCATE = r'<<>>'
-    t_COMMA = r','
-
-    t_DQUOTES = r'"'
-    t_PRIME = r"'"
-
     t_ignore = ' \t'
+    t_NEQUALS = r'''
+          !=
+        | /=
+        '''
+    t_LT = r' < '
+    t_LE = r'''
+          <=
+        | =<
+        '''
+    t_GT = r' >= '
+    t_GE = r' > '
+
+    t_LPAREN = r' \( '
+    t_RPAREN = r' \) '
+    t_NUMBER = r' \d+ '
+
+    t_IMP = r'''
+          \- >
+        | =>
+        '''
+    t_BIMP = r'''
+          < \- >
+        | <=>
+        '''
+
+    t_PLUS = r' \+ '
+    t_MINUS = r' \- '
+    t_TIMES = r' \* '
+    t_DIV = r' / '
+    t_TRUNCATE = r' <<>> '
+    t_COMMA = r' , '
+
+    t_DQUOTES = r' " '
+    t_PRIME = r" ' "
+
 
     def t_comment(self, t):
-        r'\#.*'
+        r' \# .* '
         return
 
     def t_newline(self, t):
-        r'\n+'
+        r' \n+ '
         t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):

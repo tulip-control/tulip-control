@@ -116,10 +116,19 @@ def load_file(aut_file):
     for line in f:
         # parse states
         if (line.find('State ') >= 0):
-            stateid = re.search(r'State\ (\d+)', line)
+            stateid = re.search(
+                r' State [\x20] (\d+) ',
+                line,
+                flags=re.VERBOSE)
             stateid = int(stateid.group(1))
-            state = dict(re.findall(r'(\w+):(\w+)', line))
-            state1 = dict(re.findall(r'(\w+):(-\w+)', line))
+            state = dict(re.findall(
+                r' (\w+) : (\w+) ',
+                line,
+                flags=re.VERBOSE))
+            state1 = dict(re.findall(
+                r' (\w+) : (- \w+) ',
+                line,
+                flags=re.VERBOSE))
             state.update(state1)
         if re.search('successors', line):
             transition = list(re.findall(r'\d+', line))
@@ -141,18 +150,36 @@ def read_variables(smv_file):
     else:
         f = smv_file
     for line in f:
-        if re.search(r'MODULE\ env',line):
+        if re.search(
+                r' MODULE [\x20] env ',
+                line,
+                flags=re.VERBOSE):
             for line in f:
-                if re.search(r'\ :\ ', line):
+                if re.search(
+                        r' [\x20] : [\x20] ',
+                        line,
+                        flags=re.VERBOSE):
                     env = str(re.findall(r'(\w+)\ :', line))
                     env = env[2:len(env)-2]
                     enviroment.put(env)
-                if re.search(r'MODULE\ sys',line):
+                if re.search(
+                        r' MODULE [\x20] sys ',
+                        line,
+                        flags=re.VERBOSE):
                     break
-        if re.search(r'MODULE\ sys',line):
+        if re.search(
+                r'MODULE [\x20] sys',
+                line,
+                flags=re.VERBOSE):
             for line in f:
-                if re.search(r'\ :\ ', line):
-                    sys = str(re.findall(r'(\w+)\ :', line))
+                if re.search(
+                        r' [\x20] : [\x20] ',
+                        line,
+                        flags=re.VERBOSE):
+                    sys = str(re.findall(
+                        r' (\w+) [\x20] : ',
+                        line,
+                        flags=re.VERBOSE))
                     sys = sys[2:len(sys)-2]
                     system.put(sys)
 

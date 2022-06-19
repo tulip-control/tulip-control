@@ -200,7 +200,12 @@ class LTL:
                                      str(version))
                 break
         try:
-            s = re.sub(r'\#.*(\n|$)', '', s)  # Strip comments
+            s = re.sub(
+                r' \# .* (\n | $) ',
+                '',
+                s,
+                flags=re.VERBOSE)
+                    # Strip comments
             preamble, declar, formula = s.split('%%\n')
             input_ind = declar.find('INPUT:')
             output_ind = declar.find('OUTPUT:')

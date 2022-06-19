@@ -62,33 +62,54 @@ class Lexer:
         'COMMENT', 'NAME') + tuple(reserved.values())
 
     # Tokens
-    t_TRUE = 'TRUE|True|true'
-    t_FALSE = 'FALSE|False|false'
+    t_TRUE = '''
+          TRUE
+        | True
+        | true
+        '''
+    t_FALSE = '''
+          FALSE
+        | False
+        | false
+        '''
 
-    t_COMMENT = r'/\*.*\*/'
+    t_COMMENT = r'''
+        / \*
+        .*
+        \* /
+        '''
     t_NOT = r'!'
-    t_AND = r'\&\&|\&'
-    t_OR = r'\|\||\|'
-    t_XOR = r'\^'
+    t_AND = r'''
+          \& \&
+        | \&
+        '''
+    t_OR = r'''
+          \| \|
+        | \|
+        '''
+    t_XOR = r' \^ '
 
-    t_EQUALS = r'=|=='
-    t_NEQUALS = r'!='
-    t_LT = r'<'
-    t_LE = r'<='
-    t_GT = r'>='
-    t_GE = r'>'
+    t_EQUALS = r'''
+          =
+        | ==
+        '''
+    t_NEQUALS = r' != '
+    t_LT = r' < '
+    t_LE = r' <= '
+    t_GT = r' >= '
+    t_GE = r' > '
 
-    t_LPAREN = r'\('
-    t_RPAREN = r'\)'
-    t_LBRACE = r'\{'
-    t_RBRACE = r'\}'
-    t_SEMI = r';'
-    t_COLON2 = r'::'
-    t_COLON = r':'
+    t_LPAREN = r' \( '
+    t_RPAREN = r' \) '
+    t_LBRACE = r' \{ '
+    t_RBRACE = r' \} '
+    t_SEMI = r' ; '
+    t_COLON2 = r' :: '
+    t_COLON = r' : '
 
-    t_NUMBER = r'\d+'
+    t_NUMBER = r' \d+ '
 
-    t_IMP = r'\->'
+    t_IMP = r' \- > '
 
     # Ignored characters
     t_ignore = ' \t'
@@ -99,7 +120,7 @@ class Lexer:
             debug=False)
 
     def t_newline(self, t):
-        r'\n+'
+        r' \n+ '
         t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
@@ -108,7 +129,10 @@ class Lexer:
         t.lexer.skip(1)
 
     def t_name(self, t):
-        r'[A-Za-z_][a-zA-Z0-9_]*'
+        r"""
+        [A-Za-z_]
+        [a-zA-Z0-9_]*
+        """
         t.type = self.reserved.get(t.value, 'NAME')
         return t
 
