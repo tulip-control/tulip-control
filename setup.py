@@ -116,6 +116,7 @@ def run_setup():
             'omega >= 0.3.1, < 0.4.0',
             'ply >= 3.4, <= 3.10',
             'polytope >= 0.2.1',
+            'pyparsing == 2.4.7',  # Temporary, https://github.com/pydot/pydot/issues/277
             'pydot >= 1.2.0',
             'scipy'],
         tests_require=[
