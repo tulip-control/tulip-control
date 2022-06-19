@@ -53,7 +53,7 @@ default_variants        +complete
 
 variant complete description {install also optional dependencies} {
 	depends_lib-append port:py39-matplotlib \
-	                   port:py39-pydot \
+	                   port:py39-graphviz \
                        port:graphviz \
                        port:py39-ipython \
 	                   port:glpk
