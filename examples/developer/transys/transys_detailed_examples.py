@@ -43,61 +43,6 @@ import warnings
 hl = 60*'='
 save_fig = False
 
-def sims_demo():
-    """Storing simulations.
-    """
-    #=============
-    # Sequences
-    #=============
-    # fts def:
-    #   s1 -[a]-> s2
-    #   s2 -[b]-> s3
-    #   s3 -[a]-> s3
-    prefix = ['s1', 'a', 's2', 'b', 's3']
-    suffix = ['s3', 'a', 's2', 'b', 's3']
-    execution = trs.InfiniteSequence(prefix, suffix)
-    #print(execution)
-
-    # trace def
-    prefix = [{'p1', 'p2'}, {}, {'p1'} ]
-    suffix = [{'p1'}, {}, {'p1'} ]
-    trace = trs.InfiniteSequence(prefix, suffix)
-
-    #print(trace.get_prefix() )
-    #print(trace.get_suffix() )
-
-    #=============
-    # FTS Sim
-    #=============
-    fts_sim = trs.FiniteTransitionSystemSimulation(execution, trace)
-
-    print('Execution of FTS: s0, a1, s1, ..., aN, sN')
-    print(fts_sim.execution)
-
-    print('Path of states: s1, s2, ..., sN')
-    print(fts_sim.path)
-
-    print('Trace of stat labels: L(s0), L(s1), ..., L(sN)')
-    print(fts_sim.trace)
-
-    print('Action Trace: a1, a2, ..., aN')
-    print(fts_sim.action_trace)
-
-    print(fts_sim)
-
-    #=============
-    # Automaton Sim
-    #=============
-    prefix = [{'p1'}, {'p3'}, {'p2'}]
-    suffix = [{'p2'}, {'p1'}, {'p2'}]
-    input_word = trs.InfiniteWord(prefix, suffix)
-
-    prefix = ['s1', 's2', 's3']
-    suffix = ['s3', 's2', 's3']
-    run = trs.InfiniteSequence(prefix, suffix)
-
-    aut_sim = trs.FiniteStateAutomatonSimulation(input_word, run)
-    print(aut_sim)
 
 def fts_maximal_example():
     """Finite-Transition System demo.
@@ -412,7 +357,6 @@ def label_per_state():
     fts.plot()
 
 if __name__ == '__main__':
-    #sims_demo()
     fts_maximal_example()
     #ofts_maximal_example()
     ba_maximal_example()
