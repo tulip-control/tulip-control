@@ -3,7 +3,7 @@ pip>=9.0.0
 setuptools>=39.0.0
 
 # easy extras
-gr1py==0.2.0
+gr1py>=0.2.0
 
 # extras (uncomment as needed)
 # cvxopt==...  # for faster polytopic operations.
@@ -13,7 +13,6 @@ gr1py==0.2.0
 # matplotlib  # for plots
 
 # tests
-nose
 mock
 
 # dev
