@@ -46,7 +46,8 @@ def dijkstra_single_source_multiple_targets(
         The type of cost c can be anything that contains __add__ function
         such that c + 0 is defined.
 
-    @return (cost, path) where path is a list representing the optimal path
+    @return:
+        (cost, path) where path is a list representing the optimal path
         and cost is the sum of the edge costs on this path.
     """
     dist = {source: 0}
@@ -85,7 +86,8 @@ def dijkstra_multiple_sources_multiple_targets(
         The type of cost c can be anything that contains __add__ function
         such that c + 0 is defined.
 
-    @return (cost, path) where path is a list representing the optimal path
+    @return:
+        (cost, path) where path is a list representing the optimal path
         and cost is the sum of the edge costs on this path.
     """
     best_cost = float("inf")
