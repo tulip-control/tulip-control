@@ -486,15 +486,16 @@ class SwitchedSysDyn:
 
         self.disc_domain_size = disc_domain_size
 
-        # If label numbers agree with disc_domain_size, then use them.
+        # If label numbers agree with
+        # `disc_domain_size`, then use them.
         # Otherwise, ignore the labels.
         n_env, n_sys = disc_domain_size
 
         self._env_labels = self._check_labels(n_env, env_labels)
         self._disc_sys_labels = self._check_labels(n_sys, disc_sys_labels)
-
-        # Check each dynamics key is a valid mode,
-        # i.e., a valid combination of env and sys labels.
+        # Check that each dynamics key is a valid mode,
+        # i.e., a valid combination of
+        # environment and system labels.
         if dynamics is not None:
             modes = self.all_mode_combs
 
@@ -553,13 +554,12 @@ class SwitchedSysDyn:
         return s
 
     def _check_labels(self, n, labels):
-        # don't complain for default
+        # default
         if labels is None:
             return None
-
-        # len exists ?
+        # `len` exists ?
         try:
-            # is len correct ?
+            # is length correct ?
             if len(labels) != n:
                 msg = 'number of environment labels is inconsistent'
                 msg += ' with discrete domain size.\n'
@@ -633,8 +633,8 @@ def _push_time_data(system_list, time_semantics, timestep):
             warn('Overwriting existing timestep data.')
         system.time_semantics = time_semantics
         system.timestep = timestep
-
-        # Overwrite LTI in system if system is a PWA
+        # Overwrite LTI in system if
+        # the system is piecewise-affine
         if isinstance(system, PwaSysDyn):
             _push_time_data(system.list_subsys, time_semantics, timestep)
 
@@ -685,8 +685,8 @@ def _check_time_consistency(system_list, time_semantics, timestep):
             raise ValueError('Not all time semantics are the same.')
 
 
-    # Check that time semantics for all subsystems match specified system and
-    # timestep
+    # Check that time semantics for all subsystems
+    # match specified system and timestep
     if system_list[0].timestep != timestep:
         raise ValueError('Timestep of subsystems do not match specified ' +
                          'timestep.')

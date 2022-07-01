@@ -76,7 +76,8 @@ class Lexer:
     misc = ['NAME', 'NUMBER']
 
     def __init__(self, debug=False):
-        # for setting the logger, call build explicitly
+        # for setting the logger,
+        # directly call the method `build`
         self.tokens = (
             self.delimiters + self.operators +
             self.misc + list(set(self.reserved.values())))

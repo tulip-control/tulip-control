@@ -50,10 +50,12 @@ def export(
             'discretization parameters or none at all.')
     output = dict()
     output['is_continuous'] = is_continuous
-    # Only export dynamics and abstraction and control weights if the system is
+    # Only export dynamics and abstraction and
+    # control weights if the system is
     # continuous
     if is_continuous:
-        # Export system dynamics, get state and input dimension
+        # Export system dynamics,
+        # get state and input dimension
         if isinstance(system_dynamics, hybrid.LtiSysDyn):
             dynamics_output = lti_export(system_dynamics)
             dynamics_output['type'] = 'LtiSysDyn'
@@ -67,8 +69,10 @@ def export(
         elif isinstance(system_dynamics, hybrid.SwitchedSysDyn):
             dynamics_output = switched_export(system_dynamics)
             dynamics_output['type'] = 'SwitchedSysDyn'
-            # getting state and input dimension by looking at size of the A and
-            # B matrices of one of the PWA subsystems
+            # getting state and input dimension
+            # by looking at size of the `A` and
+            # `B` matrices of one of the
+            # piecewise-affine subsystems
             pwa_systems = list(system_dynamics.dynamics.values())
             pwa_system = pwa_systems[0]
             state_dimension = numpy.shape(pwa_system.list_subsys[0].A)[1]
@@ -77,7 +81,8 @@ def export(
             raise TypeError(str(type(system_dynamics)) +
                 ' is not a supported type of system dynamics.')
         output['system_dynamics'] = dynamics_output
-        # Control weights. Set default values if needed.
+        # Control weights.
+        # Set default values if needed.
         if R is None:
             R = numpy.zeros([state_dimension, state_dimension])
         if r is None:
@@ -92,7 +97,8 @@ def export(
             linear_weight=r,
             mid_weight=mid_weight)
         output['control_weights'] = control_weights
-        # Simulation parameters; insert default discretization values if needed
+        # Simulation parameters; insert default
+        # discretization values if needed
         sim_params = dict()
         try:
             sim_params['horizon'] = disc_params['N']
@@ -252,8 +258,10 @@ def export_mealy(mealy_machine, is_continuous):
     sys_values = list(mealy_machine.outputs.values())
     output['inputs'] = export_mealy_io(env_vars, env_values)
     output['outputs'] = export_mealy_io(sys_vars, sys_values)
-    # Transitions will be exported as a 2D list of dictionaries. The only
-    # purpose of this block here is to separate the inputs from the outputs to
+    # Transitions will be exported as
+    # a 2D list of dictionaries. The only
+    # purpose of this block here is to
+    # separate the inputs from the outputs to
     # make the MATLAB code easier to write
     transitions = list()
     for u, v, label in mealy_machine.edges(data=True):
@@ -269,9 +277,12 @@ def export_mealy(mealy_machine, is_continuous):
             outputs=svals)
         transitions.append(transition_dict)
     output['transitions'] = transitions
-    # Initial states are the states that have transitions from SINIT. Initial
-    # transitions (for the purposes of execution in Stateflow), are the
-    # transitions coming from the states that transition from SINIT.
+    # Initial states are the states that
+    # have transitions from `SINIT`.
+    # Initial transitions (for the purposes
+    # of execution in Stateflow), are the
+    # transitions coming from the states
+    # that transition from `SINIT`.
     init_nodes = mealy_machine.successors(SINIT)
     assert init_nodes, init_nodes
     init_trans = list()

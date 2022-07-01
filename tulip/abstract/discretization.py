@@ -716,14 +716,14 @@ def _discretize_bi(
     iter_count = 0
     # List of how many "new" regions
     # have been created for each region
-    # and a list of original number of neighbors
+    # and a `list` of original number of neighbors
     #num_new_reg = np.zeros(len(orig_list))
     #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
     progress = list()
     # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
-        # i,j swapped in discretize_overlap
+        # `i`, `j` swapped in discretize_overlap
         i = ind[1][0]
         j = ind[0][0]
         IJ[j, i] = 0
@@ -803,16 +803,19 @@ def _discretize_bi(
                            'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
             logger.warning('\t too small: si \\ Pre(sj), so not reached it')
-        # We don't want our partitions to be smaller than the disturbance set
-        # Could be a problem since cheby radius is calculated for smallest
-        # convex polytope, so if we have a region we might throw away a good
-        # cell.
+        # We don't want our partitions to
+        # be smaller than the disturbance set
+        # Could be a problem since cheby
+        # radius is calculated for smallest
+        # convex polytope, so if we have
+        # a region we might throw away a good cell.
         if (
                 vol1 > min_cell_volume and
                 risect > rd and
                 vol2 > min_cell_volume and
                 rdiff > rd):
-            # Make sure new areas are Regions and add proposition lists
+            # Make sure new areas are Regions
+            # and add proposition lists
             if len(isect) == 0:
                 isect = pc.Region([isect], si.props)
             else:
@@ -843,14 +846,17 @@ def _discretize_bi(
             transitions[i, :] = np.zeros(n_cells)
             for r in new_idx:
                 #transitions[:, r] = transitions[:, i]
-                # All sets reachable from start are reachable from both part's
+                # All sets reachable from star
+                # are reachable from both part's
                 # except possibly the new part
                 transitions[i, r] = 0
                 transitions[j, r] = 0
-            # sol[j] is reachable from intersection of sol[i] and S0
+            # `sol[j]` is reachable from
+            # intersection of `sol[i]` and `S0`
             if i != j:
                 transitions[j, i] = 1
-                # sol[j] is reachable from each piece os S0 \cap sol[i]
+                # `sol[j]` is reachable from
+                # each piece of `S0 \cap sol[i]`
                 #for k in range(n_cells-n_isect-2, n_cells):
                 #    transitions[j, k] = 1
             """Update adjacency matrix"""
@@ -866,7 +872,7 @@ def _discretize_bi(
                 adj[r, r] = 1
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-            # adjacencies between pieces of isect and diff
+            # adjacency between pieces of `isect` and `diff`
             for r in new_idx:
                 for k in new_idx:
                     if r is k:
@@ -888,7 +894,8 @@ def _discretize_bi(
                     adj[i, k] = 1
                     adj[k, i] = 1
                 elif remove_trans and (trans_length == 1):
-                    # Actively remove transitions between non-neighbors
+                    # Actively remove transitions
+                    # between non-neighbors
                     transitions[i, k] = 0
                     transitions[k, i] = 0
                 for r in new_idx:
@@ -896,7 +903,8 @@ def _discretize_bi(
                         adj[r, k] = 1
                         adj[k, r] = 1
                     elif remove_trans and (trans_length == 1):
-                        # Actively remove transitions between non-neighbors
+                        # Actively remove transitions
+                        # between non-neighbors
                         transitions[r, k] = 0
                         transitions[k, r] = 0
             """Update IJ matrix"""
@@ -1159,7 +1167,7 @@ def _discretize_dual(
     )
     sol = deepcopy(part.regions)
     adj = part.adj.copy().toarray()
-    # next 2 lines omitted in discretize_overlap
+    # next 2 lines omitted in `discretize_overlap`
     if ispwa:
         subsys_list = list(ppp2pwa)
     else:
@@ -1182,14 +1190,14 @@ def _discretize_dual(
     iter_count = 0
     # List of how many "new" regions
     # have been created for each region
-    # and a list of original number of neighbors
+    # and a `list` of original number of neighbors
     #num_new_reg = np.zeros(len(orig_list))
     #num_orig_neigh = np.sum(adj, axis=1).flatten() - 1
     progress = list()
     # Do the abstraction
     while np.sum(IJ) > 0:
         ind = np.nonzero(IJ)
-        # i,j swapped in discretize_overlap
+        # `i`, `j` swapped in `discretize_overlap`
         i = ind[1][0]
         j = ind[0][0]
         IJ[j, i] = 0
@@ -1245,16 +1253,19 @@ def _discretize_dual(
             logger.warning('\t too small: si \\ Pre(sj), so not reached it')
         # indicate if S0 has exists in sol
         check_isect = False
-        # We don't want our partitions to be smaller than the disturbance set
-        # Could be a problem since cheby radius is calculated for smallest
-        # convex polytope, so if we have a region we might throw away a good
-        # cell.
+        # We don't want our partitions to be
+        # smaller than the disturbance set
+        # Could be a problem since cheby radius
+        # is calculated for smallest
+        # convex polytope, so if we have a region
+        # we might throw away a good cell.
         if (
                 vol1 > min_cell_volume and
                 risect > rd and
                 vol2 > min_cell_volume and
                 rsi > rd):
-            # check if the intersection has existed in current partitions
+            # check if the intersection has
+            # existed in current partitions
             for idx in range(len(sol)):
                 if(sol[idx] == isect):
                     logger.info('Found: {idx} ---> {j} '.format(idx=idx,
@@ -1263,7 +1274,8 @@ def _discretize_dual(
                     transitions[j, idx] = 1
                     check_isect = True
             if not check_isect:
-                # Make sure new areas are Regions and add proposition lists
+                # Make sure new areas are Regions
+                # and add proposition lists
                 if len(isect) == 0:
                     isect = pc.Region([isect], si.props)
                 else:
@@ -1294,14 +1306,16 @@ def _discretize_dual(
                         adj[new_idx, k] = 1
                         adj[k, new_idx] = 1
                     elif remove_trans and (trans_length == 1):
-                        # Actively remove transitions between non-neighbors
+                        # Actively remove transitions
+                        # between non-neighbors
                         transitions[new_idx, k] = 0
                         transitions[k, new_idx] = 0
                 """Update transition matrix"""
                 transitions = np.pad(transitions, (0,1), 'constant')
                 adj_k = reachable_within(trans_length, adj, adj)
-                # transitions i ---> k for k is neighbor of new_idx should be
-                # kept by new_idx
+                # transitions `i` ---> `k` for `k` is
+                # neighbor of `new_idx` should be
+                # kept by `new_idx`
                 transitions[:, new_idx] = np.multiply(transitions[:, i],
                            adj_k[:, i])
                 # if j and new_idx are neighbor, then add new_idx ---> j
@@ -2077,11 +2091,15 @@ def merge_partition_pair(
             logger.debug('AP label 1: ' + str(ap_label_1))
             logger.debug('AP label 2: ' + str(ap_label_2))
 
-            # original partitions may be different if pwa_partition used
-            # but must originate from same initial partition,
-            # i.e., have same continuous propositions, checked above
+            # original partitions may be
+            # different if `pwa_partition` used
+            # but must originate from same
+            # initial partition,
+            # i.e., have same continuous propositions,
+            # checked above
             #
-            # so no two intersecting regions can have different AP labels,
+            # so no two intersecting regions can
+            # have different AP labels,
             # checked here
             if ap_label_1 != ap_label_2:
                 msg = 'Inconsistent AP labels between intersecting regions\n'

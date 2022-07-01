@@ -72,8 +72,8 @@ def plot_abstraction_scc(ab, ax=None):
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
-
-    # each connected component of filtered graph is a symbol
+    # each connected component of
+    # filtered graph is a symbol
     components = nx.strongly_connected_components(ts)
     if ax is None:
         ax = mpl.pyplot.subplot()

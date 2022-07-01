@@ -178,7 +178,8 @@ def to_tulip_transys(path):
 
     @type path: a string indicating the path to the `prism` file
     """
-    # Convert a state of prism file (typically represented by an integer) to
+    # Convert a state of prism file
+    # (typically represented by an integer) to
     # state on the tulip transition system.
     def get_ts_state(in_model_state):
         return "s" + str(in_model_state)
@@ -200,8 +201,8 @@ def to_tulip_transys(path):
 
     # Neglect stormpy internal state labels
     neglect_labels = ['init', 'deadlock']
-
-    # Populate the set of atomic propositinos and compute the labels and transitions at each state
+    # Populate the set of atomic propositinos and
+    # compute the labels and transitions at each state
     for state in in_model.states:
         state_ap = copy.deepcopy(state.labels)
         for label in neglect_labels:
@@ -235,19 +236,24 @@ def to_prism_file(ts, path):
     assert type(ts) == MDP or type(ts) == MC
     assert len(ts.states) > 0
     assert len(ts.states.initial) == 1
-
-    # The state and action of prism file will be of the form si and acti
-    # where i is the index in state_list and action_list of the state and action
+    # The state and action of prism file will be
+    # of the form si and acti
+    # where i is the index in state_list and
+    # action_list of the state and action
     # of the tulip model.
-    # This is to deal with restriction on naming of prism model.
-    # For example, it doesn't allow action that is just an integer.
+    # This is to deal with restriction on
+    # naming of prism model.
+    # For example, it doesn't allow action
+    # that is just an integer.
     state_var = 's'
     state_list = list(ts.states)
     action_list = list(ts.actions) if type(ts) == MDP else []
-
-    # Given all the transitions from a state s of ts, return a dictionary whose
-    # key is an action a and the value is a tuple (probability, to_state)
-    # indicating the transition probability from state s to to_state under action a.
+    # Given all the transitions from
+    # a state s of ts, return a dictionary whose
+    # key is an action a and the value is
+    # a tuple (probability, to_state)
+    # indicating the transition probability
+    # from state s to to_state under action a.
     def get_transition_dict(state_transitions):
         transition_dict = {}
 
@@ -266,9 +272,10 @@ def to_prism_file(ts, path):
     # Return a properly formatted string for the given probability
     def get_prob_str(prob):
         return "{:.4f}".format(prob)
-
-    # Return a string representing the state with the given index and whether
-    # it is primed (primed in prism file indicates the next state).
+    # Return a string representing the
+    # state with the given index and whether
+    # it is primed (primed in prism file
+    # indicates the next state).
     def get_state_str(state_index, is_prime):
         state_str = state_var
         if is_prime:

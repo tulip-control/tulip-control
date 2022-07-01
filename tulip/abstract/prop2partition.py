@@ -530,8 +530,8 @@ class PropPreservingPartition(pc.MetricPartition):
     def reg2props(self, region_index):
         return self.regions[region_index].props.copy()
 
-    #TODO: iterator over pairs
-    #TODO: use nx graph to store partition
+    # TODO: iterator over pairs
+    # TODO: use `networkx` graph to store partition
 
     def is_symbolic(self):
         """Check that the set of preserved predicates

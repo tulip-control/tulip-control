@@ -192,10 +192,13 @@ def _call_slugs(filename, synth=True, symbolic=True, slugs_compiler_path=None):
     else:
         # As of commit ad0cf12c14131fc6a20fe29edfe04d9aefd7c6d4
         # (tip of master branch of
-        #  https://github.com/LTLMoP/slugs.git at the time of writing),
-        # Slugs seems to default to checking realizability. Trying to
-        # provide `--onlyRealizability` leads to error message from
-        # `slugs`: "Error: Parameter '--onlyRealizability' is unknown."
+        # <https://github.com/LTLMoP/slugs.git>
+        # at the time of writing),
+        # Slugs seems to default to checking realizability.
+        # Trying to
+        # provide `--onlyRealizability` leads to
+        # the following error message from `slugs`:
+        # > Error: Parameter '--onlyRealizability' is unknown.
         pass
     logger.debug('Calling: ' + ' '.join(options))
     try:
