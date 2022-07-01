@@ -377,7 +377,9 @@ class Parser:
 
 
 def parse(formula):
-    warnings.warn('Deprecated: Better to instantiate a Parser once only.')
+    warnings.warn(
+        'Deprecated: Better to '
+        'instantiate a Parser once only.')
     parser = Parser()
     return parser.parse(formula)
 

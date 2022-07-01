@@ -1909,7 +1909,9 @@ def merge_partitions(abstractions):
             - ap_labeling: dict
     """
     if len(abstractions) == 0:
-        warnings.warn('Abstractions empty, nothing to merge.')
+        warnings.warn(
+            'Abstractions empty, '
+            'nothing to merge.')
         return
     # consistency check
     for ab1 in abstractions.values():
@@ -1923,7 +1925,9 @@ def merge_partitions(abstractions):
             if (
                     not (p1.domain.A == p2.domain.A).all() or
                     not (p1.domain.b == p2.domain.b).all()):
-                raise Exception('merge: partitions have different domains')
+                raise Exception(
+                    'merge: partitions have '
+                    'different domains')
             # check equality of original PPP partitions
             if ab1.orig_ppp == ab2.orig_ppp:
                 logger.info(

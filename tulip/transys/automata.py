@@ -289,7 +289,9 @@ def tuple2ba(
     """
     # args
     if not isinstance(S, Iterable):
-        raise TypeError('States S must be iterable, even for single state.')
+        raise TypeError(
+            'States S must be iterable, '
+            'even for single state.')
     if not isinstance(S0, Iterable) or isinstance(S0, str):
         S0 = [S0]
     if not isinstance(Sa, Iterable) or isinstance(Sa, str):

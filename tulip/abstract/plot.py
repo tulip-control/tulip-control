@@ -183,7 +183,9 @@ def plot_trajectory(
     try:
         from tulip.graphics import newax
     except:
-        logger.error('failed to import graphics.newax')
+        logger.error(
+            'failed to import '
+            '`tulip.graphics.newax`')
         return
     if ax is None:
         ax, fig = newax()

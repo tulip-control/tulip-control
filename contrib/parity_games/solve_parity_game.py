@@ -78,7 +78,9 @@ def ctrl_next(W, pg, player):
             if pg.nodes[pred]['player'] == player:
                 print('controlled by player, good')
             elif len(pg.succ[pred]) == 1:
-                print('controlled by opponent, bad only 1 outgoing')
+                print(
+                    'controlled by opponent, '
+                    'bad only 1 outgoing')
             else:
                 print('not in CNext')
                 continue

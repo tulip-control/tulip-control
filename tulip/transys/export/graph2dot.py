@@ -545,9 +545,10 @@ def plot_dot(
         except:
             print('IPython installed, but not called from it.')
     except ImportError:
-        logger.warning('IPython not found.\nSo loaded dot images not inline.')
+        logger.warning(
+            'IPython not found.\n'
+            'So loaded dot images not inline.')
     # not called from IPython QtConsole, try Matplotlib...
-
     # installed ?
     try:
         import matplotlib.pyplot as plt
@@ -556,7 +557,8 @@ def plot_dot(
         logger.debug(
             'Matplotlib not installed.')
         logger.warning(
-            'Neither IPython QtConsole nor Matplotlib available.')
+            'Neither IPython QtConsole nor '
+            'Matplotlib available.')
         return None
     logger.debug(
         'Matplotlib installed.')

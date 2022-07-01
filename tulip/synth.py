@@ -286,7 +286,9 @@ def iter2var(states, variables, statevar, bool_states, must):
         min_one = False
     # no mutex -> cannot use int variable
     if not use_mutex:
-        logger.debug('not using mutex: Booleans must model actions')
+        logger.debug(
+            'not using mutex: '
+            'Booleans must model actions')
         bool_states = True
     logger.debug(
         'options for modeling actions:\n\t'
@@ -1330,8 +1332,10 @@ def _spec_plus_sys(
         if hasattr(sys, 'state_varname'):
             statevar = sys.state_varname
         else:
-            logger.info('sys.state_varname undefined. '
-                        'Will use the default variable name: "loc".')
+            logger.info(
+                'sys.state_varname undefined. '
+                'Will use the default '
+                'variable name: "loc".')
             statevar = 'loc'
         sys_formula = sys_to_spec(
             sys, ignore_sys_init,
@@ -1351,8 +1355,10 @@ def _spec_plus_sys(
         if hasattr(env, 'state_varname'):
             statevar = sys.state_varname
         else:
-            logger.info('env.state_varname undefined. '
-                        'Will use the default variable name: "eloc".')
+            logger.info(
+                'env.state_varname undefined. '
+                'Will use the default '
+                'variable name: "eloc".')
             statevar = 'eloc'
         env_formula = env_to_spec(
             env, ignore_env_init,
@@ -1401,7 +1407,9 @@ def strategy2mealy(A, spec):
     @rtype: `MealyMachine`
     """
     assert len(A) > 0
-    logger.info('converting strategy (compact) to Mealy machine')
+    logger.info(
+        'converting strategy (compact) '
+        'to Mealy machine')
     env_vars = spec.env_vars
     sys_vars = spec.sys_vars
     mach = transys.MealyMachine()

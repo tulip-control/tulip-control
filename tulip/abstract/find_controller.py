@@ -210,8 +210,10 @@ def get_input(
     closed_loop = params['closed_loop']
     if closed_loop:
         logger.warning(
-            '`closed_loop = True` for controller computation. '
-            'This option is under development: use with caution.')
+            '`closed_loop = True` for '
+            'controller computation. '
+            'This option is under '
+            'development: use with caution.')
     if (
             R is None and
             Q is None and

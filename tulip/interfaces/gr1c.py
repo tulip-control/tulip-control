@@ -264,7 +264,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     for spec_tag in ["env_init", "env_safety", "env_prog",
                      "sys_init", "sys_safety", "sys_prog"]:
         if s_elem.find(ns_prefix+spec_tag) is None:
-            raise ValueError("invalid specification in tulipcon XML string.")
+            raise ValueError(
+                'invalid specification in '
+                'tulipcon XML string.')
         (tag_name, li) = _untaglist(
             s_elem.find(ns_prefix + spec_tag),
             cast_f=str,

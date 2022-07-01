@@ -666,7 +666,9 @@ def _push_time_data(system_list, time_semantics, timestep):
             system.timestep != timestep and
             system.timestep is not None)
         if overwriting_timestep_data:
-            warn('Overwriting existing timestep data.')
+            warn(
+                'Overwriting existing '
+                'timestep data.')
         system.time_semantics = time_semantics
         system.timestep = timestep
         # Overwrite LTI in system if
