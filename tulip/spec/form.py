@@ -52,7 +52,10 @@ from tulip.spec import transformation as tx
 from tulip.spec import translation as ts
 
 
-__all__ = ['LTL', 'GRSpec', 'replace_dependent_vars']
+__all__ = [
+    'LTL',
+    'GRSpec',
+    'replace_dependent_vars']
 
 
 class LTL:

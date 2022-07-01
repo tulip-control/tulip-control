@@ -50,9 +50,12 @@ from tulip.abstract import find_controller
 
 
 __all__ = [
-    'plot_partition', 'plot_transition_arrow',
-    'plot_abstraction_scc', 'plot_ts_on_partition',
-    'project_strategy_on_partition', 'plot_strategy',
+    'plot_partition',
+    'plot_transition_arrow',
+    'plot_abstraction_scc',
+    'plot_ts_on_partition',
+    'project_strategy_on_partition',
+    'plot_strategy',
     'plot_trajectory']
 
 

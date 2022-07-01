@@ -58,7 +58,11 @@ import numpy as np
 # import graphviz as _gv
 
 
-__all__ = ['dimension', 'newax', 'dom2vec', 'quiver']
+__all__ = [
+    'dimension',
+    'newax',
+    'dom2vec',
+    'quiver']
 
 
 def dimension(ndarray):

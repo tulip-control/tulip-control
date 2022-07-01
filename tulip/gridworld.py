@@ -54,9 +54,13 @@ from .spec.form import GRSpec
 
 
 __all__ = [
-    'GridWorld', 'random_world', 'narrow_passage',
-    'unoccupied', 'add_trolls',
-    'extract_coord', 'animate_paths']
+    'GridWorld',
+    'random_world',
+    'narrow_passage',
+    'unoccupied',
+    'add_trolls',
+    'extract_coord',
+    'animate_paths']
 
 
 class GridWorld:

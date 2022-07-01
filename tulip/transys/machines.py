@@ -44,9 +44,14 @@ from tulip.transys.labeled_graphs import LabeledDiGraph
 
 
 __all__ = [
-    'create_machine_ports', 'MooreMachine', 'MealyMachine',
-    'guided_run', 'random_run', 'interactive_run',
-    'moore2mealy', 'mealy2moore']
+    'create_machine_ports',
+    'MooreMachine',
+    'MealyMachine',
+    'guided_run',
+    'random_run',
+    'interactive_run',
+    'moore2mealy',
+    'mealy2moore']
 
 
 _hl = 40 * '-'

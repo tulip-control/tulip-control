@@ -130,8 +130,11 @@ def run_setup():
             'pytest',
             'setuptools >= 39.0.0'],
         packages=[
-            'tulip', 'tulip.transys', 'tulip.transys.export',
-            'tulip.abstract', 'tulip.spec',
+            'tulip',
+            'tulip.transys',
+            'tulip.transys.export',
+            'tulip.abstract',
+            'tulip.spec',
             'tulip.interfaces'],
         package_dir={'tulip': 'tulip'},
         package_data=package_data)

@@ -49,7 +49,8 @@ from tulip.spec import ast
 import tulip.spec.form
 
 
-__all__ = ['translate']
+__all__ = [
+    'translate']
 
 
 def make_jtlv_nodes():

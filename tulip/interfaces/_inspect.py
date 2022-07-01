@@ -39,7 +39,8 @@ from tulip.interfaces import gr1py as gr1py_int
 from tulip.interfaces import omega as omega_int
 
 
-__all__ = ['print_env']
+__all__ = [
+    'print_env']
 
 
 def print_env():

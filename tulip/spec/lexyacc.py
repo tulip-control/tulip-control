@@ -68,11 +68,34 @@ class Lexer:
         'W': 'WEAK_UNTIL',
         'V': 'RELEASE'}
     values = {'next': 'X'}
-    delimiters = ['LPAREN', 'RPAREN', 'DQUOTES', 'COMMA']
+    delimiters = [
+        'LPAREN',
+        'RPAREN',
+        'DQUOTES',
+        'COMMA']
     operators = [
-        'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
-        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'PLUS', 'MINUS', 'TIMES', 'DIV', 'TRUNCATE', 'PRIME']
+        # logic
+        'NOT',
+        'AND',
+        'OR',
+        'XOR',
+        'IMP',
+        'BIMP',
+        # set theory
+        'EQUALS',
+        'NEQUALS',
+        # arithmetic
+        'LT',
+        'LE',
+        'GT',
+        'GE',
+        'PLUS',
+        'MINUS',
+        'TIMES',
+        'DIV',
+        'TRUNCATE',
+        # action operators
+        'PRIME']
     misc = ['NAME', 'NUMBER']
 
     def __init__(self, debug=False):

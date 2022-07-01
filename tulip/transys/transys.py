@@ -49,12 +49,16 @@ import numpy as np
 
 
 __all__ = [
-    'KripkeStructure', 'WeightedKripkeStructure',
+    'KripkeStructure',
+    'WeightedKripkeStructure',
     'MarkovChain',
     'MarkovDecisionProcess',
-    'FiniteTransitionSystem', 'FTS',
+    'FiniteTransitionSystem',
+    'FTS',
     'LabeledGameGraph',
-    'tuple2fts', 'line_labeled_with', 'cycle_labeled_with',
+    'tuple2fts',
+    'line_labeled_with',
+    'cycle_labeled_with',
     'simu_abstract']
 
 

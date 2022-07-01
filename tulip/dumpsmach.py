@@ -39,7 +39,9 @@ from itertools import chain, repeat
 import time
 
 
-__all__ = ['write_python_case', 'python_case']
+__all__ = [
+    'write_python_case',
+    'python_case']
 
 
 def write_python_case(filename, *args, **kwargs):

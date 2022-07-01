@@ -65,7 +65,9 @@ from tulip.abstract.feasible import (
     _block_diag2)
 
 
-__all__ = ['get_input', 'find_discrete_state']
+__all__ = [
+    'get_input',
+    'find_discrete_state']
 
 
 logger = logging.getLogger(__name__)

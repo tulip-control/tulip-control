@@ -69,9 +69,12 @@ from .plot import plot_ts_on_partition
 
 
 __all__ = [
-    'AbstractSwitched', 'AbstractPwa',
-    'discretize', 'discretize_switched',
-    'multiproc_discretize', 'multiproc_discretize_switched']
+    'AbstractSwitched',
+    'AbstractPwa',
+    'discretize',
+    'discretize_switched',
+    'multiproc_discretize',
+    'multiproc_discretize_switched']
 
 debug = False
 

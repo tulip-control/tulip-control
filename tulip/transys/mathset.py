@@ -43,7 +43,11 @@ from pprint import pformat
 from random import randint
 
 
-__all__ = ['MathSet', 'SubSet', 'PowerSet', 'TypedDict']
+__all__ = [
+    'MathSet',
+    'SubSet',
+    'PowerSet',
+    'TypedDict']
 
 
 logger = logging.getLogger(__name__)

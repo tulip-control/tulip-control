@@ -46,7 +46,9 @@ import polytope as pc
 
 
 __all__ = [
-    'LtiSysDyn', 'PwaSysDyn', 'SwitchedSysDyn']
+    'LtiSysDyn',
+    'PwaSysDyn',
+    'SwitchedSysDyn']
 
 
 def _indent(s, n):

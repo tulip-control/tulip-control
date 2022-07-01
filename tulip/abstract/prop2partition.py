@@ -56,9 +56,13 @@ from tulip import transys as trs
 
 
 __all__ = [
-    'prop2part', 'part2convex',
-    'pwa_partition', 'add_grid',
-    'PropPreservingPartition', 'PPP', 'ppp2ts']
+    'prop2part',
+    'part2convex',
+    'pwa_partition',
+    'add_grid',
+    'PropPreservingPartition',
+    'PPP',
+    'ppp2ts']
 
 
 _hl = 40 * '-'
