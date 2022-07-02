@@ -285,7 +285,7 @@ def _import_pyplot():
     try:
         from matplotlib import pyplot as plt
         from mpl_toolkits.mplot3d import axes3d
-    except Exception as e:
+    except ImportError as e:
         raise ImportError('Failed to import `matplotlib.pyplot`')
     return plt
 
