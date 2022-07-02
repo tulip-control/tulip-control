@@ -412,7 +412,8 @@ class GRSpec(LTL):
         @type sys_vars: dict or iterable
         @param sys_vars: Mutatis mutandis, env_vars.
 
-        @param env_init, env_safety, env_prog, sys_init, sys_safety, sys_prog:
+        @param env_init, env_safety, env_prog,
+                sys_init, sys_safety, sys_prog:
             A string or iterable of strings.  An empty string is
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. `GRSpec`.
