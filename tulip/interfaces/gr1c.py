@@ -362,10 +362,9 @@ def _parse_vars(variables, vardict):
             raise ValueError(
                 'unrecognized type of domain '
                 f'for variable "{v}":  {dom}')
-    variables = dict([
+    variables = dict(
         (v, domains[i])
-        for i, v in enumerate(variables)
-    ])
+        for i, v in enumerate(variables))
     return variables
 
 
