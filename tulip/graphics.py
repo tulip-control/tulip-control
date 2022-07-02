@@ -51,9 +51,14 @@ except ImportError:
     from itertools import izip_longest
 
 import numpy as np
+
+try:
+    import matplotlib.pyplot as _plt
+    import mpl_toolkits.mplot3d.axes3d
+except ImportError as error:
+    _plt = None
+    mpl_error = error
 # inline
-# from matplotlib import pyplot as plt
-# from mpl_toolkits.mplot3d import axes3d
 # from mayavi.mlab import quiver3d
 # import graphviz as _gv
 
@@ -109,7 +114,7 @@ def newax(
         `list` of `list`s,
         depending on `mode` above
     """
-    plt = _import_pyplot()
+    _assert_pyplot()
     # layout or number of axes ?
     try:
         subplot_layout = tuple(subplots)
@@ -123,7 +128,7 @@ def newax(
             '2-`tuple` or `int`.')
     # which figure ?
     if fig is None:
-        fig = plt.figure()
+        fig = _plt.figure()
     # create subplot(s)
     (nv, nh) = subplot_layout
     n = np.prod(subplot_layout)
@@ -225,7 +230,7 @@ def quiver(x, v, ax=None, **kwargs):
     @param kwargs: plot formatting
     @return: handle to plotted object(s)
     """
-    plt = _import_pyplot()
+    _assert_pyplot()
     # multiple axes ?
     try:
         fields = [quiver(x, v, i, **kwargs) for i in ax]
@@ -233,7 +238,7 @@ def quiver(x, v, ax=None, **kwargs):
     except:
         pass
     if not ax:
-        ax = plt.gca()
+        ax = _plt.gca()
     dim = dimension(x)
     if dim < 2:
         raise Exception('ndim < 2')
@@ -280,18 +285,6 @@ def _grouper(n, iterable, fillvalue=None):
     return izip_longest(fillvalue=fillvalue, *args)
 
 
-def _import_pyplot():
-    """Try to import `matplotlib.pyplot`, or raise `ImportError`."""
-    try:
-        from matplotlib import pyplot as plt
-        from mpl_toolkits.mplot3d import axes3d
-    except ImportError as e:
-        raise ImportError(
-            'Failed to import `matplotlib.pyplot`'
-            ) from e
-    return plt
-
-
 def networkx_to_graphviz(graph):
     """Convert `networkx` `graph` to `graphviz.Digraph`."""
     import graphviz as _gv
@@ -306,3 +299,15 @@ def networkx_to_graphviz(graph):
         gv_graph.edge(
             str(u), str(v), **d)
     return gv_graph
+
+
+def _assert_pyplot():
+    """Raise `ImportError` if `matplotlib` missing."""
+    if _plt is not None:
+        return
+    raise ImportError(
+        'Could not import `matplotlib`. '
+        '`matplotlib` can be installed from '
+        'the Python Package Index (PyPI) '
+        'with `pip install matplotlib`'
+        ) from mpl_error
