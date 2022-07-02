@@ -201,8 +201,7 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
         edge_label_types = [
             {'name': 'cost',
              'values': ValidTransitionCost(),
-             'setter': True}
-        ]
+             'setter': True}]
         super().__init__(
             deterministic,
             accepting_states_type,
