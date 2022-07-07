@@ -2,8 +2,8 @@
 
 FROM ubuntu:20.04
 
-RUN apt-get -y update
-RUN apt-get -y install \
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y update
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install \
     python3  \
     python3-pip \
     gfortran \
