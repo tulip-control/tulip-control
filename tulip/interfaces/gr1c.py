@@ -643,7 +643,7 @@ class GR1CSession:
             state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'winning ' +
-            ' '.join(str(i) for i in state_vector) + '\n')
+            ' '.join(map(str, state_vector)) + '\n')
         if 'True\n' in self.p.stdout.readline():
             return True
         else:
@@ -661,7 +661,7 @@ class GR1CSession:
         self.p.stdin.write(
             'getindex ' +
             ' '.join(
-                str(i) for i in state_vector) +
+                map(str, state_vector)) +
             f' {goal_mode}\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
@@ -682,7 +682,7 @@ class GR1CSession:
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'envnext ' +
-            ' '.join(str(i) for i in state_vector) +
+            ' '.join(map(str, state_vector)) +
             '\n')
         env_moves = []
         line = self.p.stdout.readline()
@@ -716,12 +716,12 @@ class GR1CSession:
         for ind in range(len(self.env_vars)):
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write(
-            "sysnext " +
-            " ".join(
-                str(i) for i in state_vector) +
-            " " +
-            " ".join(
-                str(i) for i in emove_vector) +
+            'sysnext ' +
+            ' '.join(
+                map(str, state_vector)) +
+            ' ' +
+            ' '.join(
+                map(str, emove_vector)) +
             f' {goal_mode}\n')
         sys_moves = []
         line = self.p.stdout.readline()
@@ -753,11 +753,9 @@ class GR1CSession:
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write(
             "sysnexta " +
-            " ".join(
-                str(i) for i in state_vector) +
+            ' '.join(map(str, state_vector)) +
             " " +
-            " ".join(
-                str(i) for i in emove_vector) +
+            ' '.join(map(str, emove_vector)) +
             "\n"
         )
         sys_moves = []
