@@ -295,9 +295,9 @@ def call_ltl2ba(formula, prefix=''):
     @type formula:
         `str`
     @return:
-        Buchi Automaton
+        Buchi Automaton description
     @rtype:
-        `tulip.transys.BA`
+        `str`
     """
     try:
         subprocess.call(
