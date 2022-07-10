@@ -828,7 +828,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         `list` of `dict`
     @param edge_label_types:
         applies to edges, as described above.
-    @type node_label_types:
+    @type edge_label_types:
         `list` of `dict`
     @param deterministic:
         if True, then edge-label-deterministic
