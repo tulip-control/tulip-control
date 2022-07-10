@@ -77,17 +77,21 @@ def check_realizable(spec):
     return realizable
 
 
-def synthesize(spec, symbolic=False):
+def synthesize(
+        spec:
+            GRSpec |
+            str,
+        symbolic=False
+        ) -> (
+            nx.DiGraph |
+            None):
     """Return strategy satisfying the specification `spec`.
 
-    @type spec:
-        `GRSpec` or
-        `str` in structured slugs syntax.
+    @param spec:
+        If a `str`, then in structured slugs syntax.
     @return:
         If realizable return synthesized strategy,
         otherwise `None`.
-    @rtype:
-        `networkx.DiGraph`
     """
     if isinstance(spec, GRSpec):
         assert not spec.moore
@@ -130,12 +134,11 @@ def synthesize(spec, symbolic=False):
     return h
 
 
-def _bitfields_to_ints(bit_state, vrs):
-    """Convert bitfield representation to integers.
-
-    @type vrs:
-        `dict`
-    """
+def _bitfields_to_ints(
+        bit_state,
+        vrs:
+            dict):
+    """Convert bitfield representation to integers."""
     int_state = dict()
     for var, dom in vrs.items():
         if dom == 'boolean':

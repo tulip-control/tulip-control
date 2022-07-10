@@ -35,6 +35,8 @@ import io
 import logging
 import re
 from textwrap import fill
+import typing as _ty
+
 import networkx as nx
 import numpy as np
 # inline:
@@ -188,14 +190,20 @@ def _state2tikz(
         style=style)
 
 
-def _format_color(color, prog='tikz'):
+def _format_color(
+        color:
+            str |
+            dict,
+        prog:
+            _ty.Literal[
+                'tikz',
+                'dot']
+            ='tikz'):
     """Encode color in syntax for given program.
 
-    @type color:
+    @param color:
       - `str` for single color or
       - `dict` for weighted color mix
-    @type prog:
-        'tikz' or 'dot'
     """
     if isinstance(color, str):
         return color
@@ -327,12 +335,12 @@ def _is_accepting(graph, state):
     return state in graph.states.accepting
 
 
-def _transitions2dot_str(trans, to_dot_graph, tikz=False):
-    """Convert transitions to dot str.
-
-    @rtype:
-        str
-    """
+def _transitions2dot_str(
+        trans,
+        to_dot_graph,
+        tikz=False
+        ) -> str:
+    """Convert transitions to dot str."""
     if not hasattr(trans.graph, '_transition_label_def'):
         return
     if not hasattr(trans.graph, '_transition_dot_label_format'):
@@ -400,17 +408,13 @@ def _form_edge_label(edge_data, label_def,
 
 
 def _graph2dot(
-        graph,
+        graph:
+            'LabeledDiGraph',
         wrap=10,
         tikz=False,
-        rankdir='TB'):
-    """Convert (possibly labeled) state graph to dot str.
-
-    @type graph:
-        `LabeledDiGraph`
-    @rtype:
-        str
-    """
+        rankdir='TB'
+        ) -> str:
+    """Convert (possibly labeled) state graph to dot str."""
     dummy_nx_graph = nx.MultiDiGraph()
     _states2dot_str(
         graph, dummy_nx_graph,
@@ -433,15 +437,16 @@ def _graph2dot(
     return dot_graph
 
 
-def graph2dot_str(graph, wrap=10, tikz=False):
+def graph2dot_str(
+        graph:
+            'LabeledDiGraph',
+        wrap=10,
+        tikz=False
+        ) -> str:
     """Convert graph to DOT string.
 
-    @type graph:
-        `LabeledDiGraph`
     @param wrap:
         textwrap width
-    @rtype:
-        `str`
     """
     dot_graph = _graph2dot(
         graph,
@@ -451,17 +456,19 @@ def graph2dot_str(graph, wrap=10, tikz=False):
 
 
 def save_dot(
-        graph, path, fileformat,
-        rankdir, prog, wrap,
-        tikz=False):
+        graph:
+            'LabeledDiGraph',
+        path,
+        fileformat,
+        rankdir,
+        prog,
+        wrap,
+        tikz=False
+        ) -> bool:
     """Save state graph to dot file.
 
-    @type graph:
-        `LabeledDiGraph`
     @return:
         `True` upon success
-    @rtype:
-        `bool`
     """
     dot_graph = _graph2dot(
         graph,
@@ -484,9 +491,22 @@ def save_dot(
 
 
 def plot_dot(
-        graph,
-        prog='dot',
-        rankdir='LR',
+        graph:
+            nx.Graph,
+        prog:
+            _ty.Literal[
+                'dot',
+                'neato',
+                'circo',
+                'twopi',
+                'fdp',
+                'sfdp']
+            ='dot',
+        rankdir:
+            _ty.Literal[
+                'LR',
+                'TB']
+            ='LR',
         wrap=10,
         ax=None):
     """Plot a networkx graph using dot.
@@ -503,17 +523,10 @@ def plot_dot(
 
     @param graph:
         to plot
-    @type graph:
-        `networkx.Graph`
     @param prog:
         GraphViz program to use
-    @type prog:
-        `'dot'` | `'neato'` | `'circo'` | `'twopi'`
-        | `'fdp'` | `'sfdp'`
     @param rankdir:
         direction to layout nodes
-    @type rankdir:
-        'LR' | 'TB'
     @param ax:
         axes
     """

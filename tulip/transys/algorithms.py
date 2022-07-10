@@ -53,16 +53,17 @@ logger = logging.getLogger(__name__)
 parser = ltl2baint.Parser()
 
 
-def ltl2ba(formula):
+def ltl2ba(
+        formula:
+            str
+        ) -> 'Automaton':
     """Convert LTL formula to Buchi Automaton using `ltl2ba`.
 
-    @type formula:
+    @param formula:
         `str(formula)` must be admissible `ltl2ba` input
     @return:
         Buchi automaton whose edges are annotated
         with Boolean formulas as `str`
-    @rtype:
-        [`Automaton`]
     """
     ltl2ba_out = ltl2baint.call_ltl2ba(str(formula))
     symbols, g, initial, accepting = parser.parse(ltl2ba_out)
@@ -208,12 +209,12 @@ def cartesian_product(self, other, prod_sys=None):
     return prod_sys
 
 
-def ts_sync_prod(ts1, ts2):
-    """Synchronous (tensor) product with other `FTS`.
-
-    @type ts1, ts2:
-        `FiniteTransitionSystem`
-    """
+def ts_sync_prod(
+        ts1:
+            FiniteTransitionSystem,
+        ts2:
+            FiniteTransitionSystem):
+    """Synchronous (tensor) product with other `FTS`."""
     prod_ts = FiniteTransitionSystem()
     # union of AP sets
     prod_ts.atomic_propositions |= (
@@ -303,7 +304,11 @@ def sync_prod(ts, ba):
         raise Exception
 
 
-def add(self, other):
+def add(
+        self,
+        other:
+            FiniteTransitionSystem
+        ) -> FiniteTransitionSystem:
     """Merge two Finite Transition Systems.
 
     States, Initial States, Actions, Atomic Propositions and
@@ -341,14 +346,10 @@ def add(self, other):
 
     @param other:
         system to merge with
-    @type other:
-        `FiniteTransitionSystem`
     @return:
         merge of `self` with `other`, union of states,
         initial states, atomic propositions, actions, edges and
         labelings, those of `other` taking precedence over `self`.
-    @rtype:
-        `FiniteTransitionSystem`
     """
     if not isinstance(other, FiniteTransitionSystem):
         raise TypeError(

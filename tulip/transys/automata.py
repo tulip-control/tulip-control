@@ -264,10 +264,16 @@ class BA(BuchiAutomaton):
 
 
 def tuple2ba(
-        S, S0, Sa, Sigma_or_AP, trans,
-        name='ba',
+        S,
+        S0,
+        Sa,
+        Sigma_or_AP,
+        trans,
+        name:
+            str='ba',
         prepend_str=None,
-        atomic_proposition_based=True):
+        atomic_proposition_based=True
+        ) -> BuchiAutomaton:
     """Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by
@@ -298,10 +304,6 @@ def tuple2ba(
 
     @param name:
         used for file export
-    @type name:
-        `str`
-    @rtype:
-        `BuchiAutomaton`
     """
     # args
     if not isinstance(S, Iterable):
@@ -432,7 +434,10 @@ class RabinPairs:
         """Get list of 2-`tuple`s `(L, U)` of good-bad sets of states."""
         return list(self._pairs)
 
-    def add(self, good_states, bad_states):
+    def add(
+            self,
+            good_states,
+            bad_states):
         """Add new acceptance pair `(L, U)`.
 
         See Also
@@ -441,12 +446,8 @@ class RabinPairs:
 
         @param good_states:
             set `L` of good states for this pair
-        @type good_states:
-            container of valid states
         @param bad_states:
             set `U` of bad states for this pair
-        @type bad_states:
-            container of valid states
         """
         good_set = SubSet(self._states)
         good_set |= good_states
@@ -454,7 +455,11 @@ class RabinPairs:
         bad_set |= bad_states
         self._pairs.append((good_set, bad_set))
 
-    def remove(self, good_states, bad_states):
+    def remove(
+            self,
+            good_states:
+                Iterable,
+            bad_states):
         """Delete pair `(L, U)` of good-bad sets of states.
 
         Note
@@ -478,8 +483,6 @@ class RabinPairs:
 
         @param good_states:
             set of good states of this pair
-        @type good_states:
-            iterable container
         """
         good_set = SubSet(self._states)
         good_set |= good_states
@@ -496,23 +499,27 @@ class RabinPairs:
                 'A pair with `pair_index` does not exist.\n'
                 'Create a new one by calling `.add`.')
 
-    def good(self, index):
+    def good(
+            self,
+            index:
+                int):
         """Return set `L` of "good" states for this pair.
 
         @param index:
-            number of Rabin acceptance pair
-        @type index:
-            `int` <= current total number of pairs
+            number of Rabin acceptance pair, with:
+            `index <= current total number of pairs`
         """
         return self._pairs[index][0]
 
-    def bad(self, index):
+    def bad(
+            self,
+            index:
+                int):
         """Return set `U` of "bad" states for this pair.
 
         @param index:
-            number of Rabin acceptance pair
-        @type index:
-            `int` <= current total number of pairs
+            number of Rabin acceptance pair, with:
+            `index <= current total number of pairs`
         """
         return self._pairs[index][1]
 

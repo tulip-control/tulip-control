@@ -30,10 +30,13 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Interface to library of synthesis tools, e.g., `gr1c`, `omega`."""
+import collections.abc as _abc
 import copy
 import logging
 import pprint
 import warnings
+
+import networkx as _nx
 
 from tulip.interfaces import gr1c
 from tulip.interfaces import gr1py
@@ -141,26 +144,29 @@ def exactly_one(iterable):
         for x in iterable]) + ')']
 
 
-def _conj_action(actions_dict, action_type, nxt=False, ids=None):
+def _conj_action(
+        actions_dict:
+            dict,
+        action_type:
+            _abc.Hashable,
+        nxt:
+            bool=False,
+        ids:
+            dict |
+            None=None
+        ) -> str:
     """Return conjunct if `action_type` in `actions_dict`.
 
     @param actions_dict:
         `dict` with pairs `action_type_name : action_value`
-    @type actions_dict:
-        dict
     @param action_type:
         key to look for in `actions_dict`
-    @type action_type:
-        hashable (here typically a str)
+        (here typically a str)
     @param nxt:
         prepend or not with the next operator
-    @type nxt:
-        bool
     @param ids:
         map `action_value` -> value used in solver input,
         for example, for gr1c
-    @type ids:
-        dict
     @return:
         - conjunct (includes `&&` operator) if:
 
@@ -169,8 +175,6 @@ def _conj_action(actions_dict, action_type, nxt=False, ids=None):
 
           includes next operator (`X`) if `nxt = True`.
         - empty string otherwise
-    @rtype:
-        str
     """
     if action_type not in actions_dict:
         return ''
@@ -220,7 +224,17 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
 # - synth doesn't care about that
 
 
-def iter2var(states, variables, statevar, bool_states, must):
+def iter2var(
+        states:
+            _abc.Iterable[int | str],
+        variables,
+        statevar:
+            str,
+        bool_states,
+        must
+        ) -> tuple[
+            dict,
+            list | None]:
     """Represent finite domain in GR(1).
 
     An integer or string variable can be used,
@@ -259,9 +273,6 @@ def iter2var(states, variables, statevar, bool_states, must):
 
     @param states:
         values of domain.
-    @type states:
-        iterable container of `int` or
-        iterable container of `str`
     @param variables:
         to be augmented with
         integer or
@@ -269,8 +280,6 @@ def iter2var(states, variables, statevar, bool_states, must):
         Boolean variables.
     @param statevar:
         name to use for integer or string valued variable.
-    @type statevar:
-        `str`
     @param bool_states:
         if True, then use bool variables.
         Otherwise use integer or string valued variable.
@@ -280,8 +289,6 @@ def iter2var(states, variables, statevar, bool_states, must):
           If Booleans are used, then GR(1) are the same.
           Otherwise, they map to e.g. 'act = "wait"' or 'act = 3'
         - constraints to be added to `trans` and/or `init` in GR(1)
-    @rtype:
-        `dict`, `list`
     """
     if not states:
         logger.debug('empty container, so empty dict for solver expr')
@@ -418,9 +425,15 @@ def _fts2spec(
 
 
 def sys_to_spec(
-    ofts, ignore_initial, statevar,
-    bool_states=False, bool_actions=False
-):
+        ofts,
+        ignore_initial:
+            bool,
+        statevar:
+            str,
+        bool_states:
+            bool=False,
+        bool_actions=False
+        ) -> GRSpec:
     """Convert transition system to GR(1) fragment of LTL.
 
     The attribute `FTS.owner` defines who controls the system,
@@ -461,13 +474,9 @@ def sys_to_spec(
         Enable this to mask absence of FTS initial states.
         Useful when initial states are specified in another way,
         e.g., directly augmenting the spec part.
-    @type ignore_initial:
-        `bool`
     @param state_var:
         name to be used for the integer or string
         variable that equals the current transition system state.
-    @type state_var:
-        `str`
     @param bool_states:
         deprecated as inefficient
 
@@ -476,8 +485,6 @@ def sys_to_spec(
         Otherwise use a single integer variable,
         different values of which correspond to states of
         `ofts` (binary encoding).
-    @type bool_states:
-        bool
     @param bool_actions:
         Similar to `bool_states`.
         For each type of system actions,
@@ -490,8 +497,6 @@ def sys_to_spec(
             that ranges over the possible action values.
     @return:
         logic formula in GR(1) form representing `ofts`.
-    @rtype:
-        `GRSpec`
     """
     if not isinstance(ofts, transys.FiniteTransitionSystem):
         raise TypeError(
@@ -1014,7 +1019,11 @@ def _sprint_aps(label, aps):
     return tmp
 
 
-def build_dependent_var_table(fts, statevar):
+def build_dependent_var_table(
+        fts:
+            transys.FTS,
+        statevar
+        ) -> dict[str, str]:
     """Return a `dict` of substitution rules for dependent variables.
 
     The dependent variables in a transition system are the
@@ -1026,8 +1035,6 @@ def build_dependent_var_table(fts, statevar):
 
     The returned substitutions can be used
 
-    @type fts:
-        `FTS`
     @param statevar:
         name of variable used for the current state
         For example if it is 'loc', then the states
@@ -1037,7 +1044,7 @@ def build_dependent_var_table(fts, statevar):
         {'s0': '(loc = "s0")',
          's1': '(loc = "s1")'}
         ```
-    @rtype:
+    @return:
         `{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}`
         where:
 
@@ -1056,12 +1063,13 @@ def build_dependent_var_table(fts, statevar):
             for k, v in ap2states.items()}
 
 
-def map_ap_to_states(fts):
+def map_ap_to_states(
+        fts:
+            transys.FTS
+        ) -> dict[str, set]:
     """For each proposition find the states labeled with it.
 
-    @type fts:
-        `FTS`
-    @rtype:
+    @return:
         `{'p': s, ...}` where
         `'p'` a proposition and
         `s` a set of states in `fts`.
@@ -1073,8 +1081,19 @@ def map_ap_to_states(fts):
     return table
 
 
-def synthesize_many(specs, ts=None, ignore_init=None,
-                    solver='omega'):
+def synthesize_many(
+        specs:
+            GRSpec,
+        ts:
+              dict[
+                ...,
+                transys.FiniteTransitionSystem]
+            | None=None,
+        ignore_init:
+              set
+            | None=None,
+        solver:
+            str='omega'):
     """Synthesize from logic specs and multiple transition systems.
 
     The transition systems are composed synchronously, i.e.,
@@ -1123,17 +1142,11 @@ def synthesize_many(specs, ts=None, ignore_init=None,
     controlled by the system and taking
     values over `{'a', 'b', 'c'}`.
 
-    @type specs:
-        `GRSpec`
-    @type ts:
-        `dict` of `FiniteTransitionSystem`
-    @type ignore_init:
+    @param ignore_init:
         `set` of keys from `ts`
     @param solver:
         See function `synthesize` for
         available options.
-    @type solver:
-        str
     """
     assert isinstance(ts, dict), ts
     for name, t in ts.items():
@@ -1154,13 +1167,22 @@ def synthesize_many(specs, ts=None, ignore_init=None,
 
 
 def synthesize(
-        specs,
-        env=None,
-        sys=None,
-        ignore_env_init=False,
-        ignore_sys_init=False,
-        rm_deadends=True,
-        solver='omega'):
+        specs:
+            GRSpec,
+        env:
+              transys.FTS
+            | None=None,
+        sys:
+              transys.FTS
+            | None=None,
+        ignore_env_init:
+            bool=False,
+        ignore_sys_init:
+            bool=False,
+        rm_deadends:
+            bool=True,
+        solver='omega'
+        ) -> transys.MealyMachine | None:
     """Function to call the appropriate synthesis tool on the specification.
 
     There are three attributes of `specs` that define what
@@ -1198,8 +1220,6 @@ def synthesize(
     arguments supported and types of objects returned may change
     without notice.
 
-    @type specs:
-        `spec.GRSpec`
     @param env:
         A transition system describing the environment:
 
@@ -1210,8 +1230,6 @@ def synthesize(
 
         This constrains the transitions available to
         the environment, given the outputs from the system.
-    @type env:
-        `FTS`
     @param sys:
         A transition system describing the system:
 
@@ -1219,22 +1237,14 @@ def synthesize(
             - input: env_actions
             - output: sys_actions
             - initial states constrain the system
-    @type sys:
-        `FTS`
     @param ignore_env_init:
         Ignore any initial state information
         contained in env.
-    @type ignore_env_init:
-        bool
     @param ignore_sys_init:
         Ignore any initial state information
         contained in sys.
-    @type ignore_sys_init:
-        bool
     @param rm_deadends:
         return a strategy that contains no terminal states.
-    @type rm_deadends:
-        bool
     @param solver:
         Magic string that declares what tool to invoke,
         what method to use, etc.  Currently recognized forms:
@@ -1256,9 +1266,6 @@ def synthesize(
         If spec is realizable,
         then return a Mealy machine implementing the strategy.
         Otherwise return None.
-    @rtype:
-        `MealyMachine` or
-        None
     """
     specs = _spec_plus_sys(
         specs, env, sys,
@@ -1267,17 +1274,14 @@ def synthesize(
     return _synthesize(specs, solver, rm_deadends)
 
 
-def _synthesize(specs, solver, rm_deadends):
-    """Return `MealyMachine` or `None` that implements `specs`.
-
-    @type specs:
-        `spec.GRSpec`
-    @type rm_deadends:
-        `bool`
-    @rtype:
-        `MealyMachine` or
-        `None`
-    """
+def _synthesize(
+        specs:
+            GRSpec,
+        solver,
+        rm_deadends:
+            bool
+        ) -> transys.MealyMachine | None:
+    """Return `MealyMachine` that implements `specs`."""
     if solver == 'gr1c':
         strategy = gr1c.synthesize(specs)
     elif solver == 'slugs':
@@ -1428,7 +1432,12 @@ def _copy_options_from_ts(ts_spec, ts, specs):
     ts_spec.qinit = cp.qinit
 
 
-def strategy2mealy(A, spec):
+def strategy2mealy(
+        A:
+            _nx.DiGraph,
+        spec:
+            GRSpec
+        ) -> transys.MealyMachine:
     """Convert strategy to Mealy transducer.
 
     Note that the strategy is a deterministic game graph,
@@ -1437,12 +1446,6 @@ def strategy2mealy(A, spec):
 
     @param A:
         strategy
-    @type A:
-        `networkx.DiGraph`
-    @type spec:
-        `GRSpec`
-    @rtype:
-        `MealyMachine`
     """
     assert len(A) > 0
     logger.info(
@@ -1578,23 +1581,22 @@ def _init_edges_using_compile_init(
             f'has var values: {var_values}')
 
 
-def _int2str(label, str_vars):
+def _int2str(
+        label:
+            dict,
+        str_vars:
+            dict
+        ) -> dict:
     """Replace integers with string values for string variables.
 
     @param label:
         mapping from variable names, to integer (as strings)
-    @type label:
-        `dict`
     @param str_vars:
         mapping that defines those variables that
         should be converted from integer to string variables.
         Each variable is mapped to a list of strings that
         comprise its range. This list defines how integer values
         correspond to string literals for that variable.
-    @type str_vars:
-        `dict`
-    @rtype:
-        `dict`
     """
     label = dict(label)
     label.update({k: str_vars[k][int(v)]
@@ -1611,7 +1613,13 @@ def mask_outputs(machine):
                 d.pop(k)
 
 
-def determinize_machine_init(mach, init_out_values=None):
+def determinize_machine_init(
+        mach:
+            transys.MealyMachine,
+        init_out_values:
+              dict
+            | None=None
+        ) -> transys.MealyMachine:
     """Return a determinized copy of `mach` with given initial outputs.
 
     The transducers produced by synthesis can have multiple
@@ -1683,16 +1691,10 @@ def determinize_machine_init(mach, init_out_values=None):
     @param mach:
         possibly non-deterministic transducer,
         as produced, for example, by `synthesize`.
-    @type mach:
-        `MealyMachine`
     @param init_out_values:
         mapping from output ports that
         the system cannot control initially,
         to the initial values they take in this instance of the game.
-    @type init_out_values:
-        `dict`
-    @rtype:
-        `MealyMachine`
     """
     mach = copy.deepcopy(mach)
     if init_out_values is None:

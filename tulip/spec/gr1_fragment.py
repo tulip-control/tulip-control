@@ -45,6 +45,7 @@ reference
    <http://doi.org/10.4204/EPTCS.50.3>
 """
 import logging
+import typing as _ty
 
 import networkx as nx
 
@@ -69,14 +70,11 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def check(formula):
+def check(formula: str):
     """Return syntax tree for `formula`.
 
     Parse `formula` and create abstract
     syntax tree (AST).
-
-    @type formula:
-        `str`
     """
     from tulip import transys as trs
     ast = lexyacc.parse(formula)
@@ -170,7 +168,10 @@ def check(formula):
     return ast
 
 
-def str_to_grspec(f):
+def str_to_grspec(
+        f:
+            str
+        ) -> GRSpec:
     """Return `GRSpec` from LTL formula `f` as `str`.
 
     Formula `f` must be in the form:
@@ -182,11 +183,6 @@ def str_to_grspec(f):
     where each of A, G is a conjunction of
     terms: `B`, `[]C`, `[]<>B`.
     For more details on `B, C`, see `split_gr1`.
-
-    @type f:
-        `str`
-    @rtype:
-        `GRSpec`
     """
     t = parser.parse(f)
     assert t.operator == '->'
@@ -202,7 +198,14 @@ def str_to_grspec(f):
         sys_prog=d['assert']['GF'])
 
 
-def split_gr1(f):
+def split_gr1(
+        f:
+            _ty.Union[
+                str,
+                'Node']
+        ) -> dict[
+            str,
+            list[str]]:
     """Return `dict` of GR(1) subformulae.
 
     The formula `f` is assumed to be a conjunction of expressions
@@ -214,13 +217,9 @@ def split_gr1(f):
 
     @param f:
         temporal logic formula
-    @type f:
-        `str` or AST
     @return:
         conjunctions of formulae A, B as `str`, grouped by keys:
         `'init', 'G', 'GF'`
-    @rtype:
-        `dict` of `str`: `list` of `str`
     """
     # TODO: preprocess by applying syntactic identities: [][] = [] etc
     try:
@@ -310,7 +309,12 @@ def has_operator(u, g, operators):
     return None
 
 
-def stability_to_gr1(p, aux='aux'):
+def stability_to_gr1(
+        p:
+            str,
+        aux:
+            str='aux'
+        ) -> GRSpec:
     """Convert `<>[] p` to GR(1).
 
     Warning: This conversion is sound, but not complete.
@@ -327,14 +331,8 @@ def stability_to_gr1(p, aux='aux'):
     [](aux -> p)
     ```
 
-    @type p:
-        `str`
     @param aux:
         name to use for auxiliary variable
-    @type aux:
-        `str`
-    @rtype:
-        `GRSpec`
     """
     logging.warning(
         'Conversion of stability (<>[]p) to GR(1)'
@@ -357,7 +355,14 @@ def stability_to_gr1(p, aux='aux'):
         sys_prog=sys_prog)
 
 
-def response_to_gr1(p, q, aux='aux'):
+def response_to_gr1(
+        p:
+            str,
+        q:
+            str,
+        aux:
+            str='aux'
+        ) -> GRSpec:
     """Convert `[](p -> <> q)` to GR(1).
 
     GR(1) form:
@@ -369,16 +374,8 @@ def response_to_gr1(p, q, aux='aux'):
     []( (! aux && !q) -> X ! aux)
     ```
 
-    @type p:
-        `str`
-    @type q:
-        `str`
     @param aux:
         name to use for auxiliary variable
-    @type aux:
-        `str`
-    @rtype:
-        `GRSpec`
     """
     a = aux
     a0 = a
@@ -400,7 +397,12 @@ def response_to_gr1(p, q, aux='aux'):
         sys_prog=sys_prog)
 
 
-def eventually_to_gr1(p, aux='aux'):
+def eventually_to_gr1(
+        p:
+            str,
+        aux:
+            str='aux'
+        ) -> GRSpec:
     """Convert `<> p` to GR(1).
 
     GR(1) form:
@@ -413,14 +415,8 @@ def eventually_to_gr1(p, aux='aux'):
     []( (!p && !aux) -> X!(aux))
     ```
 
-    @type p:
-        `str`
     @param aux:
         name to use for auxiliary variable
-    @type aux:
-        `str`
-    @rtype:
-        `GRSpec`
     """
     a = aux
     a0 = a
@@ -440,7 +436,13 @@ def eventually_to_gr1(p, aux='aux'):
         sys_prog=sys_prog)
 
 
-def until_to_gr1(p, q, aux='aux'):
+def until_to_gr1(
+        p:
+            str,
+        q,
+        aux:
+            str='aux'
+        ) -> GRSpec:
     """Convert `p U q` to GR(1).
 
     GR(1) form:
@@ -455,14 +457,8 @@ def until_to_gr1(p, q, aux='aux'):
     [](!aux -> p)
     ```
 
-    @type p:
-        `str`
     @param aux:
         name to use for auxiliary variable
-    @type aux:
-        `str`
-    @rtype:
-        `GRSpec`
     """
     a = aux
     a0 = a

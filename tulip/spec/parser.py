@@ -44,15 +44,16 @@ __all__ = [
 parsers = dict()
 
 
-def parse(formula, full_operators=False):
+def parse(
+        formula,
+        full_operators:
+            bool=False):
     """Parse formula string and create abstract syntax tree (AST).
 
     @param full_operators:
         replace full names of operators
         with their symbols (case-insensitive,
         each operator must be a separate word).
-    @type full_operators:
-        `bool`
     """
     if full_operators:
         formula = _replace_full_name_operators(formula)

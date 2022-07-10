@@ -30,11 +30,13 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Base classes for labeled directed graphs"""
+import collections.abc as _abc
 from collections.abc import Iterable
 import copy
 import logging
 import os
 from pprint import pformat
+import typing as _ty
 
 import networkx as nx
 
@@ -118,12 +120,11 @@ def test_common_bug(value, desired_value):
 class States:
     """Methods to manage states and initial states."""
 
-    def __init__(self, graph):
-        """Initialize `States`.
-
-        @type graph:
-            `LabeledDiGraph`
-        """
+    def __init__(
+            self,
+            graph:
+                'LabeledDiGraph'):
+        """Initialize `States`."""
         self.graph = graph
         self.initial = list()
 
@@ -216,7 +217,10 @@ class States:
         for state in states:
             self.remove(state)
 
-    def post(self, states=None):
+    def post(
+            self,
+            states=None
+            ) -> set:
         """Direct successor set (1-hop) for given states.
 
         Edge labels are ignored.
@@ -234,8 +238,6 @@ class States:
           - None, so initial states returned
           - single state or
           - set of states or
-        @rtype:
-            set
         """
         if states is None:
             return set(self.initial)
@@ -245,7 +247,10 @@ class States:
             successors |= set(self.graph.successors(state))
         return successors
 
-    def pre(self, states):
+    def pre(
+            self,
+            states
+            ) -> set:
         """Return direct predecessors (1-hop) of given state.
 
         See Also
@@ -253,9 +258,6 @@ class States:
         - `post`
         - Def. 2.3, p.23 U{[BK08]
           <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
-
-        @rtype:
-            set
         """
         states = self._single_state2singleton(states)
         predecessors = set()
@@ -279,7 +281,11 @@ class States:
         ancestors = nx.ancestors(self, state)
         return ancestors
 
-    def paint(self, state, color):
+    def paint(
+            self,
+            state,
+            color:
+                str):
         """Color the given state.
 
         The state is filled with given color,
@@ -288,14 +294,19 @@ class States:
         @param state:
             valid system state
         @param color:
-            with which to paint `state`
-        @type color:
-            str of valid dot color
+            DOT color with which to paint `state`
         """
         self.graph.nodes[state]['style'] = 'filled'
         self.graph.nodes[state]['fillcolor'] = color
 
-    def find(self, states=None, with_attr_dict=None, **with_attr):
+    def find(
+            self,
+            states=None,
+            with_attr_dict:
+                dict |
+                None=None,
+            **with_attr
+            ) -> list[tuple]:
         """Filter by desired states and by desired state labels.
 
         Examples
@@ -341,21 +352,16 @@ class States:
           ```
 
         @param states:
-            subset of states over which to search
-        @type states:
-            'any' (default)
-            | iterable of valid states
-            | single valid state
+            subset of states over which to search,
+            or a specific state
         @param with_attr_dict:
-            label with which to filter the states
-        @type with_attr_dict:
-            {sublabel_type : desired_sublabel_value, ...}
-            | leave empty, to allow any state label (default)
+            label with which to filter the states,
+            of the form:
+            `{sublabel_type : desired_sublabel_value, ...}`
+            (if `None`, then any state label is allowed)
         @param with_attr:
             label key-value pairs which take
             precedence over `with_attr_dict`.
-        @rtype:
-            list of labeled states
         @return:
             `[(state, label),...]`
             where:
@@ -433,12 +439,12 @@ class Transitions:
     Unlike an edge, a transition is a labeled edge.
     """
 
-    def __init__(self, graph, deterministic=False):
-        """Initialize `Transitions`.
-
-        @type graph:
-            `LabeledDiGraph`
-        """
+    def __init__(
+            self,
+            graph:
+                'LabeledDiGraph',
+            deterministic=False):
+        """Initialize `Transitions`."""
         self.graph = graph
         self._deterministic = deterministic
 
@@ -537,9 +543,14 @@ class Transitions:
             transitions)
 
     def add_adj(
-            self, adj, adj2states, attr_dict=None,
-            check=True, **attr
-    ):
+            self,
+            adj,
+            adj2states:
+                dict |
+                list,
+            attr_dict=None,
+            check=True,
+            **attr):
         """Add multiple labeled transitions from adjacency matrix.
 
         The label can be empty.
@@ -564,10 +575,10 @@ class Transitions:
 
             If `adj2states` includes a state not in sys.states,
             no transition is added and an exception raised.
-        @type adj2states:
-            either of:
-            - `dict` from adjacency matrix indices to
-              existing, or
+
+            Either:
+            - `dict` that maps adjacency matrix indices
+              to existing states, or
             - `list` of existing states
         """
         # square ?
@@ -591,9 +602,21 @@ class Transitions:
                 si, sj, attr_dict, check,
                 **attr)
 
-    def find(self, from_states=None, to_states=None,
-             with_attr_dict=None, typed_only=False, **with_attr):
-        """Find all edges between given states with given labels.
+    def find(
+            self,
+            from_states:
+                _abc.Iterable |
+                None=None,
+            to_states:
+                _abc.Iterable |
+                None=None,
+            with_attr_dict:
+                dict |
+                None=None,
+            typed_only=False,
+            **with_attr
+            ) -> list:
+        r"""Find all edges between given states with given labels.
 
         Instead of having two separate methods to:
 
@@ -619,35 +642,26 @@ class Transitions:
 
         @param from_states:
             edges must start from this subset of states
-        @type from_states:
-            - iterable of existing states, or
-            - None (no constraint, default)
+            (existing states)
         @param to_states:
             edges must end in this subset of states
-        @type to_states:
-            - iterable of existing states, or
-            - None (no constraint, default)
+            (existing states)
         @param with_attr_dict:
-            edges must be annotated with these labels
-        @type with_attr_dict:
-            - {label_type : desired_label_value, ...}, or
-            - None (no constraint, default)
+            edges must be annotated with these labels,
+            of the form:
+            `{label_type : desired_label_value, ...}`
         @param with_attr:
             label type-value pairs,
             take precedence over `desired_label`.
         @return:
-            set of transitions = labeled edges:
-                (from_state, to_state, label)
+            transitions = labeled edges:
+                `(from_state, to_state, label)`
             such that:
-                (from_state, to_state )
-                in from_states x to_states
-        @rtype:
-            list of transitions:
-            = list of labeled edges
-            = `[(from_state, to_state, label),...]`
+                (from_state, to_state)
+                in from_states \X to_states
             where:
-              - `from_state` in `from_states`
-              - `to_state` in `to_states`
+              - `from_state \in from_states`
+              - `to_state \in to_states`
               - `label`: dict
         """
         if with_attr_dict is None:
@@ -825,12 +839,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     @param node_label_types:
         applies to nodes, as described above.
-    @type node_label_types:
-        `list` of `dict`
     @param edge_label_types:
         applies to edges, as described above.
-    @type edge_label_types:
-        `list` of `dict`
     @param deterministic:
         if True, then edge-label-deterministic
 
@@ -864,8 +874,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
     def __init__(
             self,
-            node_label_types=None,
-            edge_label_types=None,
+            node_label_types:
+                list[dict] |
+                None=None,
+            edge_label_types:
+                list[dict] |
+                None=None,
             deterministic=False):
         node_labeling, node_defaults = self._init_labeling(
             node_label_types)
@@ -976,14 +990,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         else:
             logger.debug('no untyped keys.')
 
-    def is_consistent(self):
+    def is_consistent(self) -> bool:
         """Check if labels are consistent with their type definitions.
 
         Use case: removing values from a label type
         can invalidate existing labels that use them.
-
-        @rtype:
-            bool
         """
         for node, attr_dict in self.nodes(data=True):
             if not attr_dict.is_consistent():
@@ -1196,13 +1207,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 attr_dict=datadict,
                 check=check)
 
-    def remove_labeled_edge(self, u, v, attr_dict=None, **attr):
+    def remove_labeled_edge(
+            self,
+            u,
+            v,
+            attr_dict:
+                dict |
+                None=None,
+            **attr):
         """Remove single labeled edge.
 
         @param attr_dict:
             attributes with which to identify the edge.
-        @type attr_dict:
-            dict
         @param attr:
             keyword arguments with which to update `attr_dict`.
         """
@@ -1302,9 +1318,21 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self, wrap,
             **kwargs)
 
-    def save(self, filename=None, fileformat=None,
-             rankdir='LR', prog=None,
-             wrap=10, tikz=False):
+    def save(
+            self,
+            filename:
+                str=None,
+            fileformat=None,
+            rankdir:
+                _ty.Literal[
+                    'LR',
+                    'TB']
+                ='LR',
+            prog=None,
+            wrap:
+                int=10,
+            tikz=False
+            ) -> bool:
         """Save image to file.
 
         Recommended file formats:
@@ -1342,8 +1370,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             then use 'out.pdf'.
 
             If extension is missing '.pdf' is used.
-        @type filename:
-            str
         @param fileformat:
             replace the extension of `filename`
             with this. For example:
@@ -1356,9 +1382,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             result in saving `'fig.svg'`.
         @param rankdir:
             direction for dot layout
-        @type rankdir:
-            str = 'TB' | 'LR'
-            (i.e., Top->Bottom | Left->Right)
         @param prog:
             executable to call
         @type prog:
@@ -1366,14 +1389,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
             documentation
         @param wrap:
             max width of node strings
-        @type wrap:
-            int
         @param tikz:
             use tikz automata library in dot
-        @rtype:
-            bool
         @return:
-            True if saving completed successfully, False otherwise.
+            `True` if saving completed successfully,
+            `False` otherwise.
         """
         if filename is None:
             if not self.name:
@@ -1457,7 +1477,12 @@ def str2singleton(ap_label):
     return ap_label
 
 
-def prepend_with(states, prepend_str):
+def prepend_with(
+        states:
+            _abc.Iterable,
+        prepend_str:
+            str |
+            None):
     """Prepend items with given string.
 
     Example
@@ -1476,13 +1501,9 @@ def prepend_with(states, prepend_str):
 
     @param states:
         items prepended with string `prepend_str`
-    @type states:
-        iterable
     @param prepend_str:
         text prepended to `states`.  If None, then
         `states` is returned without modification
-    @type prepend_str:
-        str or None
     """
     if not isinstance(states, Iterable):
         raise TypeError(

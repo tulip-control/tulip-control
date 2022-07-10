@@ -33,7 +33,11 @@
 from time import strftime
 
 
-def fts2promela(graph, procname=None):
+def fts2promela(
+        graph,
+        procname:
+            str |
+            None=None):
     """Convert (possibly labeled) state graph to Promela str.
 
     Creates a process which can be simulated as an independent
@@ -59,8 +63,7 @@ def fts2promela(graph, procname=None):
         networkx
     @param procname:
         Promela process name (after proctype)
-    @type procname:
-        str (default: system name)
+        (default: system name)
     """
     def state_ap2promela(
             state,

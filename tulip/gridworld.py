@@ -38,6 +38,7 @@ import copy
 import itertools
 import random
 import time
+import typing as _ty
 
 import numpy as np
 
@@ -622,7 +623,13 @@ class GridWorld:
             out_str += "\n"
         return out_str
 
-    def dump_subworld(self, size, offset=(0, 0), prefix="Y", extend=False):
+    def dump_subworld(
+            self,
+            size,
+            offset=(0, 0),
+            prefix="Y",
+            extend=False
+            ) -> 'GridWorld':
         """Generate new GridWorld instance from part of current one.
 
         Does not perform automatic truncation (to make desired
@@ -642,8 +649,6 @@ class GridWorld:
             If True, then any size and offset is permitted,
             where any positions outside the actual gridworld are
             assumed to be occupied.
-        @rtype:
-            `GridWorld`
         """
         if self.W is None:
             raise ValueError("Gridworld does not exist.")
@@ -688,8 +693,12 @@ class GridWorld:
                 self_offset[1]:(self_offset[1] + actual_size[1])]
         return sub
 
-    def dump_ppartition(self, side_lengths=(1., 1.),
-                        offset=(0., 0.), nonbool=True):
+    def dump_ppartition(
+            self,
+            side_lengths=(1., 1.),
+            offset=(0., 0.),
+            nonbool=True
+            ) -> 'PropPreservingPartition':
         """Return proposition-preserving partition from this gridworld.
 
         Adjacency of cells is as returned by prop2partition.prop2part().
@@ -701,8 +710,6 @@ class GridWorld:
             2-dimensional coordinate declaring where the
             bottom-left corner of the gridworld should be placed
             in the continuous space; default places it at the origin.
-        @rtype:
-            `PropPreservingPartition<prop2part.PropPreservingPartition>`
         """
         try:
             from polytope import Polytope
@@ -754,7 +761,12 @@ class GridWorld:
                             dtype=np.float64))
         return prop2partition.prop2part(domain, cells)
 
-    def spec(self, offset=(0, 0), controlled_dyn=True, nonbool=True):
+    def spec(
+            self,
+            offset=(0, 0),
+            controlled_dyn=True,
+            nonbool=True
+            ) -> GRSpec:
         """Return GRSpec instance describing this gridworld.
 
         The offset argument is motivated by the use-case of multiple
@@ -784,8 +796,6 @@ class GridWorld:
             ("environment") variables.
         @param nonbool:
             If True, then use variables with integer domains.
-        @rtype:
-            `GRSpec`
         """
         if self.W is None:
             raise ValueError(
@@ -915,7 +925,11 @@ class GridWorld:
                 env_safety=spec_trans,
                 env_prog=spec_goal)
 
-    def scale(self, xf=1, yf=1):
+    def scale(
+            self,
+            xf=1,
+            yf=1
+            ) -> 'GridWorld':
         """Return a new gridworld equivalent to this but scaled by integer
         factor (xf, yf). In the new world, obstacles are increased in size but
         initials and goals change their position only. If this world is of size
@@ -925,8 +939,6 @@ class GridWorld:
             integer scaling factor for columns
         @param yf:
             integer scaling factor for rows
-        @rtype:
-            `GridWorld`
         """
         shape_scaled = (self.W.shape[0] * yf, self.W.shape[1] * xf)
         scaleW = np.zeros(shape_scaled, dtype=np.int32)
@@ -950,9 +962,18 @@ class GridWorld:
         return scale_gw
 
 
-def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
-                 ensure_feasible=False, timeout=None,
-                 num_trolls=0):
+def random_world(
+        size,
+        wall_density=.2,
+        num_init=1,
+        num_goals=2,
+        prefix="Y",
+        ensure_feasible=False,
+        timeout=None,
+        num_trolls=0
+        ) -> _ty.Union[
+            'GridWorld',
+            None]:
     """Generate random gridworld of given size.
 
     While an instance of GridWorld is returned, other views of the
@@ -986,9 +1007,8 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         if ensure_feasible, then quit if no correct random
         world is found before timeout seconds.  If timeout is
         None (default), then do not impose time constraints.
-    @rtype:
-        `GridWorld`, or
-        None if timeout occurs.
+    @return:
+        is `None` if timeout occurs.
     """
     if ensure_feasible and timeout is not None:
         st = time.time()
@@ -1070,8 +1090,15 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         return world
 
 
-def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
-                   passage_length=0.4, ptop=None, prefix="Y"):
+def narrow_passage(
+        size,
+        passage_width=1,
+        num_init=1,
+        num_goals=2,
+        passage_length=0.4,
+        ptop=None,
+        prefix="Y"
+        ) -> 'GridWorld':
     """Generate a narrow-passage world: this is a world containing
     two zones (initial, final) with a tube connecting them.
 
@@ -1091,8 +1118,6 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     @param prefix:
         string to be used as prefix for naming gridworld
         cell variables.
-    @rtype:
-        `GridWorld`
     """
     (w, h) = size
     if w < 3 or h < 3:
@@ -1122,7 +1147,10 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     return Z
 
 
-def unoccupied(size, prefix="Y"):
+def unoccupied(
+        size,
+        prefix="Y"
+        ) -> 'GridWorld':
     """Generate entirely unoccupied gridworld of given size.
 
     @param size:
@@ -1130,8 +1158,6 @@ def unoccupied(size, prefix="Y"):
     @param prefix:
         String to be used as prefix for naming gridworld
         cell variables.
-    @rtype:
-        `GridWorld`
     """
     if len(size) < 2:
         raise TypeError("invalid gridworld size.")
@@ -1140,8 +1166,15 @@ def unoccupied(size, prefix="Y"):
         prefix="Y")
 
 
-def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
-               get_moves_lists=True):
+def add_trolls(
+        Y:
+            'GridWorld',
+        troll_list,
+        prefix="X",
+        start_anywhere=False,
+        nonbool=True,
+        get_moves_lists=True
+        ) -> tuple[GRSpec, list]:
     """Create GR(1) specification with troll-like obstacles.
 
     Trolls are introduced into the specification with names derived
@@ -1150,8 +1183,6 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
     controlled "Y gridworld" position and each troll, but not
     between trolls.
 
-    @type Y:
-        `GridWorld`
     @param Y:
         The controlled gridworld, describing in particular
         static obstacles that must be respected by the trolls.
@@ -1168,8 +1199,6 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
         If True, then use variables with integer domains.
     @param get_moves_lists:
         Consult returned value description below.
-    @rtype:
-        (`GRSpec`, list)
     @return:
         If get_moves_lists is True, then returns (spec, moves_N)
         where spec is the specification incorporating all of the

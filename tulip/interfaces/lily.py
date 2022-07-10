@@ -57,9 +57,17 @@ DOTFILE = 'ltl2vl-synthesis.dot'
 
 
 def synthesize(
-        formula,
-        env_vars=None,
-        sys_vars=None):
+        formula:
+            str |
+            LTL |
+            GRSpec,
+        env_vars:
+            dict |
+            None=None,
+        sys_vars:
+            dict |
+            None=None
+        ) -> MooreMachine:
     """Return Moore transducer if `formula` is realizable.
 
     Variable `dict`s have variable names as keys and their type as
@@ -69,27 +77,15 @@ def synthesize(
 
     @param formula:
         linear temporal logic formula
-    @type formula:
-        `str`,
-        `LTL`, or
-        `GRSpec`
     @param env_vars:
         uncontrolled variables (inputs); used only if
         `formula` is of type `str`
-    @type env_vars:
-        `dict` or
-        None
     @param sys_vars:
         controlled variables (outputs); used only if
         `formula` is of type `str`
-    @type sys_vars:
-        `dict` or
-        None
     @return:
         symbolic Moore transducer
         (guards are conjunctions, not sets)
-    @rtype:
-        `MooreMachine`
     """
     if isinstance(formula, GRSpec):
         env_vars = formula.env_vars
@@ -144,7 +140,8 @@ def synthesize(
 def _lily_strategy2moore(
         text,
         env_vars,
-        sys_vars):
+        sys_vars
+        ) -> MooreMachine:
     """Return Moore transducer from Lily strategy.
 
     Caution
@@ -157,8 +154,6 @@ def _lily_strategy2moore(
     @param text:
         Moore strategy game graph,
         described in output from Lily
-    @rtype:
-        `MooreMachine`
     """
     lines = text.splitlines()
     def is_node_or_edge(line):
@@ -250,14 +245,11 @@ def _lily_strategy2moore(
     return machine
 
 
-def _parse_label(s):
-    """Return `dict` from variable conjunction.
-
-    @type s:
-        `str`
-    @rtype:
-        `dict`
-    """
+def _parse_label(
+        s:
+            str
+        ) -> dict:
+    """Return `dict` from variable conjunction."""
     l = re.findall(
         r' (\w+) = (0 | 1) ',
         s,

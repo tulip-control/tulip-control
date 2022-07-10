@@ -30,10 +30,12 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Finite State Machines Module"""
+import collections.abc as _abc
 import copy
 from pprint import pformat
 from random import choice
 import sys
+import typing as _ty
 
 from tulip.transys.labeled_graphs import LabeledDiGraph
 # inline imports:
@@ -265,7 +267,12 @@ class Transducer(LabeledDiGraph):
             normal='ellipse')
         self.default_export_fname = 'fsm'
 
-    def add_inputs(self, new_inputs, masks=None):
+    def add_inputs(
+            self,
+            new_inputs:
+                dict,
+            masks:
+                dict=None):
         """Create new inputs.
 
         @param new_inputs:
@@ -273,15 +280,13 @@ class Transducer(LabeledDiGraph):
             where:
             - port_name: str
             - port_type: Iterable | check class
-        @type new_inputs:
-            dict
         @param masks:
             custom mask functions, for each sublabel
             based on its current value
             each such function returns:
             - True, if the sublabel should be shown
             - False, otherwise (to hide it)
-        @type masks:
+
             `dict` of functions `{port_name : mask_function}`
             each `mask_function` returns bool
         """
@@ -516,12 +521,12 @@ class MealyMachine(Transducer):
         s += f'{_hl}\n'
         return s
 
-    def _save(self, path, fileformat):
-        """Export options available only for Mealy machines.
-
-        @type fileformat:
-            'scxml'
-        """
+    def _save(
+            self,
+            path,
+            fileformat:
+                _ty.Literal['scxml']):
+        """Export options available only for Mealy machines."""
         if fileformat != 'scxml':
             return False
         from tulip.transys.export import machine2scxml
@@ -532,7 +537,12 @@ class MealyMachine(Transducer):
         f.close()
         return True
 
-    def add_outputs(self, new_outputs, masks=None):
+    def add_outputs(
+            self,
+            new_outputs:
+                dict,
+            masks:
+                dict=None):
         """Add new outputs.
 
         @param new_outputs:
@@ -540,18 +550,14 @@ class MealyMachine(Transducer):
             where:
             - port_name: str
             - port_type: Iterable | check class
-        @type new_outputs:
-            dict
         @param masks:
-            custom mask functions, for each sublabel
-            based on its current value
-            each such function returns:
-            - True, if the sublabel should be shown
-            - False, otherwise (to hide it)
-        @type masks:
-            dict of functions
-            keys are port_names (see arg: new_outputs)
-            each function returns bool
+            - keys are port_names (see arg: new_outputs)
+            - values are custom mask functions,
+              for each sublabel
+              based on its current value.
+              Each such function returns:
+              - True, if the sublabel should be shown
+              - False, otherwise (to hide it)
         """
         for port_name, port_type in new_outputs.items():
             # append
@@ -568,7 +574,14 @@ class MealyMachine(Transducer):
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
 
-    def reaction(self, from_state, inputs, lazy=False):
+    def reaction(
+            self,
+            from_state,
+            inputs:
+                dict[str, ...],
+            lazy:
+                bool=False
+            ) -> tuple:
         """Return next state and output, when reacting to given inputs.
 
         The machine must be deterministic.
@@ -581,23 +594,20 @@ class MealyMachine(Transducer):
 
         @param from_state:
             transition starts from this state.
-        @type from_state:
             element of `self.states`
         @param inputs:
-            `dict` assigning a valid value to each input port.
-        @type inputs:
-            {'port_name':port_value, ...}
+            `dict` that assigns a valid value to
+            each input port.
+            {'port_name': port_value, ...}
         @param lazy:
             Lazy evaluation of inputs? If lazy=True, then
             allow an incomplete specification of input if there is
             precisely one enabled transition.
-        @type lazy:
-            bool
         @return:
             output values and next state.
-        @rtype:
-            (next_state, outputs)
-          where `outputs`: `{'port_name':port_value, ...}`
+            `(next_state, outputs)`
+            where `outputs`:
+                `{'port_name': port_value, ...}`
         """
         if lazy:
             restricted_inputs = set(self.inputs).intersection(inputs.keys())
@@ -667,29 +677,32 @@ class MealyMachine(Transducer):
                 input_sequences=input_sequences)
 
 
-def guided_run(mealy, from_state=None, input_sequences=None):
+def guided_run(
+        mealy:
+            MealyMachine,
+        from_state=None,
+        input_sequences:
+            dict[..., list] |
+            None=None
+        ) -> tuple[
+            list,
+            dict[..., list]]:
     """Run deterministic machine reacting to given inputs.
 
     @param from_state:
         start simulation
     @param mealy:
         input-deterministic Mealy machine
-    @type mealy:
-        `MealyMachine`
     @param from_state:
         start simulation at this state.
         If `None`, then use the unique initial state `Sinit`.
     @param input_sequences:
         one sequence of values for each input port
-    @type input_sequences:
-        `dict` of `lists`
     @return:
         sequence of states and sequence of output valuations
-    @rtype:
-        (states, output_sequences)
+        `(states, output_sequences)`
         where:
-        - `states` is a `list` of states excluding `from_state`
-        - `output_sequences` is a `dict` of `lists`
+        - `states` not containing `from_state`
     """
     seqs = input_sequences  # abbrv
     missing_ports = set(mealy.inputs).difference(seqs)
@@ -726,7 +739,12 @@ def guided_run(mealy, from_state=None, input_sequences=None):
     return (states_seq, output_seqs)
 
 
-def random_run(mealy, from_state=None, N=10):
+def random_run(
+        mealy:
+            MealyMachine,
+        from_state=None,
+        N:
+            int=10):
     """Return run from given state for N random inputs.
 
     Inputs selected randomly in a way that does not block the machine
@@ -738,12 +756,8 @@ def random_run(mealy, from_state=None, N=10):
 
     @param mealy:
         input-deterministic Mealy machine
-    @type mealy:
-        `MealyMachine`
     @param N:
         number of reactions (inputs)
-    @type N:
-        int
     @return:
         same as `guided_run`
     """
@@ -780,13 +794,14 @@ def random_run(mealy, from_state=None, N=10):
     return (states_seq, output_seqs)
 
 
-def interactive_run(mealy, from_state=None):
+def interactive_run(
+        mealy:
+            MealyMachine,
+        from_state=None):
     """Run input-deterministic Mealy machine using user input.
 
     @param mealy:
         input-deterministic Mealy machine
-    @type mealy:
-        `MealyMachine`
     """
     if from_state is None:
         state = next(iter(mealy.states.initial))
@@ -856,18 +871,16 @@ def _select_transition(mealy, trans):
     return trans[int(id_selected)]
 
 
-def moore2mealy(moore):
+def moore2mealy(
+        moore:
+            MooreMachine
+        ) -> MealyMachine:
     """Convert Moore machine to equivalent Mealy machine.
 
     Reference
     =========
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
-
-    @type moore:
-        `MooreMachine`
-    @rtype:
-        `MealyMachine`
     """
     if not isinstance(moore, MooreMachine):
         raise TypeError(
@@ -907,7 +920,10 @@ def moore2mealy(moore):
     return mealy
 
 
-def mealy2moore(mealy):
+def mealy2moore(
+        mealy:
+            MealyMachine
+        ) -> MooreMachine:
     """Convert Mealy machine to almost equivalent Moore machine.
 
     A Mealy machine cannot be transformed to an equivalent Moore machine.
@@ -918,11 +934,6 @@ def mealy2moore(mealy):
     =========
     U{[LS11]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
-
-    @type mealy:
-        `MealyMachine`
-    @rtype:
-        `MooreMachine`
     """
     # TODO: check for when Mealy is exactly convertible to Moore
     if not isinstance(mealy, MealyMachine):
@@ -1024,7 +1035,11 @@ project_dict = lambda x, y: {k: x[k] for k in x if k in y}
 trim_dict = lambda x, y: {k: x[k] for k in x if k not in y}
 
 
-def strip_ports(mealy, names):
+def strip_ports(
+        mealy:
+            MooreMachine,
+        names:
+            _abc.Iterable[str]):
     """Remove ports in `names`.
 
     For example, to remove the atomic propositions
@@ -1034,11 +1049,6 @@ def strip_ports(mealy, names):
     ```python
     strip_ports(mealy, ts.atomic_propositions)
     ```
-
-    @type mealy:
-        `MealyMachine`
-    @type names:
-        iterable container of `str`
     """
     new = MealyMachine()
     new.add_inputs(trim_dict(mealy.inputs, names))

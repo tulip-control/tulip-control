@@ -147,7 +147,12 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             Q = Qnew
 
 
-def ts_ba_sync_prod(transition_system, buchi_automaton):
+def ts_ba_sync_prod(
+        transition_system,
+        buchi_automaton
+        ) -> tuple[
+            transys.FiniteTransitionSystem,
+            set]:
     r"""Construct transition system for the synchronous product TS * BA.
 
     Def. 4.62, p.200 U{[BK08]
@@ -167,10 +172,6 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
         - `product_ts` is the synchronous product TS * BA
         - `persistent_states` are those in TS * BA which
             project on accepting states of BA.
-    @rtype:
-        - `product_TS` is a `transys.FiniteTransitionSystem`
-        - `persistent_states` is the set of states which project
-            on accepting states of the Buchi Automaton BA.
     """
     # if not hasattr(transition_system, FiniteTransitionSystem):
     #    msg = 'transition_system not transys.FiniteTransitionSystem.\n'

@@ -81,7 +81,17 @@ def neglect_none(*values):
     return ret
 
 
-def synchronous_parallel(models, transition_attr_operations=None):
+def synchronous_parallel(
+        models:
+            list[KS | WKS | MC | MDP],
+        transition_attr_operations:
+            dict |
+            None=None
+        ) -> (
+            KS |
+            WKS |
+            MC |
+            MDP):
     """Construct synchronous parallel composition.
 
     Construct a model that represents the synchronous parallel composition
@@ -94,11 +104,7 @@ def synchronous_parallel(models, transition_attr_operations=None):
     with the only exception that Act does not have the be the same
     for all the models in models.
 
-    @type models:
-        `list` of objects of type
-        `KripeStructure` or `WeightedKripkeStructure` or
-        `MarkovChain` or `MarkovDecisionProcess`
-    @type transition_attr_operations:
+    @param transition_attr_operations:
         `dict` whose key is the
         transition attribute key and
         value is the operation to be performed for this transition attribute.
@@ -107,12 +113,6 @@ def synchronous_parallel(models, transition_attr_operations=None):
     @return:
         the synchronous parallel composition of
         all the objects in models
-    @rtype:
-        one of the following types:
-        * `transys.KripkeStructure`
-        * `transys.WeightedKripkeStructure`
-        * `transys.MarkovChain`
-        * `transys.MarkovDecisionProcess`
     """
     if transition_attr_operations is None:
         transition_attr_operations = dict()
@@ -182,21 +182,21 @@ def synchronous_parallel(models, transition_attr_operations=None):
     return ts
 
 
-def apply_policy(model, policy):
+def apply_policy(
+        model:
+            MDP,
+        policy
+        ) -> MC:
     """Apply `policy` on `model` and return the induced Markov chain.
 
     Apply the policy `policy` on the Markov decision process `model`
     and return the induced Markov chain.
 
-    @type model:
-        `MarkovDecisionProcess`
     @type policy:
         An object such that for any state in `model.states`,
         `policy[state]` is an action in `model.actions`
     @return:
         the induced Markov chain
-    @rtype:
-        `MarkovChain`
     """
     result_model_type = _get_apply_policy_model_type(model)
     result = result_model_type()
@@ -219,15 +219,19 @@ def apply_policy(model, policy):
     return result
 
 
-def _get_transition_attr(trans_prod, transition_attr_operations):
+def _get_transition_attr(
+        trans_prod:
+            list,
+        transition_attr_operations:
+            dict):
     """Return product of transitions in `trans_prod`.
 
     Return the attribute of a transition constructed by taking the product
     of transitions in `trans_prod`.
 
-    @type trans_prod:
+    @param trans_prod:
         `list` of `Transitions` objects
-    @type transition_attr_operations:
+    @param transition_attr_operations:
         `dict` whose key is the
         transition attribute key and value is the operation to
         be performed for this transition attribute.
@@ -250,18 +254,13 @@ def _get_transition_attr(trans_prod, transition_attr_operations):
     return trans_attr
 
 
-def _get_composed_model_type(models):
+def _get_composed_model_type(
+        models:
+            list[KS | WKS | MC | MDP]):
     """Return class of model that corresponds to composition of `models`.
 
     Return the class of model obtained from taking a composition of
     those given in `models`.
-
-    @type models:
-        `list` of objects of type
-        `KripkeStructure` or
-        `WeightedKripkeStructure` or
-        `MarkovChain` or
-        `MarkovDecisionProcess`
     """
     if all(type(m) in [MDP, MC, KS] for m in models):
         if any(type(m) == MDP for m in models):
@@ -276,16 +275,15 @@ def _get_composed_model_type(models):
     return None
 
 
-def _get_apply_policy_model_type(model):
+def _get_apply_policy_model_type(
+        model:
+            KS |
+            WKS |
+            MDP):
     """Return class of model that corresponds to applying a policy to `model`.
 
     Return the class of model obtained from applying
     a policy on the given `model`.
-
-    @type model:
-        `KripkeStructure` or
-        `WeightedKripkeStructure` or
-        `MarkovDecisionProcess`
     """
     if type(model) == MDP:
         return MC

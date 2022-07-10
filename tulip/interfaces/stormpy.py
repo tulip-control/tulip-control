@@ -43,11 +43,11 @@ from tulip.transys import MarkovDecisionProcess as MDP
 from tulip.transys.mathfunc import FunctionOnLabeledState
 
 
-def build_stormpy_model(path):
+def build_stormpy_model(path: str):
     """Return the `stormpy` model created from the `prism` file.
 
-    @type path:
-        a string indicating the path to the `prism` file
+    @param path:
+        path to the `prism` file
     """
     prism_program = stormpy.parse_prism_program(path)
     return stormpy.build_model(prism_program)
@@ -173,15 +173,15 @@ def to_tulip_state(
     return possible_states[0]
 
 
-def to_tulip_transys(path):
+def to_tulip_transys(path: str):
     """Return Markov chain or decisiom process from `prism` file.
 
     Return either a `MarkovChain` or
     `MarkovDecisionProcess` object,
     created from the `prism` file.
 
-    @type path:
-        a string indicating the path to the `prism` file
+    @param path:
+        path to the `prism` file
     """
     # Convert a state of prism file
     # (typically represented by an integer) to
@@ -233,16 +233,16 @@ def to_tulip_transys(path):
     return ts
 
 
-def to_prism_file(ts, path):
+def to_prism_file(
+        ts:
+            MC |
+            MDP,
+        path:
+            str):
     """Write a prism file corresponding to ts
 
-    @type ts:
-        `MarkovChain` or
-        `MarkovDecisionProcess`
     @param path:
         path of output `prism` file
-    @type path:
-        `str`
     """
     # Only deal with MDP and MC with a unique initial state
     if not isinstance(ts, (MDP, MC)):
@@ -354,31 +354,25 @@ def to_prism_file(ts, path):
 
 
 def model_checking(
-        tulip_transys,
-        formula,
-        prism_file_path,
-        extract_policy=False):
+        tulip_transys:
+            MC |
+            MDP,
+        formula:
+            str,
+        prism_file_path:
+            str,
+        extract_policy:
+            bool=False):
     """Model check `tulip_transys` against `formula`.
 
-    @type tulip_transys:
-        `MarkovChain` or
-        `MarkovDecisionProcess`
     @param formula:
         a string describing PCTL formula
         according to Prism format
-    @type formula:
-        `str`
     @param prism_file_path:
-        a string indicating the
         path to export the intermediate
         `prism` file (mostly for debugging purposes)
-    @type prism_file_path:
-        `str`
     @param extract_policy:
-        boolean that indicates
-        whether to extract policy
-    @type extract_policy:
-        `bool`
+        extract policy if `True`
     @return:
         result
         - If `extract_policy == False`,

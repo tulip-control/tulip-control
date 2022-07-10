@@ -465,11 +465,14 @@ def check_realizable(spec):
         return False
 
 
-def synthesize(spec):
+def synthesize(
+        spec:
+            GRSpec
+        ) -> (
+              nx.DiGraph
+            | None):
     """Synthesize strategy realizing the given specification.
 
-    @type spec:
-        `GRSpec`
     @param spec:
         specification.
 
@@ -478,7 +481,7 @@ def synthesize(spec):
     for a detailed description.
 
     @return:
-        strategy as `networkx.DiGraph`,
+        strategy,
         or `None` if unrealizable or error occurs.
     """
     _assert_gr1c()
@@ -560,23 +563,22 @@ def select_options(spec):
     return init_option
 
 
-def load_mealy(filename, fformat='tulipxml'):
+def load_mealy(
+        filename:
+            str,
+        fformat:
+            str='tulipxml'
+        ) -> nx.DiGraph:
     """Load `gr1c` strategy from file.
 
     @param filename:
         file name
-    @type filename:
-        `str`
     @param fformat:
         file format; can be one of
         `"tulipxml"` (default),
         `"json"`.
-    @type fformat:
-        `str`
     @return:
         loaded strategy as an annotated graph.
-    @rtype:
-        `networkx.DiGraph`
     """
     s = open(filename, 'r').read()
     if fformat.lower() == 'tulipxml':

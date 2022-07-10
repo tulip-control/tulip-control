@@ -105,7 +105,15 @@ class PrioritizedSpecification:
     def __len__(self):
         return sum([len(psi) for psi in self._Psi])
 
-    def add_rule(self, fa, priority, level):
+    def add_rule(
+            self,
+            fa:
+                FA,
+            priority:
+                float |
+                int,
+            level:
+                int):
         """Add given rule to the specification.
 
         Add rule with automaton `fa`, `priority`,
@@ -114,17 +122,10 @@ class PrioritizedSpecification:
         @param fa:
             automaton that represents
             the correctness of the rule
-        @type fa:
-            `FiniteStateAutomaton`
         @param priority:
-            number that represents
-            the priority of the rule
-        @type priority:
-            `float` or
-            `int`
+            priority of the rule
         @param level:
-            `int` that represents
-            the level of the rule in the hierarchy
+            level of the rule in the hierarchy
         """
         assert isinstance(fa, FA)
         assert (
@@ -144,22 +145,17 @@ class PrioritizedSpecification:
             self._Psi.append(list())
         self._Psi[level].append(rule)
 
-    def get_rules_at(self, level):
-        """Return the `list` of rules at the given level.
-
-        @rtype:
-            `list` of `FAWithPriority`
-        """
+    def get_rules_at(
+            self,
+            level
+            ) -> list[FAWithPriority]:
+        """Return the `list` of rules at the given level."""
         if level >= len(self._Psi):
             return list()
         return self._Psi[level]
 
-    def get_rules(self):
-        """Return the `list` of all the rules.
-
-        @rtype:
-            `list` of `FAWithPriority`
-        """
+    def get_rules(self) -> list[FAWithPriority]:
+        """Return the `list` of all the rules."""
         rules = list()
         for psi in self._Psi:
             for phi in psi:

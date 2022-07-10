@@ -38,10 +38,12 @@ Also, those modules are for manipulating expressions.
 This module knows about program structure,
 namely the sections of a specification file.
 """
+import collections.abc as _abc
 import copy
 import logging
 import pprint
 import time
+import types
 import re
 
 from tulip.spec import parser
@@ -394,28 +396,39 @@ class GRSpec(LTL):
     arguments at the time of instantiation.
     """
 
-    def __init__(self, env_vars=None, sys_vars=None,
-                 env_init='', sys_init='',
-                 env_safety='', sys_safety='',
-                 env_prog='', sys_prog='',
-                 moore=True, plus_one=True,
-                 qinit=r'\A \A',
-                 parser=parser):
+    def __init__(
+            self,
+            env_vars:
+                dict |
+                _abc.Iterable |
+                None=None,
+            sys_vars:
+                dict |
+                _abc.Iterable |
+                None=None,
+            env_init='',
+            sys_init='',
+            env_safety='',
+            sys_safety='',
+            env_prog='',
+            sys_prog='',
+            moore:
+                bool=True,
+            plus_one:
+                bool=True,
+            qinit=r'\A \A',
+            parser=parser):
         """Instantiate a GRSpec object.
 
         Instantiating GRSpec without arguments results in an empty
         formula.  The default domain of a variable is "boolean".
 
-        @type env_vars:
-            dict or iterable
         @param env_vars:
             If env_vars is a dictionary, then its keys
             should be variable names, and values are domains of the
             corresponding variable.  Else, if env_vars is an iterable,
             then assume all environment variables are `boolean` (or
             "atomic propositions").  Cf. `GRSpec` for details.
-        @type sys_vars:
-            dict or iterable
         @param sys_vars:
             Mutatis mutandis, env_vars.
         @param env_init, env_safety, env_prog,
@@ -423,10 +436,6 @@ class GRSpec(LTL):
             A string or iterable of strings.  An empty string is
             converted to an empty list.  A string is placed in a list.
             iterables are converted to lists.  Cf. `GRSpec`.
-        @type moore:
-            bool
-        @type plus_one:
-            bool
         @param qinit:
             see class docstring
         """
@@ -746,7 +755,10 @@ class GRSpec(LTL):
         logger.info('done with substitutions.\n')
         return a
 
-    def compile_init(self, no_str):
+    def compile_init(
+            self,
+            no_str
+            ) -> types.CodeType:
         """Compile python expression for initial conditions.
 
         The returned bytecode can be used with `eval`
@@ -770,8 +782,6 @@ class GRSpec(LTL):
             Otherwise compile the original formula containing strings.
         @return:
             python expression compiled for `eval`
-        @rtype:
-            `code`
         """
         self.str_to_int()
         init = {

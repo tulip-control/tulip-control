@@ -53,7 +53,8 @@ def _format_label(label_def, label_dot_format):
 
 
 def labeled_digraph2d3(
-        graph,
+        graph:
+            'LabeledDiGraph',
         html_file_name='index.html'):
     """Export to SVG embedded in HTML, animated with d3.js
 
@@ -77,8 +78,6 @@ def labeled_digraph2d3(
 
     @param graph:
         labeled graph to export
-    @type graph:
-        `LabeledDiGraph`
     """
     file_path = inspect.getfile(
         inspect.currentframe())

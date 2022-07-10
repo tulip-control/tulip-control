@@ -23,6 +23,8 @@ except ImportError:
     omega = None
 import networkx as nx
 
+import tulip.spec as _spec
+
 
 log = logging.getLogger(__name__)
 
@@ -39,14 +41,11 @@ def is_realizable(spec):
     return gr1.is_realizable(z, aut)
 
 
-def synthesize_enumerated_streett(spec):
-    """Return transducer enumerated as a graph.
-
-    @type spec:
-        `tulip.spec.form.GRSpec`
-    @rtype:
-        `networkx.DiGraph`
-    """
+def synthesize_enumerated_streett(
+        spec:
+            _spec.GRSpec
+        ) -> nx.DiGraph:
+    """Return transducer enumerated as a graph."""
     aut = _grspec_to_automaton(spec)
     assert aut.action['sys'] != aut.false
     t0 = time.time()
@@ -74,24 +73,19 @@ def synthesize_enumerated_streett(spec):
     return h
 
 
-def is_circular(spec):
-    """Return `True` if trivial winning set non-empty.
-
-    @type spec:
-        `tulip.spec.form.GRSpec`
-    @rtype:
-        `bool`
-    """
+def is_circular(
+        spec:
+            _spec.GRSpec
+        ) -> bool:
+    """Return `True` if trivial winning set non-empty."""
     aut = _grspec_to_automaton(spec)
     triv, t = gr1.trivial_winning_set(aut)
     return triv != t.bdd.false
 
 
-def _int_bounds(aut):
+def _int_bounds(aut: trl.Automaton):
     """Create care set for enumeration.
 
-    @type aut:
-        `omega.symbolic.temporal.Automaton`
     @rtype:
         `dd.bdd.Function | dd.cudd.Function`
     """
@@ -111,16 +105,13 @@ def _int_bounds(aut):
     return u
 
 
-def _strategy_to_state_annotated(g, aut):
-    """Move annotation to `dict` as value of `'state'` key.
-
-    @type g:
-        `nx.DiGraph`
-    @type: aut:
-        `omega.symbolic.temporal.Automaton`
-    @rtype:
-        `nx.DiGraph`
-    """
+def _strategy_to_state_annotated(
+        g:
+            nx.DiGraph,
+        aut:
+            trl.Automaton
+        ) -> nx.DiGraph:
+    """Move annotation to `dict` as value of `'state'` key."""
     h = nx.DiGraph()
     for u, d in g.nodes(data=True):
         dvars = {
@@ -134,14 +125,11 @@ def _strategy_to_state_annotated(g, aut):
     return h
 
 
-def _grspec_to_automaton(g):
-    """Return `omega.symbolic.temporal.Automaton` from `GRSpec`.
-
-    @type g:
-        `tulip.spec.form.GRSpec`
-    @rtype:
-        `omega.symbolic.temporal.Automaton`
-    """
+def _grspec_to_automaton(
+        g:
+            _spec.GRSpec
+        ) -> trl.Automaton:
+    """Return `omega.symbolic.temporal.Automaton` from `GRSpec`."""
     if omega is None:
         raise ImportError(
             'Failed to import package `omega`.')

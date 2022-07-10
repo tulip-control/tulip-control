@@ -288,11 +288,10 @@ class PwaSysDyn:
             domain=None,
             time_semantics=None,
             timestep=None,
-            overwrite_time=True):
+            overwrite_time:
+                bool=True):
         """Constructor.
 
-        @type overwrite_time:
-            `bool`
         @param overwrite_time:
             If `True`, then overwrite any time data
             in the objects in `list_subsys` with
@@ -493,11 +492,10 @@ class SwitchedSysDyn:
             disc_sys_labels=None,
             time_semantics=None,
             timestep=None,
-            overwrite_time=True):
+            overwrite_time:
+                bool=True):
         """Constructor.
 
-        @type overwrite_time:
-            `bool`
         @param overwrite_time:
             If `True`, then overwrite any time data in
             the objects in `list_subsys` with the data in
@@ -728,18 +726,18 @@ def _push_time_data(
                 timestep)
 
 
-def _check_time_data(semantics, timestep):
+def _check_time_data(
+        semantics:
+            str,
+        timestep:
+            int |
+            float):
     """Check whether time semantics and timestep are correct.
 
     If not, then raise `ValueError`.
 
-    @type semantics:
-        `str`
     @param timestep:
         any positive number
-    @type timestep:
-        `int` or
-        `float`
     """
     if semantics not in ['sampled', 'discrete', None]:
         raise ValueError(
@@ -759,7 +757,10 @@ def _check_time_data(semantics, timestep):
 
 
 def _check_time_consistency(
-        system_list,
+        system_list:
+            list[
+                LtiSysDyn |
+                PwaSysDyn],
         time_semantics,
         timestep):
     """Assert that all items of `system_list` have same semantics.
@@ -767,10 +768,6 @@ def _check_time_consistency(
     Checks that all the dynamical systems in `system_list`
     have the same time semantics and timestep.
     Raises `ValueError` if not.
-
-    @type system_list:
-        `list` of `LtiSysDyn` or
-        `PwaSysDyn`
     """
     # Check that time semantics for all subsystems match
     for ind in range(len(system_list) - 1):

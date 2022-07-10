@@ -32,7 +32,10 @@
 """Convert Finite State Machines to State Chart XML (SCXML)."""
 
 
-def mealy2scxml(mealy):
+def mealy2scxml(
+        mealy:
+            'MealyMachine'
+        ) -> str:
     """Convert Mealy machine to SCXML.
 
     Using `examples/transys/machine_examples`:
@@ -55,10 +58,8 @@ def mealy2scxml(mealy):
 
     @param mealy:
         machine to export as SCXML
-    @type mealy:
-        `MealyMachine`
-    @rtype:
-        SCXML `str`
+    @return:
+        SCXML string
     """
     def indent(n):
         return '\n' + n * '\t'

@@ -40,7 +40,12 @@ from tulip.spec.prioritized_safety import PrioritizedSpecification
 from tulip.transys.mathset import SubSet
 
 
-def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
+def _get_rule_violation_cost(
+        from_prod_state,
+        to_prod_state,
+        spec,
+        to_ap
+        ) -> list[float]:
     """Return the rule violation cost on the transition from
     from_prod_state to to_prod_state.
 
@@ -60,8 +65,6 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
         tulip.spec.prioritized_safety.PrioritizedSpecification
     @param to_ap:
         the atomic proposition of to_prod_state
-    @rtype:
-        list of float
     """
     from_spec_state = from_prod_state[1]
     to_spec_state = to_prod_state[1]

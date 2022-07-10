@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 #
 """Syntactic manipulation of trees."""
+import collections.abc as _abc
 import logging
 import copy
 import os
@@ -85,7 +86,7 @@ class Tree(nx.MultiDiGraph):
                     for u, v, k in self.edges(keys=True)]))
 
     @property
-    def variables(self):
+    def variables(self) -> set:
         """Return the set of variables in `tree`.
 
         @rtype:
@@ -126,15 +127,17 @@ class Tree(nx.MultiDiGraph):
             assert len(u.operands) == len(w.operands)
         return w
 
-    def add_subtree(self, leaf, tree):
+    def add_subtree(
+            self,
+            leaf,
+            tree:
+                'Tree'):
         """Add the `tree` at node `nd`.
 
         @type leaf:
             `FOL.Node`
         @param tree:
             to be added, without copying AST nodes.
-        @type tree:
-            `Tree`
         """
         assert not self.succ.get(leaf)
         for u, v, k in tree.edges(keys=True):
@@ -149,12 +152,11 @@ class Tree(nx.MultiDiGraph):
             self.root = tree.root
         self.remove_node(leaf)
 
-    def _to_dot(self, detailed=False):
-        """Create GraphViz dot string from given AST.
-
-        @rtype:
-            str
-        """
+    def _to_dot(
+            self,
+            detailed=False
+            ) -> str:
+        """Create GraphViz dot string from given AST."""
         g = ast_to_labeled_graph(self, detailed)
         import tulip.graphics as _graphics
         return _graphics.networkx_to_graphviz(g)
@@ -170,13 +172,15 @@ class Tree(nx.MultiDiGraph):
             format=fext)
 
 
-def ast_to_labeled_graph(tree, detailed):
-    """Convert AST to `networkx.DiGraph` for graphics.
+def ast_to_labeled_graph(
+        tree:
+            Tree,
+        detailed
+        ) -> nx.DiGraph:
+    """Convert AST to digraph for graphics.
 
     @param tree:
         Abstract syntax tree
-    @rtype:
-        `networkx.DiGraph`
     """
     g = nx.DiGraph()
     for u in tree:
@@ -198,7 +202,11 @@ def ast_to_labeled_graph(tree, detailed):
     return g
 
 
-def check_for_undefined_identifiers(tree, domains):
+def check_for_undefined_identifiers(
+        tree:
+            Tree,
+        domains:
+            dict):
     """Check that types in `tree` are incompatible with `domains`.
 
     Raise a `ValueError` if `tree` either:
@@ -207,16 +215,12 @@ def check_for_undefined_identifiers(tree, domains):
       - binary operator between variable and
         invalid value for that variable.
 
-    @type tree:
-        `Tree`
     @param domains:
         variable definitions:
 
         `{'varname': domain}`
 
         See `GRSpec` for more details of available domain types.
-    @type domains:
-        `dict`
     """
     for u in tree:
         if u.type == 'var' and u.value not in domains:
@@ -253,13 +257,14 @@ def check_for_undefined_identifiers(tree, domains):
                     f'{dom[0]} ... {dom[1]}')
 
 
-def sub_values(tree, var_values):
+def sub_values(
+        tree:
+            Tree,
+        var_values:
+            dict
+        ) -> Tree:
     """Substitute given values for variables.
 
-    @param tree:
-        AST
-    @type var_values:
-        `dict`
     @return:
         AST with `Var` nodes replaced by
         `Num`, `Const`, or `Bool`
@@ -281,7 +286,10 @@ def sub_values(tree, var_values):
     nx.relabel_nodes(tree, old2new, copy=False)
 
 
-def sub_constants(tree, var_str2int):
+def sub_constants(
+        tree,
+        var_str2int:
+            dict[str, list]):
     """Replace string constants by integers.
 
     To be used for converting arbitrary finite domains
@@ -289,8 +297,6 @@ def sub_constants(tree, var_str2int):
 
     @param var_str2int:
         {'varname':['const_val0', ...], ...}
-    @type var_str2int:
-        `dict` of `list`
     """
     # logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
@@ -308,19 +314,19 @@ def sub_constants(tree, var_str2int):
     # logger.info('result after substitution:\n\t' + str(self) + '\n')
 
 
-def sub_bool_with_subtree(tree, bool2subtree):
+def sub_bool_with_subtree(
+        tree:
+            Tree,
+        bool2subtree:
+            dict[str, Tree]):
     """Replace selected Boolean variables with given AST.
 
-    @type tree:
-        `LTL_AST`
     @param bool2subtree:
         map from each Boolean variable to some
         equivalent formula. A subset of Boolean varibles may be used.
 
         Note that the types of variables in `tree`
         are defined by `bool2subtree`.
-    @type bool2subtree:
-        `dict` from `str` to `Tree`
     """
     for u in list(tree.nodes()):
         if u.type == 'var' and u.value in bool2subtree:
@@ -329,7 +335,11 @@ def sub_bool_with_subtree(tree, bool2subtree):
             # tree.write(str(id(tree)) + '_after.png')
 
 
-def pair_node_to_var(tree, c):
+def pair_node_to_var(
+        tree:
+            Tree,
+        c
+        ) -> tuple:
     """Find variable under `Binary` operator above given node.
 
     First move up from `nd`, stop at first `Binary` node.
@@ -340,15 +350,11 @@ def pair_node_to_var(tree, c):
     May be extended in the future, depending on what the
     tools support and is thus needed here.
 
-    @type tree:
-        `LTL_AST`
     @type `nd`:
         `Const` or
         `Num`
     @return:
-        variable, constant
-    @rtype:
-        `(Var, Const)`
+        `(variable, constant)`
     """
     # find parent Binary operator
     while True:
@@ -369,15 +375,20 @@ def pair_node_to_var(tree, c):
     return v, c
 
 
-def infer_constants(formula, variables):
+def infer_constants(
+        formula:
+            str,
+        variables:
+            dict |
+            _abc.Iterable[str]
+        ) -> str:
     """Enclose all non-variable names in quotes.
 
     @param formula:
         well-formed LTL formula
-    @type formula:
-        `str`
     @param variables:
-        domains of variables, or only their names.
+        domains of variables (for `GRSpec`), or
+        only their names.
         If the domains are given, then they are checked
         for ambiguities as for example a variable name
         duplicated as a possible value in the domain of
@@ -386,14 +397,9 @@ def infer_constants(formula, variables):
         If the names are given only, then a warning is raised,
         because ambiguities cannot be checked in that case,
         since they depend on what domains will be used.
-    @type variables:
-        `dict` as accepted by `GRSpec` or
-        container of `str`
     @return:
         `formula` with all string literals not in `variables`
         enclosed in double quotes
-    @rtype:
-        `str`
     """
     if isinstance(variables, dict):
         for var in variables:
@@ -421,7 +427,10 @@ def infer_constants(formula, variables):
     return str(tree)
 
 
-def _check_var_conflicts(s, variables):
+def _check_var_conflicts(
+        s,
+        variables:
+            dict):
     """Raise exception if set intersects existing variable name, or values.
 
     Values refers to arbitrary finite data types.
@@ -430,8 +439,6 @@ def _check_var_conflicts(s, variables):
         set
     @param variables:
         definitions of variable types
-    @type variables:
-        `dict`
     """
     # check conflicts with variable names
     vars_redefined = {x for x in s if x in variables}
@@ -481,12 +488,13 @@ def collect_primed_vars(t):
 
 
 # defunct until further notice
-def _flatten(tree, u, to_lang, **kw):
-    """Recursively flatten `tree`.
-
-    @rtype:
-        `str`
-    """
+def _flatten(
+        tree,
+        u,
+        to_lang,
+        **kw
+        ) -> str:
+    """Recursively flatten `tree`."""
     s = tree.succ[u]
     if not s:
         return to_lang(u, **kw)

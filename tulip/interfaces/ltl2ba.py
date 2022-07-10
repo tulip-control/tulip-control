@@ -317,7 +317,11 @@ class Parser:
             f'Syntax error at {p.value}')
 
 
-def call_ltl2ba(formula, prefix=''):
+def call_ltl2ba(
+        formula:
+            str,
+        prefix=''
+        ) -> str:
     """Load a Buchi Automaton from a Never Claim.
 
     TODO
@@ -331,12 +335,8 @@ def call_ltl2ba(formula, prefix=''):
 
     @param formula:
         LTL formula for input to `ltl2ba`
-    @type formula:
-        `str`
     @return:
         Buchi Automaton description
-    @rtype:
-        `str`
     """
     try:
         subprocess.call(

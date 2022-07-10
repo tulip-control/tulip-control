@@ -61,7 +61,12 @@ _hl = 40 * '-'
 logger = logging.getLogger(__name__)
 
 
-def prop2part(state_space, cont_props_dict):
+def prop2part(
+        state_space:
+            pc.Polytope,
+        cont_props_dict:
+            dict[pc.Polytope]
+        ) -> 'PropPreservingPartition':
     """
 
     Takes a domain `state_space` and a `list` of
@@ -78,17 +83,11 @@ def prop2part(state_space, cont_props_dict):
 
     @param state_space:
         problem domain
-    @type state_space:
-        `polytope.Polytope`
     @param cont_props_dict:
         propositions
-    @type cont_props_dict:
-        `dict` of `polytope.Polytope`
     @return:
         state-space quotient partition induced
         by propositions
-    @rtype:
-        `PropPreservingPartition`
     """
     first_poly = list()  # Initial Region's polytopes
     first_poly.append(state_space)
@@ -149,7 +148,12 @@ def prop2part(state_space, cont_props_dict):
     return mypartition
 
 
-def part2convex(ppp):
+def part2convex(
+        ppp:
+            'PropPreservingPartition'
+        ) -> tuple[
+            'PropPreservingPartition',
+            list]:
     """Refine partition so that cells be convex.
 
     Takes a proposition-preserving partition, and
@@ -157,13 +161,9 @@ def part2convex(ppp):
     such that each cell in the new partition is
     a convex polytope.
 
-    @type ppp:
-        `PropPreservingPartition`
     @return:
         refinement into convex polytopes and
         map from new to old Regions
-    @rtype:
-        (`PropPreservingPartition`, list)
     """
     cvxpart = PropPreservingPartition(
         domain=copy.deepcopy(ppp.domain),
@@ -184,7 +184,15 @@ def part2convex(ppp):
     return (cvxpart, new2old)
 
 
-def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
+def pwa_partition(
+        pwa_sys:
+            'PwaSysDyn',
+        ppp,
+        abs_tol=1e-5
+        ) -> tuple[
+            'PropPreservingPartition',
+            list,
+            list]:
     """This function takes:
 
     - a piecewise affine system `pwa_sys` and
@@ -210,17 +218,11 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
     `discretize`
 
 
-    @type pwa_sys:
-        `hybrid.PwaSysDyn`
-    @type ppp:
-        `PropPreservingPartition`
     @return:
         new partition and associated maps:
         - new partition `new_ppp`
         - map of `new_ppp.regions` to `pwa_sys.list_subsys`
         - map of `new_ppp.regions` to `ppp.regions`
-    @rtype:
-        `(PropPreservingPartition, list, list)`
     """
     if pc.is_fulldim(ppp.domain.diff(pwa_sys.domain)):
         raise Exception(
@@ -276,10 +278,18 @@ def pwa_partition(pwa_sys, ppp, abs_tol=1e-5):
 
 
 def add_grid(
-        ppp,
-        grid_size=None,
-        num_grid_pnts=None,
-        abs_tol=1e-10):
+        ppp:
+            'PropPreservingPartition',
+        grid_size:
+            float |
+            list[float] |
+            None=None,
+        num_grid_pnts:
+            int |
+            list[int] |
+            None=None,
+        abs_tol=1e-10
+        ) -> 'PropPreservingPartition':
     """Refine proposition-preserving partition using grids.
 
     This function takes a proposition-preserving
@@ -289,17 +299,13 @@ def add_grid(
 
     Input:
 
-    - `ppp`: a `PropPreservingPartition` object
-    - `grid_size`: the size of the grid,
-      - type: `float`,
-        or `list of `float`
+    - `grid_size`: the size of the grid
     - `num_grid_pnts`: the number of grids
-      for each dimension,
-      - type: `int` or `list` of `int`
+      for each dimension
 
     Output:
 
-      - A `PropPreservingPartition` object with grids
+      - partition with grids
 
     Note: There could be numerical instabilities when
     the continuous propositions in `ppp` do not align well with
@@ -464,11 +470,9 @@ class PropPreservingPartition(pc.MetricPartition):
     Attributes:
 
     - `domain`: the domain we want to partition
-      - type: `Polytope`
 
     - `regions`: `Region`s of
       proposition-preserving partition
-      - type: `list` of `Region`
 
     - `adj`: sparse matrix showing which
       regions are adjacent.
@@ -480,8 +484,6 @@ class PropPreservingPartition(pc.MetricPartition):
     - `prop_regions`: map from atomic
       proposition symbols to continuous subsets
 
-      - type: `dict` of `Polytope` or `Region`
-
 
     Relevant
     ========
@@ -489,11 +491,21 @@ class PropPreservingPartition(pc.MetricPartition):
     """
     def __init__(
             self,
-            domain=None,
-            regions=[],
-            adj=None,
-            prop_regions=None,
+            domain:
+                Polytope |
+                None=None,
+            regions:
+                list[Polytope] |
+                None=None,
+            adj:
+                sp.lil_matrix |
+                None=None,
+            prop_regions:
+                dict[..., Polytope] |
+                None=None,
             check=True):
+        if regions is None:
+            regions = list()
         # super().__init__(adj)
         if prop_regions is None:
             self.prop_regions = None
@@ -657,21 +669,22 @@ class PPP(PropPreservingPartition):
         PropPreservingPartition.__init__(self, **args)
 
 
-def ppp2ts(part):
+def ppp2ts(
+        part:
+            PropPreservingPartition
+        ) -> tuple[
+            trs.FTS,
+            dict]:
     """Derive transition system from proposition preserving partition.
 
     @param part:
         labeled polytopic partition from
         which to derive the transition system
-    @type part:
-        `PropPreservingPartition`
     @return:
         `(ts, state_map)`
         finite transition system labeled with propositions
         from the given partition, and map of
         polytope indices to transition system states.
-    @rtype:
-        `(transys.FTS, dict)`
     """
     # generate transition system and add transitions
     ofts = trs.FTS()

@@ -30,6 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets."""
+import collections.abc as _abc
 from collections.abc import Iterable, Hashable, Container
 from itertools import chain, combinations
 import logging
@@ -48,7 +49,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def compare_lists(list1, list2):
+def compare_lists(
+        list1:
+            list,
+        list2:
+            list
+        ) -> bool:
     """Compare list contents, ignoring ordering.
 
     Hashability of elements not assumed, incurring `O(N**2)`
@@ -57,15 +63,9 @@ def compare_lists(list1, list2):
     ========
     `MathSet`
 
-    @type list1:
-        `list`
-    @type list2:
-        `list`
     @return:
         `True` if a bijection exists between the lists.
         Note that this takes into account multiplicity of elements.
-    @rtype:
-        bool
     """
     if not isinstance(list1, list):
         raise TypeError(
@@ -129,7 +129,10 @@ class MathSet:
     `SubSet`, `PowerSet`, set
     """
 
-    def __init__(self, iterable=None):
+    def __init__(
+            self,
+            iterable:
+                _abc.Iterable=None):
         """Initialize by adding elements from iterable.
 
         Example
@@ -142,8 +145,6 @@ class MathSet:
         @param iterable:
             iterable from which to initialize the set S
             which underlies the PowerSet 2^S
-        @type iterable:
-            iterable, any element types allowed
         """
         if iterable is None:
             iterable = list()
@@ -159,7 +160,11 @@ class MathSet:
         set_str = ', '.join([repr(i) for i in self._set])
         return f'MathSet({{{set_str}}} +{self._list})'
 
-    def __or__(self, other):
+    def __or__(
+            self,
+            other:
+                _abc.Iterable
+            ) -> 'MathSet':
         """Union with another mathematical set.
 
         See Also
@@ -168,18 +173,18 @@ class MathSet:
 
         @param other:
             any other mathematical set.
-        @type other:
-            iterable, elements not restricted to hashable
         @return:
             self | iterable
-        @rtype:
-            MathSet
         """
         s = MathSet(self)
         s.add_from(other)
         return s
 
-    def __mul__(self, other):
+    def __mul__(
+            self,
+            other:
+                'MathSet'
+            ) -> 'MathSet':
         """Return the Cartesian product with another `MathSet`.
 
         Example
@@ -205,17 +210,18 @@ class MathSet:
 
         @param other:
             set with which to take Cartesian product
-        @type other:
-            MathSet
         @return:
             Cartesian product of `self` with `other`.
-        @rtype:
-            `MathSet` (explicit construction)
+            (explicit construction)
         """
         cartesian = [(x, y) for x in self for y in other]
         return MathSet(cartesian)
 
-    def __ior__(self, iterable):
+    def __ior__(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> 'MathSet':
         """Union with of MathSet with iterable.
 
         Example
@@ -234,12 +240,8 @@ class MathSet:
 
         @param iterable:
             any mathematical set.
-        @type iterable:
-            iterable, elements not restricted to hashable
         @return:
             self | iterable
-        @rtype:
-            MathSet
         """
         self.add_from(iterable)
         return self
@@ -321,9 +323,8 @@ class MathSet:
 
         @param item:
             the new set element
-        @type item:
-            anything, if hashable it is stored in a Python set,
-            otherwise stored in a list.
+            (if hashable it is stored in a Python set,
+            otherwise stored in a list)
         """
         if isinstance(item, Hashable):
             try:
@@ -338,7 +339,10 @@ class MathSet:
             logger.warning(
                 'item already in MathSet.')
 
-    def add_from(self, iterable):
+    def add_from(
+            self,
+            iterable:
+                _abc.Iterable):
         """Add multiple elements to mathematical set.
 
         Equivalent to |=
@@ -364,9 +368,6 @@ class MathSet:
 
         @param iterable:
             new MathSet elements
-        @type iterable:
-            iterable containing
-            (possibly not hashable) elements
         """
         if not isinstance(iterable, Iterable):
             raise TypeError(
@@ -446,17 +447,17 @@ class MathSet:
                 'Bug in empty `MathSet`: not `self` above '
                 'should not reaching this point.')
 
-    def intersection(self, iterable):
+    def intersection(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> 'MathSet':
         """Return intersection with iterable.
 
         @param iterable:
             find common elements with `self`
-        @type iterable:
-            `Iterable`
         @return:
             intersection of `self` with `iterable`
-        @rtype:
-            `MathSet`
         """
         s = MathSet()
         for item in iterable:
@@ -464,7 +465,11 @@ class MathSet:
                 s.add(item)
         return s
 
-    def intersects(self, iterable):
+    def intersects(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> bool:
         """Check intersection with iterable.
 
         Checks the existence of common elements with iterable.
@@ -478,13 +483,9 @@ class MathSet:
 
         @param iterable:
             with which to check intersection
-        @type iterable:
-            `Iterable`
         @return:
             `True` if `self` has common element with `iterable`.
             Otherwise `False`.
-        @rtype:
-            `bool`
         """
         for item in iterable:
             if item in self:
@@ -516,17 +517,18 @@ class SubSet(MathSet):
     `MathSet`, `PowerSet`
     """
 
-    def __init__(self, superset, iterable=None):
+    def __init__(
+            self,
+            superset:
+                _abc.Container,
+            iterable:
+                _abc.Iterable=None):
         """Define the superset of this set.
 
         @param superset:
             This SubSet checked vs `superset`
-        @type superset:
-            Iterable
         @param iterable:
             elements to add to subset
-        @type iterable:
-            Iterable
         """
         self._superset = superset
         super(SubSet, self).__init__([])
@@ -634,7 +636,11 @@ class CartesianProduct:
             self.remove(mathset)
 
 
-def unique(iterable):
+def unique(
+        iterable
+        ) -> (
+            set |
+            list):
     """Return unique elements.
 
     Note
@@ -645,7 +651,6 @@ def unique(iterable):
 
     @return:
         iterable with duplicates removed, as `set` if possible.
-    @rtype:
         - If all items in `iterable` are hashable,
             then returns `set`.
         - If iterable contains unhashable item,
@@ -773,11 +778,13 @@ class PowerSet:
     @param iterable:
         mathematical set `S` of elements,
         on which this `2^S` defined.
-    @type iterable:
-        iterable container
     """
 
-    def __init__(self, iterable=None):
+    def __init__(
+            self,
+            iterable:
+                _abc.Iterable |
+                None=None):
         """Create new `PowerSet` over elements contained in `iterable`.
 
         This powerset is `2^iterable`.
@@ -785,9 +792,6 @@ class PowerSet:
         @param iterable:
             contains elements of set `iterable`
             underlying the `PowerSet`.
-        @type iterable:
-            iterable of elements which
-            can be hashable or not.
         """
         if iterable is None:
             iterable = list()
@@ -927,14 +931,11 @@ class TypedDict(dict):
         """
         self.allowed_values = allowed_values
 
-    def is_consistent(self):
+    def is_consistent(self) -> bool:
         """Check if typed keys have consistent values.
 
         Use case: changing the object that allowed_values
         points to can invalidate the assigned values.
-
-        @rtype:
-            bool
         """
         for k, v in self:
             if k in self.allowed_values:

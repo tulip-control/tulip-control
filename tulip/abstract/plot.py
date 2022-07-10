@@ -96,8 +96,14 @@ def plot_abstraction_scc(ab, ax=None):
 
 
 def plot_ts_on_partition(
-        ppp, ts, ppp2ts,
-        edge_label, only_adjacent, ax):
+        ppp,
+        ts,
+        ppp2ts:
+            list,
+        edge_label:
+            dict,
+        only_adjacent,
+        ax):
     """Plot partition, superimposing graph.
 
     The graph `ts` edges are drawn as arrows.
@@ -107,10 +113,10 @@ def plot_ts_on_partition(
     So it can plot transitions of
     a single mode for a switched system.
 
+    @param ppp2ts:
+        states
     @param edge_label:
         desired label
-    @type edge_label:
-        `dict`
     """
     l,u = ppp.domain.bounding_box
     arr_size = (u[0, 0] - l[0, 0]) / 50.0
@@ -130,16 +136,15 @@ def plot_ts_on_partition(
             arr_size)
 
 
-def project_strategy_on_partition(ppp, mealy):
+def project_strategy_on_partition(
+        ppp:
+            'PropPreservingPartition',
+        mealy:
+            'MealyMachine'):
     """Project transitions of `ppp` on `mealy`.
 
     Returns an `FTS` with the `PPP` (spatial)
     transitions used by the Mealy strategy.
-
-    @type ppp:
-        `PropPreservingPartition`
-    @type mealy:
-        `transys.MealyMachine`
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))
@@ -154,16 +159,14 @@ def project_strategy_on_partition(ppp, mealy):
     return proj_adj
 
 
-def plot_strategy(ab, mealy):
+def plot_strategy(
+        ab:
+            'AbstractPwa | AbstractSwitched',
+        mealy:
+            'MealyMachine'):
     """Plot strategic transitions on PPP.
 
     Assumes that `mealy` is feasible for `ab`.
-
-    @type ab:
-        `AbstractPwa` or
-        `AbstractSwitched`
-    @type mealy:
-        `transys.MealyMachine`
     """
     proj_mealy = project_strategy_on_partition(
         ab.ppp, mealy)
@@ -175,12 +178,17 @@ def plot_strategy(ab, mealy):
 
 
 def plot_trajectory(
-        ppp, x0, u_seq, ssys,
+        ppp:
+            'PropPreservingPartition',
+        x0,
+        u_seq,
+        ssys,
         ax=None,
         color_seed=None):
         color_seed:
             int |
             None=None
+        ) -> '_mpl.axes.Axes':
     """Plot trajectory, starting from `x0`.
 
     The trajectory is drawn on the partition.
@@ -194,8 +202,6 @@ def plot_trajectory(
     ========
     `plot_partition`, plot
 
-    @type ppp:
-        `PropPreservingPartition`
     @param x0:
         initial state
     @param u_seq:
@@ -206,8 +212,6 @@ def plot_trajectory(
         read:
         - `polytope.plot_partition()`
         - `numpy.random.RandomState`
-    @return:
-        axis object
     """
     try:
         from tulip.graphics import newax
@@ -244,7 +248,15 @@ def plot_trajectory(
 
 
 def simulate2d(
-        env_inputs, sys_dyn, ctrl, disc_dynamics, T,
+        env_inputs:
+            list[dict],
+        sys_dyn:
+            'LtiSysDyn',
+        ctrl:
+            'MealyMachine',
+        disc_dynamics:
+            'AbstractPwa',
+        T,
         qinit='\E \A',
         d_init=None,
         x_init=None,
@@ -264,15 +276,9 @@ def simulate2d(
     and is used to find the initial transition in `ctrl`.
 
     @param env_inputs:
-        `list` of `dict`, with length `T + 1`
+        has length `T + 1`
     @param sys_dyn:
         system dynamics
-    @type sys_dyn:
-        `tulip.hybrid.LtiSysDyn`
-    @type ctrl:
-        `tulip.transys.machines.MealyMachine`
-    @type disc_dynamics:
-        `tulip.abstract.discretization.AbstractPwa`
     @param T:
         number of simulation steps
     @param qinit:

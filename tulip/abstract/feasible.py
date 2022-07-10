@@ -51,6 +51,8 @@ import logging
 import numpy as np
 import polytope as pc
 
+import tulip.hybrid as _hyb
+
 
 __all__ = [
     'is_feasible',
@@ -58,6 +60,9 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
+Polytope = (
+    pc.Polytope |
+    pc.Region)
 
 
 def is_feasible(
@@ -77,12 +82,20 @@ def is_feasible(
 
 
 def solve_feasible(
-        P1, P2, ssys,
+        P1:
+            Polytope,
+        P2:
+            Polytope,
+        ssys:
+            _hyb.LtiSysDyn,
         N=1,
-        closed_loop=True,
-        use_all_horizon=False,
+        closed_loop:
+            bool=True,
+        use_all_horizon:
+            bool=False,
         trans_set=None,
-        max_num_poly=5):
+        max_num_poly=5
+        ) -> Polytope:
     r"""Compute `S0 \subseteq trans_set` from which `P2` is `N`-reachable.
 
     `N`-reachable means reachable in horizon `N`.
@@ -107,22 +120,12 @@ def solve_feasible(
       in the computation. Consider decreasing the sampling period
       used for discretizing the associated continuous-time dynamical system.
 
-    @type P1:
-        `Polytope` or
-        `Region`
-    @type P2:
-        `Polytope` or
-        `Region`
-    @type ssys:
-        `LtiSysDyn`
     @param N:
         horizon length
     @param closed_loop:
         If `True`, then take 1 step at a time.
         This keeps down polytope dimension and
         handles disturbances better.
-    @type closed_loop:
-        bool
     @param use_all_horizon:
         Used for closed loop algorithm.
 
@@ -130,17 +133,12 @@ def solve_feasible(
           reachability in `< N` steps,
 
         - otherwise, in exactly `N` steps.
-    @type use_all_horizon:
-        `bool`
     @param trans_set:
         If specified,
         then force transitions to be in this set.
         Otherwise, `P1` is used.
     @return:
         states from which `P2` is reachable
-    @rtype:
-        `Polytope` or
-        `Region`
     """
     if closed_loop:
         if use_all_horizon:
@@ -163,7 +161,13 @@ def solve_feasible(
 
 
 def _solve_closed_loop_fixed_horizon(
-        P1, P2, ssys, N,
+        P1:
+            Polytope,
+        P2:
+            Polytope,
+        ssys,
+        N:
+            int,
         trans_set=None):
     """Underapproximate states in `P1` that can reach `P2`.
 
@@ -174,18 +178,10 @@ def _solve_closed_loop_fixed_horizon(
     If intermediate polytopes are convex,
     then the result is exact and not an underapproximation.
 
-    @type P1:
-        `Polytope` or
-        `Region`
-    @type P2:
-        `Polytope` or
-        `Region`
     @param ssys:
         system dynamics
     @param N:
-        horizon length
-    @type N:
-        positive `int`
+        horizon length (positive number)
     @param trans_set:
         If provided,
         then intermediate steps are allowed
@@ -365,10 +361,21 @@ def volumes_for_reachability(part, max_num_poly):
 
 
 def createLM(
-        ssys, N, list_P,
-        Pk=None,
-        PN=None,
-        disturbance_ind=None):
+        ssys:
+            _hyb.LtiSysDyn,
+        N,
+        list_P:
+            Polytope |
+            list[Polytope],
+        Pk:
+            pc.Polytope |
+            None=None,
+        PN:
+            pc.Polytope |
+            None=None,
+        disturbance_ind:
+            list[int] |
+            None=None):
     r"""Compute the components of the polytope:
 
     ```
@@ -396,21 +403,11 @@ def createLM(
 
     @param ssys:
         system dynamics
-    @type ssys:
-        `LtiSysDyn`
     @param N:
         horizon length
-    @type list_P:
-        `list` of `Polytope`, or
-        `Polytope`
-    @type Pk:
-        `Polytope`
-    @type PN:
-        `Polytope`
     @param disturbance_ind:
-        `list`
-        that indicates which `k`'s
-        that disturbance should be
+        In which `k`s
+        the disturbance should be
         taken into account.
         Default is `1..N`
     """
@@ -555,7 +552,14 @@ def createLM(
     return L, M
 
 
-def get_max_extreme(G, D, N):
+def get_max_extreme(
+        G:
+            np.ndarray,
+        D:
+            pc.Polytope,
+        N:
+            int
+        ) -> np.ndarray:
     """Calculate the array `d_hat` such that:
 
     ```
@@ -587,9 +591,11 @@ def get_max_extreme(G, D, N):
         Polytope describing the disturbance set
     @param N:
         Horizon length
-    @return: d_hat:
-        Array describing the maximum possible
-        effect from the disturbance
+    @return:
+        `d_hat` mentioned above,
+        as an array that describes
+        the maximum possible effect from
+        the disturbance.
     """
     D_extreme = pc.extreme(D)
     nv = D_extreme.shape[0]

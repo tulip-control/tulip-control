@@ -41,6 +41,7 @@ They come from <https://github.com/johnyf/pyvectorized>.
 import logging
 from warnings import warn
 from itertools import zip_longest as izip_longest
+import typing as _ty
 
 import numpy as np
 
@@ -50,9 +51,11 @@ except ImportError as error:
     _gv = None
     gv_error = error
 try:
+    import matplotlib as _mpl
     import matplotlib.pyplot as _plt
     import mpl_toolkits.mplot3d.axes3d
 except ImportError as error:
+    _mpl = None
     _plt = None
     mpl_error = error
 # inline
@@ -80,10 +83,17 @@ def dimension(ndarray):
 
 
 def newax(
-        subplots=(1, 1),
+        subplots:
+            int |
+            tuple[int, int]=(1, 1),
         fig=None,
-        mode='list',
-        dim=2):
+        mode:
+            _ty.Literal[
+                'list', 'matrix']='list',
+        dim=2
+        ) -> tuple[
+            '_mpl.axes.Axes',
+            '_mpl.figure.Figure']:
     """Create (possibly multiple) new axes handles.  (DEPRECATED)
 
     @param fig:
@@ -94,17 +104,11 @@ def newax(
     @param subplots:
         number or
         layout of subplots
-    @type subplots:
-        `int` or
-        2-`tuple` of subplot layout
     @param mode:
         return the axes shaped as a
         vector or as a matrix.
         This is a convenience for later iterations
         over the axes.
-    @type mode:
-        'matrix'
-        | ['list']
     @param dim:
         plot dimension:
         - if `dim == 2`, then use `matplotlib`
@@ -114,10 +118,8 @@ def newax(
         `(ax, fig)` where:
         - `ax`: axes created
         - `fig`: parent of `ax`
-    @rtype:
-        `list` or
-        `list` of `list`s,
-        depending on `mode` above
+        The returned value's type
+        depends on `mode` above
     """
     _assert_pyplot()
     # layout or number of axes ?
@@ -163,7 +165,12 @@ def newax(
     return (ax, fig)
 
 
-def dom2vec(domain, resolution):
+def dom2vec(
+        domain:
+            list[float],
+        resolution:
+            list[int]
+        ) -> np.ndarray:
     """Matrix of column vectors for meshgrid points.  (DEPRECATED)
 
     Returns a matrix of column vectors for the meshgrid
@@ -180,17 +187,17 @@ def dom2vec(domain, resolution):
     ```
 
     @param domain:
-        extremal values of parallelepiped
-    @type domain:
+        extremal values of parallelepiped,
+        arranged as:
         `[xmin, xmax, ymin, ymax, ...]`
     @param resolution:
-        # points / dimension
-    @type resolution:
+        # points / dimension,
+        arranged as:
         `[nx, ny, ...]`
     @return:
         q = matrix of column vectors
-        (meshgrid point coordinates)
-    @rtype:
+        (meshgrid point coordinates),
+        of shape:
         [#dim x #points]
 
     See also:
@@ -208,7 +215,13 @@ def dom2vec(domain, resolution):
     return q
 
 
-def quiver(x, v, ax=None, **kwargs):
+def quiver(
+        x:
+            np.ndarray,
+        v:
+            np.ndarray,
+        ax=None,
+        **kwargs):
     """Multi-dimensional quiver.  (DEPRECATED)
 
     Plot v columns at points in columns of x
@@ -231,24 +244,15 @@ def quiver(x, v, ax=None, **kwargs):
     @param x:
         points where vectors are based
         each column is a coordinate tuple
-    @type x:
-        2d lil
-        | `numpy.ndarray`
+        [#dim x #points]
+        (can be 2d lil)
     @param v:
-        vectors which to base at points x
-    @type v:
-        2d lil
-        | `numpy.ndarray`
+        matrix of column vectors to
+        plot at points x
+        [#dim x #points]
+        (can be 2d lil)
     @param ax:
         axes handle, e.g., `ax = gca()`
-    @param x:
-        matrix of points where vectors are plotted
-    @type x:
-        [#dim x #points]
-    @param v:
-        matrix of column vectors to plot at points x
-    @type v:
-        [#dim x #points]
     @param kwargs:
         plot formatting
     @return:

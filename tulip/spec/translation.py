@@ -49,6 +49,8 @@
 import logging
 # import pprint
 import re
+import typing as _ty
+
 from tulip.spec import ast
 import tulip.spec.form
 
@@ -470,15 +472,13 @@ def _to_wring(d):
         return 'G(1)'
 
 
-def convert_domain(dom):
-    """Return equivalent integer domain if `dom` contais strings.
-
-    @type dom:
-        `list` of `str`
-    @rtype:
-        `'boolean'` or
-        `(min_int, max_int)`
-    """
+def convert_domain(
+        dom:
+            list[str]
+        ) -> (
+            bool |
+            tuple[int, int]):
+    """Return equivalent integer domain if `dom` contais strings."""
     # not a string variable ?
     if not isinstance(dom, list):
         return dom
@@ -541,19 +541,20 @@ to_lang = {
         _to_wring}
 
 
-def translate(spec, lang):
+def translate(
+        spec:
+            '_form.GRSpec',
+        lang:
+            _ty.Literal[
+                'gr1c',
+                'slugs',
+                'jtlv',
+                'wring']):
     """Return str or tuple in tool format.
 
     Consult the respective documentation in `tulip.interfaces`
     concerning formats and links to further reading.
 
-    @type spec:
-        `GRSpec`
-    @type lang:
-        'gr1c',
-        'slugs',
-        'jtlv', or
-        'wring'
     @return:
         spec formatted for input to tool; the type of the return
         value depends on the tool:
@@ -574,19 +575,21 @@ def translate(spec, lang):
     return to_lang[lang](d)
 
 
-def translate_ast(tree, lang):
+def translate_ast(
+        tree,
+        lang:
+            _ty.Literal[
+                'gr1c',
+                'slugs',
+                'jtlv',
+                'promela',
+                'smv',
+                'python',
+                'wring']):
     """Return AST of formula `tree`.
 
     @type tree:
         `Nodes.Node`
-    @type lang:
-        'gr1c' or
-        'slugs' or
-        'jtlv' or
-        'promela' or
-        'smv' or
-        'python' or
-        'wring'
     @return:
         tree using AST nodes of `lang`
     @rtype:

@@ -48,6 +48,7 @@ Relevant
 `discretize`
 """
 import logging
+import typing as _ty
 
 import numpy as np
 import polytope as pc
@@ -56,10 +57,13 @@ try:
 except ImportError:
     solvers = None
 
+
+import tulip.abstract.discretization as _discr
 from tulip.abstract.feasible import (
     solve_feasible,
     createLM,
     _block_diag2)
+import tulip.hybrid as _hybrid
 
 
 __all__ = [
@@ -83,14 +87,26 @@ def assert_cvxopt():
 
 
 def get_input(
-        x0, ssys, abstraction,
-        start, end,
+        x0:
+            np.ndarray,
+        ssys:
+            _hybrid.LtiSysDyn,
+        abstraction:
+            '_discr.AbstractPwa',
+        start:
+            int,
+        end:
+            int,
         R=None,
         r=None,
         Q=None,
-        ord=1,
+        ord:
+              _ty.Literal[
+                1, 2, np.inf]
+              =1,
         mid_weight=0.0,
-        solver=None):
+        solver=None
+        ) -> np.ndarray:
     r"""Compute continuous control input for discrete transition.
 
     Computes a continuous control input sequence
@@ -151,24 +167,17 @@ def get_input(
 
     @param x0:
         initial continuous state
-    @type x0:
-        `numpy` 1darray
+        (1darray)
     @param ssys:
         system dynamics
-    @type ssys:
-        `LtiSysDyn`
     @param abstraction:
         abstract system dynamics
-    @type abstraction:
-        `AbstractPwa`
     @param start:
         index of the initial state in `abstraction.ts`
-    @type start:
-        `int` >= 0
+        (`int` >= 0)
     @param end:
         index of the end state in `abstraction.ts`
-    @type end:
-        `int` >= 0
+        (`int` >= 0)
     @param R:
         state cost matrix for:
 
@@ -177,16 +186,16 @@ def get_input(
         ```
 
         If empty, then the zero matrix is used.
-    @type R:
-        `size(N * xdim x N * xdim)`
+        shape:
+            `size(N * xdim x N * xdim)`
     @param r:
         cost vector for state trajectory:
 
         ```
         x = [x(1)' x(2)' .. x(N)']'
         ```
-    @type r:
-        `size(N * xdim x 1)`
+        shape:
+            `size(N * xdim x 1)`
     @param Q:
         input cost matrix for control input:
 
@@ -195,8 +204,8 @@ def get_input(
         ```
 
         If empty, then the identity matrix is used.
-    @type Q:
-        `size(N * udim x N * udim)`
+        shape:
+            `size(N * udim x N * udim)`
     @param mid_weight:
         cost weight for |x(N)-xc|_{ord}
     @param ord:
@@ -209,14 +218,11 @@ def get_input(
             + r'x
             + mid_weight * |xc - x(N)|_{ord}
         ```
-    @type ord:
-        `ord \in {1, 2, np.inf}`
     @return:
         array `A`, where row `k` contains the
         control input: `u(k)`,
         for `k \in 0..(N - 1)`
-    @rtype:
-        `N x m` `numpy` 2darray
+        `N x m` array
     """
     part = abstraction.ppp
     regions = part.regions
@@ -527,7 +533,13 @@ class _InputHelperQPException(Exception):
     pass
 
 
-def is_seq_inside(x0, u_seq, ssys, P0, P1):
+def is_seq_inside(
+        x0,
+        u_seq,
+        ssys:
+            'LtiSysDyn',
+        P0,
+        P1):
     r"""Check transition from `P0` to `P1`.
 
     Checks if the plant remains inside
@@ -544,8 +556,6 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
         is input for `t = k`
     @param ssys:
         dynamics
-    @type ssys:
-        `LtiSysDyn`
     @param P0:
         `Polytope` where we want
         `x(k)` to remain for `k \in 1..(N - 1)`
@@ -575,7 +585,12 @@ def is_seq_inside(x0, u_seq, ssys, P0, P1):
     return inside
 
 
-def find_discrete_state(x0, part):
+def find_discrete_state(
+        x0:
+            np.ndarray,
+        part:
+            'PropPreservingPartition'
+        ) -> int:
     """Return index of discrete state that contains `x0`.
 
     Returns the index that identifies the
@@ -591,12 +606,9 @@ def find_discrete_state(x0, part):
 
     @param x0:
         initial continuous state
-    @type x0:
-        `numpy` 1darray
+        (1darray)
     @param part:
         state-space partition
-    @type part:
-        `PropPreservingPartition`
     @return:
         if `x0` belongs to some
         discrete state in `part`,
@@ -604,8 +616,6 @@ def find_discrete_state(x0, part):
 
         Otherwise return `None`, i.e., in case
         `x0` does not belong to any discrete state.
-    @rtype:
-        `int`
     """
     for i, region in enumerate(part):
         if x0 in region:

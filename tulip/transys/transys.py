@@ -30,9 +30,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Transition system representation."""
+import collections.abc as _abc
 from collections.abc import Iterable
 import logging
 from pprint import pformat
+import typing as _ty
 
 from networkx import MultiDiGraph
 import numpy as np
@@ -624,8 +626,25 @@ class FTS(FiniteTransitionSystem):
     """Alias to `FiniteTransitionSystem`."""
 
 
-def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
-              prepend_str=None):
+def tuple2fts(
+        S:
+            _abc.Iterable[
+                _abc.Hashable],
+        S0:
+            _abc.Iterable,
+        AP:
+            _abc.Iterable[
+                _abc.Hashable],
+        L:
+            _abc.Iterable[tuple],
+        Act:
+            _abc.Iterable[
+                _abc.Hashable],
+        trans:
+            list[tuple],
+        name:
+            str='fts',
+        prepend_str=None):
     """Create a Finite Transition System from a tuple of fields.
 
     Hint
@@ -648,37 +667,25 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
 
     @param S:
         set of states
-    @type S:
-        iterable of hashables
     @param S0:
         set of initial states, must be \\subset S
-    @type S0:
-        iterable of elements from S
     @param AP:
         set of Atomic Propositions for state labeling:
             L: S-> 2^AP
-    @type AP:
-        iterable of hashables
     @param L:
         state labeling definition
-    @type L:
         iterable of (state, AP_label) pairs:
         [(state0, {'p'} ), ...]
         | None, to skip state labeling.
     @param Act:
         set of Actions for edge labeling:
             R: E-> Act
-    @type Act:
-        iterable of hashables
     @param trans:
         transition relation
-    @type trans:
         list of triples: [(from_state, to_state, act), ...]
         where act \\in Act
     @param name:
         used for file export
-    @type name:
-        str
     """
     def pair_labels_with_states(states, state_labeling):
         if state_labeling is None:
@@ -772,7 +779,11 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     return ts
 
 
-def line_labeled_with(L, m=0):
+def line_labeled_with(
+        L:
+            _abc.Iterable,
+        m:
+            int=0):
     """Return linear FTS with given labeling.
 
     The resulting system will be a terminating sequence:
@@ -789,7 +800,6 @@ def line_labeled_with(L, m=0):
 
     @param L:
         state labeling
-    @type L:
         iterable of state labels, e.g.,:
 
         ```
@@ -800,8 +810,6 @@ def line_labeled_with(L, m=0):
         so [..., 'p',...] and [...,{'p'},...] are equivalent.
     @param m:
         starting index
-    @type m:
-        int
     @return:
         `FTS` with:
         - states `['s0', ..., 'sN']`, where `N = len(L) - 1`
@@ -831,7 +839,7 @@ def line_labeled_with(L, m=0):
     return ts
 
 
-def cycle_labeled_with(L):
+def cycle_labeled_with(L: _abc.Iterable):
     """Return cycle FTS with given labeling.
 
     The resulting system will be a cycle:
@@ -848,7 +856,6 @@ def cycle_labeled_with(L):
 
     @param L:
         state labeling
-    @type L:
         iterable of state labels, e.g.,
         `[{'p', 'q'}, ...]`
         Single strings are identified with
@@ -874,7 +881,11 @@ def cycle_labeled_with(L):
     return ts
 
 
-def add_initial_states(ts, ap_labels):
+def add_initial_states(
+        ts:
+            FiniteTransitionSystem,
+        ap_labels:
+            _abc.Iterable):
     """Make initial any state of ts labeled with any label in ap_labels.
 
     For example if isinstance(ofts, FTS):
@@ -885,25 +896,18 @@ def add_initial_states(ts, ap_labels):
     add_initial_states(ofts, initial_labels)
     ```
 
-    @type ts:
-        `FiniteTransitionSystem`
     @param ap_labels:
         labels, each comprised of atomic propositions
-    @type ap_labels:
-        iterable of sets of elements from
-        ts.atomic_propositions
+        (i.e., iterable of sets of elements from
+        `ts.atomic_propositions`)
     """
     for label in ap_labels:
         new_init_states = ts.states.find(ap='label')
         ts.states.initial |= new_init_states
 
 
-def _dumps_states(g):
-    """Dump string of transition system states.
-
-    @type g:
-        `FTS`
-    """
+def _dumps_states(g: FTS):
+    """Dump string of transition system states."""
     nodes = g
     a = list()
     for u in nodes:
@@ -951,7 +955,11 @@ class GameGraph(LabeledDiGraph):
             node_label_types,
             edge_label_types)
 
-    def player_states(self, n):
+    def player_states(
+            self,
+            n:
+                _ty.Literal[0, 1]
+            ) -> set:
         """Return states controlled by player `n`.
 
         "controlled" means that player `n`
@@ -959,22 +967,20 @@ class GameGraph(LabeledDiGraph):
 
         @param n:
             player index (id number)
-        @type n:
-            0 or 1
         @return:
             set of states
-        @rtype:
-            `set`
         """
         return {x for x in self if self.nodes[x]['player'] == n}
 
-    def edge_controlled_by(self, e):
+    def edge_controlled_by(
+            self,
+            e:
+                tuple
+            ) -> _ty.Literal[0, 1]:
         """Return the index of the player controlling edge `e`.
 
-        @type e:
+        @param e:
             2-tuple of nodes `(n1, n2)`
-        @rtype:
-            integer 0 or 1
         """
         from_state = e[0]
         return self.nodes[from_state]['player']
@@ -1020,21 +1026,21 @@ class LabeledGameGraph(GameGraph):
             normal='rectangle')
 
 
-def _pre(graph, list_n):
+def _pre(
+        graph:
+            MultiDiGraph,
+        list_n:
+            list
+        ) -> set:
     """Find union of predecessors of nodes in graph defined by `MultiDiGraph`.
 
     @param graph:
         a graph structure corresponding to a FTS.
-    @type graph:
-        `networkx.MultiDiGraph`
     @param list_n:
-        list of nodes whose predecessors need to be returned
-    @type list_n:
-        list of nodes in `graph`
+        list of nodes (in `graph`)
+        whose predecessors need to be returned
     @return:
         set of predecessors of `list_n`
-    @rtype:
-        `set`
     """
     pre_set = set()
     for n in list_n:
@@ -1042,7 +1048,15 @@ def _pre(graph, list_n):
     return pre_set
 
 
-def _output_fts(ts, transitions, sol):
+def _output_fts(
+        ts:
+            FTS,
+        transitions:
+            MultiDiGraph,
+        sol
+        ) -> tuple[
+            FTS,
+            dict]:
     """Convert the Part from `nx.MultiDiGraph` to FTS.
 
     The returned FTS does not contain any edge attribute in the original FTS.
@@ -1050,19 +1064,18 @@ def _output_fts(ts, transitions, sol):
 
     @param ts:
         the input finite transition system
-    @type ts:
-        `FTS`
     @param transitions:
         the final partition
-    @type transitions:
-        `networkx.MultiDiGraph`
     @return:
         the bi/dual simulation abstraction, and the
         partition of states in input ts
-    @rtype:
-        `FTS`, and `dict` with keys `ts2simu` and `simu2ts`.
-        `ts2simu` maps nodes from input FTS to output FTS and `simu2ts`
-        maps the nodes of two FTS in the other direction.
+
+        In the returned `dict`:
+        - the value at key `'ts2simu'`
+          maps nodes from input FTS to output FTS
+        - the value at key `'simu2ts'`
+          maps the nodes of two FTS in
+          the other direction.
     """
     env_actions = [
         dict(name='env_actions',
@@ -1105,21 +1118,23 @@ def _output_fts(ts, transitions, sol):
     return ts_simu, Part_hash
 
 
-def simu_abstract(ts, simu_type):
+def simu_abstract(
+        ts:
+            FTS,
+        simu_type
+        ) -> tuple[
+            FTS,
+            dict]:
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
 
     @param ts:
         input finite transition system, the one you want to get
         its bi/dual-simulation abstraction.
-    @type ts:
-        `FTS`
     @param simu_type:
         string 'bi'/'dual', flag used to switch b.w.
         bisimulation algorithm and dual-simulation algorithm.
     @return:
         the bi/dual simulation, and the corresponding partition.
-    @rtype:
-        `FTS`, `dict`
 
 
     References

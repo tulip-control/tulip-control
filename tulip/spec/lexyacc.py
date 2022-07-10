@@ -327,13 +327,16 @@ class Parser:
             debug=debug,
             debuglog=debuglog)
 
-    def parse(self, formula, debuglog=None):
+    def parse(
+            self,
+            formula:
+                str,
+            debuglog=None
+            ) -> 'tulip.spec.ast.nodes.Node':
         """Return syntax tree for `formula`.
 
         @param formula:
             logic formula
-        @type formula:
-            `str`
         @param debuglog:
             logger passed as
             keyword parameter `debuglog` to
@@ -341,15 +344,12 @@ class Parser:
             `ply.yacc.LRParser.parse`.
             The default value is the logger
             with name `PARSER_LOGGER`.
-        @type debuglog:
-            `logging.Logger`
         @return:
             abstract syntax tree that
             results from parsing `formula`
-        @rtype:
-            `tulip.spec.ast.nodes.Node`,
-            unless parameter `ast` was
-            passed to `self.__init__`
+            (the return type depends on
+            whether the parameter `ast` was
+            passed to `self.__init__`)
         """
         if debuglog is None:
             debuglog = logging.getLogger(
