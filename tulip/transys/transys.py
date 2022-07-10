@@ -1017,9 +1017,9 @@ def _output_fts(ts, transitions, sol):
         the input finite transition system
     @type ts:
         `FTS`
-    @param Part:
+    @param transitions:
         the final partition
-    @type Part:
+    @type transitions:
         `networkx.MultiDiGraph`
     @return:
         the bi/dual simulation abstraction, and the
