@@ -150,8 +150,6 @@ class Tree(nx.MultiDiGraph):
     def _to_dot(self, detailed=False):
         """Create GraphViz dot string from given AST.
 
-        @type ast:
-            `ASTNode`
         @rtype:
             str
         """

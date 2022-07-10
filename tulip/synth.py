@@ -1037,8 +1037,6 @@ def build_dependent_var_table(fts, statevar):
         {'s0': '(loc = "s0")',
          's1': '(loc = "s1")'}
         ```
-    @type state_ids:
-        `dict`
     @rtype:
         `{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}`
         where:

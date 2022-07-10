@@ -1211,8 +1211,6 @@ def _discretize_dual(
         (bisimulation or dual-simulation):
         - `'bi'` (default), or
         - `'dual'`
-    @type simu_type:
-        `str`
     @rtype:
         `AbstractPwa`
     """

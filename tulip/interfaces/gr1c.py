@@ -219,16 +219,6 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     @param x:
         a string or an instance of
         `xml.etree.ElementTree.fromstring()`
-    @type spec0:
-        `GRSpec`
-    @param spec0:
-        GR(1) specification with which to interpret the
-        output of `gr1c` while constructing a `MealyMachine`, or
-        `None` if the output from `gr1c` should be used as is.
-        Note that `spec0` may differ from the specification in
-        the given tulipcon XML string `x`.
-        If you are unsure what to do, try setting `spec0` to
-        whatever `gr1cint.synthesize` was invoked with.
     @return:
         if a strategy is given in the XML string,
         return it as `networkx.DiGraph`.
