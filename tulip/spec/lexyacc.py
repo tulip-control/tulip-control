@@ -329,7 +329,7 @@ class Parser:
             `ply.yacc.LRParser.parse`.
             The default value is the logger
             with name `PARSER_LOGGER`.
-        @type logger:
+        @type debuglog:
             `logging.Logger`
         @return:
             abstract syntax tree that
