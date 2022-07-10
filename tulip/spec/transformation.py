@@ -285,9 +285,9 @@ def sub_constants(tree, var_str2int):
     To be used for converting arbitrary finite domains
     to integer domains prior to calling gr1c.
 
-    @param const2int:
+    @param var_str2int:
         {'varname':['const_val0', ...], ...}
-    @type const2int:
+    @type var_str2int:
         `dict` of `list`
     """
     # logger.info('substitute ints for constants in:\n\t' + str(self))
@@ -311,13 +311,13 @@ def sub_bool_with_subtree(tree, bool2subtree):
 
     @type tree:
         `LTL_AST`
-    @param bool2form:
+    @param bool2subtree:
         map from each Boolean variable to some
         equivalent formula. A subset of Boolean varibles may be used.
 
         Note that the types of variables in `tree`
-        are defined by `bool2form`.
-    @type bool2form:
+        are defined by `bool2subtree`.
+    @type bool2subtree:
         `dict` from `str` to `Tree`
     """
     for u in list(tree.nodes()):
