@@ -259,7 +259,7 @@ def sub_values(tree, var_values):
     @type var_values:
         `dict`
     @return:
-        AST with `Var` nodes replaces by
+        AST with `Var` nodes replaced by
         `Num`, `Const`, or `Bool`
     """
     old2new = dict()
