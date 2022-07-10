@@ -129,7 +129,7 @@ class MathSet:
     `SubSet`, `PowerSet`, set
     """
 
-    def __init__(self, iterable=[]):
+    def __init__(self, iterable=None):
         """Initialize by adding elements from iterable.
 
         Example
@@ -145,6 +145,8 @@ class MathSet:
         @type iterable:
             iterable, any element types allowed
         """
+        if iterable is None:
+            iterable = list()
         self._delete_all()
         self.add_from(iterable)
 
