@@ -81,7 +81,7 @@ def neglect_none(*values):
     return ret
 
 
-def synchronous_parallel(models, transition_attr_operations={}):
+def synchronous_parallel(models, transition_attr_operations=None):
     """Construct synchronous parallel composition.
 
     Construct a model that represents the synchronous parallel composition
@@ -114,6 +114,8 @@ def synchronous_parallel(models, transition_attr_operations={}):
         * `transys.MarkovChain`
         * `transys.MarkovDecisionProcess`
     """
+    if transition_attr_operations is None:
+        transition_attr_operations = dict()
     # Let models = [K_1, ..., K_n].
     # Let
     # * prod_states = [S_1, ..., S_n] where S_i is the set of states of K_i
