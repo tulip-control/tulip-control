@@ -373,8 +373,7 @@ def infer_constants(formula, variables):
     @param formula:
         well-formed LTL formula
     @type formula:
-        `str` or
-        `LTL_AST`
+        `str`
     @param variables:
         domains of variables, or only their names.
         If the domains are given, then they are checked
