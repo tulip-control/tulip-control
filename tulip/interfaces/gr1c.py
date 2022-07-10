@@ -657,7 +657,8 @@ class GR1CSession:
             state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'winning ' +
-            ' '.join(map(str, state_vector)) + '\n')
+            _join_as_str(state_vector) +
+            '\n')
         if 'True\n' in self.p.stdout.readline():
             return True
         else:
@@ -674,8 +675,7 @@ class GR1CSession:
             state_vector[ind + len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'getindex ' +
-            ' '.join(
-                map(str, state_vector)) +
+            _join_as_str(state_vector) +
             f' {goal_mode}\n')
         line = self.p.stdout.readline()
         if len(self.prompt) > 0:
@@ -696,7 +696,7 @@ class GR1CSession:
             state_vector[ind+len(self.env_vars)] = state[self.sys_vars[ind]]
         self.p.stdin.write(
             'envnext ' +
-            ' '.join(map(str, state_vector)) +
+            _join_as_str(state_vector) +
             '\n')
         env_moves = list()
         line = self.p.stdout.readline()
@@ -731,11 +731,9 @@ class GR1CSession:
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write(
             'sysnext ' +
-            ' '.join(
-                map(str, state_vector)) +
+            _join_as_str(state_vector) +
             ' ' +
-            ' '.join(
-                map(str, emove_vector)) +
+            _join_as_str(emove_vector) +
             f' {goal_mode}\n')
         sys_moves = list()
         line = self.p.stdout.readline()
@@ -767,9 +765,9 @@ class GR1CSession:
             emove_vector[ind] = env_move[self.env_vars[ind]]
         self.p.stdin.write(
             "sysnexta " +
-            ' '.join(map(str, state_vector)) +
+            _join_as_str(state_vector) +
             " " +
-            ' '.join(map(str, emove_vector)) +
+            _join_as_str(emove_vector) +
             '\n'
         )
         sys_moves = list()
@@ -845,3 +843,8 @@ class GR1CSession:
             return False
         else:
             return True
+
+
+def _join_as_str(items) -> str:
+    """Return space-joined strings of `items`."""
+    return ' '.join(map(str, items))
