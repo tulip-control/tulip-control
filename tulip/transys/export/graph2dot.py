@@ -511,7 +511,7 @@ def plot_dot(
         GraphViz program to use
     @type prog:
         `'dot'` | `'neato'` | `'circo'` | `'twopi'`
-        | `'fdp'` | `'sfdp'` | etc
+        | `'fdp'` | `'sfdp'`
     @param rankdir:
         direction to layout nodes
     @type rankdir:
