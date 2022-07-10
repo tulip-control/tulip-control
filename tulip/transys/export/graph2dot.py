@@ -437,8 +437,6 @@ def graph2dot_str(graph, wrap=10, tikz=False):
     """Convert graph to DOT string.
 
     @type graph:
-        L{LabeledDiGraph}
-    @type graph:
         `LabeledDiGraph`
     @param wrap:
         textwrap width
