@@ -573,7 +573,7 @@ def load_mealy(filename, fformat='tulipxml'):
     @return:
         loaded strategy as an annotated graph.
     @rtype:
-        `networkx.Digraph`
+        `networkx.DiGraph`
     """
     s = open(filename, 'r').read()
     if fformat.lower() == 'tulipxml':
