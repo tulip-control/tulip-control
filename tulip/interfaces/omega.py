@@ -92,10 +92,8 @@ def _int_bounds(aut):
 
     @type aut:
         `omega.symbolic.temporal.Automaton`
-    @return:
-        node in a `dd.bdd.BDD`
     @rtype:
-        `int`
+        `dd.bdd.Function | dd.cudd.Function`
     """
     int_types = {'int', 'saturating', 'modwrap'}
     bdd = aut.bdd
