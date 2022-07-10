@@ -91,7 +91,7 @@ def _int_bounds(aut):
     """Create care set for enumeration.
 
     @type aut:
-        `omega.symbolic.symbolic.Automaton`
+        `omega.symbolic.temporal.Automaton`
     @return:
         node in a `dd.bdd.BDD`
     @rtype:
@@ -119,7 +119,7 @@ def _strategy_to_state_annotated(g, aut):
     @type g:
         `nx.DiGraph`
     @type: aut:
-        `omega.symbolic.symbolic.Automaton`
+        `omega.symbolic.temporal.Automaton`
     @rtype:
         `nx.DiGraph`
     """
