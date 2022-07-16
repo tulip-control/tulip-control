@@ -55,49 +55,48 @@ PARSER_LOGGER = 'tulip.ltl_parser_log'
 class Lexer:
     """Token rules to build LTL lexer."""
 
-    reserved = {
-        'ite': 'ITE',
-        'next': 'NEXT',
-        'X': 'NEXT',
-        'FALSE': 'FALSE',
-        'TRUE': 'TRUE',
-        'G': 'ALWAYS',
-        'F': 'EVENTUALLY',
-        'U': 'UNTIL',
-        'W': 'WEAK_UNTIL',
-        'V': 'RELEASE'}
-    values = {'next': 'X'}
-    delimiters = [
-        'LPAREN',
-        'RPAREN',
-        'DQUOTES',
-        'COMMA']
-    operators = [
-        # logic
-        'NOT',
-        'AND',
-        'OR',
-        'XOR',
-        'IMP',
-        'BIMP',
-        # set theory
-        'EQUALS',
-        'NEQUALS',
-        # arithmetic
-        'LT',
-        'LE',
-        'GT',
-        'GE',
-        'PLUS',
-        'MINUS',
-        'TIMES',
-        'DIV',
-        'TRUNCATE',
-        # action operators
-        'PRIME']
-    misc = ['NAME', 'NUMBER']
-
     def __init__(self, debug=False):
+        self.reserved = {
+            'ite': 'ITE',
+            'next': 'NEXT',
+            'X': 'NEXT',
+            'FALSE': 'FALSE',
+            'TRUE': 'TRUE',
+            'G': 'ALWAYS',
+            'F': 'EVENTUALLY',
+            'U': 'UNTIL',
+            'W': 'WEAK_UNTIL',
+            'V': 'RELEASE'}
+        self.values = {'next': 'X'}
+        self.delimiters = [
+            'LPAREN',
+            'RPAREN',
+            'DQUOTES',
+            'COMMA']
+        self.operators = [
+            # logic
+            'NOT',
+            'AND',
+            'OR',
+            'XOR',
+            'IMP',
+            'BIMP',
+            # set theory
+            'EQUALS',
+            'NEQUALS',
+            # arithmetic
+            'LT',
+            'LE',
+            'GT',
+            'GE',
+            'PLUS',
+            'MINUS',
+            'TIMES',
+            'DIV',
+            'TRUNCATE',
+            # action operators
+            'PRIME']
+        self.misc = ['NAME', 'NUMBER']
         # for setting the logger,
         # directly call the method `build`
         self.tokens = (
@@ -236,40 +235,62 @@ class Lexer:
 class Parser:
     """Production rules to build LTL parser."""
 
-    tabmodule = TABMODULE
-    start = 'expr'
-    # lowest to highest
-    # closely follows `spin.y`
-    precedence = (
-        ('left', 'BIMP'),
-        ('left', 'IMP'),
-        ('left', 'XOR'),
-        ('left', 'OR'),
-        ('left', 'AND'),
-        ('left',
-            'ALWAYS', 'EVENTUALLY'),
-        ('left',
-            'UNTIL',
-            'WEAK_UNTIL',
-            'RELEASE'),
-        ('left', 'EQUALS', 'NEQUALS'),
-        ('left',
-            'LT', 'LE', 'GT', 'GE'),
-        ('left', 'PLUS', 'MINUS'),
-        ('left', 'TIMES', 'DIV'),
-        ('right', 'NOT', 'UMINUS'),
-        ('right', 'NEXT'),
-        ('left', 'PRIME'),
-        ('nonassoc', 'TRUE', 'FALSE'))
-
     def __init__(
             self, ast=None, lexer=None):
         if ast is None:
-            ast = tulip.spec.ast.nodes
+            self.ast = tulip.spec.ast.nodes
+        else:
+            self.ast = ast
         if lexer is None:
-            lexer = Lexer()
-        self.ast = ast
-        self.lexer = lexer
+            self.lexer = Lexer()
+        else:
+            self.lexer = lexer
+        self.tabmodule = TABMODULE
+        self.start = 'expr'
+        # lowest to highest
+        # closely follows `spin.y`
+        self.precedence = (
+            ('left',
+                'BIMP'),
+            ('left',
+                'IMP'),
+            ('left',
+                'XOR'),
+            ('left',
+                'OR'),
+            ('left',
+                'AND'),
+            ('left',
+                'ALWAYS',
+                'EVENTUALLY'),
+            ('left',
+                'UNTIL',
+                'WEAK_UNTIL',
+                'RELEASE'),
+            ('left',
+                'EQUALS',
+                'NEQUALS'),
+            ('left',
+                'LT',
+                'LE',
+                'GT',
+                'GE'),
+            ('left',
+                'PLUS',
+                'MINUS'),
+            ('left',
+                'TIMES',
+                'DIV'),
+            ('right',
+                'NOT',
+                'UMINUS'),
+            ('right',
+                'NEXT'),
+            ('left',
+                'PRIME'),
+            ('nonassoc',
+                'TRUE',
+                'FALSE'))
         self.tokens = self.lexer.tokens
         self.build()
 
