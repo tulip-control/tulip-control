@@ -131,8 +131,6 @@ def synthesize(spec, symbolic=False):
 def _bitfields_to_ints(bit_state, vrs):
     """Convert bitfield representation to integers.
 
-    @type line:
-        `str`
     @type vrs:
         `dict`
     """
