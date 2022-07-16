@@ -160,7 +160,9 @@ class Parser:
     def __init__(self):
         """Build lexer and parser."""
         self.lexer = Lexer()
+        self.start = 'claim'
         self.tokens = self.lexer.tokens
+        self.tabmodule = TABMODULE
         self.parser = ply.yacc.yacc(
             module=self,
             tabmodule=TABMODULE,
@@ -170,6 +172,38 @@ class Parser:
         self.initial_nodes = None
         self.accepting_nodes = None
         self.symbols = None
+
+    def build(
+            self,
+            tabmodule=None,
+            outputdir='',
+            write_tables=False,
+            debug=False,
+            debuglog=None):
+        """Cache LALR(1) state machine.
+
+        Using `ply.yacc`.
+
+        The default Python module where the
+        state-machine transitions are stored is
+        as defined in the attribute
+        `self.tabmodule`.
+
+        This module's logger is used as default.
+        """
+        if tabmodule is None:
+            tabmodule = self.tabmodule
+        if debug and debuglog is None:
+            debuglog = logger
+        self.parser = ply.yacc.yacc(
+            method='LALR',
+            module=self,
+            start=self.start,
+            tabmodule=tabmodule,
+            outputdir=outputdir,
+            write_tables=write_tables,
+            debug=debug,
+            debuglog=debuglog)
 
     def parse(self, ltl2ba_output):
         """Return a Buchi automaton from parsing `ltl2ba_output`.
