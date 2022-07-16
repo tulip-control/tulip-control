@@ -115,7 +115,7 @@ def run_setup():
         project_urls=PROJECT_URLS,
         license='BSD',
         classifiers=classifiers,
-        python_requires='>=3.7',
+        python_requires='>=3.10',
         install_requires=[
             'graphviz >= 0.20',
             'networkx >= 2.0',

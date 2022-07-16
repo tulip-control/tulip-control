@@ -4,7 +4,7 @@
 ## 1.4.0
 (future)
 
-- require Python >= 3.7
+- require Python >= 3.10
 
 - TST: use `pytest`, instead of `nose`
 
