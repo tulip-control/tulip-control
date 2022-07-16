@@ -93,18 +93,26 @@ class KripkeStructure(LabeledDiGraph):
         self.atomic_propositions = self.ap
         # dot formatting
         self._state_dot_label_format = {
-            'ap': '',
-            'type?label': '',
-            'separator': r'\\n'}
+            'ap':
+                '',
+            'type?label':
+                '',
+            'separator':
+                r'\\n'}
         self.dot_node_shape = dict(
             normal='rectangle')
         self._state_dot_label_format = {
-            'ap': '',
-            'type?label': '',
-            'separator': r'\\n'}
+            'ap':
+                '',
+            'type?label':
+                '',
+            'separator':
+                r'\\n'}
         self._transition_dot_label_format = {
-            'type?label': ':',
-            'separator': r'\\n'}
+            'type?label':
+                ':',
+            'separator':
+                r'\\n'}
         self._transition_dot_mask = dict()
 
     def __str__(self):
@@ -186,11 +194,13 @@ class MarkovDecisionProcess(MarkovChain):
     action_label = "action"
 
     def __init__(self):
-        edge_label_types = [
-            {'name': self.action_label,
-             'values': MathSet(),
-             'setter': True}
-        ]
+        edge_label_types = [{
+            'name':
+                self.action_label,
+            'values':
+                MathSet(),
+            'setter':
+                True}]
         super().__init__()
         super().add_label_types(
             edge_label_types, True)
@@ -464,15 +474,21 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self._owner = 'sys'
 
         if env_actions is None:
-            env_actions = [
-                {'name': 'env_actions',
-                 'values': MathSet(),
-                 'setter': True}]
+            env_actions = [{
+                'name':
+                    'env_actions',
+                'values':
+                    MathSet(),
+                'setter':
+                    True}]
         if sys_actions is None:
-            sys_actions = [
-                {'name': 'sys_actions',
-                 'values': MathSet(),
-                 'setter': True}]
+            sys_actions = [{
+                'name':
+                    'sys_actions',
+                'values':
+                    MathSet(),
+                'setter':
+                    True}]
         # NOTE:
         # "sys_actions" used to be "actions"
         # in closed systems (old FTS)
@@ -505,16 +521,23 @@ class FiniteTransitionSystem(LabeledDiGraph):
         self.sys_actions_must = 'xor'
         # dot formatting
         self._state_dot_label_format = {
-            'ap': '',
-            'type?label': '',
-            'separator': r'\\n'}
+            'ap':
+                '',
+            'type?label':
+                '',
+            'separator':
+                r'\\n'}
         self._transition_dot_label_format = {
-            'sys_actions': 'sys',
+            'sys_actions':
+                'sys',
                 # todo: '' if no env
-            'env_actions': 'env',
-            'type?label': ':',
+            'env_actions':
+                'env',
+            'type?label':
+                ':',
                 # todo: '' if no env
-            'separator': r'\\n'}
+            'separator':
+                r'\\n'}
         self._transition_dot_mask = dict()
         self.dot_node_shape = dict(
             normal='box')
@@ -916,9 +939,12 @@ class GameGraph(LabeledDiGraph):
 
     def __init__(self, node_label_types, edge_label_types):
         node_label_types += [{
-            'name': 'player',
-            'values': {0, 1},
-            'default': 0}]
+            'name':
+                'player',
+            'values':
+                {0, 1},
+            'default':
+                0}]
         super().__init__(
             node_label_types,
             edge_label_types)
@@ -969,18 +995,25 @@ class LabeledGameGraph(GameGraph):
 
     def __init__(self):
         ap_labels = PowerSet()
-        node_label_types = [
-            {'name': 'ap',
-             'values': ap_labels,
-             'setter': ap_labels.math_set,
-             'default': set()}]
+        node_label_types = [{
+            'name':
+                'ap',
+            'values':
+                ap_labels,
+            'setter':
+                ap_labels.math_set,
+            'default':
+                set()}]
         super().__init__(node_label_types)
         self.atomic_propositions = self.ap
         # dot formatting
         self._state_dot_label_format = {
-            'ap': '',
-            'type?label': '',
-            'separator': r'\\n'}
+            'ap':
+                '',
+            'type?label':
+                '',
+            'separator':
+                r'\\n'}
         self.dot_node_shape = dict(
             normal='rectangle')
 

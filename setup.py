@@ -14,10 +14,14 @@ from setuptools import setup
 
 NAME = 'tulip'
 PROJECT_URLS = {
-    'Bug Tracker': 'https://github.com/tulip-control/tulip-control/issues',
-    'Documentation': 'https://tulip-control.sourceforge.io/doc/',
-    'API Documentation': 'https://tulip-control.sourceforge.io/api-doc/',
-    'Source Code': 'https://github.com/tulip-control/tulip-control'}
+    'Bug Tracker':
+        'https://github.com/tulip-control/tulip-control/issues',
+    'Documentation':
+        'https://tulip-control.sourceforge.io/doc/',
+    'API Documentation':
+        'https://tulip-control.sourceforge.io/api-doc/',
+    'Source Code':
+        'https://github.com/tulip-control/tulip-control'}
 VERSION_FILE = f'{NAME}/_version.py'
 MAJOR = 1
 MINOR = 4

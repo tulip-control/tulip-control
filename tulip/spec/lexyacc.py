@@ -57,17 +57,29 @@ class Lexer:
 
     def __init__(self, debug=False):
         self.reserved = {
-            'ite': 'ITE',
-            'next': 'NEXT',
-            'X': 'NEXT',
-            'FALSE': 'FALSE',
-            'TRUE': 'TRUE',
-            'G': 'ALWAYS',
-            'F': 'EVENTUALLY',
-            'U': 'UNTIL',
-            'W': 'WEAK_UNTIL',
-            'V': 'RELEASE'}
-        self.values = {'next': 'X'}
+            'ite':
+                'ITE',
+            'next':
+                'NEXT',
+            'X':
+                'NEXT',
+            'FALSE':
+                'FALSE',
+            'TRUE':
+                'TRUE',
+            'G':
+                'ALWAYS',
+            'F':
+                'EVENTUALLY',
+            'U':
+                'UNTIL',
+            'W':
+                'WEAK_UNTIL',
+            'V':
+                'RELEASE'}
+        self.values = {
+            'next':
+                'X'}
         self.delimiters = [
             'LPAREN',
             'RPAREN',

@@ -60,12 +60,40 @@ __all__ = [
 
 def make_jtlv_nodes():
     opmap = {
-        'False': 'FALSE', 'True': 'TRUE',
-        '!': '!',
-        '|': '|', '&': '&', '->': '->', '<->': '<->',
-        'G': '[]', 'F': '<>', 'X': 'next',
-        'U': 'U',
-        '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='}
+        'False':
+            'FALSE',
+        'True':
+            'TRUE',
+        '!':
+            '!',
+        '|':
+            '|',
+        '&':
+            '&',
+        '->':
+            '->',
+        '<->':
+            '<->',
+        'G':
+            '[]',
+        'F':
+            '<>',
+        'X':
+            'next',
+        'U':
+            'U',
+        '<':
+            '<',
+        '<=':
+            '<=',
+        '=':
+            '=',
+        '>=':
+            '>=',
+        '>':
+            '>',
+        '!=':
+            '!='}
     nodes = ast.make_fol_nodes(opmap)
     class Str(nodes.Str):
         def flatten(self, **kw):
@@ -89,12 +117,38 @@ def make_jtlv_nodes():
 def make_gr1c_nodes(opmap=None):
     if opmap is None:
         opmap = {
-            'False': 'False', 'True': 'True',
-            '!': '!',
-            '|': '|', '&': '&', '->': '->', '<->': '<->',
-            'G': '[]', 'F': '<>', 'X': '',
-            '<': '<', '<=': '<=', '=': '=',
-            '>=': '>=', '>': '>', '!=': '!='}
+            'False':
+                'False',
+            'True':
+                'True',
+            '!':
+                '!',
+            '|':
+                '|',
+            '&':
+                '&',
+            '->':
+                '->',
+            '<->':
+                '<->',
+            'G':
+                '[]',
+            'F':
+                '<>',
+            'X':
+                '',
+            '<':
+                '<',
+            '<=':
+                '<=',
+            '=':
+                '=',
+            '>=':
+                '>=',
+            '>':
+                '>',
+            '!=':
+                '!='}
     nodes = ast.make_fol_nodes(opmap)
     class Var(nodes.Var):
         def flatten(self, prime=None, **kw):
@@ -117,32 +171,107 @@ def make_slugs_nodes():
     For signed arithmetic use Promela instead.
     """
     opmap = {
-        'False': 'FALSE', 'True': 'TRUE',
-        '!': '!',
-        '|': '|', '&': '&', '->': '->', '<->': '<->',
-        'G': '[]', 'F': '<>', 'X': '',
-        '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!=',
-        '+': '+', '-': '-'}
+        'False':
+            'FALSE',
+        'True':
+            'TRUE',
+        '!':
+            '!',
+        '|':
+            '|',
+        '&':
+            '&',
+        '->':
+            '->',
+        '<->':
+            '<->',
+        'G':
+            '[]',
+        'F':
+            '<>',
+        'X':
+            '',
+        '<':
+            '<',
+        '<=':
+            '<=',
+        '=':
+            '=',
+        '>=':
+            '>=',
+        '>':
+            '>',
+        '!=':
+            '!=',
+        '+':
+            '+',
+        '-':
+            '-'}
     return make_gr1c_nodes(opmap)
 
 
 def make_promela_nodes():
     opmap = dict(ast.OPMAP)
-    opmap.update({'True': 'true', 'False': 'false',
-                  'G': '[]', 'F': '<>', 'R': 'V', '=': '=='})
+    opmap.update({
+        'True':
+            'true',
+        'False':
+            'false',
+        'G':
+            '[]',
+        'F':
+            '<>',
+        'R':
+            'V',
+        '=':
+            '=='})
     return ast.make_fol_nodes(opmap)
 
 
 def make_smv_nodes():
-    opmap = {'X': 'X', 'G': 'G', 'F': 'F', 'U': 'U', 'R': 'V'}
+    opmap = {
+        'X':
+            'X',
+        'G':
+            'G',
+        'F':
+            'F',
+        'U':
+            'U',
+        'R':
+            'V'}
     return ast.make_fol_nodes(opmap)
 
 def make_wring_nodes():
-    opmap = {'False': '0', 'True': '1',
-             '!': '!',
-             '|': '+', '&': '*', '->': '->', '<->': '<->', 'xor': '^',
-             'G': 'G', 'F': 'F', 'X': 'X',
-             'U': 'U', 'R': 'R', 'V': 'V'}
+    opmap = {
+        'False':
+            '0',
+        'True':
+            '1',
+        '!':
+            '!',
+        '|':
+            '+',
+        '&':
+            '*',
+        '->':
+            '->',
+        '<->':
+            '<->',
+        'xor':
+            '^',
+        'G':
+            'G',
+        'F':
+            'F',
+        'X':
+            'X',
+        'U':
+            'U',
+        'R':
+            'R',
+        'V':
+            'V'}
     nodes = ast.make_fol_nodes(opmap)
     class Var(nodes.Var):
         def flatten(self, *arg, **kw):
@@ -165,12 +294,37 @@ def make_wring_nodes():
     return nodes
 
 def make_python_nodes():
-    opmap = {'True': 'True', 'False': 'False',
-             '!': 'not', '&': 'and', '|': 'or',
-             '^': '^', '=': '==', '!=': '!=',
-             '<': '<', '<': '<',
-             '>=': '>=', '<=': '<=', '>': '>',
-             '+': '+', '-': '-'}
+    opmap = {
+        'True':
+            'True',
+        'False':
+            'False',
+        '!':
+            'not',
+        '&':
+            'and',
+        '|':
+            'or',
+        '^':
+            '^',
+        '=':
+            '==',
+        '!=':
+            '!=',
+        '<':
+            '<',
+        '<':
+            '<',
+        '>=':
+            '>=',
+        '<=':
+            '<=',
+        '>':
+            '>',
+        '+':
+            '+',
+        '-':
+            '-'}
     nodes = ast.make_fol_nodes(opmap)
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
@@ -188,13 +342,20 @@ def make_python_nodes():
 
 
 lang2nodes = {
-    'jtlv': make_jtlv_nodes(),
-    'gr1c': make_gr1c_nodes(),
-    'slugs': make_slugs_nodes(),
-    'promela': make_promela_nodes(),
-    'smv': make_smv_nodes(),
-    'python': make_python_nodes(),
-    'wring': make_wring_nodes()}
+    'jtlv':
+        make_jtlv_nodes(),
+    'gr1c':
+        make_gr1c_nodes(),
+    'slugs':
+        make_slugs_nodes(),
+    'promela':
+        make_promela_nodes(),
+    'smv':
+        make_smv_nodes(),
+    'python':
+        make_python_nodes(),
+    'wring':
+        make_wring_nodes()}
 
 
 def _to_jtlv(d):
@@ -368,8 +529,15 @@ def _format_slugs_vars(vardict, name):
     return f'[{name}]\n{vars}\n\n'
 
 
-to_lang = {'jtlv': _to_jtlv, 'gr1c': _to_gr1c, 'slugs': _to_slugs,
-           'wring': _to_wring}
+to_lang = {
+    'jtlv':
+        _to_jtlv,
+    'gr1c':
+        _to_gr1c,
+    'slugs':
+        _to_slugs,
+    'wring':
+        _to_wring}
 
 
 def translate(spec, lang):
@@ -453,9 +621,10 @@ def _ast_to_python(u, nodes):
         assert u.operator == '!'
         return cls(u.operator, _ast_to_python(u.operands[0], nodes))
     elif len(u.operands) == 2:
-        assert u.operator in {'&', '|', '^', '->', '<->',
-                              '>', '>=', '=', '!=', '<=', '<',
-                              '+', '-', '*', '/'}
+        assert u.operator in {
+            '&', '|', '^', '->', '<->',
+            '>', '>=', '=', '!=', '<=', '<',
+            '+', '-', '*', '/'}
         if u.operator == '->':
             cls = nodes.Imp
         elif u.operator == '<->':

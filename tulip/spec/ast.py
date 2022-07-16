@@ -41,32 +41,89 @@ logger = logging.getLogger(__name__)
 
 # prototype for flattening to a "canonical" string
 OPMAP = {
-    'False': 'False', 'True': 'True',
-    '!': '!',
-    '|': '|', '&': '&', '->': '->', '<->': '<->', '^': '^', 'ite': 'ite',
-    'X': 'X', 'G': 'G', 'F': 'F',
-    'U': 'U', 'W': 'W', 'V': 'V',
-    '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!=',
-    '+': '+', '-': '-', '*': '*', '/': '/',
-    '<<>>': '<<>>'  # arithmetic
-}
+    'False':
+        'False',
+    'True':
+        'True',
+    '!':
+        '!',
+    '|':
+        '|',
+    '&':
+        '&',
+    '->':
+        '->',
+    '<->':
+        '<->',
+    '^':
+        '^',
+    'ite':
+        'ite',
+    'X':
+        'X',
+    'G':
+        'G',
+    'F':
+        'F',
+    'U':
+        'U',
+    'W':
+        'W',
+    'V':
+        'V',
+    '<':
+        '<',
+    '<=':
+        '<=',
+    '=':
+        '=',
+    '>=':
+        '>=',
+    '>':
+        '>',
+    '!=':
+        '!=',
+    '+':
+        '+',
+    '-':
+        '-',
+    '*':
+        '*',
+    '/':
+        '/',
+    '<<>>':
+        '<<>>'  # arithmetic
+    }
 # this mapping is based on SPIN documentation:
 #   <http://spinroot.com/spin/Man/ltl.html>
 FULL_OPERATOR_NAMES = {
-    'next': 'X',
-    'always': '[]',
-    'eventually': '<>',
-    'until': 'U',
-    'stronguntil': 'U',
-    'weakuntil': 'W',
-    'unless': 'W',  # see Baier - Katoen
-    'release': 'V',
-    'implies': '->',
-    'equivalent': '<->',
-    'not': '!',
-    'and': '&&',
-    'or': '||',
-}
+    'next':
+        'X',
+    'always':
+        '[]',
+    'eventually':
+        '<>',
+    'until':
+        'U',
+    'stronguntil':
+        'U',
+    'weakuntil':
+        'W',
+    'unless':
+        'W',  # see Baier - Katoen
+    'release':
+        'V',
+    'implies':
+        '->',
+    'equivalent':
+        '<->',
+    'not':
+        '!',
+    'and':
+        '&&',
+    'or':
+        '||',
+    }
 
 
 def make_nodes(opmap=None):

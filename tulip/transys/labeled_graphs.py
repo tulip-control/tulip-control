@@ -925,14 +925,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 f'empty label types: {label_types}')
         # define the labeling
         labeling = {
-            d['name']: d['values']
+            d['name']:
+                d['values']
             for d in label_types}
         defaults = {
-            d['name']: d.get('default')
+            d['name']:
+                d.get('default')
             for d in label_types
             if 'default' in d}
         setters = {
-            d['name']: d.get('setter')
+            d['name']:
+                d.get('setter')
             for d in label_types
             if 'setter' in d}
         for name, setter in setters.items():

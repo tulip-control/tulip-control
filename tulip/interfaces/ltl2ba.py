@@ -46,11 +46,16 @@ class Lexer:
     """Token rules to build lexer for `ltl2ba` output."""
 
     reserved = {
-        'goto': 'GOTO',
-        'if': 'IF',
-        'fi': 'FI',
-        'never': 'NEVER',
-        'skip': 'SKIP'}
+        'goto':
+            'GOTO',
+        'if':
+            'IF',
+        'fi':
+            'FI',
+        'never':
+            'NEVER',
+        'skip':
+            'SKIP'}
     tokens = (
         'TRUE', 'FALSE',
         'NUMBER',

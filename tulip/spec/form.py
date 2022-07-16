@@ -433,10 +433,14 @@ class GRSpec(LTL):
         self.parser = parser
         self._ast = dict()
         self._cache = {
-            'string': dict(),
-            'jtlv': dict(),
-            'gr1c': dict(),
-            'slugs': dict()}
+            'string':
+                dict(),
+            'jtlv':
+                dict(),
+            'gr1c':
+                dict(),
+            'slugs':
+                dict()}
         self._bool_int = dict()
         self._parts = {
             x + y
@@ -770,7 +774,11 @@ class GRSpec(LTL):
             `code`
         """
         self.str_to_int()
-        init = {'env': self.env_init, 'sys': self.sys_init}
+        init = {
+            'env':
+                self.env_init,
+            'sys':
+                self.sys_init}
         pyinit = dict()
         for side, clauses in init.items():
             if no_str:
