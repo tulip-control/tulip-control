@@ -6,8 +6,8 @@ on:
     pull_request:
     schedule:
         # the start of every hour is a high-load time for GitHub Actions
-        # https://docs.github.com/en/actions/reference/
-        #     events-that-trigger-workflows#scheduled-events
+        # <https://docs.github.com/en/actions/reference/
+        #     events-that-trigger-workflows#scheduled-events>
         - cron: '37 5 5 * *'
 jobs:
     build:
@@ -126,9 +126,9 @@ jobs:
                 tar -xzf ${GR1C_GZ}
                 export PATH=`pwd`/gr1c-${GR1C_VERSION}-Linux_x86-64:$PATH
                 # store values to use in later steps for environment variables
-                # https://docs.github.com/en/actions/reference/
+                # <https://docs.github.com/en/actions/reference/
                 #     workflow-commands-for-github-actions#
-                #     setting-an-environment-variable
+                #     setting-an-environment-variable>
                 echo "`pwd`/gr1c-${GR1C_VERSION}-Linux_x86-64" >> $GITHUB_PATH
                 # diagnostic information
                 which gr1c
@@ -142,8 +142,8 @@ jobs:
                 export PATH=`pwd`/Lily-1.0.2:$PATH
                 # store values to use in later steps for environment variables
                 echo "PERL5LIB=`pwd`/Lily-1.0.2" >> $GITHUB_ENV
-                # https://docs.github.com/en/actions/reference/
-                #     workflow-commands-for-github-actions#adding-a-system-path
+                # <https://docs.github.com/en/actions/reference/
+                #     workflow-commands-for-github-actions#adding-a-system-path>
                 echo "`pwd`/Lily-1.0.2" >> $GITHUB_PATH
                 # diagnostic information
                 echo $PATH

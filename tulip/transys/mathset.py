@@ -719,8 +719,8 @@ def is_subset(small_iterable, big_iterable):
 def powerset(iterable):
     """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
-    From http://docs.python.org/2/library/itertools.html,
-    also in https://pypi.python.org/pypi/more-itertools
+    From <http://docs.python.org/2/library/itertools.html>,
+    also in <https://pypi.python.org/pypi/more-itertools>
     """
     s = list(iterable)
     return chain.from_iterable(combinations(s, r)
@@ -860,7 +860,7 @@ class TypedDict(dict):
     ```
     """
     # credits for debugging this go here:
-    #   http://stackoverflow.com/questions/2060972/
+    #   <http://stackoverflow.com/questions/2060972/>
 
     def __init__(self, *args, **kwargs):
         self.update(*args, **kwargs)

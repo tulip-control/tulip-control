@@ -86,7 +86,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
 
     Construct a model that represents the synchronous parallel composition
     of the given models (i.e., tensor product in graph theory
-    https://en.wikipedia.org/wiki/Tensor_product_of_graphs)
+    <https://en.wikipedia.org/wiki/Tensor_product_of_graphs>)
 
     It follows definition 2.42 (synchronous product) in
     U{[BK08]

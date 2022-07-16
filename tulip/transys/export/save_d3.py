@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Export html containing `d3.js` animating SVG."""
-# there exists: https://github.com/mikedewar/d3py,
+# there exists: <https://github.com/mikedewar/d3py>,
 # but it is not sufficiently developed yet,
 # so here the wheel is partially re-invented
 import os

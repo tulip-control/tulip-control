@@ -51,7 +51,7 @@ OPMAP = {
     '<<>>': '<<>>'  # arithmetic
 }
 # this mapping is based on SPIN documentation:
-#   http://spinroot.com/spin/Man/ltl.html
+#   <http://spinroot.com/spin/Man/ltl.html>
 FULL_OPERATOR_NAMES = {
     'next': 'X',
     'always': '[]',

@@ -31,7 +31,7 @@
 # SUCH DAMAGE.
 """Interface to `gr1py`.
 
-<https://pypi.python.org/pypi/gr1py>
+<https://pypi.org/project/gr1py>
 <https://github.com/slivingston/gr1py>
 """
 import logging

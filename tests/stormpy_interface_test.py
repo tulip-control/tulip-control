@@ -3,7 +3,7 @@
 # Details of these tests can be found at
 # the Stormpy computer session of EECI 2020:
 #
-# https://www.cds.caltech.edu/~murray/wiki/index.php?title=EECI_2020:_Computer_Session:_Stormpy
+# <https://www.cds.caltech.edu/~murray/wiki/index.php?title=EECI_2020:_Computer_Session:_Stormpy>
 #
 # All the tests here are run only if on Python 3
 #

@@ -42,7 +42,7 @@ reference
    Interactions, Games and Protocols (iWIGP),
    Electronic Proceedings in Theoretical Computer Science (EPTCS),
    50, pp. 33--45, 2011,
-   http://doi.org/10.4204/EPTCS.50.3
+   <http://doi.org/10.4204/EPTCS.50.3>
 """
 import logging
 

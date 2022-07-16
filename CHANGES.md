@@ -75,7 +75,7 @@
 2016-07-25
 
 Version 1.2.1 of TuLiP is available on the Python Package Index (PyPI) at
-https://pypi.python.org/pypi/tulip/1.2.1
+<https://pypi.python.org/pypi/tulip/1.2.1>
 
 Summary of changes for this release:
 
@@ -109,7 +109,7 @@ There were also several corrections (bug fixes).
 2015-10-25
 
 TuLiP is listed on the Python Package Index (PyPI) at
-https://pypi.python.org/pypi/tulip
+<https://pypi.python.org/pypi/tulip>
 
 There have been many changes since the previous release, including:
 
@@ -145,14 +145,14 @@ There has not been a release in a while, yet the project has been active.
 We collect here several of the most significant changes,
 though be warned there is more.
 A good place to begin is the installation instructions at
-http://tulip-control.sourceforge.net/doc/install.html
+<http://tulip-control.sourceforge.net/doc/install.html>
 or fetch the release from
-http://sourceforge.net/projects/tulip-control/files/
+<http://sourceforge.net/projects/tulip-control/files/>
 
  - `tulip.polytope` is now a separate Python package,
-   which is named simply `polytope`. The primary repository for it is https://github.com/tulip-control/polytope
+   which is named simply `polytope`. The primary repository for it is <https://github.com/tulip-control/polytope>
    and releases are available from PyPI at
-   https://pypi.python.org/pypi/polytope
+   <https://pypi.python.org/pypi/polytope>
 
 - support for switched systems with external inputs is introduced
 

@@ -32,7 +32,7 @@
 """Routines for working with gridworlds.
 
 Note (24 June 2012): Several pieces of source code are taken or
-derived from btsynth; see http://scottman.net/2012/btsynth
+derived from btsynth; see <http://scottman.net/2012/btsynth>
 """
 import copy
 import itertools

@@ -155,7 +155,7 @@ def ts_ba_sync_prod(transition_system, buchi_automaton):
     Erratum
     =======
     note the erratum: P_{pers}(A) is ^_{q\in F} !q, verified from:
-    http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf
+    <http://www-i2.informatik.rwth-aachen.de/~katoen/errata.pdf>
 
     See Also
     ========

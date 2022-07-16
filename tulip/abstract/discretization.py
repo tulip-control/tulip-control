@@ -1730,7 +1730,7 @@ def multiproc_discretize_switched(
     for job in jobs:
         job.start()
     # flush before join:
-    #   http://stackoverflow.com/questions/19071529/
+    #   <http://stackoverflow.com/questions/19071529/>
     abstractions = dict()
     for job in jobs:
         mode, absys = q.get()

@@ -36,11 +36,11 @@
 """Load output of scheck or lbt into a NetworkX DiGraph
 
 The official website of scheck is
-http://tcs.legacy.ics.tkk.fi/users/tlatvala/scheck/
+<http://tcs.legacy.ics.tkk.fi/users/tlatvala/scheck/>
 It uses the output format of LBT, which is defined at
-http://www.tcs.hut.fi/Software/maria/tools/lbt/
+<http://www.tcs.hut.fi/Software/maria/tools/lbt/>
 
-scheck is also available at https://github.com/slivingston/scheck
+scheck is also available at <https://github.com/slivingston/scheck>
 where a fork of it is maintained.
 
 * Parsing is done by hand; consider changing to use pyparsing.

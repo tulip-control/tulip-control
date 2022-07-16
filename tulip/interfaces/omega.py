@@ -1,6 +1,6 @@
 # Copyright by California Institute of Technology
 # All rights reserved. See LICENSE file at:
-# https://github.com/tulip-control/tulip-control
+# <https://github.com/tulip-control/tulip-control>
 """Interface to `omega` package.
 
 `omega` constructs symbolic transducers,
@@ -8,7 +8,7 @@ represented as binary decision diagrams.
 This module applies enumeration,
 to return enumerated transducers.
 
-<https://pypi.python.org/pypi/omega>
+<https://pypi.org/project/omega>
 """
 import logging
 import time
