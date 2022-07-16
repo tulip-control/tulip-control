@@ -128,7 +128,7 @@ def _format_python_package_message(name, package, url):
     if package is None:
         s = (
             f'Could not import Python package `{name}`.\n'
-            f'Can be installed from:\n    `{url}`\n')
+            f'Can be installed from:\n    <{url}>\n')
     else:
         s = (
             f'Found Python package `{name}` as:\n'
