@@ -163,9 +163,7 @@ class Parser:
         self.start = 'claim'
         self.tokens = self.lexer.tokens
         self.tabmodule = TABMODULE
-        self.parser = ply.yacc.yacc(
-            module=self,
-            tabmodule=TABMODULE,
+        self.build(
             write_tables=True,
             debug=False)
         self.g = None
