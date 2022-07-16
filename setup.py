@@ -3,6 +3,7 @@
 import logging
 import subprocess
 import sys
+import traceback as _tb
 
 from setuptools import setup
 # inline:
@@ -87,7 +88,10 @@ def run_setup():
             debuglog=logger)
         plytable_build_failed = False
     except Exception as e:
-        print(f'Failed to build PLY tables: {e}')
+        tb = ''.join(
+            _tb.format_exception(e))
+        print(
+            f'Failed to build PLY tables, raising:\n{tb}')
         plytable_build_failed = True
     # version
     try:
