@@ -112,7 +112,7 @@ class Lexer:
     t_IMP = r' \- > '
 
     # Ignored characters
-    t_ignore = ' \t'
+    t_ignore = ''.join(['\x20', '\t'])
 
     def __init__(self):
         self.lexer = ply.lex.lex(
