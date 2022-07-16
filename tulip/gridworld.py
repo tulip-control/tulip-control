@@ -41,7 +41,7 @@ import time
 
 import numpy as np
 
-from .spec.form import GRSpec
+from tulip.spec.form import GRSpec
 
 # inline:
 #
