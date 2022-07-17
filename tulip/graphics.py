@@ -257,7 +257,23 @@ def quiver(x, v, ax=None, **kwargs):
 
 
 def _grouper(n, iterable, fillvalue=None):
-    """`grouper(3, 'ABCDEFG', 'x')` --> ABC DEF Gxx."""
+    """Yield chunks of length `n`.
+
+    Pad the last chunk using `fillvalue`,
+    to be of length `n`.
+
+    Example:
+
+    ```python
+    chunks = grouper(3, 'ABCDEFG', 'x')
+    chunks_ = [
+        ('A', 'B', 'C'),
+        ('D', 'E', 'F'),
+        ('G', 'x', 'x')]
+    assert chunks == chunks_, (
+        chunks, chunks_)
+    ```
+    """
     args = [iter(iterable)] * n
     return izip_longest(fillvalue=fillvalue, *args)
 
