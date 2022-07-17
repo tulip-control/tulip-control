@@ -38,6 +38,7 @@ Their use in new applications is discouraged.
 
 They come from <https://github.com/johnyf/pyvectorized>.
 """
+import collections.abc as _abc
 import itertools as _itr
 import logging
 import typing as _ty
@@ -90,7 +91,9 @@ def newax(
         mode:
             _ty.Literal[
                 'list', 'matrix']='list',
-        dim=2
+        dim:
+            _ty.Literal[2, 3]
+            =2
         ) -> tuple[
             '_mpl.axes.Axes',
             '_mpl.figure.Figure']:
@@ -291,7 +294,15 @@ def quiver(
     return h
 
 
-def _grouper(n, iterable, fillvalue=None):
+def _grouper(
+        n:
+            int,
+        iterable:
+            _abc.Iterable,
+        fillvalue:
+            str |
+            None=None
+        ) -> _abc.Iterator:
     """Yield chunks of length `n`.
 
     Pad the last chunk using `fillvalue`,
@@ -313,7 +324,7 @@ def _grouper(n, iterable, fillvalue=None):
     return _itr.zip_longest(fillvalue=fillvalue, *args)
 
 
-def networkx_to_graphviz(graph):
+def networkx_to_graphviz(graph) -> '_gv.Digraph':
     """Convert `networkx` `graph` to `graphviz.Digraph`."""
     _assert_graphviz()
     if graph.is_directed():

@@ -46,9 +46,11 @@ parsers = dict()
 
 
 def parse(
-        formula,
+        formula:
+            str,
         full_operators:
-            bool=False):
+            bool=False
+        ) -> _ast.NodeSpec:
     """Parse formula string and create abstract syntax tree (AST).
 
     @param full_operators:
@@ -69,7 +71,10 @@ def parse(
         'failed')
 
 
-def _replace_full_name_operators(formula):
+def _replace_full_name_operators(
+        formula:
+            str
+        ) -> str:
     """Replace full operator names with symbols.
 
     Replaces full names with symbols,

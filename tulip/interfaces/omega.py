@@ -10,6 +10,7 @@ to return enumerated transducers.
 
 <https://pypi.org/project/omega>
 """
+import collections.abc as _abc
 import logging
 import time
 
@@ -29,7 +30,10 @@ import tulip.spec as _spec
 log = logging.getLogger(__name__)
 
 
-def is_realizable(spec):
+def is_realizable(
+        spec:
+            _spec.GRSpec
+        ) -> bool:
     """Return `True` if, and only if, realizable.
 
     See `synthesize_enumerated_streett` for more details.
@@ -176,7 +180,12 @@ def _grspec_to_automaton(
     return a
 
 
-def _conj(strings, f):
+def _conj(
+        strings:
+            _abc.Iterable,
+        f:
+            _abc.Callable
+        ) -> str:
     if not strings:
         return 'TRUE'
     return ' & '.join(f(s) for s in strings)

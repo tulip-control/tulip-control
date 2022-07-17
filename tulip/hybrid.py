@@ -34,6 +34,7 @@
 import itertools
 import logging
 import pprint as _pp
+import typing as _ty
 import warnings as _warn
 
 import numpy as np
@@ -50,7 +51,28 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _indent(s, n):
+IJ = tuple[int, int]
+maybe_array = (
+    np.ndarray |
+    None)
+maybe_float = (
+    float |
+    None)
+Hull = pc.Polytope
+Polytope = (
+    Hull |
+    pc.Region)
+TimeSemantics = _ty.Literal[
+    'discrete',
+    'sampled']
+
+
+def _indent(
+        s:
+            str,
+        n:
+            int
+        ) -> str:
     s = s.split('\n')
     w = n * ' '
     return w + ('\n' + w).join(s)
@@ -113,15 +135,29 @@ class LtiSysDyn:
     """
     def __init__(
             self,
-            A=None,
-            B=None,
-            E=None,
-            K=None,
-            Uset=None,
-            Wset=None,
-            domain=None,
-            time_semantics=None,
-            timestep=None):
+            A:
+                maybe_array=None,
+            B:
+                maybe_array=None,
+            E:
+                maybe_array=None,
+            K:
+                maybe_array=None,
+            Uset:
+                Hull |
+                None=None,
+            Wset:
+                Hull |
+                None=None,
+            domain:
+                Polytope |
+                None=None,
+            time_semantics:
+                TimeSemantics |
+                None=None,
+            timestep:
+                float |
+                None=None):
         if Uset is None:
             _warn.warn('Uset not given to `LtiSysDyn()`')
         elif not isinstance(Uset, pc.Polytope):
@@ -224,9 +260,12 @@ class LtiSysDyn:
     def plot(
             self,
             ax=None,
-            color=None,
-            show_domain=True,
-            res=(5, 5),
+            color:
+                maybe_array=None,
+            show_domain:
+                bool=True,
+            res:
+                IJ=(5, 5),
             **kwargs):
         try:
             from tulip.graphics import newax, quiver
@@ -258,9 +297,7 @@ class PwaSysDyn:
     - `list_subsys`: list of `LtiSysDyn`
 
     - `domain`: domain over which piecewise-affine
-      system is defined. Type:
-      - `polytope.Polytope` or
-      - `polytope.Region`
+      system is defined.
 
     - `time_semantics`: either
       - `'discrete'` (if system is originally
@@ -284,10 +321,17 @@ class PwaSysDyn:
     """
     def __init__(
             self,
-            list_subsys=None,
-            domain=None,
-            time_semantics=None,
-            timestep=None,
+            list_subsys:
+                list[LtiSysDyn] |
+                None=None,
+            domain:
+                Polytope |
+                None=None,
+            time_semantics:
+                TimeSemantics |
+                None=None,
+            timestep:
+                maybe_float=None,
             overwrite_time:
                 bool=True):
         """Constructor.
@@ -380,13 +424,21 @@ class PwaSysDyn:
     @classmethod
     def from_lti(
             cls,
-            A=None,
-            B=None,
-            E=None,
-            K=None,
-            Uset=None,
-            Wset=None,
-            domain=None):
+            A:
+                maybe_array=None,
+            B:
+                maybe_array=None,
+            E:
+                maybe_array=None,
+            K:
+                maybe_array=None,
+            Uset:
+                Hull=None,
+            Wset:
+                Hull=None,
+            domain:
+                Polytope=None
+            ) -> 'PwaSysDyn':
         if A is None:
             A = list()
         if B is None:
@@ -402,7 +454,8 @@ class PwaSysDyn:
     def plot(
             self,
             ax=None,
-            show_domain=True,
+            show_domain:
+                bool=True,
             **kwargs):
         try:
             from tulip.graphics import newax
@@ -485,13 +538,26 @@ class SwitchedSysDyn:
     """
     def __init__(
             self,
-            disc_domain_size=(1, 1),
-            dynamics=None,
+            disc_domain_size:
+                IJ=(1, 1),
+            dynamics:
+                dict[
+                    tuple,
+                    PwaSysDyn] |
+                None=None,
             cts_ss=None,
-            env_labels=None,
-            disc_sys_labels=None,
-            time_semantics=None,
-            timestep=None,
+            env_labels:
+                list |
+                None=None,
+            disc_sys_labels:
+                list |
+                None=None,
+            time_semantics:
+                TimeSemantics |
+                None=None,
+            timestep:
+                float |
+                None=None,
             overwrite_time:
                 bool=True):
         """Constructor.
@@ -597,7 +663,16 @@ class SwitchedSysDyn:
                     + newlines)
         return s
 
-    def _check_labels(self, n, labels):
+    def _check_labels(
+            self,
+            n:
+                int,
+            labels:
+                list |
+                None
+            ) -> (
+                list |
+                None):
         # default
         if labels is None:
             return None
@@ -654,8 +729,12 @@ class SwitchedSysDyn:
     @classmethod
     def from_pwa(
             cls,
-            list_subsys=None,
-            domain=None):
+            list_subsys:
+                list |
+                None=None,
+            domain:
+                Polytope=None
+            ) -> 'SwitchedSysDyn':
         if list_subsys is None:
             list_subsys = list()
         pwa_sys = PwaSysDyn(
@@ -668,13 +747,21 @@ class SwitchedSysDyn:
     @classmethod
     def from_lti(
             cls,
-            A=None,
-            B=None,
-            E=None,
-            K=None,
-            Uset=None,
-            Wset=None,
-            domain=None):
+            A:
+                maybe_array=None,
+            B:
+                maybe_array=None,
+            E:
+                maybe_array=None,
+            K:
+                maybe_array=None,
+            Uset:
+                Hull=None,
+            Wset:
+                Hull=None,
+            domain:
+                Polytope=None
+            ) -> 'SwitchedSysDyn':
         if A is None:
             A = list()
         if B is None:
@@ -693,9 +780,14 @@ class SwitchedSysDyn:
 
 
 def _push_time_data(
-        system_list,
-        time_semantics,
-        timestep):
+        system_list:
+            list,
+        time_semantics:
+            TimeSemantics |
+            None,
+        timestep:
+            float |
+            None):
     """Overwrite the time data in `system_list`.
 
     Emits warnings if overwriting existing data.
@@ -761,8 +853,11 @@ def _check_time_consistency(
             list[
                 LtiSysDyn |
                 PwaSysDyn],
-        time_semantics,
-        timestep):
+        time_semantics:
+            TimeSemantics,
+        timestep:
+            float |
+            None):
     """Assert that all items of `system_list` have same semantics.
 
     Checks that all the dynamical systems in `system_list`

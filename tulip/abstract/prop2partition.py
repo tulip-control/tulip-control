@@ -33,6 +33,7 @@
 """Proposition-preserving partition module."""
 import copy
 import logging
+import typing as _ty
 import warnings
 
 import numpy as np
@@ -41,6 +42,7 @@ import polytope.plot as _pplot
 import scipy.sparse as sp
 
 import tulip.graphics as _graphics
+_mpl = _graphics._mpl
 import tulip.transys as trs
 
 
@@ -56,6 +58,9 @@ __all__ = [
 
 _hl = 40 * '-'
 logger = logging.getLogger(__name__)
+Polytope = (
+    pc.Polytope |
+    pc.Region)
 
 
 def prop2part(
@@ -184,8 +189,10 @@ def part2convex(
 def pwa_partition(
         pwa_sys:
             'PwaSysDyn',
-        ppp,
-        abs_tol=1e-5
+        ppp:
+            'PropPreservingPartition',
+        abs_tol:
+            float=1e-5
         ) -> tuple[
             'PropPreservingPartition',
             list,
@@ -285,7 +292,8 @@ def add_grid(
             int |
             list[int] |
             None=None,
-        abs_tol=1e-10
+        abs_tol:
+            float=1e-10
         ) -> 'PropPreservingPartition':
     """Refine proposition-preserving partition using grids.
 
@@ -437,8 +445,18 @@ def add_grid(
 
 
 def compute_interval(
-        low_domain, high_domain, size,
-        abs_tol=1e-7):
+        low_domain:
+            float,
+        high_domain:
+            float,
+        size:
+            float,
+        abs_tol:
+            float=1e-7
+        ) -> list[
+            tuple[
+                float,
+                float]]:
     """Compute intervals for each dimension."""
     list_g = list()
     i = low_domain
@@ -452,7 +470,12 @@ def compute_interval(
     return list_g
 
 
-def product_interval(list1, list2):
+def product_interval(
+        list1:
+            list[float],
+        list2:
+            list[float]
+        ) -> list[float]:
     """Combine all intervals, for any two interval lists."""
     new_list = list()
     for m in range(len(list1)):
@@ -500,7 +523,8 @@ class PropPreservingPartition(pc.MetricPartition):
             prop_regions:
                 dict[..., Polytope] |
                 None=None,
-            check=True):
+            check:
+                bool=True):
         if regions is None:
             regions = list()
         # super().__init__(adj)
@@ -540,13 +564,17 @@ class PropPreservingPartition(pc.MetricPartition):
         super(PropPreservingPartition, self).__init__(domain)
         self.adj = adj
 
-    def reg2props(self, region_index):
+    def reg2props(
+            self,
+            region_index:
+                int
+            ) -> set:
         return self.regions[region_index].props.copy()
 
     # TODO: iterator over pairs
     # TODO: use `networkx` graph to store partition
 
-    def is_symbolic(self):
+    def is_symbolic(self) -> None:
         """Check that the set of preserved predicates
         are bijectively mapped to the symbols.
 
@@ -566,7 +594,7 @@ class PropPreservingPartition(pc.MetricPartition):
                 'continuous atomic propositions:\n\t'
                 f'{set(self.prop_regions)}')
 
-    def preserves_predicates(self):
+    def preserves_predicates(self) -> bool:
         """Return `True` if each `Region` <= Predicates for the
         predicates in `prop_regions.values`,
         where `prop_regions` is a bijection to
@@ -621,19 +649,40 @@ class PropPreservingPartition(pc.MetricPartition):
 
     def plot(
             self,
-            trans=None,
-            ppp2trans=None,
-            only_adjacent=False,
-            ax=None,
-            plot_numbers=True,
-            color_seed=None):
+            trans:
+                np.ndarray=None,
+            ppp2trans:
+                list |
+                None=None,
+            only_adjacent:
+                bool=False,
+            ax:
+                _ty.Union[
+                    '_mpl.axes.Axes',
+                    None]
+                =None,
+            plot_numbers:
+                bool=True,
+            color_seed:
+                int |
+                None=None
+            ) -> '_mpl.axes.Axes':
         """For details see `polytope.plot.plot_partition`."""
         return _pplot.plot_partition(
             self, trans,
             ppp2trans, only_adjacent,
             ax, plot_numbers, color_seed)
 
-    def plot_props(self, ax=None, text_color='yellow'):
+    def plot_props(
+            self,
+            ax:
+                _ty.Union[
+                    '_mpl.axes.Axes',
+                    None]
+                =None,
+            text_color:
+                str='yellow'
+            ) -> '_mpl.axes.Axes':
         """Plot labeled regions of continuous propositions."""
         if ax is None:
             ax, fig = _graphics.newax()

@@ -156,7 +156,14 @@ class AbstractSwitched:
         ab = self.modes[mode]
         return ab.ppp2pwa(region_idx)
 
-    def ppp2sys(self, mode, i):
+    def ppp2sys(
+            self,
+            mode,
+            i:
+                int
+            ) -> tuple[
+                int,
+                _hyb.PwaSysDyn]:
         """Return index of active PWA subsystem in `mode`,
 
         @param mode:
@@ -174,8 +181,11 @@ class AbstractSwitched:
 
     def plot(
             self,
-            show_ts=False,
-            only_adjacent=False):
+            show_ts:
+                bool=False,
+            only_adjacent:
+                bool=False
+            ) -> list['_mpl.axes.Axes']:
         """Plot mode partitions and merged partition, if one exists.
 
         For details read `AbstractPwa.plot`.
@@ -325,7 +335,13 @@ class AbstractPwa:
         region = self.ppp[region_index]
         return (region_index, region)
 
-    def ppp2trans(self, region_index):
+    def ppp2trans(
+            self,
+            region_index:
+                int
+            ) -> tuple[
+                Polytope,
+                _hyb.LtiSysDyn]:
         """Return the transition set constraint and active subsystem,
 
         for non-conservative planning.
@@ -336,7 +352,8 @@ class AbstractPwa:
 
     def ppp2pwa(
             self,
-            region_index
+            region_index:
+                int
             ) -> tuple[
                 int,
                 pc.Region]:
@@ -356,7 +373,8 @@ class AbstractPwa:
 
     def ppp2sys(
             self,
-            region_index
+            region_index:
+                int
             ) -> tuple[
                 int,
                 pc.Region]:
@@ -377,7 +395,8 @@ class AbstractPwa:
 
     def ppp2orig(
             self,
-            region_index
+            region_index:
+                int
             ) -> tuple[
                 int,
                 pc.Region]:
@@ -393,7 +412,11 @@ class AbstractPwa:
         orig_region = self.orig_ppp[j]
         return (j, orig_region)
 
-    def _ppp2other_str(self, ppp2other):
+    def _ppp2other_str(
+            self,
+            ppp2other:
+                list
+            ) -> str:
         if ppp2other is None:
             return ''
         c = list()
@@ -401,7 +424,7 @@ class AbstractPwa:
             c.append(f'\t\t{i} -> {other}\n')
         return ''.join(c)
 
-    def _debug_str_(self):
+    def _debug_str_(self) -> str:
         return (
             f'{self.ppp}'
             f'{self.ts}'
@@ -416,7 +439,10 @@ class AbstractPwa:
                 bool=False,
             only_adjacent:
                 bool=False,
-            color_seed=None):
+            color_seed:
+                int |
+                None=None
+            ) -> '_mpl.axes.Axes':
         """Plot partition and optionally feasible transitions.
 
         @param show_ts:
@@ -431,7 +457,7 @@ class AbstractPwa:
             self, show_ts, only_adjacent, color_seed)
         return ax
 
-    def verify_transitions(self):
+    def verify_transitions(self) -> None:
         logger.info('verifying transitions...')
         for from_state, to_state in self.ts.transitions():
             i, from_region = self.ts2ppp(from_state)
@@ -460,10 +486,17 @@ class AbstractPwa:
 
 
 def _plot_abstraction(
-        ab,
-        show_ts,
-        only_adjacent,
-        color_seed):
+        ab:
+            AbstractPwa,
+        show_ts:
+            bool,
+        only_adjacent:
+            bool,
+        color_seed:
+            int
+        ) -> _ty.Union[
+            '_mpl.axes.Axes',
+            None]:
     if ab.ppp is None or ab.ts is None:
         warnings.warn('Either ppp or ts is None.')
         return
@@ -1558,7 +1591,14 @@ def _discretize_dual(
         disc_params=param)
 
 
-def reachable_within(trans_length, adj_k, adj):
+def reachable_within(
+        trans_length:
+            int,
+        adj_k:
+            np.ndarray,
+        adj:
+            np.ndarray
+        ) -> np.ndarray:
     """Find cells reachable within trans_length hops."""
     if trans_length <= 1:
         return adj_k
@@ -1663,8 +1703,17 @@ def discretize_overlap(
 
 
 def multiproc_discretize(
-        q, mode, ppp,
-        cont_dyn, disc_params):
+        q:
+            mp.Queue,
+        mode:
+            str,
+        ppp:
+            PPP,
+        cont_dyn:
+            SystemDynamics,
+        disc_params:
+            dict
+        ) -> None:
     global logger
     logger = mp.log_to_stderr()
     name = mp.current_process().name
@@ -1676,8 +1725,15 @@ def multiproc_discretize(
 
 
 def multiproc_get_transitions(
-        q, absys, mode,
-        ssys, params):
+        q:
+            mp.Queue,
+        absys,
+        mode,
+        ssys:
+            SystemDynamics,
+        params:
+            dict
+        ) -> None:
     global logger
     logger = mp.log_to_stderr()
     name = mp.current_process().name
@@ -1691,11 +1747,20 @@ def multiproc_get_transitions(
 
 
 def multiproc_discretize_switched(
-        ppp, hybrid_sys,
-        disc_params=None,
-        plot=False,
-        show_ts=False,
-        only_adjacent=True):
+        ppp:
+            PPP,
+        hybrid_sys:
+            _hyb.SwitchedSysDyn,
+        disc_params:
+            dict |
+            None=None,
+        plot:
+            bool=False,
+        show_ts:
+            bool=False,
+        only_adjacent:
+            bool=True
+        ) -> AbstractSwitched:
     """Parallel implementation of `discretize_switched`.
 
     Uses the multiprocessing package.
@@ -1827,7 +1892,14 @@ def discretize_switched(
     return merged_abstr
 
 
-def plot_mode_partitions(swab, show_ts, only_adjacent):
+def plot_mode_partitions(
+        swab:
+            AbstractSwitched,
+        show_ts:
+            bool,
+        only_adjacent:
+            bool
+        ) -> None:
     """Save each mode's partition and final merged partition."""
     axs = swab.plot(show_ts, only_adjacent)
     if not axs:
@@ -1848,7 +1920,10 @@ def plot_mode_partitions(swab, show_ts, only_adjacent):
         ax.figure.savefig(fname)
 
 
-def plot_annot(ax):
+def plot_annot(
+        ax:
+            '_mpl.axes.Axes'
+        ) -> None:
     fontsize = 5
     for tick in ax.xaxis.get_major_ticks():
         tick.label1.set_fontsize(fontsize)
@@ -1863,7 +1938,11 @@ def merge_abstractions(
             AbstractSwitched,
         trans:
             dict[..., AbstractPwa],
-        abstr, modes, mode_nums):
+        abstr,
+        modes,
+        mode_nums:
+            list[int]
+        ) -> None:
     """Construct merged transitions."""
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
@@ -1914,12 +1993,16 @@ def merge_abstractions(
 
 
 def get_transitions(
-        abstract_sys,
+        abstract_sys:
+            AbstractSwitched,
         mode,
         ssys,
-        N=10,
-        closed_loop=True,
-        trans_length=1
+        N:
+            int=10,
+        closed_loop:
+            bool=True,
+        trans_length:
+            int=1
         ) -> sp.lil_matrix:
     """Find which transitions are feasible in given mode.
 

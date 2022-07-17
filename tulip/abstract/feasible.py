@@ -66,10 +66,22 @@ Polytope = (
 
 
 def is_feasible(
-        from_region, to_region, sys, N,
-        closed_loop=True,
-        use_all_horizon=False,
-        trans_set=None):
+        from_region:
+            Polytope,
+        to_region:
+            Polytope,
+        sys:
+            _hyb.LtiSysDyn,
+        N:
+            int,
+        closed_loop:
+            bool=True,
+        use_all_horizon:
+            bool=False,
+        trans_set:
+            Polytope |
+            None=None
+        ) -> bool:
     """Return `True` if `to_region` is reachable `from_region`.
 
     For details read function `solve_feasible`.
@@ -88,12 +100,15 @@ def solve_feasible(
             Polytope,
         ssys:
             _hyb.LtiSysDyn,
-        N=1,
+        N:
+            int=1,
         closed_loop:
             bool=True,
         use_all_horizon:
             bool=False,
-        trans_set=None,
+        trans_set:
+            Polytope |
+            None=None,
         max_num_poly=5
         ) -> Polytope:
     r"""Compute `S0 \subseteq trans_set` from which `P2` is `N`-reachable.
@@ -166,10 +181,14 @@ def _solve_closed_loop_fixed_horizon(
             Polytope,
         P2:
             Polytope,
-        ssys,
+        ssys:
+            _hyb.LtiSysDyn,
         N:
             int,
-        trans_set=None):
+        trans_set:
+            Polytope |
+            None=None
+        ) -> Polytope:
     """Underapproximate states in `P1` that can reach `P2`.
 
     Underapproximate states in polytope `P1` that
@@ -212,7 +231,18 @@ def _solve_closed_loop_fixed_horizon(
 
 
 def _solve_closed_loop_bounded_horizon(
-        P1, P2, ssys, N, trans_set=None):
+        P1:
+            _hyb.LtiSysDyn,
+        P2:
+            Polytope,
+        ssys:
+            _hyb.LtiSysDyn,
+        N:
+            int,
+        trans_set:
+            Polytope |
+            None=None
+        ) -> Polytope:
     """Underapproximate `P1` subset that can reach `P2`.
 
     Underapproximates the states in polytope `P1`
@@ -254,8 +284,18 @@ def _solve_closed_loop_bounded_horizon(
 
 
 def _underapproximate_attractor(
-        P1, P2, ssys, N,
-        trans_set=None):
+        P1:
+            Polytope,
+        P2:
+            Polytope,
+        ssys:
+            _hyb.LtiSysDyn,
+        N:
+            int,
+        trans_set:
+            Polytope |
+            None=None
+        ) -> Polytope:
     """Underapproximate `N`-step attractor of `P2`.
 
     Underapproximates the `N`-step attractor
@@ -291,7 +331,7 @@ def _underapproximate_attractor(
     return r
 
 
-def _print_horizon_warning():
+def _print_horizon_warning() -> None:
     print(
         'WARNING: different timing semantics and assumptions '
         'from the case of fixed horizon. '
@@ -301,9 +341,20 @@ def _print_horizon_warning():
 
 
 def solve_open_loop(
-        P1, P2, ssys, N,
-        trans_set=None,
-        max_num_poly=5):
+        P1:
+            Polytope,
+        P2:
+            Polytope,
+        ssys:
+            _hyb.LtiSysDyn,
+        N:
+            int,
+        trans_set:
+            Polytope |
+            None=None,
+        max_num_poly:
+            int=5
+        ) -> Polytope:
     r1 = P1.copy()
         # Initial set
     r2 = P2.copy()
@@ -335,7 +386,19 @@ def solve_open_loop(
     return s0
 
 
-def poly_to_poly(p1, p2, ssys, N, trans_set=None):
+def poly_to_poly(
+        p1:
+            Polytope,
+        p2:
+            Polytope,
+        ssys:
+            _hyb.LtiSysDyn,
+        N:
+            int,
+        trans_set:
+            Polytope |
+            None=None
+        ) -> Polytope:
     """Compute `s0` for open-loop `N`-reachability.
 
     Computes `s0` for open-loop polytope-to-polytope
@@ -357,7 +420,12 @@ def poly_to_poly(p1, p2, ssys, N, trans_set=None):
     return pc.reduce(s0)
 
 
-def volumes_for_reachability(part, max_num_poly):
+def volumes_for_reachability(
+        part:
+            list[Polytope],
+        max_num_poly:
+            int
+        ) -> Polytope:
     if len(part) <= max_num_poly:
         return part
     vol_list = np.zeros(len(part))
@@ -374,7 +442,8 @@ def volumes_for_reachability(part, max_num_poly):
 def createLM(
         ssys:
             _hyb.LtiSysDyn,
-        N,
+        N:
+            int,
         list_P:
             Polytope |
             list[Polytope],
@@ -386,7 +455,10 @@ def createLM(
             None=None,
         disturbance_ind:
             list[int] |
-            None=None):
+            None=None
+        ) -> tuple[
+            np.ndarray,
+            np.ndarray]:
     r"""Compute the components of the polytope:
 
     ```
@@ -639,7 +711,12 @@ def get_max_extreme(
     return d_hat.reshape(d_hat.size, 1)
 
 
-def _block_diag2(A, B):
+def _block_diag2(
+        A:
+            np.ndarray,
+        B:
+            np.ndarray
+        ) -> np.ndarray:
     """Similar to `block_diag()` in `scipy.linalg`.
 
     This function is similar to the function

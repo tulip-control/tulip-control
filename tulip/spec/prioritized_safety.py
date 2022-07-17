@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 #
 """Representing prioritized safety specifications."""
+import collections.abc as _abc
 import itertools as _itr
 
 import tulip.transys.automata as _automata
@@ -46,7 +47,14 @@ class FAWithPriority:
     finite automaton, with priority.
     """
 
-    def __init__(self, fa, priority, level):
+    def __init__(
+            self,
+            fa:
+                FA,
+            priority:
+                int,
+            level:
+                int):
         if not isinstance(fa, FA):
             raise TypeError(fa)
         if not isinstance(priority, int):
@@ -57,15 +65,15 @@ class FAWithPriority:
         self._priority = priority
         self._level = level
 
-    def priority(self):
+    def priority(self) -> int:
         """Get the priority of this rule."""
         return self._priority
 
-    def automaton(self):
+    def automaton(self) -> FA:
         """Get the automaton of this rule."""
         return self._fa
 
-    def level(self):
+    def level(self) -> int:
         """Get the level of this rule."""
         return self._level
 
@@ -159,7 +167,8 @@ class PrioritizedSpecification:
 
     def get_rules_at(
             self,
-            level
+            level:
+                int
             ) -> list[FAWithPriority]:
         """Return the `list` of rules at the given level."""
         if level >= len(self._Psi):
@@ -174,24 +183,24 @@ class PrioritizedSpecification:
                 rules.append(phi)
         return rules
 
-    def get_states(self):
+    def get_states(self) -> _abc.Iterator:
         """Get the product of the states in all the finite automata."""
         return _itr.product(*(
             phi.automaton().states
             for phi in self))
 
-    def get_initial_states(self):
+    def get_initial_states(self) -> _abc.Iterator:
         """Get the product of the initial states of all the finite automata."""
         return _itr.product(*(
             phi.automaton().states.initial
             for phi in self))
 
-    def get_accepting_states(self):
+    def get_accepting_states(self) -> _abc.Iterator:
         """Get product of the accepting states of all the finite automata."""
         return _itr.product(*(
             phi.automaton().states.accepting
             for phi in self))
 
-    def get_num_levels(self):
+    def get_num_levels(self) -> int:
         """Get the number of levels."""
         return len(self._Psi)

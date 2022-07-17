@@ -34,6 +34,7 @@ import collections.abc as _abc
 import copy
 import logging
 import pprint
+import typing as _ty
 import warnings
 
 import networkx as _nx
@@ -67,25 +68,44 @@ logger = logging.getLogger(__name__)
 _hl = '\n' + 60 * '-'
 
 
+Formulas = list[str]
+Solver = _ty.Literal[
+    'gr1c',
+    'gr1py',
+    'omega',
+    'slugs',
+    ]
+maybe_mealy = (
+    transys.MealyMachine |
+    None)
+maybe_fts = (
+    transys.FTS |
+    None)
 
-def _pstr(s):
+
+def _pstr(s) -> str:
     return f'({s})'
 
 
-def _disj(set0):
+def _disj(set0) -> str:
     return ' || '.join([
         '(' + str(x) + ')'
         for x in set0])
 
 
-def _conj(set0):
+def _conj(set0) -> str:
     return ' && '.join([
         '(' + str(x) + ')'
         for x in set0
         if x != ''])
 
 
-def _conj_intersection(set0, set1, parenth=True):
+def _conj_intersection(
+        set0,
+        set1,
+        parenth:
+            bool=True
+        ) -> str:
     if parenth:
         return ' && '.join([
             '(' + str(x) + ')'
@@ -98,7 +118,11 @@ def _conj_intersection(set0, set1, parenth=True):
             if x in set1])
 
 
-def _conj_neg(set0, parenth=True):
+def _conj_neg(
+        set0,
+        parenth:
+            bool=True
+        ) -> str:
     if parenth:
         return ' && '.join([
             f'!({x})'
@@ -109,7 +133,12 @@ def _conj_neg(set0, parenth=True):
             for x in set0])
 
 
-def _conj_neg_diff(set0, set1, parenth=True):
+def _conj_neg_diff(
+        set0,
+        set1,
+        parenth:
+            bool=True
+        ) -> str:
     if parenth:
         return ' && '.join([
             '!(' + str(x) + ')'
@@ -122,7 +151,7 @@ def _conj_neg_diff(set0, set1, parenth=True):
             if x not in set1])
 
 
-def mutex(iterable):
+def mutex(iterable) -> list[str]:
     """Mutual exclusion for all time."""
     iterable = list(filter(lambda x: x != '', iterable))
     if not iterable or len(iterable) <= 1:
@@ -132,7 +161,7 @@ def mutex(iterable):
         for x in iterable])]
 
 
-def exactly_one(iterable):
+def exactly_one(iterable) -> list[str]:
     """N-ary xor.
 
     Contrast with pure mutual exclusion.
@@ -189,7 +218,15 @@ def _conj_action(
         return _pstr(action)
 
 
-def _conj_actions(actions_dict, solver_expr=None, nxt=False):
+def _conj_actions(
+        actions_dict:
+            dict,
+        solver_expr:
+            dict |
+            None=None,
+        nxt:
+            bool=False
+        ) -> str:
     """Conjunction of multiple action types.
 
     Includes solver expression substitution.
@@ -229,11 +266,17 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
 def iter2var(
         states:
             _abc.Iterable[int | str],
-        variables,
+        variables:
+            dict,
         statevar:
             str,
-        bool_states,
-        must
+        bool_states:
+            bool,
+        must:
+            _ty.Literal[
+                'mutex',
+                'xor',
+                None]
         ) -> tuple[
             dict,
             list | None]:
@@ -382,7 +425,12 @@ def iter2var(
     return state_ids, constraint
 
 
-def _add_actions(constraint, init, trans):
+def _add_actions(
+        constraint,
+        init:
+            list,
+        trans:
+            list):
     if constraint is None:
         return
     trans += [f'X ({constraint[0]})']
@@ -390,10 +438,20 @@ def _add_actions(constraint, init, trans):
 
 
 def _fts2spec(
-    fts, ignore_initial,
-    statevar, actionvar=None,
-    bool_states=False, bool_actions=False
-):
+        fts:
+            transys.FiniteTransitionSystem,
+        ignore_initial:
+            bool,
+        statevar:
+            str,
+        actionvar:
+            str |
+            None=None,
+        bool_states:
+            bool=False,
+        bool_actions:
+            bool=False
+        ) -> tuple:
     """Convert closed FTS to GR(1) representation."""
     raise Exception('deprecated')
     assert isinstance(fts, transys.FiniteTransitionSystem)
@@ -427,7 +485,8 @@ def _fts2spec(
 
 
 def sys_to_spec(
-        ofts,
+        ofts:
+            transys.FiniteTransitionSystem,
         ignore_initial:
             bool,
         statevar:
@@ -435,7 +494,7 @@ def sys_to_spec(
         bool_states:
             bool=False,
         bool_actions=False
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Convert transition system to GR(1) fragment of LTL.
 
     The attribute `FTS.owner` defines who controls the system,
@@ -469,8 +528,6 @@ def sys_to_spec(
     `sys_trans_from_ts}, `env_open_fts2spec`,
     `create_actions`, `create_states`
 
-    @param ofts:
-        `FTS`
     @param ignore_initial:
         Do not include initial state info from TS.
         Enable this to mask absence of FTS initial states.
@@ -567,7 +624,7 @@ def sys_to_spec(
     sys_trans += tmp_trans
     env_trans += _env_trans_from_sys_ts(
         states, state_ids, trans, env_action_ids)
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
         env_vars=env_vars,
         env_init=env_init,
@@ -577,9 +634,17 @@ def sys_to_spec(
 
 
 def env_to_spec(
-    ofts, ignore_initial, statevar,
-    bool_states=False, bool_actions=False
-):
+        ofts:
+            transys.FiniteTransitionSystem,
+        ignore_initial:
+            bool,
+        statevar:
+            str,
+        bool_states:
+            bool=False,
+        bool_actions:
+            bool=False
+        ) -> _spec.GRSpec:
     """Convert env transition system to GR(1) representation.
 
     The following are represented by environment variables:
@@ -668,7 +733,7 @@ def env_to_spec(
         states, state_ids, aps)
     env_init += tmp_init
     env_trans += tmp_trans
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
         env_vars=env_vars,
         env_init=env_init,
@@ -677,7 +742,13 @@ def env_to_spec(
         sys_safety=sys_trans)
 
 
-def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
+def _sys_init_from_ts(
+        states,
+        state_ids,
+        aps,
+        ignore_initial:
+            bool=False
+        ) -> Formulas:
     """Initial state, including enforcement of exactly one."""
     init = list()
     # skip ?
@@ -702,9 +773,13 @@ def _sys_init_from_ts(states, state_ids, aps, ignore_initial=False):
 
 
 def _sys_trans_from_ts(
-    states, state_ids, trans,
-    action_ids=None, sys_action_ids=None, env_action_ids=None
-):
+        states,
+        state_ids,
+        trans,
+        action_ids=None,
+        sys_action_ids=None,
+        env_action_ids=None
+        ) -> Formulas:
     """Convert transition relation to GR(1) sys_safety.
 
     The transition relation may be closed or open,
@@ -843,7 +918,12 @@ def _sys_trans_from_ts(
     return sys_trans
 
 
-def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
+def _env_trans_from_sys_ts(
+        states,
+        state_ids,
+        trans,
+        env_action_ids
+        ) -> Formulas:
     """Convert environment actions to GR(1) env_safety.
 
     This constrains the actions available next to the environment
@@ -902,9 +982,13 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
 
 
 def _env_trans_from_env_ts(
-    states, state_ids, trans,
-    action_ids=None, env_action_ids=None, sys_action_ids=None
-):
+        states,
+        state_ids,
+        trans,
+        action_ids=None,
+        env_action_ids=None,
+        sys_action_ids=None
+        ) -> Formulas:
     r"""Convert environment TS transitions to GR(1) representation.
 
     This contributes to the \rho_e(X, Y, X') part of the spec,
@@ -980,7 +1064,12 @@ def _env_trans_from_env_ts(
     return env_trans
 
 
-def _ap_trans_from_ts(states, state_ids, aps):
+def _ap_trans_from_ts(
+        states,
+        state_ids,
+        aps) -> tuple[
+            Formulas,
+            Formulas]:
     """Require atomic propositions to follow states according to label."""
     init = list()
     trans = list()
@@ -1008,7 +1097,7 @@ def _ap_trans_from_ts(states, state_ids, aps):
     return (init, trans)
 
 
-def _sprint_aps(label, aps):
+def _sprint_aps(label, aps) -> str:
     if 'ap' in label:
         tmp0 = _conj_intersection(
             aps, label['ap'],
@@ -1033,7 +1122,8 @@ def _sprint_aps(label, aps):
 def build_dependent_var_table(
         fts:
             transys.FTS,
-        statevar
+        statevar:
+            str
         ) -> dict[str, str]:
     """Return a `dict` of substitution rules for dependent variables.
 
@@ -1094,17 +1184,18 @@ def map_ap_to_states(
 
 def synthesize_many(
         specs:
-            GRSpec,
+            _spec.GRSpec,
         ts:
-              dict[
+            dict[
                 ...,
-                transys.FiniteTransitionSystem]
-            | None=None,
+                transys.FiniteTransitionSystem] |
+            None=None,
         ignore_init:
-              set
-            | None=None,
+            set |
+            None=None,
         solver:
-            str='omega'):
+            Solver='omega'
+        ) -> maybe_mealy:
     """Synthesize from logic specs and multiple transition systems.
 
     The transition systems are composed synchronously, i.e.,
@@ -1179,21 +1270,20 @@ def synthesize_many(
 
 def synthesize(
         specs:
-            GRSpec,
+            _spec.GRSpec,
         env:
-              transys.FTS
-            | None=None,
+            maybe_fts=None,
         sys:
-              transys.FTS
-            | None=None,
+            maybe_fts=None,
         ignore_env_init:
             bool=False,
         ignore_sys_init:
             bool=False,
         rm_deadends:
             bool=True,
-        solver='omega'
-        ) -> transys.MealyMachine | None:
+        solver:
+            Solver='omega'
+        ) -> maybe_mealy:
     """Function to call the appropriate synthesis tool on the specification.
 
     There are three attributes of `specs` that define what
@@ -1287,11 +1377,12 @@ def synthesize(
 
 def _synthesize(
         specs:
-            GRSpec,
-        solver,
+            _spec.GRSpec,
+        solver:
+            Solver,
         rm_deadends:
             bool
-        ) -> transys.MealyMachine | None:
+        ) -> maybe_mealy:
     """Return `MealyMachine` that implements `specs`."""
     if solver == 'gr1c':
         strategy = gr1c.synthesize(specs)
@@ -1315,7 +1406,14 @@ def _synthesize(
         rm_deadends=rm_deadends)
 
 
-def _trim_strategy(strategy, specs, rm_deadends):
+def _trim_strategy(
+        strategy:
+            maybe_mealy,
+        specs:
+            _spec.GRSpec,
+        rm_deadends:
+            bool
+        ) -> maybe_mealy:
     """Return `MealyMachine` without deadends, or `None`.
 
     If `strategy is None`, then return `None`.
@@ -1342,12 +1440,19 @@ def _trim_strategy(strategy, specs, rm_deadends):
 
 
 def is_realizable(
-        specs,
-        env=None,
-        sys=None,
-        ignore_env_init=False,
-        ignore_sys_init=False,
-        solver='omega'):
+        specs:
+            _spec.GRSpec,
+        env:
+            maybe_fts=None,
+        sys:
+            maybe_fts=None,
+        ignore_env_init:
+            bool=False,
+        ignore_sys_init:
+            bool=False,
+        solver:
+            Solver='omega'
+        ) -> bool:
     """Check realizability.
 
     For details see `synthesize`.
@@ -1380,8 +1485,17 @@ def is_realizable(
 
 
 def _spec_plus_sys(
-        specs, env, sys,
-        ignore_env_init, ignore_sys_init):
+        specs:
+            _spec.GRSpec,
+        env:
+            maybe_fts,
+        sys:
+            maybe_fts,
+        ignore_env_init:
+            bool,
+        ignore_sys_init:
+            bool
+        ) -> _spec.GRSpec:
     if sys is not None:
         if hasattr(sys, 'state_varname'):
             statevar = sys.state_varname
@@ -1432,7 +1546,11 @@ def _spec_plus_sys(
     return specs
 
 
-def _copy_options_from_ts(ts_spec, ts, specs):
+def _copy_options_from_ts(
+        ts_spec,
+        ts,
+        specs
+        ) -> None:
     """Copy `moore, qinit, plus_one` from `ts`, if set.
 
     Otherwise copy the values of those attributes from `specs`.
@@ -1450,7 +1568,7 @@ def strategy2mealy(
         A:
             _nx.DiGraph,
         spec:
-            GRSpec
+            _spec.GRSpec
         ) -> transys.MealyMachine:
     """Convert strategy to Mealy transducer.
 
@@ -1535,7 +1653,16 @@ def strategy2mealy(
 
 
 def _init_edges_using_initial_nodes(
-        A, mach, keys, all_vars, str_vars, initial_state):
+        A:
+            _nx.DiGraph,
+        mach:
+            transys.MealyMachine,
+        keys,
+        all_vars,
+        str_vars:
+            dict,
+        initial_state
+        ) -> None:
     assert A.initial_nodes
     init_valuations = set()
     for u in A.initial_nodes:
@@ -1554,7 +1681,18 @@ def _init_edges_using_initial_nodes(
 
 
 def _init_edges_using_compile_init(
-        spec, A, mach, keys, all_vars, str_vars, initial_state):
+        spec:
+            _spec.GRSpec,
+        A:
+            _nx.DiGraph,
+        mach:
+            transys.MealyMachine,
+        keys,
+        all_vars,
+        str_vars:
+            dict,
+        initial_state
+        ) -> None:
     init_valuations = set()
     # to store tuples of
     # dict values for fast search
@@ -1623,7 +1761,10 @@ def _int2str(
     return label
 
 
-def mask_outputs(machine):
+def mask_outputs(
+        machine:
+            transys.MealyMachine
+        ) -> None:
     """Erase outputs from each edge where they are zero."""
     for u, v, d in machine.edges(data=True):
         for k in d:
@@ -1635,8 +1776,8 @@ def determinize_machine_init(
         mach:
             transys.MealyMachine,
         init_out_values:
-              dict
-            | None=None
+            dict |
+            None=None
         ) -> transys.MealyMachine:
     """Return a determinized copy of `mach` with given initial outputs.
 

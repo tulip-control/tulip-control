@@ -33,6 +33,7 @@
 """Functions for plotting Partitions."""
 import functools as _ft
 import logging
+import typing as _ty
 
 import networkx as nx
 import numpy as np
@@ -41,9 +42,15 @@ import scipy.sparse as sp
 import polytope as pc
 import polytope.plot as _pplot
 
-import tulip.abstract as _abs
+import tulip.abstract.discretization as _disc
+import tulip.abstract.find_controller as _fnd
+import tulip.abstract.prop2partition as _ppp
 import tulip.graphics as _graphics
+_mpl = _graphics._mpl
 _plt = _graphics._plt
+import tulip.hybrid as _hyb
+import tulip.spec as _spec
+import tulip.transys as _trs
 
 
 __all__ = [
@@ -62,7 +69,25 @@ plot_transition_arrow = (
     _pplot.plot_transition_arrow)
 
 
-def plot_abstraction_scc(ab, ax=None):
+Point = np.ndarray
+Polytope = (
+    pc.Polytope |
+    pc.Region)
+PPP = _ppp.PropPreservingPartition
+SystemAbstraction = _ty.Union[
+    '_disc.AbstractSwitched',
+    '_disc.AbstractPwa']
+
+
+def plot_abstraction_scc(
+        ab:
+            SystemAbstraction,
+        ax:
+            _ty.Union[
+                '_mpl.axes.Axes',
+                None]
+            =None
+        ) -> '_mpl.axes.Axes':
     """Plot regions colored by SCC.
 
     SCC abbreviates
@@ -101,14 +126,19 @@ def plot_abstraction_scc(ab, ax=None):
 
 
 def plot_ts_on_partition(
-        ppp,
-        ts,
+        ppp:
+            PPP,
+        ts:
+            _trs.FiniteTransitionSystem,
         ppp2ts:
             list,
         edge_label:
             dict,
-        only_adjacent,
-        ax):
+        only_adjacent:
+            bool,
+        ax:
+            '_mpl.axes.Axes'
+        ) -> None:
     """Plot partition, superimposing graph.
 
     The graph `ts` edges are drawn as arrows.
@@ -148,9 +178,10 @@ def plot_ts_on_partition(
 
 def project_strategy_on_partition(
         ppp:
-            'PropPreservingPartition',
+            PPP,
         mealy:
-            'MealyMachine'):
+            _trs.MealyMachine
+        ) -> sp.lil:
     """Project transitions of `ppp` on `mealy`.
 
     @return:
@@ -177,9 +208,10 @@ def project_strategy_on_partition(
 
 def plot_strategy(
         ab:
-            'AbstractPwa | AbstractSwitched',
+            SystemAbstraction,
         mealy:
-            'MealyMachine'):
+            _trs.MealyMachine
+        ) -> '_mpl.axes.Axes':
     """Plot strategic transitions on PPP.
 
     Assumes that `mealy` is feasible for
@@ -196,12 +228,18 @@ def plot_strategy(
 
 def plot_trajectory(
         ppp:
-            'PropPreservingPartition',
-        x0,
-        u_seq,
-        ssys,
-        ax=None,
-        color_seed=None):
+            PPP,
+        x0:
+            Point,
+        u_seq:
+            np.ndarray,
+        ssys:
+            _hyb.LtiSysDyn,
+        ax:
+            _ty.Union[
+                '_mpl.axes.Axes',
+                None]
+            =None,
         color_seed:
             int |
             None=None
@@ -264,16 +302,24 @@ def simulate2d(
         env_inputs:
             list[dict],
         sys_dyn:
-            'LtiSysDyn',
+            _hyb.LtiSysDyn,
         ctrl:
-            'MealyMachine',
+            _trs.MealyMachine,
         disc_dynamics:
-            'AbstractPwa',
-        T,
-        qinit=r'\E \A',
-        d_init=None,
-        x_init=None,
-        show_traj=True):
+            '_disc.AbstractPwa',
+        T:
+            int,
+        qinit:
+            _spec.QInit=r'\E \A',
+        d_init:
+            dict |
+            None=None,
+        x_init:
+            Point |
+            None=None,
+        show_traj:
+            bool=True
+        ) -> None:
     r"""Simulation for systems with two-dimensional continuous dynamics.
 
     The first item in `env_inputs` is used as the initial environment
@@ -305,7 +351,6 @@ def simulate2d(
         plot trajectory
     """
     N = disc_dynamics.disc_params['N']
-    _fnd = _abs.find_controller
     find_node = _fnd.find_discrete_state
     # initialization:
     #     pick initial continuous state
@@ -377,7 +422,7 @@ def simulate2d(
         x0 = np.array([x[i * N], y[i * N]])
         start = s0_part
         end = disc_dynamics.ppp2ts.index(out['loc'])
-        u = _abs.find_controller.get_input(
+        u = _fnd.get_input(
             x0=x0,
             ssys=sys_dyn,
             abstraction=disc_dynamics,
@@ -409,7 +454,10 @@ def simulate2d(
     _plt.show()
 
 
-def pick_point_in_polytope(poly):
+def pick_point_in_polytope(
+        poly:
+            Polytope
+        ) -> np.ndarray:
     """Return a point in polytope `poly`."""
     poly_vertices = pc.extreme(poly)
     n_extreme = poly_vertices.shape[0]

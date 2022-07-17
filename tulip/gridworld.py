@@ -61,17 +61,27 @@ __all__ = [
     'animate_paths']
 
 
+IJ = tuple[int, int]
+XY = tuple[float, float]
+
+
 class GridWorld:
     """4-connected grids with primitives like obstacles and goals."""
 
-    def __init__(self, gw_desc=None, prefix="Y"):
+    def __init__(
+            self,
+            gw_desc:
+                str |
+                None=None,
+            prefix:
+                str="Y"):
         """Load gridworld described in given string, or make empty instance.
 
         @param gw_desc:
-            String containing a gridworld description, or
+            Gridworld description, or
             None to create an empty instance.
         @param prefix:
-            String to be used as prefix for naming
+            Prefix for naming
             gridworld cell variables.
         """
         if gw_desc is not None:
@@ -83,7 +93,10 @@ class GridWorld:
         self.prefix = prefix
         self.offset = (0, 0)
 
-    def __eq__(self, other):
+    def __eq__(
+            self,
+            other:
+                'GridWorld'):
         """Test for equality.
 
         Does not compare prefixes of cell variable names.
@@ -104,13 +117,23 @@ class GridWorld:
             return False
         return True
 
-    def __ne__(self, other):
+    def __ne__(
+            self,
+            other:
+                'GridWorld'):
         return not self.__eq__(other)
 
     def __str__(self):
         return self.pretty(show_grid=True)
 
-    def __getitem__(self, key, use_next=False, nonbool=True):
+    def __getitem__(
+            self,
+            key:
+                IJ,
+            use_next:
+                bool=False,
+            nonbool:
+                bool=True):
         """Return variable name corresponding to this cell.
 
         Supports negative wrapping, e.g., if Y is an instance of
@@ -177,7 +200,15 @@ class GridWorld:
         """
         return self.__copy__()
 
-    def state(self, key, offset=(0, 0), nonbool=True):
+    def state(
+            self,
+            key:
+                IJ,
+            offset:
+                IJ
+                =(0, 0),
+            nonbool:
+                bool=True):
         """Return dictionary form of state with keys of variable names.
 
         Supports negative indices for key, e.g., as in __getitem__.
@@ -223,7 +254,12 @@ class GridWorld:
                 f'{key[1] + offset[1]}'] = 1
         return output
 
-    def is_empty(self, coord, extend=False):
+    def is_empty(
+            self,
+            coord:
+                IJ,
+            extend:
+                bool=False):
         """Is cell at coord empty?
 
         @param coord:
@@ -246,21 +282,32 @@ class GridWorld:
         else:
             return False
 
-    def mark_occupied(self, coord):
+    def mark_occupied(
+            self,
+            coord:
+                IJ):
         """Mark cell at coord as statically (permanently) occupied."""
         if self.W is None:
             raise ValueError(
                 "Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 1
 
-    def mark_empty(self, coord):
+    def mark_empty(
+            self,
+            coord:
+                IJ):
         """Mark cell at coord as empty."""
         if self.W is None:
             raise ValueError(
                 "Gridworld is empty; no cells exist.")
         self.W[coord[0]][coord[1]] = 0
 
-    def is_reachable(self, start, stop):
+    def is_reachable(
+            self,
+            start:
+                IJ,
+            stop:
+                IJ):
         """Decide whether there is a path from start cell to stop.
 
         Assume the gridworld is 4-connected.
@@ -327,8 +374,18 @@ class GridWorld:
             CLOSED.append(current)
         return False
 
-    def plot(self, font_pt=18, show_grid=False, grid_width=2,
-             troll_list=None, axes=None):
+    def plot(
+            self,
+            font_pt:
+                int=18,
+            show_grid:
+                bool=False,
+            grid_width:
+                int=2,
+            troll_list:
+                list |
+                None=None,
+            axes=None):
         """Draw figure depicting this gridworld.
 
         Figure legend (symbolic form in parenthesis):
@@ -415,8 +472,18 @@ class GridWorld:
                                 1, 1, color=(.8, .8, .8)))
         ax.axis([xmin, xmax, ymin, ymax])
 
-    def pretty(self, show_grid=False, line_prefix="",
-               path=None, goal_order=False):
+    def pretty(
+            self,
+            show_grid:
+                bool=False,
+            line_prefix:
+                str="",
+            path:
+                list |
+                None=None,
+            goal_order:
+                bool=False
+            ) -> str:
         """Return pretty-for-printing string.
 
         @param show_grid:
@@ -507,7 +574,11 @@ class GridWorld:
         else:
             return self.W.shape
 
-    def loads(self, gw_desc):
+    def loads(
+            self,
+            gw_desc:
+                str
+            ) -> None:
         """Reincarnate using given gridworld description string.
 
         @param gw_desc:
@@ -587,7 +658,11 @@ class GridWorld:
         self.init_list = init_list
         self.goal_list = goal_list
 
-    def load(self, gw_file):
+    def load(
+            self,
+            gw_file:
+                str
+            ) -> None:
         """Read description from given file.
 
         Merely a convenience wrapper for the `loads` method.
@@ -595,7 +670,11 @@ class GridWorld:
         with open(gw_file, "r") as f:
             self.loads(f.read())
 
-    def dumps(self, line_prefix=""):
+    def dumps(
+            self,
+            line_prefix:
+                str=""
+            ) -> str:
         """Dump gridworld description string.
 
         @param line_prefix:
@@ -625,10 +704,14 @@ class GridWorld:
 
     def dump_subworld(
             self,
-            size,
-            offset=(0, 0),
-            prefix="Y",
-            extend=False
+            size:
+                IJ,
+            offset:
+                IJ=(0, 0),
+            prefix:
+                str="Y",
+            extend:
+                bool=False
             ) -> 'GridWorld':
         """Generate new GridWorld instance from part of current one.
 
@@ -695,9 +778,12 @@ class GridWorld:
 
     def dump_ppartition(
             self,
-            side_lengths=(1., 1.),
-            offset=(0., 0.),
-            nonbool=True
+            side_lengths:
+                XY=(1., 1.),
+            offset:
+                XY=(0., 0.),
+            nonbool:
+                bool=True
             ) -> 'PropPreservingPartition':
         """Return proposition-preserving partition from this gridworld.
 
@@ -763,10 +849,13 @@ class GridWorld:
 
     def spec(
             self,
-            offset=(0, 0),
-            controlled_dyn=True,
-            nonbool=True
-            ) -> GRSpec:
+            offset:
+                IJ=(0, 0),
+            controlled_dyn:
+                bool=True,
+            nonbool:
+                bool=True
+            ) -> _form.GRSpec:
         """Return GRSpec instance describing this gridworld.
 
         The offset argument is motivated by the use-case of multiple
@@ -927,8 +1016,10 @@ class GridWorld:
 
     def scale(
             self,
-            xf=1,
-            yf=1
+            xf:
+                int=1,
+            yf:
+                int=1
             ) -> 'GridWorld':
         """Return a new gridworld equivalent to this but scaled by integer
         factor (xf, yf). In the new world, obstacles are increased in size but
@@ -936,9 +1027,9 @@ class GridWorld:
         (h, w) then the returned world will be of size (h*yf, w*xf).
 
         @param xf:
-            integer scaling factor for columns
+            scaling factor for columns
         @param yf:
-            integer scaling factor for rows
+            scaling factor for rows
         """
         shape_scaled = (self.W.shape[0] * yf, self.W.shape[1] * xf)
         scaleW = np.zeros(shape_scaled, dtype=np.int32)
@@ -964,13 +1055,21 @@ class GridWorld:
 
 def random_world(
         size,
-        wall_density=.2,
-        num_init=1,
-        num_goals=2,
-        prefix="Y",
-        ensure_feasible=False,
-        timeout=None,
-        num_trolls=0
+        wall_density:
+            float=.2,
+        num_init:
+            int=1,
+        num_goals:
+            int=2,
+        prefix:
+            str="Y",
+        ensure_feasible:
+            bool=False,
+        timeout:
+            int |
+            None=None,
+        num_trolls:
+            int=0
         ) -> _ty.Union[
             'GridWorld',
             None]:
@@ -1092,12 +1191,19 @@ def random_world(
 
 def narrow_passage(
         size,
-        passage_width=1,
-        num_init=1,
-        num_goals=2,
-        passage_length=0.4,
-        ptop=None,
-        prefix="Y"
+        passage_width:
+            int=1,
+        num_init:
+            int=1,
+        num_goals:
+            int=2,
+        passage_length:
+            float=0.4,
+        ptop:
+            int |
+            None=None,
+        prefix:
+            str="Y"
         ) -> 'GridWorld':
     """Generate a narrow-passage world: this is a world containing
     two zones (initial, final) with a tube connecting them.
@@ -1148,15 +1254,17 @@ def narrow_passage(
 
 
 def unoccupied(
-        size,
-        prefix="Y"
+        size:
+            IJ,
+        prefix:
+            str="Y"
         ) -> 'GridWorld':
     """Generate entirely unoccupied gridworld of given size.
 
     @param size:
-        a pair, indicating number of rows and columns.
+        number of rows and columns.
     @param prefix:
-        String to be used as prefix for naming gridworld
+        prefix for naming gridworld
         cell variables.
     """
     if len(size) < 2:
@@ -1169,12 +1277,17 @@ def unoccupied(
 def add_trolls(
         Y:
             'GridWorld',
-        troll_list,
-        prefix="X",
-        start_anywhere=False,
-        nonbool=True,
-        get_moves_lists=True
-        ) -> tuple[GRSpec, list]:
+        troll_list:
+            list,
+        prefix:
+            str="X",
+        start_anywhere:
+            bool=False,
+        nonbool:
+            bool=True,
+        get_moves_lists:
+            bool=True
+        ) -> tuple[_form.GRSpec, list]:
     """Create GR(1) specification with troll-like obstacles.
 
     Trolls are introduced into the specification with names derived
@@ -1284,10 +1397,14 @@ def add_trolls(
     return spec
 
 
-def extract_coord(var_name):
-    """Assuming prefix_R_C format, return (prefix,row,column) tuple.
-
-    prefix is of type string, row and column are integers.
+def extract_coord(
+        var_name:
+            str
+        ) -> tuple[
+            str,
+            int,
+            int]:
+    """Assuming prefix_R_C format, return `(prefix, row, column)`.
 
     The "nowhere" coordinate has form prefix_n_n. To indicate this,
     (-1, -1) is returned as the row, column position.
@@ -1311,7 +1428,17 @@ def extract_coord(var_name):
     return ("_".join(name_frags[:-2]), row, col)
 
 
-def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
+def animate_paths(
+        Z:
+            GridWorld,
+        paths:
+            list[list],
+        jitter:
+            float=0.0,
+        save_prefix:
+            str |
+            None=None
+        ) -> None:
     """Animate a list of paths simultaneously in world Z using matplotlib.
 
     @param Z:

@@ -59,7 +59,8 @@ except ImportError:
 
 import tulip.abstract.discretization as _discr
 import tulip.abstract.feasible as _fsb
-import tulip.hybrid as _hybrid
+import tulip.abstract.prop2partition as _ppp
+import tulip.hybrid as _hyb
 
 
 __all__ = [
@@ -74,7 +75,7 @@ if _cvx is None:
         'No quadratic cost for controller computation.')
 
 
-def assert_cvxopt():
+def assert_cvxopt() -> None:
     """Raise `ImportError` if `cvxopt` failed to import."""
     if _cvx is None:
         raise ImportError(
@@ -82,26 +83,51 @@ def assert_cvxopt():
             'Unable to solve quadratic-programming problems.')
 
 
+Point = np.ndarray
+Polytope = (
+    pc.Polytope |
+    pc.Region)
+PPP = _ppp.PropPreservingPartition
+NormName = _ty.Literal[
+    1,
+    2,
+    np.inf]
+SolverName = _ty.Literal[
+    'glpk',
+    'mosek',
+    'scipy',
+    ]
+    # solvers supported by the
+    # function `polytope.solvers.lpsolve`.
+
+
 def get_input(
         x0:
-            np.ndarray,
+            Point,
         ssys:
-            _hybrid.LtiSysDyn,
+            _hyb.LtiSysDyn,
         abstraction:
             '_discr.AbstractPwa',
         start:
             int,
         end:
             int,
-        R=None,
-        r=None,
-        Q=None,
+        R:
+            np.ndarray |
+            None=None,
+        r:
+            np.ndarray |
+            None=None,
+        Q:
+            np.ndarray |
+            None=None,
         ord:
-              _ty.Literal[
-                1, 2, np.inf]
-              =1,
-        mid_weight=0.0,
-        solver=None
+            NormName=1,
+        mid_weight:
+            float=0.0,
+        solver:
+            SolverName |
+            None=None
         ) -> np.ndarray:
     r"""Compute continuous control input for discrete transition.
 
@@ -369,10 +395,30 @@ def get_input(
 
 
 def get_input_helper(
-        x0, ssys, P1, P3, N, R, r, Q,
-        ord=1,
-        closed_loop=True,
-        solver=None):
+        x0:
+            Point,
+        ssys:
+            _hyb.LtiSysDyn,
+        P1:
+            Polytope,
+        P3:
+            Polytope,
+        N:
+            int,
+        R:
+            np.ndarray,
+        r:
+            np.ndarray,
+        Q:
+            np.ndarray,
+        ord:
+            NormName=1,
+        closed_loop:
+            bool=True,
+        solver:
+            SolverName |
+            None=None
+        ) -> np.ndarray:
     r"""Compute sequence of control inputs.
 
     Computes the sequence `u_seq` such that:
@@ -530,12 +576,17 @@ class _InputHelperQPException(Exception):
 
 
 def is_seq_inside(
-        x0,
-        u_seq,
+        x0:
+            Point,
+        u_seq:
+            np.ndarray,
         ssys:
-            'LtiSysDyn',
-        P0,
-        P1):
+            _hyb.LtiSysDyn,
+        P0:
+            Polytope,
+        P1:
+            Polytope
+        ) -> bool:
     r"""Check transition from `P0` to `P1`.
 
     Checks if the plant remains inside
@@ -553,7 +604,7 @@ def is_seq_inside(
     @param ssys:
         dynamics
     @param P0:
-        `Polytope` where we want
+        polytope where we want
         `x(k)` to remain for `k \in 1..(N - 1)`
     @return:
         `True` if `x(k) \in P0` for
@@ -583,10 +634,12 @@ def is_seq_inside(
 
 def find_discrete_state(
         x0:
-            np.ndarray,
+            Point,
         part:
-            'PropPreservingPartition'
-        ) -> int:
+            PPP
+        ) -> (
+            int |
+            None):
     """Return index of discrete state that contains `x0`.
 
     Returns the index that identifies the

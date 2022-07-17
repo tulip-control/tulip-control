@@ -56,7 +56,7 @@ def build_stormpy_model(path: str):
     return stormpy.build_model(prism_program)
 
 
-def print_stormpy_model(model):
+def print_stormpy_model(model) -> None:
     """Print the `stormpy` model"""
     print(
         f'Model type {model.model_type}, '
@@ -76,7 +76,10 @@ def print_stormpy_model(model):
 def get_action_map(
         stormpy_model,
         tulip_transys:
-            MDP):
+            MDP
+        ) -> dict[
+            str,
+            list]:
     """Get a map of action of `stormpy_model` and that of `tulip_transys`.
 
     @return:
@@ -109,7 +112,9 @@ def to_tulip_action(
         stormpy_model,
         tulip_transys:
             MDP,
-        action_map=None):
+        action_map:
+            dict[str, list] |
+            None=None):
     """Return action of `tulip_transys` on model.
 
     Get an action of `tulip_transys` that
@@ -134,15 +139,15 @@ def to_tulip_action(
 def to_tulip_labels(
         stormpy_state,
         tulip_transys:
-            MDP):
+            MDP
+        ) -> _trs.MathSet:
     """Get set of atomic propositions at `stormpy_state` for `tulip_transys`.
 
     This typically involves getting rid of `stormpy` internal labels such as
     `"init"`, `"deadlock"`, etc.
 
     @return:
-        a `MathSet` object corresponding to
-        the set of atomic propositions
+        set of atomic propositions
         of `stormpy_state` in `tulip_transys`
     """
     return tulip_transys.atomic_propositions.intersection(
@@ -176,12 +181,13 @@ def to_tulip_state(
     return possible_states[0]
 
 
-def to_tulip_transys(path: str):
+def to_tulip_transys(
+        path:
+            str
+        ) -> (
+            MC |
+            MDP):
     """Return Markov chain or decisiom process from `prism` file.
-
-    Return either a `MarkovChain` or
-    `MarkovDecisionProcess` object,
-    created from the `prism` file.
 
     @param path:
         path to the `prism` file
@@ -241,7 +247,8 @@ def to_prism_file(
             MC |
             MDP,
         path:
-            str):
+            str
+        ) -> None:
     """Write a prism file corresponding to ts
 
     @param path:
@@ -365,12 +372,12 @@ def model_checking(
         prism_file_path:
             str,
         extract_policy:
-            bool=False):
+            bool=False
+        ) -> dict:
     """Model check `tulip_transys` against `formula`.
 
     @param formula:
-        a string describing PCTL formula
-        according to Prism format
+        PCTL formula in Prism format
     @param prism_file_path:
         path to export the intermediate
         `prism` file (mostly for debugging purposes)
@@ -410,7 +417,10 @@ def model_checking(
     return (prob, policy)
 
 
-def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
+def _extract_policy(
+        stormpy_result,
+        stormpy_model,
+        tulip_transys):
     """Extract policy from `stormpy_result`."""
     if not stormpy_result.has_scheduler:
         raise ValueError(
@@ -431,7 +441,6 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
                 action, stormpy_model,
                 tulip_transys, action_map),
             to_tulip_labels(state, tulip_transys))
-
     return tulip_policy
 
 
@@ -455,12 +464,15 @@ def _extract_probability(
 
 
 def _update_possible_actions_with_transitions(
-        possible_actions,
+        possible_actions:
+            list,
         stormpy_model,
-        tulip_transys,
+        tulip_transys:
+            MC,
         from_state_tulip,
         stormpy_transitions,
-        prob_tol=1e-6):
+        prob_tol:
+            float=1e-6):
     """Return subset of `possible_actions` according to conditions.
 
     Return a subset of `possible_actions` from

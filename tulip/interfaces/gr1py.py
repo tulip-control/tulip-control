@@ -36,6 +36,8 @@
 """
 import logging
 
+import networkx as _nx
+
 import tulip.interfaces.gr1c as _gr1c
 import tulip.spec as _spec
 try:
@@ -49,7 +51,10 @@ logger = logging.getLogger(__name__)
 _hl = 60 * '-'
 
 
-def check_realizable(spec):
+def check_realizable(
+        spec:
+            _spec.GRSpec
+        ) -> bool:
     """Decide realizability of specification.
 
     Consult the documentation of `synthesize` about parameters.
@@ -66,7 +71,10 @@ def check_realizable(spec):
         init_flags=init_option)
 
 
-def synthesize(spec):
+def synthesize(
+        spec:
+            _spec.GRSpec
+        ) -> _nx.DiGraph:
     """Synthesize strategy realizing the given specification.
 
     cf. `tulip.interfaces.gr1c.synthesize`
@@ -82,7 +90,10 @@ def synthesize(spec):
     return _gr1c.load_aut_json(s)
 
 
-def _spec_to_gr1py(spec):
+def _spec_to_gr1py(
+        spec:
+            _spec.GRSpec
+        ) -> tuple:
     if gr1py is None:
         raise ValueError(
             'Import of gr1py interface failed.\n'

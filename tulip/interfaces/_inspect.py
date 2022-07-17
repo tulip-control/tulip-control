@@ -40,7 +40,7 @@ __all__ = [
     'print_env']
 
 
-def print_env():
+def print_env() -> None:
     """Print to `stdout` relevant information about environment.
 
     Looks for solvers like `gr1c` and `glpk`, bindings with `cvxopt`,
@@ -123,8 +123,15 @@ def print_env():
     print(s)
 
 
-def _format_python_package_message(name, package, url):
-    """Return a `str` reporting information about package."""
+def _format_python_package_message(
+        name:
+            str,
+        package:
+            str,
+        url:
+            str
+        ) -> str:
+    """Return information about package `name`."""
     if package is None:
         return (
             f'Could not import Python package `{name}`.\n'
@@ -134,7 +141,7 @@ def _format_python_package_message(name, package, url):
         f'    {package}\n')
 
 
-def _check_glpsol():
+def _check_glpsol() -> bool:
     """Return `True` if `glpsol` (of GLPK) in `$PATH`."""
     try:
         v = subprocess.check_output(['glpsol', '--version'])

@@ -32,6 +32,7 @@
 #
 """Minimum violation planning module"""
 import itertools as _itr
+import typing as _ty
 
 import tulip.transys as _trs
 import tulip.transys.cost as _cost
@@ -42,13 +43,20 @@ import tulip.spec.prioritized_safety as _prio
 KS = _trs.KripkeStructure
 WFA = _trs.WeightedFiniteStateAutomaton
 PrioSpec = _prio.PrioritizedSpecification
+ProductState = tuple[
+    _ty.Any,
+    _ty.Any]
 
 
 def _get_rule_violation_cost(
-        from_prod_state,
-        to_prod_state,
-        spec,
-        to_ap
+        from_prod_state:
+            ProductState,
+        to_prod_state:
+            ProductState,
+        spec:
+            PrioSpec,
+        to_ap:
+            set
         ) -> list[float]:
     """Return the rule violation cost on the transition from
     from_prod_state to to_prod_state.
@@ -65,8 +73,7 @@ def _get_rule_violation_cost(
         representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
     @param spec:
-        the prioritized safety specification of type
-        tulip.spec.prioritized_safety.PrioritizedSpecification
+        the prioritized safety specification
     @param to_ap:
         the atomic proposition of to_prod_state
     """
@@ -85,12 +92,17 @@ def _get_rule_violation_cost(
 
 
 def _add_transition(
-        from_prod_states,
-        to_prod_states,
-        ks,
-        spec,
+        from_prod_states:
+            ProductState,
+        to_prod_states:
+            ProductState,
+        ks:
+            KS,
+        spec:
+            PrioSpec,
         trans_ks_cost,
-        fa):
+        fa:
+            WFA):
     """Add a transition from from_prod_state to to_prod_state to fa.
 
     This follows Definition 8 (weighted finite automaton)
@@ -104,16 +116,11 @@ def _add_transition(
         and aut_state is a tuple,
         representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
-    @param ks:
-        the Kripke structure
     @param spec:
-        the prioritized safety specification of type
-        tulip.spec.prioritized_safety.PrioritizedSpecification
+        the prioritized safety specification
     @param trans_ks_cost:
         the cost of transition from from_prod_state[0] to to_prod_state[0]
         in ks
-    @param fa:
-        the finite automaton
     """
     for from_prod_state in from_prod_states:
         for to_prod_state in to_prod_states:
@@ -127,22 +134,20 @@ def _add_transition(
                 {"cost": _cost.VectorCost(cost)})
 
 
-def _construct_weighted_product_automaton(ks, spec):
+def _construct_weighted_product_automaton(
+        ks:
+            KS,
+        spec:
+            PrioSpec
+        ) -> tuple[WFA, str]:
     """Compute the weighted product automaton ks times spec
 
     This follows Definition 9 (product automaton) in
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param ks:
-        the Kripke structure
     @param spec:
-        the prioritized safety specification of type
-        tulip.spec.prioritized_safety.PrioritizedSpecification
-    @return:
-        (fa, null_state) where fa is the weighted product automaton of type
-        tulip.transys.automata.WeightedFiniteStateAutomaton
-        and null_state is the null state
+        the prioritized safety specification
     """
     null_state = "null"
     while null_state in ks.states:
@@ -176,20 +181,23 @@ def _construct_weighted_product_automaton(ks, spec):
     return (fa, null_state)
 
 
-def solve(ks, goal_label, spec):
+def solve(
+        ks:
+            KS,
+        goal_label,
+        spec:
+            PrioSpec
+        ) -> tuple:
     """Solve the minimum violation planning problem
 
     This follows from
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param ks:
-        the Kripke structure
     @param goal_label:
         a label in ks.atomic_propositions that indicates the goal
     @param spec:
-        the prioritized safety specification of type
-        tulip.spec.prioritized_safety.PrioritizedSpecification
+        the prioritized safety specification
     @return:
         (best_cost, best_path, weighted_product_automaton) where
         * best_cost is the optimal cost of reaching the goal

@@ -55,7 +55,10 @@ PARSER_LOGGER = 'tulip.ltl_parser_log'
 class Lexer:
     """Token rules to build LTL lexer."""
 
-    def __init__(self, debug=False):
+    def __init__(
+            self,
+            debug:
+                bool=False):
         self.reserved = {
             'ite':
                 'ITE',
@@ -215,8 +218,11 @@ class Lexer:
 
     def build(
             self,
-            debug=False,
-            debuglog=None,
+            debug:
+                bool=False,
+            debuglog:
+                logging.Logger |
+                None=None,
             **kwargs):
         """Create a lexer.
 
@@ -242,7 +248,9 @@ class Parser:
     """Production rules to build LTL parser."""
 
     def __init__(
-            self, ast=None, lexer=None):
+            self,
+            ast=None,
+            lexer=None):
         if ast is None:
             self.ast = _ast.nodes
         else:
@@ -302,11 +310,18 @@ class Parser:
 
     def build(
             self,
-            tabmodule=None,
-            outputdir='',
-            write_tables=False,
-            debug=False,
-            debuglog=None):
+            tabmodule:
+                str |
+                None=None,
+            outputdir:
+                str='',
+            write_tables:
+                bool=False,
+            debug:
+                bool=False,
+            debuglog:
+                logging.Logger |
+                None=None):
         """Build parser using `ply.yacc`.
 
         The default table module is
@@ -332,8 +347,10 @@ class Parser:
             self,
             formula:
                 str,
-            debuglog=None
-            ) -> 'tulip.spec.ast.nodes.Node':
+            debuglog:
+                logging.Logger |
+                None=None
+            ) -> _ast.NodeSpec:
         """Return syntax tree for `formula`.
 
         @param formula:
@@ -465,7 +482,10 @@ class Parser:
             f'remaining input:\n{s}\n')
 
 
-def parse(formula):
+def parse(
+        formula:
+            str
+        ) -> _ast.NodeSpec:
     warnings.warn(
         'Deprecated: Better to '
         'instantiate a Parser once only.')

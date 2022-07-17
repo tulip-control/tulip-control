@@ -43,6 +43,7 @@ interacting with the `gr1c` executable.
 
 Use the `logging` module to throttle verbosity.
 """
+import collections.abc as _abc
 import copy
 import errno
 import json
@@ -51,6 +52,7 @@ import os
 import pkg_resources as _pkg
 import subprocess
 import tempfile
+import typing as _ty
 import xml.etree.ElementTree as ET
 
 import networkx as nx
@@ -64,7 +66,18 @@ _hl = 60 * '-'
 logger = logging.getLogger(__name__)
 
 
-def check_gr1c():
+Tag = (
+    str |
+    ET.Element)
+_Cast = (
+    _abc.Callable |
+    None)
+_VarDom = (
+    str |
+    tuple[int, int])
+
+
+def check_gr1c() -> bool:
     """Return `True` if `gr1c >= require_version` found in `PATH`."""
     try:
         v = subprocess.check_output(
@@ -78,7 +91,7 @@ def check_gr1c():
     return False
 
 
-def _assert_gr1c():
+def _assert_gr1c() -> None:
     """Raise `Exception` if `gr1c` not in PATH."""
     if check_gr1c():
         return
@@ -92,14 +105,14 @@ def _assert_gr1c():
         "or the TuLiP User's Guide about alternatives.")
 
 
-def get_version():
+def get_version() -> tuple[int, int, int]:
     """Get version of `gr1c` as detected by TuLiP.
 
     Failure to find the `gr1c` program or errors in parsing the received
     version string will cause an exception.
 
     @return:
-        `(major, minor, micro)`, a `tuple` of `int`
+        `(major, minor, micro)`
     """
     try:
         v_str = subprocess.check_output(
@@ -120,8 +133,16 @@ def get_version():
     return (major, minor, micro)
 
 
-def _untaglist(x, cast_f=float,
-               namespace=DEFAULT_NAMESPACE):
+def _untaglist(
+        x:
+            Tag,
+        cast_f:
+            _Cast=float,
+        namespace:
+            str=DEFAULT_NAMESPACE
+        ) -> tuple[
+            str,
+            list]:
     """Extract list from given tulipcon XML tag (string).
 
     Use function `cast_f` for type-casting extracting element strings.
@@ -134,8 +155,8 @@ def _untaglist(x, cast_f=float,
     use, e.g. by the function `untagpolytope` and some load/dumpXML
     methods elsewhere.
 
-    Return result as 2-tuple, containing name of the tag (as a string)
-    and the list obtained from it.
+    @return:
+        `(tag, list_obtained_from_tag)`
     """
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -159,11 +180,19 @@ def _untaglist(x, cast_f=float,
 
 
 def _untagdict(
-        x,
-        cast_f_keys=None,
-        cast_f_values=None,
-        namespace=DEFAULT_NAMESPACE,
-        get_order=False):
+        x:
+            Tag,
+        cast_f_keys:
+            _Cast=None,
+        cast_f_values:
+            _Cast=None,
+        namespace:
+            str=DEFAULT_NAMESPACE,
+        get_order:
+            bool=False
+        ) -> (
+            tuple[str, dict] |
+            tuple[str, dict, list]):
     """Extract dictionary from given tulipcon XML tag (string).
 
     Use functions `cast_f_keys` and `cast_f_values` for type-casting
@@ -179,10 +208,15 @@ def _untagdict(
     use, e.g. by the function `untagpolytope` and some load/dumpXML
     methods elsewhere.
 
-    Return result as 2-`tuple`, containing name of the tag (as a string)
-    and the dictionary obtained from it.  If get_order is `True`, then
-    return a triple, where the first two elements are as usual and the
-    third is the list of keys in the order they were found.
+    @return:
+        Two cases, depending on argument given
+        for the parameter `get_order`.
+        - if `get_order is True`:
+          `(tag_name, dict_obtained_from_tag)`
+        - else a triple is returned,
+          which extends the previous case with
+          the list of keys in the order they were found,
+          as third tuple item.
     """
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -213,18 +247,22 @@ def _untagdict(
         return (elem.tag, di)
 
 
-def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
+def load_aut_xml(
+        x:
+            Tag,
+        namespace:
+            str=DEFAULT_NAMESPACE
+        ) -> (
+            nx.DiGraph |
+            tuple[GRSpec, None]):
     """Return strategy constructed from output of `gr1c`.
 
-    @param x:
-        a string or an instance of
-        `xml.etree.ElementTree.fromstring()`
     @return:
-        if a strategy is given in the XML string,
-        return it as `networkx.DiGraph`.
-        Else, return `(GRSpec, None)`,
-        where the first element is the specification
-        as read from the XML string.
+        - if a strategy is given in the XML string,
+          then return it as a graph.
+        - else, return `(GRSpec, None)`,
+          where the first element is the specification
+          as read from the XML string.
     """
     if isinstance(x, str):
         elem = ET.fromstring(x)
@@ -336,7 +374,14 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     return A
 
 
-def _parse_vars(variables, vardict):
+def _parse_vars(
+        variables:
+            list[str],
+        vardict:
+            dict[str, str]
+        ) -> dict[
+            str,
+            _VarDom]:
     """Helper for parsing env, sys variables."""
     domains = list()
     for var in variables:
@@ -367,14 +412,15 @@ def _parse_vars(variables, vardict):
             zip(variables, domains)}
 
 
-def load_aut_json(x):
+def load_aut_json(
+        x:
+            str |
+            _ty.IO
+        ) -> nx.DiGraph:
     """Return strategy constructed from output of `gr1c`.
 
-    @param x:
-        string or
-        file-like object
     @return:
-        strategy as `networkx.DiGraph`,
+        strategy graph,
         like the return value of `load_aut_xml`
     """
     try:
@@ -406,8 +452,11 @@ def load_aut_json(x):
     return A
 
 
-def check_syntax(spec_str):
-    """Check whether given string has correct `gr1c` specification syntax.
+def check_syntax(
+        spec_str:
+            str
+        ) -> bool:
+    """Check whether `spec_str` has correct `gr1c` specification syntax.
 
     Return `True` if syntax check passed, `False` on error.
     """
@@ -430,7 +479,10 @@ def check_syntax(spec_str):
     return False
 
 
-def check_realizable(spec):
+def check_realizable(
+        spec:
+            GRSpec
+        ) -> bool:
     """Decide realizability of specification.
 
     Consult the documentation of `synthesize` about parameters.
@@ -469,8 +521,8 @@ def synthesize(
         spec:
             GRSpec
         ) -> (
-              nx.DiGraph
-            | None):
+            nx.DiGraph |
+            None):
     """Synthesize strategy realizing the given specification.
 
     @param spec:
@@ -530,7 +582,12 @@ def synthesize(
         return None
 
 
-def select_options(spec):
+def select_options(
+        spec:
+            GRSpec
+        ) -> _ty.Literal[
+            'ALL_ENV_EXIST_SYS_INIT',
+            'ONE_SIDE_INIT']:
     """Return `gr1c` initial option based on `GRSpec` inits."""
     # Let x denote environment variables,
     # and y component variables.
@@ -567,16 +624,17 @@ def load_mealy(
         filename:
             str,
         fformat:
-            str='tulipxml'
+            _ty.Literal[
+                'tulipxml',
+                'json']
+            ='tulipxml'
         ) -> nx.DiGraph:
     """Load `gr1c` strategy from file.
 
     @param filename:
         file name
     @param fformat:
-        file format; can be one of
-        `"tulipxml"` (default),
-        `"json"`.
+        file format
     @return:
         loaded strategy as an annotated graph.
     """
@@ -617,10 +675,18 @@ class GR1CSession:
     success, `False` if error.
     """
 
+    State = dict[str, ...]
+
     def __init__(
-            self, spec_filename, sys_vars,
-            env_vars=None,
-            prompt=">>> "):
+            self,
+            spec_filename:
+                str,
+            sys_vars:
+                list,
+            env_vars:
+                list=None,
+            prompt:
+                str=">>> "):
         if env_vars is None:
             env_vars = list()
         self.spec_filename = spec_filename
@@ -640,7 +706,11 @@ class GR1CSession:
         else:
             self.p = None
 
-    def iswinning(self, state):
+    def iswinning(
+            self,
+            state:
+                State
+            ) -> bool:
         """Return `True` if given state is in winning set, `False` otherwise.
 
         `state` should be a dictionary with keys of variable names
@@ -661,7 +731,13 @@ class GR1CSession:
         else:
             return False
 
-    def getindex(self, state, goal_mode):
+    def getindex(
+            self,
+            state:
+                State,
+            goal_mode:
+                int
+            ) -> int:
         if goal_mode < 0 or goal_mode > self.numgoals()-1:
             raise ValueError(
                 f'Invalid goal mode requested: {goal_mode}')
@@ -681,11 +757,12 @@ class GR1CSession:
                 line = line[len(self.prompt):]
         return int(line[:-1])
 
-    def env_next(self, state):
-        """Return `list` of possible next environment moves, given current state.
-
-        Format of given `state` is same as for `iswinning` method.
-        """
+    def env_next(
+            self,
+            state:
+                State
+            ) -> list:
+        """Return possible next environment moves, given current state."""
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
@@ -709,12 +786,16 @@ class GR1CSession:
             line = self.p.stdout.readline()
         return env_moves
 
-    def sys_nextfeas(self, state, env_move, goal_mode):
-        """Return `list` of next system moves consistent with some strategy.
-
-        Format of given `state` and `env_move` is same as for `iswinning`
-        method.
-        """
+    def sys_nextfeas(
+            self,
+            state:
+                State,
+            env_move:
+                State,
+            goal_mode:
+                int
+            ) -> list:
+        """Return next system moves consistent with some strategy."""
         if goal_mode < 0 or goal_mode > self.numgoals() - 1:
             raise ValueError(
                 f'Invalid goal mode requested: {goal_mode}')
@@ -746,12 +827,14 @@ class GR1CSession:
             line = self.p.stdout.readline()
         return sys_moves
 
-    def sys_nexta(self, state, env_move):
-        """Return `list` of possible next system moves, whether or not winning.
-
-        Format of given `state` and `env_move` is same as for `iswinning`
-        method.
-        """
+    def sys_nexta(
+            self,
+            state:
+                State,
+            env_move:
+                State
+            ) -> list:
+        """Return possible next system moves, whether or not winning."""
         state_vector = list(range(len(state)))
         for ind in range(len(self.env_vars)):
             state_vector[ind] = state[self.env_vars[ind]]
@@ -803,7 +886,12 @@ class GR1CSession:
                     line = line[len(self.prompt):]
         return int(line[:-1])
 
-    def reset(self, spec_filename=None):
+    def reset(
+            self,
+            spec_filename:
+                str |
+                None=None
+            ) -> bool:
         """Quit and start anew, reading spec from file with given name.
 
         If no filename given, then use previous one.
@@ -831,7 +919,7 @@ class GR1CSession:
             self.p = None
         return True
 
-    def close(self):
+    def close(self) -> bool:
         """End session, and terminate `gr1c` subprocess."""
         self.p.stdin.write('quit\n')
         returncode = self.p.wait()
@@ -841,6 +929,9 @@ class GR1CSession:
         return True
 
 
-def _join_as_str(items) -> str:
+def _join_as_str(
+        items:
+            _abc.Iterable
+        ) -> str:
     """Return space-joined strings of `items`."""
     return ' '.join(map(str, items))

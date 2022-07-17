@@ -174,7 +174,7 @@ def check(
 def str_to_grspec(
         f:
             str
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Return `GRSpec` from LTL formula `f` as `str`.
 
     Formula `f` must be in the form:
@@ -205,7 +205,7 @@ def split_gr1(
         f:
             _ty.Union[
                 str,
-                'Node']
+                _ast.NodeSpec]
         ) -> dict[
             str,
             list[str]]:
@@ -295,7 +295,14 @@ def split_gr1(
     return d
 
 
-def has_operator(u, g, operators):
+def has_operator(
+        u:
+            _ast.NodeSpec,
+        g:
+            tx.Tree,
+        operators:
+            set[str]
+        ) -> str | None:
     try:
         if u.operator in operators:
             return u.operator
@@ -317,7 +324,7 @@ def stability_to_gr1(
             str,
         aux:
             str='aux'
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Convert `<>[] p` to GR(1).
 
     Warning: This conversion is sound, but not complete.
@@ -365,7 +372,7 @@ def response_to_gr1(
             str,
         aux:
             str='aux'
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Convert `[](p -> <> q)` to GR(1).
 
     GR(1) form:
@@ -405,7 +412,7 @@ def eventually_to_gr1(
             str,
         aux:
             str='aux'
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Convert `<> p` to GR(1).
 
     GR(1) form:
@@ -442,10 +449,11 @@ def eventually_to_gr1(
 def until_to_gr1(
         p:
             str,
-        q,
+        q:
+            str,
         aux:
             str='aux'
-        ) -> GRSpec:
+        ) -> _spec.GRSpec:
     """Convert `p U q` to GR(1).
 
     GR(1) form:
@@ -485,7 +493,7 @@ def until_to_gr1(
         sys_prog=sys_prog)
 
 
-def _paren(x):
+def _paren(x: str) -> str:
     return f'({x})'
 
 

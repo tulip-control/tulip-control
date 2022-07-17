@@ -40,6 +40,7 @@ import logging
 import os
 import subprocess
 import tempfile
+import typing as _ty
 
 import networkx as nx
 import tulip.spec as _spec
@@ -56,7 +57,10 @@ BDD_FILE = 'strategy_bdd.txt'
 logger = logging.getLogger(__name__)
 
 
-def check_realizable(spec):
+def check_realizable(
+        spec:
+            _spec.GRSpec
+        ) -> bool:
     """Decide realizability of specification.
 
     Consult the documentation of `synthesize` about parameters.
@@ -79,9 +83,10 @@ def check_realizable(spec):
 
 def synthesize(
         spec:
-            GRSpec |
+            _spec.GRSpec |
             str,
-        symbolic=False
+        symbolic:
+            bool=False
         ) -> (
             nx.DiGraph |
             None):
@@ -135,9 +140,17 @@ def synthesize(
 
 
 def _bitfields_to_ints(
-        bit_state,
+        bit_state:
+            dict[
+                str,
+                _ty.Literal[
+                    0,
+                    1]],
         vrs:
-            dict):
+            dict
+        ) -> dict[
+            str,
+            bool | int]:
     """Convert bitfield representation to integers."""
     int_state = dict()
     for var, dom in vrs.items():
@@ -157,10 +170,18 @@ def _bitfields_to_ints(
 
 
 def _call_slugs(
-        filename,
-        synth=True,
-        symbolic=True,
-        slugs_compiler_path=None):
+        filename:
+            str,
+        synth:
+            bool=True,
+        symbolic:
+            bool=True,
+        slugs_compiler_path:
+            str |
+            None=None
+        ) -> tuple[
+            str,
+            str]:
     """Call `slugs` and return results.
 
     `slugs_compiler_path` is the path to

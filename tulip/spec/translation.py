@@ -46,6 +46,7 @@
   <http://vlsi.colorado.edu/~rbloem/wring.html>
   (see top of file: LTL.pm)
 """
+import collections.abc as _abc
 import logging
 # import pprint
 import re
@@ -60,9 +61,11 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
+Node = _ast.NodeSpec
+Nodes = _ast.NodesSpec
 
 
-def make_jtlv_nodes():
+def make_jtlv_nodes() -> Nodes:
     opmap = {
         'False':
             'FALSE',
@@ -118,7 +121,11 @@ def make_jtlv_nodes():
     return nodes
 
 
-def make_gr1c_nodes(opmap=None):
+def make_gr1c_nodes(
+        opmap:
+            _ast.OpMap |
+            None=None
+        ) -> Nodes:
     if opmap is None:
         opmap = {
             'False':
@@ -169,7 +176,7 @@ def make_gr1c_nodes(opmap=None):
     return nodes
 
 
-def make_slugs_nodes():
+def make_slugs_nodes() -> Nodes:
     """Simple translation, unisigned arithmetic only.
 
     For signed arithmetic use Promela instead.
@@ -214,7 +221,7 @@ def make_slugs_nodes():
     return make_gr1c_nodes(opmap)
 
 
-def make_promela_nodes():
+def make_promela_nodes() -> Nodes:
     opmap = dict(_ast.OPMAP)
     opmap.update({
         'True':
@@ -232,7 +239,7 @@ def make_promela_nodes():
     return _ast.make_fol_nodes(opmap)
 
 
-def make_smv_nodes():
+def make_smv_nodes() -> Nodes:
     opmap = {
         'X':
             'X',
@@ -247,7 +254,7 @@ def make_smv_nodes():
     return _ast.make_fol_nodes(opmap)
 
 
-def make_wring_nodes():
+def make_wring_nodes() -> Nodes:
     opmap = {
         'False':
             '0',
@@ -299,7 +306,7 @@ def make_wring_nodes():
     return nodes
 
 
-def make_python_nodes():
+def make_python_nodes() -> Nodes:
     opmap = {
         'True':
             'True',
@@ -364,7 +371,12 @@ lang2nodes = {
         make_wring_nodes()}
 
 
-def _to_jtlv(d):
+def _to_jtlv(
+        d:
+            dict[str, ...]
+        ) -> tuple[
+            str,
+            str]:
     """Return specification as list of two strings [assumption, guarantee].
 
     Format is that of JTLV.
@@ -382,7 +394,14 @@ def _to_jtlv(d):
     return (assumption, guarantee)
 
 
-def _jtlv_str(m, comment, prefix='[]<>'):
+def _jtlv_str(
+        m:
+            _abc.Iterable[str],
+        comment:
+            str,
+        prefix:
+            str='[]<>'
+        ) -> str:
     # no clauses ?
     if not m:
         return ''
@@ -402,7 +421,10 @@ def _jtlv_str(m, comment, prefix='[]<>'):
     return f'-- {comment}\n{formula}'
 
 
-def _to_gr1c(d):
+def _to_gr1c(
+        d:
+            dict[str, ...]
+        ) -> str:
     """Dump to gr1c specification string.
 
     Cf. `interfaces.gr1c`.
@@ -436,7 +458,10 @@ def _to_gr1c(d):
     return output
 
 
-def _to_wring(d):
+def _to_wring(
+        d:
+            dict[str, ...]
+        ) -> str:
     """Dump to LTL formula in Wring syntax
 
     Assume that d is a dictionary describing a GR(1) formula in the
@@ -488,14 +513,24 @@ def convert_domain(
     return (0, len(dom) - 1)
 
 
-def _gr1c_str(s, name='SYSGOAL', prefix='[]<>'):
+def _gr1c_str(
+        s:
+            _abc.Iterable[str],
+        name:
+            str='SYSGOAL',
+        prefix:
+            str='[]<>'
+        ) -> str:
     if not s:
         return f'{name}:;\n'
     f = '\n& '.join(f'{prefix}({x})' for x in s)
     return f'{name}: {f};\n'
 
 
-def _to_slugs(d):
+def _to_slugs(
+        d:
+            dict[str, ...]
+        ) -> str:
     """Return structured slugs spec."""
     f = _slugs_str
     return (
@@ -511,7 +546,14 @@ def _to_slugs(d):
         f(d['sys_init'], 'SYS_INIT', sep='&'))
 
 
-def _slugs_str(r, name, sep='\n'):
+def _slugs_str(
+        r:
+            _abc.Iterable[str],
+        name:
+            str,
+        sep:
+            str='\n'
+        ) -> str:
     if not r:
         return f'[{name}]\n'
     sep = f' {sep} '
@@ -519,7 +561,12 @@ def _slugs_str(r, name, sep='\n'):
     return f'[{name}]\n{f}\n\n'
 
 
-def _format_slugs_vars(vardict, name):
+def _format_slugs_vars(
+        vardict:
+            dict[str, ...],
+        name:
+            str
+        ) -> str:
     a = list()
     for var, dom in vardict.items():
         if dom == 'boolean':
@@ -552,7 +599,8 @@ def translate(
                 'gr1c',
                 'slugs',
                 'jtlv',
-                'wring']):
+                'wring']
+        ) -> str:
     """Return str or tuple in tool format.
 
     Consult the respective documentation in `tulip.interfaces`
@@ -580,7 +628,8 @@ def translate(
 
 
 def translate_ast(
-        tree,
+        tree:
+            Node,
         lang:
             _ty.Literal[
                 'gr1c',
@@ -589,22 +638,24 @@ def translate_ast(
                 'promela',
                 'smv',
                 'python',
-                'wring']):
+                'wring']
+        ) -> Node:
     """Return AST of formula `tree`.
 
-    @type tree:
-        `Nodes.Node`
     @return:
         tree using AST nodes of `lang`
-    @rtype:
-        `FOL.Node`
     """
     if lang == 'python':
         return _ast_to_python(tree, lang2nodes[lang])
     return _ast_to_lang(tree, lang2nodes[lang])
 
 
-def _ast_to_lang(u, nodes):
+def _ast_to_lang(
+        u:
+            Node,
+        nodes:
+            Nodes
+        ) -> Node:
     cls = getattr(nodes, type(u).__name__)
     if hasattr(u, 'value'):
         return cls(u.value)
@@ -615,7 +666,12 @@ def _ast_to_lang(u, nodes):
         f'Unknown node type "{type(u).__name__}"')
 
 
-def _ast_to_python(u, nodes):
+def _ast_to_python(
+        u:
+            Node,
+        nodes:
+            Nodes
+        ) -> Node:
     cls = getattr(nodes, type(u).__name__)
     if hasattr(u, 'value'):
         return cls(u.value)

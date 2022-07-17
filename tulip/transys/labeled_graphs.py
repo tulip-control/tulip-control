@@ -54,7 +54,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def label_is_desired(attr_dict, desired_dict):
+def label_is_desired(
+        attr_dict:
+            dict,
+        desired_dict:
+            dict
+        ) -> bool:
     """Return True if all labels match.
 
     Supports symbolic evaluation, if label type is callable.
@@ -96,7 +101,10 @@ def label_is_desired(attr_dict, desired_dict):
     return True
 
 
-def test_common_bug(value, desired_value):
+def test_common_bug(
+        value,
+        desired_value
+        ) -> None:
     logger.debug(
         f'Label value:\n\t{value}')
     logger.debug(
@@ -158,7 +166,7 @@ class States:
         return state in self.graph
 
     @property
-    def initial(self):
+    def initial(self) -> _mset.SubSet:
         """ Return `SubSet` of initial states."""
         return self._initial
 
@@ -168,7 +176,10 @@ class States:
         s |= states
         self._initial = s
 
-    def _single_state2singleton(self, state):
+    def _single_state2singleton(
+            self,
+            state
+            ) -> list:
         """Convert to a singleton list, if argument is a single state.
 
         Otherwise return given argument.
@@ -179,7 +190,15 @@ class States:
             states = state
         return states
 
-    def add(self, new_state, attr_dict=None, check=True, **attr):
+    def add(
+            self,
+            new_state,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Wraps `LabeledDiGraph.add_node`,
 
         which wraps `networkx.MultiDiGraph.add_node`.
@@ -188,7 +207,13 @@ class States:
             new_state, attr_dict, check,
             **attr)
 
-    def add_from(self, new_states, check=True, **attr):
+    def add_from(
+            self,
+            new_states:
+                _abc.Iterable,
+            check:
+                bool=True,
+            **attr):
         """Wraps `LabeledDiGraph.add_nodes_from`,
 
         which wraps `networkx.MultiDiGraph.add_nodes_from`.
@@ -206,7 +231,10 @@ class States:
             self.initial.remove(state)
         self.graph.remove_node(state)
 
-    def remove_from(self, states):
+    def remove_from(
+            self,
+            states:
+                _abc.Iterable):
         """Remove multiple states.
 
         Iterates `States.remove` to imitate
@@ -218,7 +246,9 @@ class States:
 
     def post(
             self,
-            states=None
+            states:
+                _abc.Iterable |
+                None=None
             ) -> set:
         """Direct successor set (1-hop) for given states.
 
@@ -244,7 +274,8 @@ class States:
 
     def pre(
             self,
-            states
+            states:
+                _abc.Iterable
             ) -> set:
         """Return direct predecessors (1-hop) of given state.
 
@@ -258,7 +289,10 @@ class States:
             self.graph.predecessors,
             states))
 
-    def forward_reachable(self, state):
+    def forward_reachable(
+            self,
+            state
+            ) -> set:
         """Return states reachable from `state`.
 
         Wrapper of `networkx.descendants()`.
@@ -266,7 +300,10 @@ class States:
         descendants = nx.descendants(self, state)
         return descendants
 
-    def backward_reachable(self, state):
+    def backward_reachable(
+            self,
+            state
+            ) -> set:
         """Return states from which `state` can be reached.
 
         Wrapper of `networkx.ancestors()`.
@@ -414,7 +451,10 @@ class States:
                 logger.debug('No match for label---> state discarded.')
         return found_state_label_pairs
 
-    def is_terminal(self, state):
+    def is_terminal(
+            self,
+            state
+            ) -> bool:
         """Return `True` if `state` has no outgoing transitions.
 
         See Also
@@ -436,7 +476,8 @@ class Transitions:
             self,
             graph:
                 'LabeledDiGraph',
-            deterministic=False):
+            deterministic:
+                bool=False):
         """Initialize `Transitions`."""
         self.graph = graph
         self._deterministic = deterministic
@@ -456,7 +497,12 @@ class Transitions:
         """Count transitions."""
         return self.graph.number_of_edges()
 
-    def _breaks_determinism(self, from_state, sublabels):
+    def _breaks_determinism(
+            self,
+            from_state,
+            sublabels:
+                dict
+            ) -> bool:
         """Return `True` if adding transition conserves determinism."""
         if not self._deterministic:
             return False
@@ -473,7 +519,16 @@ class Transitions:
             raise Exception(msg)
         return True
 
-    def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
+    def add(
+            self,
+            from_state,
+            to_state,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Wrapper of `LabeledDiGraph.add_edge`,
 
         which wraps `networkx.MultiDiGraph.add_edge`.
@@ -485,7 +540,16 @@ class Transitions:
             check=check,
             **attr)
 
-    def add_from(self, transitions, attr_dict=None, check=True, **attr):
+    def add_from(
+            self,
+            transitions:
+                _abc.Iterable,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Wrapper of `LabeledDiGraph.add_edges_from`,
 
         which wraps `networkx.MultiDiGraph.add_edges_from`.
@@ -496,8 +560,18 @@ class Transitions:
             check=check,
             **attr)
 
-    def add_comb(self, from_states, to_states, attr_dict=None,
-                 check=True, **attr):
+    def add_comb(
+            self,
+            from_states:
+                _abc.Iterable,
+            to_states:
+                _abc.Iterable,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Add an edge for each combination `(u, v)`,
 
         for `u` in `from_states` for `v` in `to_states`.
@@ -510,7 +584,14 @@ class Transitions:
                     check=check,
                     **attr)
 
-    def remove(self, from_state, to_state, attr_dict=None, **attr):
+    def remove(
+            self,
+            from_state,
+            to_state,
+            attr_dict:
+                dict |
+                None=None,
+            **attr):
         """Remove single transition.
 
         If only the states are passed,
@@ -526,7 +607,10 @@ class Transitions:
             from_state, to_state, attr_dict,
             **attr)
 
-    def remove_from(self, transitions):
+    def remove_from(
+            self,
+            transitions:
+                _abc.Iterable[tuple]):
         """Remove multiple transitions.
 
         Each transition is either a:
@@ -544,8 +628,11 @@ class Transitions:
             adj2states:
                 dict |
                 list,
-            attr_dict=None,
-            check=True,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
             **attr):
         """Add multiple labeled transitions from adjacency matrix.
 
@@ -610,7 +697,8 @@ class Transitions:
             with_attr_dict:
                 dict |
                 None=None,
-            typed_only=False,
+            typed_only:
+                bool=False,
             **with_attr
             ) -> list:
         r"""Find all edges between given states with given labels.
@@ -870,15 +958,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
     is adapted from `networkx`, which is distributed under a BSD license.
     """
 
+    LabelTypes = list[dict]
+
     def __init__(
             self,
             node_label_types:
-                list[dict] |
+                LabelTypes |
                 None=None,
             edge_label_types:
-                list[dict] |
+                LabelTypes |
                 None=None,
-            deterministic=False):
+            deterministic:
+                bool=False):
         node_labeling, node_defaults = self._init_labeling(
             node_label_types)
         edge_labeling, edge_defaults = self._init_labeling(
@@ -900,7 +991,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
             normal='circle')
         self.default_layout = 'dot'
 
-    def add_label_types(self, label_types, is_edge):
+    def add_label_types(
+            self,
+            label_types:
+                LabelTypes,
+            is_edge:
+                bool):
         """Add label_types to node or edge depending on is_edge param
 
         @param label_types:
@@ -916,7 +1012,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self._node_label_types.update(labeling)
             self._node_label_defaults.update(defaults)
 
-    def _init_labeling(self, label_types):
+    def _init_labeling(
+            self,
+            label_types:
+                list[dict] |
+                None
+            ) -> tuple[
+                dict[str, ...],
+                dict[str, ...]]:
         """Initialize labeling.
 
         Note
@@ -958,7 +1061,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
             setattr(self, name, setter)
         return labeling, defaults
 
-    def _check_for_untyped_keys(self, typed_attr, type_defs, check):
+    def _check_for_untyped_keys(
+            self,
+            typed_attr:
+                dict,
+            type_defs:
+                dict[str, ...],
+            check:
+                bool):
         untyped_keys = set(typed_attr).difference(type_defs)
         msg = (
             'checking for untyped keys...\n'
@@ -1003,7 +1113,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 return False
         return True
 
-    def _update_attr_dict_with_attr(self, attr_dict, attr):
+    def _update_attr_dict_with_attr(
+            self,
+            attr_dict:
+                dict |
+                None,
+            attr:
+                dict):
         if attr_dict is None:
             attr_dict = attr
         else:
@@ -1014,7 +1130,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 raise nx.NetworkXError(msg)
         return attr_dict
 
-    def add_node(self, n, attr_dict=None, check=True, **attr):
+    def add_node(
+            self,
+            n,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Use a `TypedDict` as attribute dict.
 
         Overrides `networkx.MultiDiGraph.add_node`,
@@ -1045,7 +1169,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self, n,
             **typed_attr)
 
-    def add_nodes_from(self, nodes, check=True, **attr):
+    def add_nodes_from(
+            self,
+            nodes:
+                _abc.Iterable,
+            check:
+                bool=True,
+            **attr):
         """Create or label multiple nodes.
 
         Overrides `networkx.MultiDiGraph.add_nodes_from`,
@@ -1065,7 +1195,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 attr_dict=attr_dict,
                 check=check)
 
-    def add_edge(self, u, v, key=None, attr_dict=None, check=True, **attr):
+    def add_edge(
+            self,
+            u,
+            v,
+            key=None,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Use a `TypedDict` as attribute dict.
 
         Overrides `networkx.MultiDiGraph.add_edge`,
@@ -1163,8 +1303,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 self, u, v,
                 **typed_attr)
 
-    def add_edges_from(self, labeled_ebunch, attr_dict=None,
-                       check=True, **attr):
+    def add_edges_from(
+            self,
+            labeled_ebunch:
+                _abc.Iterable,
+            attr_dict:
+                dict |
+                None=None,
+            check:
+                bool=True,
+            **attr):
         """Add multiple labeled edges.
 
         Overrides `networkx.MultiDiGraph.add_edges_from`,
@@ -1239,8 +1387,14 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 u, v,
                 key=key)
 
-    def remove_labeled_edges_from(self, labeled_ebunch,
-                                  attr_dict=None, **attr):
+    def remove_labeled_edges_from(
+            self,
+            labeled_ebunch:
+                _abc.Iterable,
+            attr_dict:
+                dict |
+                None=None,
+            **attr):
         """Remove labeled edges.
 
         Example
@@ -1284,7 +1438,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 u, v,
                 attr_dict=datadict)
 
-    def has_deadends(self):
+    def has_deadends(self) -> bool:
         """Return `False` if all nodes have outgoing edges.
 
         Edge labels are not taken into account.
@@ -1312,7 +1466,12 @@ class LabeledDiGraph(nx.MultiDiGraph):
         print(f'removed {n - m} nodes from '
               f'{n} total')
 
-    def dot_str(self, wrap=10, **kwargs):
+    def dot_str(
+            self,
+            wrap:
+                int=10,
+            **kwargs
+            ) -> str:
         """Return dot string."""
         import tulip.transys.export.graph2dot as graph2dot
         return graph2dot.graph2dot_str(
@@ -1322,8 +1481,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
     def save(
             self,
             filename:
-                str=None,
-            fileformat=None,
+                str |
+                None=None,
+            fileformat:
+                _ty.Literal[
+                    'pdf',
+                    'svg',
+                    'png',
+                    'dot'] |
+                None=None,
             rankdir:
                 _ty.Literal[
                     'LR',
@@ -1332,7 +1498,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             prog=None,
             wrap:
                 int=10,
-            tikz=False
+            tikz:
+                bool=False
             ) -> bool:
         """Save image to file.
 
@@ -1428,7 +1595,24 @@ class LabeledDiGraph(nx.MultiDiGraph):
             tikz=tikz)
         return True
 
-    def plot(self, rankdir='LR', prog=None, wrap=10, ax=None):
+    def plot(
+            self,
+            rankdir:
+                _ty.Literal[
+                    'LR',
+                    'TB']
+                ='LR',
+            prog:
+                _ty.Literal[
+                    'dot',
+                    'neato',
+                    'twopi',
+                    'circo',
+                    'sfdp'] |
+                None=None,
+            wrap:
+                int=10,
+            ax=None):
         """Plot image using dot.
 
         No file I/O involved.
@@ -1461,7 +1645,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self, prog, rankdir, wrap, ax=ax)
 
 
-def str2singleton(ap_label):
+def str2singleton(ap_label) -> set:
     """If string, convert to set(string).
 
     Convention: singleton str {'*'}
@@ -1483,7 +1667,8 @@ def prepend_with(
             _abc.Iterable,
         prepend_str:
             str |
-            None):
+            None
+        ) -> list[str]:
     """Prepend items with given string.
 
     Example

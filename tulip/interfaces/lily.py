@@ -35,6 +35,7 @@ Relevant links:
   - [Lily](http://www.ist.tugraz.at/staff/jobstmann/lily/)
 """
 import collections as _cl
+import collections.abc as _abc
 import itertools as _itr
 import logging
 import errno
@@ -57,15 +58,15 @@ DOTFILE = 'ltl2vl-synthesis.dot'
 def synthesize(
         formula:
             str |
-            LTL |
-            GRSpec,
+            _form.LTL |
+            _form.GRSpec,
         env_vars:
             dict |
             None=None,
         sys_vars:
             dict |
             None=None
-        ) -> MooreMachine:
+        ) -> _trs.MooreMachine:
     """Return Moore transducer if `formula` is realizable.
 
     Variable `dict`s have variable names as keys and their type as
@@ -136,10 +137,13 @@ def synthesize(
 
 
 def _lily_strategy2moore(
-        text,
-        env_vars,
-        sys_vars
-        ) -> MooreMachine:
+        text:
+            str,
+        env_vars:
+            _abc.Iterable[str],
+        sys_vars:
+            _abc.Iterable[str]
+        ) -> _trs.MooreMachine:
     """Return Moore transducer from Lily strategy.
 
     Caution

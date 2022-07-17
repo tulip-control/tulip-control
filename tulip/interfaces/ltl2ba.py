@@ -177,11 +177,18 @@ class Parser:
 
     def build(
             self,
-            tabmodule=None,
-            outputdir='',
-            write_tables=False,
-            debug=False,
-            debuglog=None):
+            tabmodule:
+                str |
+                None=None,
+            outputdir:
+                str='',
+            write_tables:
+                bool=False,
+            debug:
+                bool=False,
+            debuglog:
+                logging.Logger |
+                None=None):
         """Cache LALR(1) state machine.
 
         Using `ply.yacc`.
@@ -207,16 +214,32 @@ class Parser:
             debug=debug,
             debuglog=debuglog)
 
-    def parse(self, ltl2ba_output):
+    def parse(
+            self,
+            ltl2ba_output:
+                str
+            ) -> tuple[
+                dict[str, str],
+                nx.DiGraph,
+                set[str],
+                set[str]]:
         """Return a Buchi automaton from parsing `ltl2ba_output`.
 
         @return:
             Buchi automaton as a 4-`tuple` containing:
-            - `dict` mapping symbols to types (all `"boolean"`)
-            - `networkx.MultiDiGraph`, each edge labeled with a
-              `"guard"` that is a Boolean formula as `str`
-            - `set` of initial nodes
-            - `set` of accepting nodes
+
+            ```python
+            (mapping_symbols_to_types,
+             graph,
+             initial_nodes,
+             accepting_nodes)
+            ```
+
+            where:
+            - all values in the mapping are `"boolean"`
+            - each graph edge is labeled with
+              the key `"guard"`, with a Boolean
+              formula as value (the formula as `str`)
         """
         self.g = nx.MultiDiGraph()
         # flat is better than nested
@@ -320,7 +343,8 @@ class Parser:
 def call_ltl2ba(
         formula:
             str,
-        prefix=''
+        prefix:
+            str=''
         ) -> str:
     """Load a Buchi Automaton from a Never Claim.
 

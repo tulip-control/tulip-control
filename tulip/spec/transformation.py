@@ -59,6 +59,7 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
+Node = _ast.NodeSpec
 
 
 class Tree(nx.MultiDiGraph):
@@ -86,7 +87,7 @@ class Tree(nx.MultiDiGraph):
                     for u, v, k in self.edges(keys=True)]))
 
     @property
-    def variables(self) -> set:
+    def variables(self) -> set[Node]:
         """Return the set of variables in `tree`.
 
         @rtype:
@@ -95,13 +96,21 @@ class Tree(nx.MultiDiGraph):
         return {u for u in self if u.type == 'var'}
 
     @classmethod
-    def from_recursive_ast(cls, u):
+    def from_recursive_ast(
+            cls,
+            u:
+                Node
+            ) -> 'Tree':
         tree = cls()
         tree.root = u
         tree._recurse(u)
         return tree
 
-    def _recurse(self, u):
+    def _recurse(
+            self,
+            u:
+                Node
+            ) -> Node:
         if hasattr(u, 'value'):
             # necessary this terminal is the root
             self.add_node(u)
@@ -113,7 +122,12 @@ class Tree(nx.MultiDiGraph):
             raise Exception(f'unknown node type: {u}')
         return u
 
-    def to_recursive_ast(self, u=None):
+    def to_recursive_ast(
+            self,
+            u:
+                Node |
+                None=None
+            ) -> Node:
         if u is None:
             u = self.root
         w = copy.copy(u)
@@ -129,13 +143,13 @@ class Tree(nx.MultiDiGraph):
 
     def add_subtree(
             self,
-            leaf,
+            leaf:
+                Node,
             tree:
-                'Tree'):
+                'Tree'
+            ) -> None:
         """Add the `tree` at node `nd`.
 
-        @type leaf:
-            `FOL.Node`
         @param tree:
             to be added, without copying AST nodes.
         """
@@ -154,14 +168,21 @@ class Tree(nx.MultiDiGraph):
 
     def _to_dot(
             self,
-            detailed=False
+            detailed:
+                bool=False
             ) -> str:
         """Create GraphViz dot string from given AST."""
         g = ast_to_labeled_graph(self, detailed)
         import tulip.graphics as _graphics
         return _graphics.networkx_to_graphviz(g)
 
-    def write(self, filename, detailed=False):
+    def write(
+            self,
+            filename:
+                str,
+            detailed:
+                bool=False
+            ) -> None:
         """Layout AST and save result in PDF file."""
         fname, fext = os.path.splitext(filename)
         fext = fext[1:]  # drop .
@@ -175,7 +196,8 @@ class Tree(nx.MultiDiGraph):
 def ast_to_labeled_graph(
         tree:
             Tree,
-        detailed
+        detailed:
+            bool
         ) -> nx.DiGraph:
     """Convert AST to digraph for graphics.
 
@@ -289,7 +311,8 @@ def sub_values(
 
 
 def sub_constants(
-        tree,
+        tree:
+            Tree,
         var_str2int:
             dict[str, list]):
     """Replace string constants by integers.
@@ -340,8 +363,11 @@ def sub_bool_with_subtree(
 def pair_node_to_var(
         tree:
             Tree,
-        c
-        ) -> tuple:
+        c:
+            Node
+        ) -> tuple[
+            Node,
+            Node]:
     """Find variable under `Binary` operator above given node.
 
     First move up from `nd`, stop at first `Binary` node.
@@ -430,7 +456,8 @@ def infer_constants(
 
 
 def _check_var_conflicts(
-        s,
+        s:
+            set[str],
         variables:
             dict):
     """Raise exception if set intersects existing variable name, or values.
@@ -458,7 +485,12 @@ def _check_var_conflicts(
                 f'Values redefined: {conflicting_values}')
 
 
-def check_var_name_conflict(f, varname):
+def check_var_name_conflict(
+        f:
+            str,
+        varname:
+            str
+        ) -> set[str]:
     t = parser.parse(f)
     g = Tree.from_recursive_ast(t)
     v = {x.value for x in g.variables}
@@ -467,12 +499,11 @@ def check_var_name_conflict(f, varname):
     return v
 
 
-def collect_primed_vars(t):
-    """Return `set` of variable identifiers in the context of a next operator.
-
-    @type t:
-        recursive AST
-    """
+def collect_primed_vars(
+        t:
+            Node
+        ) -> set[str]:
+    """Return variable identifiers that are within scope of operator `'`."""
     g = Tree.from_recursive_ast(t)
     # (node, context)
     Q = [(t, False)]
@@ -491,9 +522,12 @@ def collect_primed_vars(t):
 
 # defunct until further notice
 def _flatten(
-        tree,
-        u,
-        to_lang,
+        tree:
+            Tree,
+        u:
+            Node,
+        to_lang:
+            _abc.Callable,
         **kw
         ) -> str:
     """Recursively flatten `tree`."""

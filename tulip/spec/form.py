@@ -44,6 +44,7 @@ import logging
 import pprint
 import time
 import types
+import typing as _ty
 import re
 
 import tulip.spec.parser as parser
@@ -95,9 +96,15 @@ class LTL:
 
     def __init__(
             self,
-            formula=None,
-            input_variables=None,
-            output_variables=None):
+            formula:
+                str |
+                None=None,
+            input_variables:
+                dict[str, ...] |
+                None=None,
+            output_variables:
+                dict[str, ...] |
+                None=None):
         """Instantiate an LTL object.
 
         Any non-None arguments are saved to the corresponding
@@ -123,7 +130,7 @@ class LTL:
     def __str__(self):
         return str(self.formula)
 
-    def _domain_str(self, d):
+    def _domain_str(self, d) -> str:
         if d == 'boolean':
             return d
         elif isinstance(d, tuple) and len(d) == 2:
@@ -133,7 +140,11 @@ class LTL:
         else:
             raise ValueError('Unrecognized variable domain type.')
 
-    def dumps(self, timestamp=False):
+    def dumps(
+            self,
+            timestamp:
+                bool=False
+            ) -> str:
         """Dump TuLiP LTL file string.
 
         @param timestamp:
@@ -156,7 +167,7 @@ class LTL:
                 output += f'{k} : {self._domain_str(v)};\n'
         return f'{output}\n%%\n{self.formula}'
 
-    def check_vars(self):
+    def check_vars(self) -> None:
         """Raise Exception if variabe definitions are invalid.
 
         Checks:
@@ -172,7 +183,11 @@ class LTL:
                 'Env and sys have variables in '
                 f'common: {common_vars}')
 
-    def check_form(self, check_undeclared_identifiers=False):
+    def check_form(
+            self,
+            check_undeclared_identifiers:
+                bool=False
+            ) -> None:
         """Verify formula syntax and type-check variable domains.
 
         Return True iff OK.
@@ -183,7 +198,10 @@ class LTL:
         raise NotImplementedError
 
     @staticmethod
-    def loads(s):
+    def loads(
+            s:
+                str
+            ) -> 'LTL':
         """Create LTL object from TuLiP LTL file string."""
         for line in s.splitlines():
             line = line.strip()  # Ignore leading and trailing whitespace
@@ -259,16 +277,28 @@ class LTL:
             output_variables=variables[1])
 
     @staticmethod
-    def load(f):
+    def load(
+            f:
+                str |
+                _ty.IO
+            ) -> 'LTL':
         """Wrap `loads` for reading from files.
 
         @param f:
-            file or str.  In the latter case, attempt to open a
+            If `str`, attempt to open a
             file named "f" read-only.
         """
         if isinstance(f, str):
             f = open(f, 'rU')
         return LTL.loads(f.read())
+
+
+VariableDeclaration = (
+    dict[str, ...] |
+    _abc.Iterable[str])
+Conjuncts = (
+    str |
+    _abc.Iterable[str])
 
 
 class GRSpec(LTL):
@@ -399,24 +429,34 @@ class GRSpec(LTL):
     def __init__(
             self,
             env_vars:
-                dict |
-                _abc.Iterable |
+                VariableDeclaration |
                 None=None,
             sys_vars:
-                dict |
-                _abc.Iterable |
+                VariableDeclaration |
                 None=None,
-            env_init='',
-            sys_init='',
-            env_safety='',
-            sys_safety='',
-            env_prog='',
-            sys_prog='',
+            env_init:
+                Conjuncts='',
+            sys_init:
+                Conjuncts='',
+            env_safety:
+                Conjuncts='',
+            sys_safety:
+                Conjuncts='',
+            env_prog:
+                Conjuncts='',
+            sys_prog:
+                Conjuncts='',
             moore:
                 bool=True,
             plus_one:
                 bool=True,
-            qinit=r'\A \A',
+            qinit:
+                _ty.Literal[
+                    r'\A \A',
+                    r'\A \E',
+                    r'\E \A',
+                    r'\E \E']
+                =r'\A \A',
             parser=parser):
         """Instantiate a GRSpec object.
 
@@ -433,8 +473,8 @@ class GRSpec(LTL):
             Mutatis mutandis, env_vars.
         @param env_init, env_safety, env_prog,
                 sys_init, sys_safety, sys_prog:
-            A string or iterable of strings.  An empty string is
-            converted to an empty list.  A string is placed in a list.
+            An empty string is converted to an empty list.
+            A string is placed in a list.
             iterables are converted to lists.  Cf. `GRSpec`.
         @param qinit:
             see class docstring
@@ -550,12 +590,19 @@ class GRSpec(LTL):
     def __str__(self):
         return self.to_canon()
 
-    def dumps(self, timestamp=False):
+    def dumps(
+            self,
+            timestamp:
+                bool=False
+            ) -> str:
         self.formula = self.to_canon()
         return LTL.dumps(self, timestamp=timestamp)
 
     @staticmethod
-    def loads(s):
+    def loads(
+            s:
+                str
+            ) -> 'GRSpec':
         """Create GRSpec object from TuLiP LTL file string.
 
         UNDER DEVELOPMENT; function signature may change without
@@ -564,7 +611,11 @@ class GRSpec(LTL):
         raise NotImplementedError
 
     @staticmethod
-    def load(f):
+    def load(
+            f:
+                str |
+                _ty.IO
+            ) -> 'GRSpec':
         """Wrap `loads` for reading from files.
 
         UNDER DEVELOPMENT; function signature may change without
@@ -572,8 +623,8 @@ class GRSpec(LTL):
         """
         raise NotImplementedError
 
-    def pretty(self):
-        """Return pretty printing string."""
+    def pretty(self) -> str:
+        """Return a string intended to be readable."""
         output = 'ENVIRONMENT VARIABLES:\n'
         if self.env_vars:
             for k, v in self.env_vars.items():
@@ -627,7 +678,7 @@ class GRSpec(LTL):
                 ) + '\n')
         return output
 
-    def check_syntax(self):
+    def check_syntax(self) -> None:
         """Raise `AssertionError` for misplaced primed variables."""
         self._assert_no_primed(
             self.env_init,
@@ -652,7 +703,13 @@ class GRSpec(LTL):
                     f'primed system variable "{var}"'
                     f' found in env safety: {f}')
 
-    def _assert_no_primed(self, formulae, name):
+    def _assert_no_primed(
+            self,
+            formulae:
+                _abc.Iterable[str],
+            name:
+                str
+            ) -> None:
         """Raise `AssertionError` if primed vars in `formulae`."""
         for f in formulae:
             a = self.ast(f)
@@ -664,7 +721,7 @@ class GRSpec(LTL):
                 f'primed variables: {primed}'
                 f' found in {name}: {f}')
 
-    def copy(self):
+    def copy(self) -> 'GRSpec':
         """Return a copy of `self`."""
         r = GRSpec(
             env_vars=dict(self.env_vars),
@@ -680,7 +737,11 @@ class GRSpec(LTL):
         r.qinit = self.qinit
         return r
 
-    def __or__(self, other):
+    def __or__(
+            self,
+            other:
+                'GRSpec'
+            ) -> 'GRSpec':
         """Create union of two specifications."""
         result = self.copy()
         if not isinstance(other, GRSpec):
@@ -704,7 +765,7 @@ class GRSpec(LTL):
             getattr(result, x).extend(getattr(other, x))
         return result
 
-    def to_canon(self):
+    def to_canon(self) -> str:
         """Output formula in TuLiP LTL syntax.
 
         The format is described in the [Specifications section](
@@ -735,7 +796,11 @@ class GRSpec(LTL):
         else:
             return 'True'
 
-    def sub_values(self, var_values):
+    def sub_values(
+            self,
+            var_values:
+                dict[str, ...]
+            ) -> dict:
         """Substitute given values for variables.
 
         Note that there are three ways to substitute values for variables:
@@ -764,7 +829,8 @@ class GRSpec(LTL):
 
     def compile_init(
             self,
-            no_str
+            no_str:
+                bool
             ) -> types.CodeType:
         """Compile python expression for initial conditions.
 
@@ -813,7 +879,7 @@ class GRSpec(LTL):
         s = f'not ({assumption}) or ({guarantee})'
         return compile(s, '<string>', 'eval')
 
-    def str_to_int(self):
+    def str_to_int(self) -> None:
         """Replace arbitrary finite vars with int vars.
 
         Returns spec itself if it contains only int vars.
@@ -845,7 +911,10 @@ class GRSpec(LTL):
                 self._bool_int[x] = f
         logger.info('done converting to integer variables.\n')
 
-    def ast(self, x):
+    def ast(
+            self,
+            x:
+                str):
         """Return AST corresponding to formula x.
 
         If AST for formula `x` has already been computed earlier,
@@ -863,7 +932,7 @@ class GRSpec(LTL):
             self.parse()
         return self._ast[x]
 
-    def parse(self):
+    def parse(self) -> None:
         """Parse each clause and store it.
 
         The AST resulting from each clause is stored
@@ -888,7 +957,11 @@ class GRSpec(LTL):
         self._collect_cache_garbage(self._ast)
         logger.info('done parsing ASTs.\n')
 
-    def _collect_cache_garbage(self, cache):
+    def _collect_cache_garbage(
+            self,
+            cache:
+                dict
+            ) -> None:
         logger.info('collecting garbage from GRSpec cache...')
         # rm cached ASTs that correspond to deleted clauses
         s = set(cache)
@@ -906,7 +979,12 @@ class GRSpec(LTL):
         logger.info(f'cleaned {len(s)} cached elements.\n')
 
 
-def replace_dependent_vars(spec, bool2form):
+def replace_dependent_vars(
+        spec:
+            GRSpec,
+        bool2form:
+            dict[str, str]
+        ) -> None:
     logger.debug(
         'replacing dependent variables '
         f'using the map:\n\t{bool2form}')
@@ -942,7 +1020,14 @@ def replace_dependent_vars(spec, bool2form):
         setattr(spec, s, new)
 
 
-def _conj(iterable, unary='', op='&&'):
+def _conj(
+        iterable:
+            _abc.Iterable,
+        unary:
+            str='',
+        op:
+            str='&&'
+        ) -> str:
     return f' {op} '.join(
         f'{unary}({s})'
         for s in iterable)
