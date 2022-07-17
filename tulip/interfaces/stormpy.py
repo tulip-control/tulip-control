@@ -132,7 +132,7 @@ def to_tulip_labels(stormpy_state, tulip_transys):
 
     @return:
         a `MathSet` object corresponding to
-        the set of atomicic propositions
+        the set of atomic propositions
         of `stormpy_state` in `tulip_transys`
     """
     return tulip_transys.atomic_propositions.intersection(
@@ -195,7 +195,7 @@ def to_tulip_transys(path):
     ts.states.initial.add_from(initial_state_list)
     # Neglect stormpy internal state labels
     neglect_labels = ['init', 'deadlock']
-    # Populate the set of atomic propositinos and
+    # Populate the set of atomic propositions and
     # compute the labels and transitions at each state
     for state in in_model.states:
         state_ap = copy.deepcopy(state.labels)
