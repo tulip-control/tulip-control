@@ -53,6 +53,11 @@ except ImportError:
 import numpy as np
 
 try:
+    import graphviz as _gv
+except ImportError as error:
+    _gv = None
+    gv_error = error
+try:
     import matplotlib.pyplot as _plt
     import mpl_toolkits.mplot3d.axes3d
 except ImportError as error:
@@ -60,7 +65,6 @@ except ImportError as error:
     mpl_error = error
 # inline
 # from mayavi.mlab import quiver3d
-# import graphviz as _gv
 
 
 __all__ = [
@@ -287,7 +291,7 @@ def _grouper(n, iterable, fillvalue=None):
 
 def networkx_to_graphviz(graph):
     """Convert `networkx` `graph` to `graphviz.Digraph`."""
-    import graphviz as _gv
+    _assert_graphviz()
     if graph.is_directed():
         gv_graph = _gv.Digraph()
     else:
@@ -299,6 +303,18 @@ def networkx_to_graphviz(graph):
         gv_graph.edge(
             str(u), str(v), **d)
     return gv_graph
+
+
+def _assert_graphviz():
+    """Raise `ImportError` if `graphviz` missing."""
+    if _gv is not None:
+        return
+    raise ImportError(
+        'Could not import the Python package '
+        '`graphviz`, which can be installed from '
+        'the Python Package Index (PyPI) '
+        'with `pip install graphviz`'
+        ) from gv_error
 
 
 def _assert_pyplot():
