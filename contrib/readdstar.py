@@ -62,7 +62,7 @@ FILE to read from stdin.
   E.g., if AP = {p, q}, and (1,3) is an edge in the Automaton object A,
   then
 
-    A.edge[1][3]["subsets of AP"] = [set([]), set(['p'])]
+    A.edge[1][3]["subsets of AP"] = [set(), set(['p'])]
 
   means that the transition (1,3) should be taken (assuming current
   execution has led to state 1) if the none of the atomic propositions

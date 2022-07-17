@@ -122,7 +122,7 @@ class MathSet_operations_test(object):
 
 @pytest.mark.parametrize('iterable,expected',
     [(range(3), set([0, 1, 2])),
-     ([], set([])),
+     ([], set()),
      ([1, 1, -1], set([1, -1])),
      ([[1, 2], 3, 3], [[1, 2], 3]),
      ('Dessert!!', set('Desert!'))])
