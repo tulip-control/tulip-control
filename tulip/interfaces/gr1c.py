@@ -617,8 +617,10 @@ class GR1CSession:
 
     def __init__(
             self, spec_filename, sys_vars,
-            env_vars=[],
+            env_vars=None,
             prompt=">>> "):
+        if env_vars is None:
+            env_vars = list()
         self.spec_filename = spec_filename
         self.sys_vars = sys_vars[:]
         self.env_vars = env_vars[:]
