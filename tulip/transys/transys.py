@@ -169,7 +169,7 @@ class MarkovChain(KripkeStructure):
                 if obj >= 0 and obj <= 1:
                     return True
                 return False
-            except Exception:
+            except TypeError:
                 return False
 
 
