@@ -83,7 +83,7 @@ def get_action_map(stormpy_model, tulip_transys):
         from_state_tulip = to_tulip_state(
             from_state_stormpy, tulip_transys)
         for stormpy_action in from_state_stormpy.actions:
-            possible_actions = action_map.get(str(stormpy_action), None)
+            possible_actions = action_map.get(str(stormpy_action))
             if possible_actions is None:
                 action_map[str(stormpy_action)] = list(
                     tulip_transys.actions)
@@ -262,7 +262,7 @@ def to_prism_file(ts, path):
     def get_transition_dict(state_transitions):
         transition_dict = dict()
         for transition in state_transitions:
-            action = transition[2].get(MDP.action_label, None)
+            action = transition[2].get(MDP.action_label)
             if action is None:
                 action = 0
             if action not in transition_dict:
