@@ -777,7 +777,7 @@ class GR1CSession:
     def getvars(self):
         """Return string of environment and system variable names in order.
 
-        Indices are indicated in parens.
+        Indices are indicated in parentheses.
         """
         self.p.stdin.write('var\n')
         line = self.p.stdout.readline()
