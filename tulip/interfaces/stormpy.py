@@ -251,7 +251,7 @@ def to_prism_file(ts, path):
     # that is just an integer.
     state_var = 's'
     state_list = list(ts.states)
-    action_list = list(ts.actions) if type(ts) == MDP else []
+    action_list = list(ts.actions) if isinstance(ts, MDP) else []
     # Given all the transitions from
     # a state s of ts, return a dictionary whose
     # key is an action a and the value is
@@ -308,9 +308,9 @@ def to_prism_file(ts, path):
     # Use the above functions to describe the model in prism format.
     with open(path, 'w') as f:
         # Type of model
-        if type(ts) == MDP:
+        if isinstance(ts, MDP):
             f.write('mdp')
-        elif type(ts) == MC:
+        elif isinstance(ts, MC):
             f.write('dtmc')
         # The set of states and initial state
         f.write('\n\nmodule sys_model\n')
@@ -326,7 +326,7 @@ def to_prism_file(ts, path):
                 ts.transitions.find(state))
             for action, transitions in transition_dict.items():
                 action_str = ''
-                if type(ts) == MDP:
+                if isinstance(ts, MDP):
                     action_str = f'act{action_list.index(action)}'
                 f.write(
                     f'    [{action_str}] '
@@ -383,7 +383,8 @@ def model_checking(
           `policy[state]` is the action to be
           applied at `state`.
     """
-    assert type(tulip_transys) == MDP or type(tulip_transys) == MC
+    if not isinstance(tulip_transys, (MDP, MC)):
+        raise TypeError(tulip_transys)
     to_prism_file(tulip_transys, prism_file_path)
     prism_program = stormpy.parse_prism_program(prism_file_path)
     stormpy_model = stormpy.build_model(prism_program)
