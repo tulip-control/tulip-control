@@ -149,7 +149,7 @@ def _untaglist(x, cast_f=float,
     if cast_f is None:
         cast_f = str
     litems = elem.findall(f'{ns_prefix}litem')
-    if len(litems) > 0:
+    if litems:
         li = [cast_f(k.attrib['value']) for k in litems]
     elif elem.text is None:
         li = list()
