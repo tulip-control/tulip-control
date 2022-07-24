@@ -70,7 +70,10 @@ def print_stormpy_model(model):
                     f'go to state {transition.column}')
 
 
-def get_action_map(stormpy_model, tulip_transys):
+def get_action_map(
+        stormpy_model,
+        tulip_transys:
+            MDP):
     """Get a map of action of `stormpy_model` and that of `tulip_transys`.
 
     @return:
@@ -101,7 +104,8 @@ def get_action_map(stormpy_model, tulip_transys):
 def to_tulip_action(
         stormpy_action,
         stormpy_model,
-        tulip_transys,
+        tulip_transys:
+            MDP,
         action_map=None):
     """Return action of `tulip_transys` on model.
 
@@ -124,7 +128,10 @@ def to_tulip_action(
     return possible_tulip_action[0]
 
 
-def to_tulip_labels(stormpy_state, tulip_transys):
+def to_tulip_labels(
+        stormpy_state,
+        tulip_transys:
+            MDP):
     """Get set of atomic propositions at `stormpy_state` for `tulip_transys`.
 
     This typically involves getting rid of `stormpy` internal labels such as
@@ -139,7 +146,10 @@ def to_tulip_labels(stormpy_state, tulip_transys):
         stormpy_state.labels)
 
 
-def to_tulip_state(stormpy_state, tulip_transys):
+def to_tulip_state(
+        stormpy_state,
+        tulip_transys:
+            MDP):
     """Get unique state of `tulip_transys` that corresponds to `stormpy_state`.
 
     The computation is based on the state labels,
