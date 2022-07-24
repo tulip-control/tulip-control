@@ -44,6 +44,7 @@ from tulip.transys.transys import GameGraph
 
 __all__ = [
     'FiniteStateAutomaton',
+    'WeightedFiniteStateAutomaton',
     'BuchiAutomaton',
     'BA',
     'tuple2ba',
