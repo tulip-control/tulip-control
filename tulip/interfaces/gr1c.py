@@ -357,10 +357,14 @@ def _parse_vars(variables, vardict):
             raise ValueError(
                 'unrecognized type of domain '
                 f'for variable "{v}":  {dom}')
-    variables = dict(
-        (v, domains[i])
-        for i, v in enumerate(variables))
-    return variables
+    if len(variables) != len(domains):
+        raise AssertionError(
+            len(variables),
+            len(domains))
+    return {
+        var: domain
+        for var, domain in
+            zip(variables, domains)}
 
 
 def load_aut_json(x):
