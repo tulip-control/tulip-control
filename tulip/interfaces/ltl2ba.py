@@ -220,8 +220,11 @@ class Parser:
         self.accepting_nodes = set()
         self.symbols = dict()
         self.parser.parse(ltl2ba_output, lexer=self.lexer.lexer)
-        return (self.symbols, self.g,
-                self.initial_nodes, self.accepting_nodes)
+        return (
+            self.symbols,
+            self.g,
+            self.initial_nodes,
+            self.accepting_nodes)
 
     def p_claim(self, p):
         """claim : NEVER LBRACE COMMENT clauses RBRACE"""
