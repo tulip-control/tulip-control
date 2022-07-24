@@ -152,9 +152,8 @@ def to_tulip_state(stormpy_state, tulip_transys):
     def filter_(s):
         return (set(tulip_transys.states[s]['ap'])
             == set(to_tulip_labels(stormpy_state, tulip_transys)))
-    possible_states = [
-        s for s in tulip_transys.states
-        if filter_(s)]
+    possible_states = list(filter(
+        filter_, tulip_transys.states))
     if len(possible_states) != 1:
         raise ValueError(
             'Cannot find a unique state '
