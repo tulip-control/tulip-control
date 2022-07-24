@@ -150,8 +150,10 @@ def to_tulip_state(stormpy_state, tulip_transys):
     `ValueError` will be raised.
     """
     def filter_(s):
-        return (set(tulip_transys.states[s]['ap'])
-            == set(to_tulip_labels(stormpy_state, tulip_transys)))
+        return (
+            set(tulip_transys.states[s]['ap'])
+            == set(to_tulip_labels(
+                stormpy_state, tulip_transys)))
     possible_states = list(filter(
         filter_, tulip_transys.states))
     if len(possible_states) != 1:
