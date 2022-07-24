@@ -303,8 +303,7 @@ def to_prism_file(ts, path):
         for label in ts.atomic_propositions:
             label_dict[label] = [
                 state for state in ts.states
-                if label in ts.states[state]['ap']
-            ]
+                if label in ts.states[state]['ap']]
         return label_dict
     # Use the above functions to describe the model in prism format.
     with open(path, 'w') as f:

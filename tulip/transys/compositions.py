@@ -170,8 +170,7 @@ def synchronous_parallel(models, transition_attr_operations={}):
     for from_state in ts.states:
         transitions = [
             models[coord].transitions.find(from_state[coord])
-            for coord in range(len(models))
-        ]
+            for coord in range(len(models))]
         for transition in product(*transitions):
             to_state = tuple(t[1] for t in transition)
             attr = _get_transition_attr(
