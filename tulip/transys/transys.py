@@ -166,11 +166,12 @@ class MarkovChain(KripkeStructure):
 
         def __contains__(self, obj):
             try:
-                if obj >= 0 and obj <= 1:
-                    return True
-                return False
+                in_01 = (
+                    obj >= 0 and
+                    obj <= 1)
             except TypeError:
-                return False
+                pass
+            return in_01
 
 
     def __init__(self):
