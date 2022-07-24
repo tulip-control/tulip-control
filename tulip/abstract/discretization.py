@@ -65,7 +65,7 @@ from tulip.abstract.feasible import (
 from tulip.abstract.plot import plot_ts_on_partition
 # inline imports:
 #
-# inline: import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 
 __all__ = [
