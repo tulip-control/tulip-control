@@ -45,27 +45,6 @@ logger = logging.getLogger(__name__)
 class Lexer:
     """Token rules to build lexer for `ltl2ba` output."""
 
-    reserved = {
-        'goto':
-            'GOTO',
-        'if':
-            'IF',
-        'fi':
-            'FI',
-        'never':
-            'NEVER',
-        'skip':
-            'SKIP'}
-    tokens = (
-        'TRUE', 'FALSE',
-        'NUMBER',
-        'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
-        'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
-        'PLUS', 'MINUS', 'TIMES', 'DIV',
-        'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
-        'COLON', 'COLON2', 'SEMI',
-        'COMMENT', 'NAME') + tuple(reserved.values())
-
     # Tokens
     t_TRUE = '''
           TRUE
@@ -120,6 +99,27 @@ class Lexer:
     t_ignore = ''.join(['\x20', '\t'])
 
     def __init__(self):
+        self.reserved = {
+            'goto':
+                'GOTO',
+            'if':
+                'IF',
+            'fi':
+                'FI',
+            'never':
+                'NEVER',
+            'skip':
+                'SKIP'}
+        self.tokens = (
+            'TRUE', 'FALSE',
+            'NUMBER',
+            'NOT', 'AND', 'OR', 'XOR', 'IMP', 'BIMP',
+            'EQUALS', 'NEQUALS', 'LT', 'LE', 'GT', 'GE',
+            'PLUS', 'MINUS', 'TIMES', 'DIV',
+            'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
+            'COLON', 'COLON2', 'SEMI',
+            'COMMENT', 'NAME') + tuple(
+                self.reserved.values())
         self.lexer = ply.lex.lex(
             module=self,
             debug=False)
@@ -145,25 +145,24 @@ class Lexer:
 class Parser:
     """Production rules to build parser for `ltl2ba` output."""
 
-    precedence = (
-        # ('right', 'UNTIL', 'RELEASE'),
-        ('right', 'BIMP'),
-        ('right', 'IMP'),
-        ('left', 'XOR'),
-        ('left', 'OR'),
-        ('left', 'AND'),
-        # ('right', 'ALWAYS', 'EVENTUALLY'),
-        # ('right', 'NEXT'),
-        ('right', 'NOT'),
-        # ('left', 'PRIME'),
-        ('nonassoc', 'EQUALS', 'NEQUALS',
-         'LT', 'LE', 'GT', 'GE'),
-        ('nonassoc', 'TIMES', 'DIV'),
-        ('nonassoc', 'PLUS', 'MINUS'),
-        ('nonassoc', 'TRUE', 'FALSE'))
-
     def __init__(self):
         """Build lexer and parser."""
+        self.precedence = (
+            # ('right', 'UNTIL', 'RELEASE'),
+            ('right', 'BIMP'),
+            ('right', 'IMP'),
+            ('left', 'XOR'),
+            ('left', 'OR'),
+            ('left', 'AND'),
+            # ('right', 'ALWAYS', 'EVENTUALLY'),
+            # ('right', 'NEXT'),
+            ('right', 'NOT'),
+            # ('left', 'PRIME'),
+            ('nonassoc', 'EQUALS', 'NEQUALS',
+             'LT', 'LE', 'GT', 'GE'),
+            ('nonassoc', 'TIMES', 'DIV'),
+            ('nonassoc', 'PLUS', 'MINUS'),
+            ('nonassoc', 'TRUE', 'FALSE'))
         self.lexer = Lexer()
         self.start = 'claim'
         self.tokens = self.lexer.tokens
