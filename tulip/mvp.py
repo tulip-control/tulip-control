@@ -69,8 +69,8 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
         rule_transitions = rule.automaton().transitions.find(
             from_spec_state[idx], to_spec_state[idx])
         rule_transition_labels = [
-            set(transition[2]["letter"]) for transition in rule_transitions
-        ]
+            set(transition[2]["letter"])
+            for transition in rule_transitions]
         if to_ap not in rule_transition_labels:
             cost[rule.level()] += rule.priority()
     return cost
@@ -202,5 +202,8 @@ def solve(ks, goal_label, spec):
         wpa.states.initial,
         accepting_goal_states,
         cost_key="cost")
-    state_path = [state[0] for state in product_path if state[0] != null_state]
+    state_path = [
+        state[0]
+        for state in product_path
+        if state[0] != null_state]
     return (cost, state_path, product_path, wpa)

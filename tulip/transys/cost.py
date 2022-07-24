@@ -76,7 +76,9 @@ class VectorCost:
             self,
             obj):
         obj = self._convert(obj)
-        return VectorCost([self[i] + obj[i] for i in range(len(self))])
+        return VectorCost([
+            self[i] + obj[i]
+            for i in range(len(self))])
 
     def __radd__(
             self,

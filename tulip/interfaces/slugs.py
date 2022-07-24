@@ -139,8 +139,9 @@ def _bitfields_to_ints(bit_state, vrs):
         if dom == 'boolean':
             int_state[var] = bit_state[var]
             continue
-        bitnames = [f'{var}@{i}'
-                    for i in range(dom[1].bit_length())]
+        bitnames = [
+            f'{var}@{i}'
+            for i in range(dom[1].bit_length())]
         bitnames[0] = f'{var}@0.{dom[0]}.{dom[1]}'
         bitvalues = [bit_state[b] for b in bitnames]
         # little-endian
