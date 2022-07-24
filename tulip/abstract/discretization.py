@@ -38,15 +38,15 @@ See Also
 """
 import copy
 import logging
-import os
-import warnings
-import pprint
 import multiprocessing as mp
+import os
+import pprint
+import warnings
 
 import numpy as np
-import scipy.sparse as sp
 import polytope as pc
 import polytope.plot as _pplt
+import scipy.sparse as sp
 
 import tulip.abstract.feasible as _fsb
 import tulip.abstract.plot as _aplt
