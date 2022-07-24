@@ -570,7 +570,7 @@ def load_mealy(filename, fformat='tulipxml'):
     @param fformat:
         file format; can be one of
         `"tulipxml"` (default),
-        `"json"`. Not case sensitive.
+        `"json"`.
     @type fformat:
         `str`
     @return:
