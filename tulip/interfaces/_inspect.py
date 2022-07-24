@@ -126,14 +126,12 @@ def print_env():
 def _format_python_package_message(name, package, url):
     """Return a `str` reporting information about package."""
     if package is None:
-        s = (
+        return (
             f'Could not import Python package `{name}`.\n'
             f'Can be installed from:\n    <{url}>\n')
-    else:
-        s = (
-            f'Found Python package `{name}` as:\n'
-            f'    {package}\n')
-    return s
+    return (
+        f'Found Python package `{name}` as:\n'
+        f'    {package}\n')
 
 
 def _check_glpsol():

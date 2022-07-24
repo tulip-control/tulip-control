@@ -426,9 +426,8 @@ def check_syntax(spec_str):
     logger.debug(f'gr1c stdout: {p.stdout.read()}')
     if p.returncode == 0:
         return True
-    else:
-        logger.info(p.stdout.read())
-        return False
+    logger.info(p.stdout.read())
+    return False
 
 
 def check_realizable(spec):
@@ -835,8 +834,7 @@ class GR1CSession:
         self.p = None
         if returncode != 0:
             return False
-        else:
-            return True
+        return True
 
 
 def _join_as_str(items) -> str:
