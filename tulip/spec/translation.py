@@ -47,7 +47,6 @@
   (see top of file: LTL.pm)
 """
 import logging
-logger = logging.getLogger(__name__)
 # import pprint
 import re
 from tulip.spec import ast
@@ -56,6 +55,9 @@ import tulip.spec.form
 
 __all__ = [
     'translate']
+
+
+logger = logging.getLogger(__name__)
 
 
 def make_jtlv_nodes():
