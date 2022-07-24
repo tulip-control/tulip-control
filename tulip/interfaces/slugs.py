@@ -45,8 +45,10 @@ import networkx as nx
 from tulip.spec import GRSpec, translate
 
 
-# If this path begins with '/', then it is considered to be absolute.
-# Otherwise, it is relative to the path of the `slugs` executable.
+# If this path begins with '/',
+# then it is considered to be absolute.
+# Otherwise, it is relative to
+# the path of the `slugs` executable.
 SLUGS_COMPILER_PATH = (
     '../tools/StructuredSlugsParser/'
     'compiler.py')
