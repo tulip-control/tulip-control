@@ -15,10 +15,10 @@ import time
 
 try:
     import omega
-    from omega.logic import bitvector as bv
-    from omega.games import gr1
-    from omega.symbolic import temporal as trl
-    from omega.games import enumeration as enum
+    import omega.logic.bitvector as bv
+    import omega.games.gr1 as gr1
+    import omega.symbolic.temporal as trl
+    import omega.games.enumeration as enum
 except ImportError:
     omega = None
 import networkx as nx

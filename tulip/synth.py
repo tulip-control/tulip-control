@@ -38,15 +38,15 @@ import warnings
 
 import networkx as _nx
 
-from tulip.interfaces import gr1c
-from tulip.interfaces import gr1py
-from tulip.interfaces import omega as omega_int
+import tulip.interfaces.gr1c as gr1c
+import tulip.interfaces.gr1py as gr1py
+import tulip.interfaces.omega as omega_int
 try:
-    from tulip.interfaces import slugs
+    import tulip.interfaces.slugs as slugs
 except ImportError:
     slugs = None
 import tulip.spec as _spec
-from tulip import transys
+import tulip.transys as transys
 
 
 __all__ = [

@@ -43,7 +43,7 @@ import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.mathset as _mset
 # inline imports
 #
-# from tulip.transys.export import graph2promela
+# import tulip.transys.export.graph2promela
 
 
 __all__ = [
@@ -334,7 +334,9 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     First create an empty transition system and add some states to it:
 
     ```python
-    from tulip import transys as trs
+    import tulip.transys as trs
+
+
     ts = trs.FiniteTransitionSystem()
     ts.states.add('s0')
     ts.states.add_from(['s1', 's3', 'end', 5])
@@ -611,8 +613,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         # closed ?
         if self.env_vars:
             return False
-        from tulip.transys.export import graph2promela
-        s = graph2promela.fts2promela(self, self.name)
+        import tulip.transys.export.graph2promela as _pml
+        s = _pml.fts2promela(self, self.name)
         # dump to file
         f = open(path, 'w')
         f.write(s)

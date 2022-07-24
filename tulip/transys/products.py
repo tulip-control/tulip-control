@@ -33,8 +33,8 @@
 import logging
 import warnings
 
-from tulip.transys import transys
-from tulip.transys import automata
+import tulip.transys.automata as automata
+import tulip.transys.transys as transys
 
 
 __all__ = [

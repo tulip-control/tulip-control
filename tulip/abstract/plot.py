@@ -379,7 +379,7 @@ def simulate2d(
         assert s0_loc == out['loc'], (s0_loc, out['loc'])
         print(f'outputs:\n    {out}\n')
     if show_traj:
-        from matplotlib import pyplot as plt
+        import matplotlib.pyplot as plt
         plt.plot(x, label='x')
         plt.plot(y, '--', label='y')
         plt.xlabel('time')

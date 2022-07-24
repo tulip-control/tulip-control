@@ -6,7 +6,7 @@ try:
 except ImportError:
     cvxopt = None
 try:
-    from cvxopt import glpk as cvxopt_glpk
+    import cvxopt.glpk as cvxopt_glpk
 except ImportError:
     cvxopt_glpk = None
 try:
@@ -14,7 +14,7 @@ try:
 except ImportError:
     dd = None
 try:
-    from dd import cudd as dd_cudd
+    import dd.cudd as dd_cudd
 except ImportError:
     dd_cudd = None
 try:
@@ -31,9 +31,9 @@ except ImportError:
     polytope = None
 
 
-from tulip.interfaces import gr1c as gr1c
-from tulip.interfaces import gr1py as gr1py_int
-from tulip.interfaces import omega as omega_int
+import tulip.interfaces.gr1c as gr1c
+import tulip.interfaces.gr1py as gr1py_int
+import tulip.interfaces.omega as omega_int
 
 
 __all__ = [

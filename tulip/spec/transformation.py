@@ -40,7 +40,7 @@ import warnings
 import networkx as nx
 
 import tulip.spec.ast as _ast
-from tulip.spec import parser
+import tulip.spec.parser as parser
 # inline:
 # import tulip.graphics as _graphics
 

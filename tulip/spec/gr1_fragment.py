@@ -50,10 +50,10 @@ import typing as _ty
 import networkx as nx
 
 import tulip.spec as _spec
-from tulip.spec import lexyacc
-from tulip.spec import transformation as tx
-from tulip.spec import parser
-from tulip.spec import ast as sast
+import tulip.spec.lexyacc as lexyacc
+import tulip.spec.transformation as tx
+import tulip.spec.parser as parser
+import tulip.spec.ast as sast
 import tulip.transys as trs
 
 

@@ -46,9 +46,9 @@ import time
 import types
 import re
 
-from tulip.spec import parser
-from tulip.spec import transformation as tx
-from tulip.spec import translation as ts
+import tulip.spec.parser as parser
+import tulip.spec.transformation as tx
+import tulip.spec.translation as ts
 
 
 __all__ = [

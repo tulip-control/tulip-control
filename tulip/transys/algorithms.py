@@ -35,7 +35,7 @@ import logging
 
 import networkx as nx
 
-from tulip.interfaces import ltl2ba as ltl2baint
+import tulip.interfaces.ltl2ba as ltl2baint
 import tulip.transys.automata as _aut
 import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.transys as _trs

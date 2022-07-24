@@ -51,7 +51,7 @@ import logging
 import re
 import typing as _ty
 
-from tulip.spec import ast
+import tulip.spec.ast as ast
 import tulip.spec.form
 
 

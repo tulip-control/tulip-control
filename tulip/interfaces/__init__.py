@@ -30,5 +30,5 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Minimal bindings to external entities."""
-from tulip.interfaces import gr1c as gr1cint
+import tulip.interfaces.gr1c as gr1cint
 from tulip.interfaces._inspect import *
