@@ -364,7 +364,7 @@ def _parse_vars(variables, vardict):
 
 
 def load_aut_json(x):
-    """Return strategy constructed from output of `gr1c`
+    """Return strategy constructed from output of `gr1c`.
 
     @param x:
         string or
