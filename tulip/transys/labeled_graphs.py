@@ -37,6 +37,7 @@ import os
 from pprint import pformat
 
 import networkx as nx
+
 from tulip.transys.mathset import SubSet, TypedDict
 # inline imports:
 #

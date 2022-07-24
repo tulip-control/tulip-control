@@ -32,6 +32,7 @@
 """Products between automata and transition systems"""
 import logging
 import warnings
+
 from tulip.transys import transys
 from tulip.transys import automata
 

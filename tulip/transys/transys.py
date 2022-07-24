@@ -36,6 +36,7 @@ from pprint import pformat
 
 from networkx import MultiDiGraph
 import numpy as np
+
 from tulip.transys.cost import ValidTransitionCost
 from tulip.transys.labeled_graphs import (
     LabeledDiGraph, str2singleton, prepend_with)

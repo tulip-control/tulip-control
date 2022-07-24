@@ -35,7 +35,9 @@ import logging
 import copy
 import os
 import warnings
+
 import networkx as nx
+
 from tulip.spec.ast import nodes
 from tulip.spec import parser
 # inline:

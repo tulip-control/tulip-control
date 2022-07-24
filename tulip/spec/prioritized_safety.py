@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 
 from itertools import product
+
 from tulip.transys.automata import FiniteStateAutomaton as FA
 
 
