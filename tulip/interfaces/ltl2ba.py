@@ -207,7 +207,7 @@ class Parser:
         """Return a Buchi automaton from parsing `ltl2ba_output`.
 
         @return:
-            Buchi automaton as a 3-`tuple` containing:
+            Buchi automaton as a 4-`tuple` containing:
             - `dict` mapping symbols to types (all `"boolean"`)
             - `networkx.MultiDiGraph`, each edge labeled with a
               `"guard"` that is a Boolean formula as `str`
