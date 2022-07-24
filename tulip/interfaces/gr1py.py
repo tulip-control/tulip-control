@@ -36,9 +36,8 @@
 """
 import logging
 
-from tulip.interfaces.gr1c import load_aut_json
-from tulip.interfaces.gr1c import select_options
-from tulip.spec import translate
+import tulip.interfaces.gr1c as _gr1c
+import tulip.spec as _spec
 try:
     import gr1py
     import gr1py.cli
@@ -60,7 +59,7 @@ def check_realizable(spec):
         `False` if not, or
         an error occurs.
     """
-    init_option = select_options(spec)
+    init_option = _gr1c.select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     return gr1py.solve.check_realizable(
         tsys, exprtab,
@@ -72,7 +71,7 @@ def synthesize(spec):
 
     cf. `tulip.interfaces.gr1c.synthesize`
     """
-    init_option = select_options(spec)
+    init_option = _gr1c.select_options(spec)
     tsys, exprtab = _spec_to_gr1py(spec)
     strategy = gr1py.solve.synthesize(
         tsys, exprtab,
@@ -80,7 +79,7 @@ def synthesize(spec):
     if strategy is None:
         return None
     s = gr1py.output.dumps_json(tsys.symtab, strategy)
-    return load_aut_json(s)
+    return _gr1c.load_aut_json(s)
 
 
 def _spec_to_gr1py(spec):
@@ -88,7 +87,7 @@ def _spec_to_gr1py(spec):
         raise ValueError(
             'Import of gr1py interface failed.\n'
             'Please verify installation of `gr1py`.')
-    s = translate(spec, 'gr1c')
+    s = _spec.translate(spec, 'gr1c')
     logger.info(
         f'\n{_hl}\n gr1py input:\n {s}\n{_hl}')
     tsys, exprtab = gr1py.cli.loads(s)

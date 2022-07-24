@@ -45,7 +45,7 @@ Relevant
 ========
 `find_controller`
 """
-from collections.abc import Iterable
+import collections.abc as _abc
 import logging
 
 import numpy as np
@@ -411,7 +411,7 @@ def createLM(
         taken into account.
         Default is `1..N`
     """
-    if not isinstance(list_P, Iterable):
+    if not isinstance(list_P, _abc.Iterable):
         list_P = [list_P] + (N - 1) * [Pk] + [PN]
     if disturbance_ind is None:
         disturbance_ind = range(1, N + 1)

@@ -33,8 +33,8 @@
 """Classes representing hybrid dynamical systems."""
 import itertools
 import logging
-from pprint import pformat
-from warnings import warn
+import pprint as _pp
+import warnings as _warn
 
 import numpy as np
 import polytope as pc
@@ -123,11 +123,11 @@ class LtiSysDyn:
             time_semantics=None,
             timestep=None):
         if Uset is None:
-            warn('Uset not given to `LtiSysDyn()`')
+            _warn.warn('Uset not given to `LtiSysDyn()`')
         elif not isinstance(Uset, pc.Polytope):
             raise Exception('`Uset` has to be a Polytope')
         if domain is None:
-            warn('Domain not given to `LtiSysDyn()`')
+            _warn.warn('Domain not given to `LtiSysDyn()`')
         if ((domain is not None) and
             (not (isinstance(domain, pc.Polytope) or
                 isinstance(domain, pc.Region))
@@ -306,7 +306,7 @@ class PwaSysDyn:
         if list_subsys is None:
             list_subsys = list()
         if domain is None:
-            warn(
+            _warn.warn(
                 'requires argument `domain`')
         if (domain is not None and
             (not (isinstance(domain, pc.Polytope) or
@@ -507,7 +507,7 @@ class SwitchedSysDyn:
         """
         # check that the continuous domain is specified
         if cts_ss is None:
-            warn('requires continuous state-space `cts_ss`')
+            _warn.warn('requires continuous state-space `cts_ss`')
         else:
             if not isinstance(
                     cts_ss,
@@ -539,7 +539,7 @@ class SwitchedSysDyn:
             missing_modes = set(modes).difference(
                 dynamics.keys())
             if missing_modes:
-                warn(
+                _warn.warn(
                     f'Missing the modes:\n{missing_modes}'
                     '\n Make sure you did not '
                     'forget any modes,\n'
@@ -579,11 +579,11 @@ class SwitchedSysDyn:
             f'{dashes}\n'
             'Modes:\n'
             f'{spaces_4}Environment ({n_env} modes):\n'
-            + spaces_6 + pformat(
+            + spaces_6 + _pp.pformat(
                 self.env_labels, indent=3)
                 + newlines
             + spaces_4 + f'System: ({n_sys} modes)\n'
-            + spaces_6 + pformat(
+            + spaces_6 + _pp.pformat(
                 self.disc_sys_labels, indent=3)
                 + newlines
             + 'Continuous State Space:\n\n'
@@ -605,7 +605,7 @@ class SwitchedSysDyn:
         try:
             # is length correct ?
             if len(labels) != n:
-                warn(
+                _warn.warn(
                     'number of environment labels '
                     'is inconsistent with discrete '
                     'domain size.\n'
@@ -613,7 +613,7 @@ class SwitchedSysDyn:
                     'Defaulting to integer labels.')
                 return None
         except:
-            warn(
+            _warn.warn(
                 'Environment labels of type: '
                 f'{labels} have no `len()`')
             return None
@@ -632,7 +632,7 @@ class SwitchedSysDyn:
     @property
     def modes(self):
         if self.dynamics is None:
-            warn(
+            _warn.warn(
                 'No dynamics defined (`None`).')
             return None
         return self.dynamics.keys()
@@ -705,14 +705,14 @@ def _push_time_data(
             system.time_semantics != time_semantics and
             system.time_semantics is not None)
         if overwriting_time_semantics:
-            warn(
+            _warn.warn(
                 'Overwriting existing '
                 'time-semantics data.')
         overwriting_timestep_data = (
             system.timestep != timestep and
             system.timestep is not None)
         if overwriting_timestep_data:
-            warn(
+            _warn.warn(
                 'Overwriting existing '
                 'timestep data.')
         system.time_semantics = time_semantics

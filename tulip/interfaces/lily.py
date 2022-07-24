@@ -42,12 +42,10 @@ import os
 import re
 import subprocess
 
-from tulip.spec.form import GRSpec
-from tulip.spec.form import LTL
-from tulip.spec.parser import parse
-from tulip.spec.translation import translate
-from tulip.spec.translation import translate_ast
-from tulip.transys import MooreMachine
+import tulip.spec.form as _form
+import tulip.spec.parser as _parser
+import tulip.spec.translation as _trsl
+import tulip.transys as _trs
 
 
 logger = logging.getLogger(__name__)
@@ -87,10 +85,10 @@ def synthesize(
         symbolic Moore transducer
         (guards are conjunctions, not sets)
     """
-    if isinstance(formula, GRSpec):
+    if isinstance(formula, _form.GRSpec):
         env_vars = formula.env_vars
         sys_vars = formula.sys_vars
-    elif isinstance(formula, LTL):
+    elif isinstance(formula, _form.LTL):
         env_vars = formula.input_variables
         sys_vars = formula.output_variables
     all_vars = dict(env_vars)
@@ -98,11 +96,11 @@ def synthesize(
     if not all(v == 'boolean' for v in all_vars.values()):
         raise TypeError(
             f'all variables should be Boolean:\n{all_vars}')
-    if isinstance(formula, GRSpec):
-        f = translate(formula, 'wring')
+    if isinstance(formula, _form.GRSpec):
+        f = _trsl.translate(formula, 'wring')
     else:
-        T = parse(str(formula))
-        f = translate_ast(T, 'wring').flatten(
+        T = _parser.parse(str(formula))
+        f = _trsl.translate_ast(T, 'wring').flatten(
             env_vars=env_vars,
             sys_vars=sys_vars)
     # dump partition file
@@ -207,7 +205,7 @@ def _lily_strategy2moore(
         end = mapping.get(end, end)
         successors[start].add(end)
         edge_labels[start, end] = annot
-    machine = MooreMachine()
+    machine = _trs.MooreMachine()
     inports = {
         name: {False, True}
         for name in env_vars}

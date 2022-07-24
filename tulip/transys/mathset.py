@@ -31,11 +31,10 @@
 # SUCH DAMAGE.
 """Mathematical Sets and Power Sets."""
 import collections.abc as _abc
-from collections.abc import Iterable, Hashable, Container
-from itertools import chain, combinations
+import itertools as _itr
 import logging
-from pprint import pformat
-from random import randint
+import pprint as _pp
+import random
 import warnings
 
 
@@ -153,7 +152,7 @@ class MathSet:
 
     def __repr__(self):
         return (
-            f'MathSet({pformat(list(self._set))}'
+            f'MathSet({_pp.pformat(list(self._set))}'
             f'{self._list})')
 
     def _debug_repr(self):
@@ -274,7 +273,7 @@ class MathSet:
         return (self._set == other._set) and same_lists
 
     def __contains__(self, item):
-        if isinstance(item, Hashable):
+        if isinstance(item, _abc.Hashable):
             try:
                 return item in self._set
             except:
@@ -292,13 +291,13 @@ class MathSet:
     def _filter_hashables(self, iterable):
         return filter(
             lambda x:
-                isinstance(x, Hashable),
+                isinstance(x, _abc.Hashable),
             iterable)
 
     def _filter_unhashables(self, iterable):
         return list(filter(
             lambda x:
-                not isinstance(x, Hashable),
+                not isinstance(x, _abc.Hashable),
             iterable))
 
     def _delete_all(self):
@@ -326,7 +325,7 @@ class MathSet:
             (if hashable it is stored in a Python set,
             otherwise stored in a list)
         """
-        if isinstance(item, Hashable):
+        if isinstance(item, _abc.Hashable):
             try:
                 self._set.add(item)
                 return
@@ -369,7 +368,7 @@ class MathSet:
         @param iterable:
             new MathSet elements
         """
-        if not isinstance(iterable, Iterable):
+        if not isinstance(iterable, _abc.Iterable):
             raise TypeError(
                 'Can only add elements to MathSet from Iterable.\n'
                 f'Got:\n\t{iterable}\n instead.')
@@ -416,7 +415,7 @@ class MathSet:
             warnings.warn(
                 'Set element not in set S.\n'
                 'Maybe you targeted another element for removal ?')
-        if isinstance(item, Hashable):
+        if isinstance(item, _abc.Hashable):
             try:
                 self._set.remove(item)
                 return
@@ -434,7 +433,7 @@ class MathSet:
             raise KeyError(
                 'Nothing to pop: `MathSet` is empty.')
         if self._set and self._list:
-            if randint(0, 1):
+            if random.randint(0, 1):
                 return self._set.pop()
             else:
                 return self._list.pop()
@@ -532,14 +531,14 @@ class SubSet(MathSet):
         """
         self._superset = superset
         super(SubSet, self).__init__([])
-        if not isinstance(superset, Container):
+        if not isinstance(superset, _abc.Container):
             raise TypeError(
                 'superset must be Iterable,\n'
                 f'Got instead:\n\t{superset}')
 
     def __repr__(self):
         return (
-            f'SubSet({pformat(list(self._set))}'
+            f'SubSet({_pp.pformat(list(self._set))}'
             f'{self._list})')
 
     def _debug_repr(self):
@@ -606,7 +605,7 @@ class CartesianProduct:
 
     def __contains__(self, element):
         # TODO check ordered
-        if not isinstance(element, Iterable):
+        if not isinstance(element, _abc.Iterable):
             raise TypeError(
                 'Argument element must be `Iterable`, otherwise cannot '
                 'recover which item in it belongs to which set in the '
@@ -679,12 +678,12 @@ def is_subset(small_iterable, big_iterable):
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
-    if not isinstance(big_iterable, (Iterable, Container)):
+    if not isinstance(big_iterable, (_abc.Iterable, _abc.Container)):
         raise TypeError(
             'big_iterable must be either Iterable or Container, '
             'otherwise subset relation undefined.\n'
             f'Got:\n\t{big_iterable}\ninstead.')
-    if not isinstance(small_iterable, Iterable):
+    if not isinstance(small_iterable, _abc.Iterable):
         raise TypeError(
             'small_iterable must be Iterable, '
             'otherwise subset relation undefined.\n'
@@ -730,7 +729,7 @@ def powerset(iterable):
     also in <https://pypi.python.org/pypi/more-itertools>
     """
     s = list(iterable)
-    return chain.from_iterable(combinations(s, r)
+    return _itr.chain.from_iterable(_itr.combinations(s, r)
                                for r in range(len(s) + 1))
 
 
@@ -805,7 +804,7 @@ class PowerSet:
 
     def __contains__(self, item):
         """Is item \\in 2^iterable = this powerset(iterable)."""
-        if not isinstance(item, Iterable):
+        if not isinstance(item, _abc.Iterable):
             raise Exception(
                 f'Not iterable:\n\t{item},\n'
                 'this is a powerset, so it contains (math) sets.')

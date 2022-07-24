@@ -32,7 +32,7 @@
 #
 """Graph algorithms."""
 import copy
-from heapq import heappush, heappop
+import heapq as _hp
 
 
 def dijkstra_single_source_multiple_targets(
@@ -57,7 +57,7 @@ def dijkstra_single_source_multiple_targets(
     visited = set()
     Q = [(0, source, list())]
     while Q:
-        (cost, u, path) = heappop(Q)
+        (cost, u, path) = _hp.heappop(Q)
         if u in visited:
             continue
         visited.add(u)
@@ -73,7 +73,7 @@ def dijkstra_single_source_multiple_targets(
             new_cost = transition[2][cost_key] + cost
             if not current_cost or new_cost < current_cost:
                 dist[v] = new_cost
-                heappush(Q, (new_cost, v, path_to_u))
+                _hp.heappush(Q, (new_cost, v, path_to_u))
     return (float("inf"), ())
 
 

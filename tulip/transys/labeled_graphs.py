@@ -31,16 +31,15 @@
 # SUCH DAMAGE.
 """Base classes for labeled directed graphs"""
 import collections.abc as _abc
-from collections.abc import Iterable
 import copy
 import logging
 import os
-from pprint import pformat
+import pprint as _pp
 import typing as _ty
 
 import networkx as nx
 
-from tulip.transys.mathset import SubSet, TypedDict
+import tulip.transys.mathset as _mset
 # inline imports:
 #
 # from tulip.transys.export import graph2dot
@@ -60,7 +59,7 @@ def label_is_desired(attr_dict, desired_dict):
 
     Supports symbolic evaluation, if label type is callable.
     """
-    if not isinstance(attr_dict, TypedDict):
+    if not isinstance(attr_dict, _mset.TypedDict):
         raise Exception(
             'attr_dict must be TypedDict'
             f', instead: {type(attr_dict)}')
@@ -138,7 +137,7 @@ class States:
         return self.graph.nodes(*args, **kwargs)
 
     def __str__(self):
-        states = pformat(self(data=False))
+        states = _pp.pformat(self(data=False))
         return f'States:\n{states}'
 
     def __len__(self):
@@ -164,7 +163,7 @@ class States:
 
     @initial.setter
     def initial(self, states):
-        s = SubSet(self)
+        s = _mset.SubSet(self)
         s |= states
         self._initial = s
 
@@ -406,7 +405,7 @@ class States:
                 logger.debug('Any label acceptable.')
                 ok = True
             else:
-                typed_attr = TypedDict()
+                typed_attr = _mset.TypedDict()
                 typed_attr.set_types(self.graph._node_label_types)
                 typed_attr.update(attr_dict)
                 ok = label_is_desired(typed_attr, with_attr_dict)
@@ -455,7 +454,7 @@ class Transitions:
         return self.graph.edges(**kwargs)
 
     def __str__(self):
-        transitions = pformat(self())
+        transitions = _pp.pformat(self())
         return f'Transitions:\n{transitions}'
 
     def __len__(self):
@@ -689,7 +688,7 @@ class Transitions:
             else:
                 logger.debug(
                     'Checking guard.')
-                typed_attr = TypedDict()
+                typed_attr = _mset.TypedDict()
                 typed_attr.set_types(
                     self.graph._edge_label_types)
                 typed_attr.update(attr_dict)
@@ -1030,7 +1029,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         attr_dict = self._update_attr_dict_with_attr(
             attr_dict, attr)
         # define typed dict
-        typed_attr = TypedDict()
+        typed_attr = _mset.TypedDict()
         typed_attr.set_types(self._node_label_types)
         typed_attr.update(
             copy.deepcopy(
@@ -1111,7 +1110,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         attr_dict = self._update_attr_dict_with_attr(
             attr_dict, attr)
         # define typed dict
-        typed_attr = TypedDict()
+        typed_attr = _mset.TypedDict()
         typed_attr.set_types(self._edge_label_types)
         typed_attr.update(
             copy.deepcopy(
@@ -1504,7 +1503,7 @@ def prepend_with(
         text prepended to `states`.  If None, then
         `states` is returned without modification
     """
-    if not isinstance(states, Iterable):
+    if not isinstance(states, _abc.Iterable):
         raise TypeError(
             'states must be Iterable. '
             f'Got:\n\t{states}\ninstead.')

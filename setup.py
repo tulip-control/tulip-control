@@ -5,7 +5,7 @@ import subprocess
 import sys
 import traceback as _tb
 
-from setuptools import setup
+import setuptools
 # inline:
 # import git
 # import polytope
@@ -109,7 +109,7 @@ def run_setup():
     with open(VERSION_FILE, 'w') as f:
         f.write(s)
     # setup
-    setup(
+    setuptools.setup(
         name=NAME,
         version=version,
         description='Temporal Logic Planning (TuLiP) Toolbox',

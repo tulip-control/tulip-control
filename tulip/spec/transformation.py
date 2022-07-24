@@ -39,7 +39,7 @@ import warnings
 
 import networkx as nx
 
-from tulip.spec.ast import nodes
+import tulip.spec.ast as _ast
 from tulip.spec import parser
 # inline:
 # import tulip.graphics as _graphics
@@ -276,11 +276,11 @@ def sub_values(
         val = var_values[u.value]
         # instantiate appropriate value type
         if isinstance(val, bool):
-            v = nodes.Bool(val)
+            v = _ast.nodes.Bool(val)
         elif isinstance(val, int):
-            v = nodes.Num(val)
+            v = _ast.nodes.Num(val)
         elif isinstance(val, str):
-            v = nodes.Str(val)
+            v = _ast.nodes.Str(val)
         old2new[u] = v
     # replace variable by value
     nx.relabel_nodes(tree, old2new, copy=False)
@@ -307,7 +307,7 @@ def sub_constants(
         # now: c, is the operator and: v, the variable
         str2int = var_str2int[str(var)]
         x = str2int.index(u.value)
-        num = nodes.Num(str(x))
+        num = _ast.nodes.Num(str(x))
         # replace Const with Num
         old2new[u] = num
     nx.relabel_nodes(tree, old2new, copy=False)
@@ -422,7 +422,7 @@ def infer_constants(
             continue
         # Var (so NAME token) but not a variable
         # turn it into a string constant
-        old2new[u] = nodes.Const(str(u))
+        old2new[u] = _ast.nodes.Const(str(u))
     nx.relabel_nodes(tree, old2new, copy=False)
     return str(tree)
 

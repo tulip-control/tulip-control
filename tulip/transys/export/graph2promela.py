@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Convert state graphs to Promela."""
-from time import strftime
+import time
 
 
 def fts2promela(
@@ -105,7 +105,7 @@ def fts2promela(
     if procname is None:
         procname = graph.name
     s = '/*\n * Promela file generated with TuLiP\n'
-    tm = strftime('%x %X %z')
+    tm = time.strftime('%x %X %z')
     s += f' * Date: {tm}\n */\n\n'
     for ap in graph.atomic_propositions:
         # convention "!" means negation

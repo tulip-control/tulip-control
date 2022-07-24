@@ -36,9 +36,9 @@ import logging
 import networkx as nx
 
 from tulip.interfaces import ltl2ba as ltl2baint
-from tulip.transys.automata import BuchiAutomaton
-from tulip.transys.labeled_graphs import LabeledDiGraph
-from tulip.transys.transys import FiniteTransitionSystem
+import tulip.transys.automata as _aut
+import tulip.transys.labeled_graphs as _graphs
+import tulip.transys.transys as _trs
 
 
 __all__ = [
@@ -154,7 +154,7 @@ def tensor_product(self, other, prod_sys=None):
             mutable = True
         else:
             mutable = False
-        prod_sys = LabeledDiGraph(mutable=mutable)
+        prod_sys = _graphs.LabeledDiGraph(mutable=mutable)
     prod_sys = self._multiply_mutable_states(
         other, prod_graph, prod_sys)
     return prod_sys
@@ -203,7 +203,7 @@ def cartesian_product(self, other, prod_sys=None):
             mutable = True
         else:
             mutable = False
-        prod_sys = LabeledDiGraph(mutable=mutable)
+        prod_sys = _graphs.LabeledDiGraph(mutable=mutable)
     prod_sys = self._multiply_mutable_states(
         other, prod_graph, prod_sys)
     return prod_sys
@@ -211,11 +211,11 @@ def cartesian_product(self, other, prod_sys=None):
 
 def ts_sync_prod(
         ts1:
-            FiniteTransitionSystem,
+            _trs.FiniteTransitionSystem,
         ts2:
-            FiniteTransitionSystem):
+            _trs.FiniteTransitionSystem):
     """Synchronous (tensor) product with other `FTS`."""
-    prod_ts = FiniteTransitionSystem()
+    prod_ts = _trs.FiniteTransitionSystem()
     # union of AP sets
     prod_ts.atomic_propositions |= (
         ts1.atomic_propositions |
@@ -224,7 +224,7 @@ def ts_sync_prod(
     #
     # for synchronous product: Cartesian product of action sets
     # prod_ts.actions |= ts1.actions * ts2.actions
-    prod_ts = super(FiniteTransitionSystem, self).tensor_product(
+    prod_ts = super(_trs.FiniteTransitionSystem, self).tensor_product(
         ts, prod_sys=prod_ts)
     return prod_ts
 
@@ -298,17 +298,17 @@ def sync_prod(ts, ba):
     @rtype:
         `FiniteTransitionSystem`
     """
-    if not isinstance(ba, BuchiAutomaton):
+    if not isinstance(ba, _aut.BuchiAutomaton):
         raise Exception
-    if not isinstance(ts, FiniteTransitionSystem):
+    if not isinstance(ts, _trs.FiniteTransitionSystem):
         raise Exception
 
 
 def add(
         self,
         other:
-            FiniteTransitionSystem
-        ) -> FiniteTransitionSystem:
+            _trs.FiniteTransitionSystem
+        ) -> _trs.FiniteTransitionSystem:
     """Merge two Finite Transition Systems.
 
     States, Initial States, Actions, Atomic Propositions and
@@ -351,7 +351,7 @@ def add(
         initial states, atomic propositions, actions, edges and
         labelings, those of `other` taking precedence over `self`.
     """
-    if not isinstance(other, FiniteTransitionSystem):
+    if not isinstance(other, _trs.FiniteTransitionSystem):
         raise TypeError(
             'other class must be FiniteTransitionSystem.\n'
             f'Got instead:\n\t{other}'
@@ -391,7 +391,7 @@ def async_prod(self, ts):
     Def. 2.18, p.38 U{[BK08]
     <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
     """
-    if not isinstance(ts, FiniteTransitionSystem):
+    if not isinstance(ts, _trs.FiniteTransitionSystem):
         raise TypeError(
             'ts must be a `FiniteTransitionSystem`.')
     if self.states.mutants or ts.states.mutants:
@@ -399,12 +399,12 @@ def async_prod(self, ts):
     else:
         mutable = False
     # union of AP sets
-    prod_ts = FiniteTransitionSystem(mutable=mutable)
+    prod_ts = _trs.FiniteTransitionSystem(mutable=mutable)
     prod_ts.atomic_propositions |= (
         self.atomic_propositions |
         ts.atomic_propositions)
     # for parallel product: union of action sets
     prod_ts.actions |= self.actions | ts.actions
-    prod_ts = super(FiniteTransitionSystem, self).cartesian_product(
+    prod_ts = super(_trs.FiniteTransitionSystem, self).cartesian_product(
         ts, prod_sys=prod_ts)
     return prod_ts

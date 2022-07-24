@@ -38,10 +38,10 @@ Their use in new applications is discouraged.
 
 They come from <https://github.com/johnyf/pyvectorized>.
 """
+import itertools as _itr
 import logging
-from warnings import warn
-from itertools import zip_longest as izip_longest
 import typing as _ty
+import warnings as _warn
 
 import numpy as np
 
@@ -156,7 +156,7 @@ def newax(
                 projection='3d')
             ax.append(curax)
         if curdim > 3:
-            warn('`ndim > 3`, but plot limited to 3.')
+            _warn.warn('`ndim > 3`, but plot limited to 3.')
     if mode == 'matrix':
         ax = list(_grouper(nh, ax))
     # single axes ?
@@ -285,7 +285,7 @@ def quiver(
             v[0, :], v[1, :], v[2, :],
             **kwargs)
     if dim > 3:
-        warn(
+        _warn.warn(
             'quiver:ndim #dimensions > 3,' +
             'plotting only 3D component.')
     return h
@@ -310,7 +310,7 @@ def _grouper(n, iterable, fillvalue=None):
     ```
     """
     args = [iter(iterable)] * n
-    return izip_longest(fillvalue=fillvalue, *args)
+    return _itr.zip_longest(fillvalue=fillvalue, *args)
 
 
 def networkx_to_graphviz(graph):

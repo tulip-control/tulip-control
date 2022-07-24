@@ -48,7 +48,7 @@ import errno
 import json
 import logging
 import os
-from pkg_resources import parse_version
+import pkg_resources as _pkg
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
@@ -73,7 +73,7 @@ def check_gr1c():
     except OSError:
         return False
     v = v.split()[1]
-    if parse_version(v) >= parse_version(GR1C_MIN_VERSION):
+    if _pkg.parse_version(v) >= _pkg.parse_version(GR1C_MIN_VERSION):
         return True
     return False
 

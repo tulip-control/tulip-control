@@ -38,9 +38,12 @@ import copy
 
 import stormpy
 
-from tulip.transys import MarkovChain as MC
-from tulip.transys import MarkovDecisionProcess as MDP
-from tulip.transys.mathfunc import FunctionOnLabeledState
+import tulip.transys as _trs
+import tulip.transys.mathfunc as _mathfunc
+
+
+MC = _trs.MarkovChain
+MDP = _trs.MarkovDecisionProcess
 
 
 def build_stormpy_model(path: str):
@@ -415,7 +418,7 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
     stormpy_policy = stormpy_result.scheduler
     if stormpy_policy is None:
         raise ValueError(stormpy_policy)
-    tulip_policy = FunctionOnLabeledState(
+    tulip_policy = _mathfunc.FunctionOnLabeledState(
         'state', MDP.action_label)
     action_map = get_action_map(stormpy_model, tulip_transys)
     for state in stormpy_model.states:
@@ -432,14 +435,19 @@ def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
     return tulip_policy
 
 
-def _extract_probability(stormpy_result, stormpy_model, tulip_transys):
+def _extract_probability(
+        stormpy_result,
+        stormpy_model,
+        tulip_transys
+        ) -> _mathfunc.FunctionOnLabeledState:
     """Extract probability of satisfying specification at each state.
 
     Extracts the probability of satisfying
     a specification at each state
     from `stormpy_result`.
     """
-    probability = FunctionOnLabeledState('state', 'probability')
+    probability = _mathfunc.FunctionOnLabeledState(
+        'state', 'probability')
     for state in stormpy_model.states:
         tulip_state = to_tulip_state(state, tulip_transys)
         probability.add(tulip_state, stormpy_result.at(state))

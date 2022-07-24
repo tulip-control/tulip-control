@@ -32,12 +32,12 @@
 """Finite State Machines Module"""
 import collections.abc as _abc
 import copy
-from pprint import pformat
-from random import choice
+import pprint as _pp
+import random
 import sys
 import typing as _ty
 
-from tulip.transys.labeled_graphs import LabeledDiGraph
+import tulip.transys.labeled_graphs as _graphs
 # inline imports:
 #
 # from tulip.transys.export import machine2scxml
@@ -98,7 +98,7 @@ def create_machine_ports(spc_vars):
     return ports
 
 
-class Transducer(LabeledDiGraph):
+class Transducer(_graphs.LabeledDiGraph):
     r"""Sequential Transducer, i.e., a letter-to-letter function.
 
     Inputs
@@ -262,7 +262,7 @@ class Transducer(LabeledDiGraph):
         self._transition_dot_mask = dict()
         self._state_dot_mask = dict()
         self.default_export_fname = 'fsm'
-        LabeledDiGraph.__init__(self)
+        _graphs.LabeledDiGraph.__init__(self)
         self.dot_node_shape = dict(
             normal='ellipse')
         self.default_export_fname = 'fsm'
@@ -374,7 +374,7 @@ class MooreMachine(Transducer):
                 f'{_print_label(output_values)}')
         s += (
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n')
+            _pp.pformat(self.states.initial, indent=3) + 2 * '\n')
         s += 'Transitions & Labels: (from --> to : label)\n'
         for from_state, to_state, label_dict in self.transitions(data=True):
             s += (
@@ -507,7 +507,7 @@ class MealyMachine(Transducer):
                 f'{_print_label(label_dict)}')
         s += (
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n' +
+            _pp.pformat(self.states.initial, indent=3) + 2 * '\n' +
             'Input Ports:\n\t(name : type)\n' +
             _print_ports(self.inputs) +
             'Output Ports:\n\t(name : type)\n' +
@@ -770,7 +770,7 @@ def random_run(
     for i in range(N):
         trans = mealy.transitions.find([state])
         # choose next transition
-        selected_trans = choice(list(trans))
+        selected_trans = random.choice(list(trans))
         _, new_state, attr_dict = selected_trans
         # extend execution trace
         states_seq.append(new_state)
@@ -993,7 +993,7 @@ def _print_ports(port_dict):
     s = ''
     for port_name, port_type in port_dict.items():
         s += '\t' + str(port_name) + ' : '
-        s += pformat(port_type) + '\n'
+        s += _pp.pformat(port_type) + '\n'
     s += '\n'
     return s
 

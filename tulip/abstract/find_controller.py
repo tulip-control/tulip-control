@@ -53,15 +53,12 @@ import typing as _ty
 import numpy as np
 import polytope as pc
 try:
-    from cvxopt import matrix, solvers
+    import cvxopt as _cvx
 except ImportError:
-    solvers = None
+    _cvx = None
 
 import tulip.abstract.discretization as _discr
-from tulip.abstract.feasible import (
-    solve_feasible,
-    createLM,
-    _block_diag2)
+import tulip.abstract.feasible as _fsb
 import tulip.hybrid as _hybrid
 
 
@@ -71,7 +68,7 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
-if solvers is None:
+if _cvx is None:
     logger.warning(
         '`tulip` failed to import `cvxopt`.\n'
         'No quadratic cost for controller computation.')
@@ -79,7 +76,7 @@ if solvers is None:
 
 def assert_cvxopt():
     """Raise `ImportError` if `cvxopt` failed to import."""
-    if solvers is None:
+    if _cvx is None:
         raise ImportError(
             'Failed to import `cvxopt`.'
             'Unable to solve quadratic-programming problems.')
@@ -401,19 +398,19 @@ def get_input_helper(
         temp_part = P3
         list_P.append(P3)
         for i in range(N - 1, 0, -1):
-            temp_part = solve_feasible(
+            temp_part = _fsb.solve_feasible(
                 P1, temp_part, ssys, N=1,
                 closed_loop=False, trans_set=P1
             )
             list_P.insert(0, temp_part)
         list_P.insert(0, P1)
-        L, M = createLM(ssys, N, list_P, disturbance_ind=[1])
+        L, M = _fsb.createLM(ssys, N, list_P, disturbance_ind=[1])
     else:
         list_P.append(P1)
         for i in range(N - 1, 0, -1):
             list_P.append(P1)
         list_P.append(P3)
-        L, M = createLM(ssys, N, list_P)
+        L, M = _fsb.createLM(ssys, N, list_P)
     # Remove first constraint on x(0)
     L = L[range(list_P[0].A.shape[0], L.shape[0]), :]
     M = M[range(list_P[0].A.shape[0], M.shape[0]), :]
@@ -423,7 +420,7 @@ def get_input_helper(
     M = M - Lx.dot(x0).reshape(Lx.shape[0], 1)
     B_diag = ssys.B
     for i in range(N - 1):
-        B_diag = _block_diag2(B_diag, ssys.B)
+        B_diag = _fsb._block_diag2(B_diag, ssys.B)
     K_hat = np.tile(ssys.K, (N, 1))
     A_it = ssys.A.copy()
     A_row = np.zeros([n, n * N])
@@ -472,10 +469,10 @@ def get_input_helper(
         Q2 = Q.T.dot(Q)
         R2 = R.T.dot(R)
         # constraints
-        G = matrix(Lu)
-        h = matrix(M)
-        P = matrix(Q2 + Ct.T.dot(R2).dot(Ct))
-        q = matrix(
+        G = _cvx.matrix(Lu)
+        h = _cvx.matrix(M)
+        P = _cvx.matrix(Q2 + Ct.T.dot(R2).dot(Ct))
+        q = _cvx.matrix(
             np.dot(
                 np.dot(x0.reshape(1, x0.size), A_N.T) +
                 A_K.dot(K_hat).T,
@@ -487,7 +484,7 @@ def get_input_helper(
             raise Exception(
                 'solver specified, '
                 'but only `None` is allowed for `ord = 2`')
-        sol = solvers.qp(P, q, G, h)
+        sol = _cvx.solvers.qp(P, q, G, h)
         if sol['status'] != "optimal":
             raise _InputHelperQPException(
                 'QP solver finished with status ' +

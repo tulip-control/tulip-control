@@ -31,14 +31,17 @@
 # SUCH DAMAGE.
 """Compositions of transys."""
 import copy
-from functools import reduce
-from itertools import product
-from operator import or_
+import functools as _ft
+import itertools as _itr
+import operator as _op
 
-from tulip.transys import KripkeStructure as KS
-from tulip.transys import WeightedKripkeStructure as WKS
-from tulip.transys import MarkovChain as MC
-from tulip.transys import MarkovDecisionProcess as MDP
+import tulip.transys as _trs
+
+
+KS = _trs.KripkeStructure
+WKS = _trs.WeightedKripkeStructure
+MC = _trs.MarkovChain
+MDP = _trs.MarkovDecisionProcess
 
 
 def sum_values(*values):
@@ -140,15 +143,15 @@ def synchronous_parallel(
     # Also, compute the label at each state (s_1, ..., s_n).
     # By definition L(s_1, ..., s_n) = \bigcup_i L_i(s_i)
     # where L_i is the labeling function of K_i.
-    for state in product(*prod_states):
+    for state in _itr.product(*prod_states):
         ts.states.add(state)
-        ts.states[state]["ap"] = reduce(
-            or_, [
+        ts.states[state]["ap"] = _ft.reduce(
+            _op.or_, [
                 models[i].states[state[i]]["ap"]
                 for i in range(len(models))])
     #
     # Compute the initial state of ts: I = I_1 \times ... \times I_n
-    for state in product(*prod_initials):
+    for state in _itr.product(*prod_initials):
         ts.states.initial.add(state)
     #
     # Compute the set of actions
@@ -157,7 +160,7 @@ def synchronous_parallel(
         if len(prod_actions) == 1:
             ts.actions.add_from(prod_actions[0])
         else:
-            ts.actions.add_from(list(product(*prod_actions)))
+            ts.actions.add_from(list(_itr.product(*prod_actions)))
     if WKS.cost_label not in transition_attr_operations:
         transition_attr_operations[WKS.cost_label] = sum_values
     if MC.probability_label not in transition_attr_operations:
@@ -173,7 +176,7 @@ def synchronous_parallel(
         transitions = [
             models[coord].transitions.find(from_state[coord])
             for coord in range(len(models))]
-        for transition in product(*transitions):
+        for transition in _itr.product(*transitions):
             to_state = tuple(t[1] for t in transition)
             attr = _get_transition_attr(
                 transition, transition_attr_operations)

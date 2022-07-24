@@ -30,16 +30,15 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Automata Module."""
-from collections.abc import Iterable
+import collections.abc as _abc
 import copy
 import logging
-from pprint import pformat
+import pprint as _pp
 
-from tulip.transys.cost import ValidTransitionCost
-from tulip.transys.labeled_graphs import (
-    LabeledDiGraph, str2singleton, prepend_with)
-from tulip.transys.mathset import SubSet, PowerSet
-from tulip.transys.transys import GameGraph
+import tulip.transys.cost as _cost
+import tulip.transys.labeled_graphs as _graphs
+import tulip.transys.mathset as _mset
+import tulip.transys.transys as _trs
 
 
 __all__ = [
@@ -57,7 +56,7 @@ logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
-class FiniteStateAutomaton(LabeledDiGraph):
+class FiniteStateAutomaton(_graphs.LabeledDiGraph):
     """Set of sequences described with a graph and a condition.
 
     It has:
@@ -106,7 +105,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
                 # no checks
         else:
             if atomic_proposition_based:
-                alphabet = PowerSet([])
+                alphabet = _mset.PowerSet([])
                 self.atomic_propositions = alphabet.math_set
             else:
                 alphabet = set()
@@ -123,8 +122,8 @@ class FiniteStateAutomaton(LabeledDiGraph):
             edge_label_types=edge_label_types)
         # accepting states
         if accepting_states_type is None:
-            self._accepting = SubSet(self.states)
-            self._accepting_type = SubSet
+            self._accepting = _mset.SubSet(self.states)
+            self._accepting_type = _mset.SubSet
         else:
             self._accepting = accepting_states_type(self)
             self._accepting_type = accepting_states_type
@@ -146,13 +145,13 @@ class FiniteStateAutomaton(LabeledDiGraph):
         return self._accepting
 
     def __str__(self):
-        states = pformat(
+        states = _pp.pformat(
             self.states(data=False),
             indent=3)
-        initial_states = pformat(
+        initial_states = _pp.pformat(
             self.states.initial,
             indent=3)
-        accepting_states = pformat(
+        accepting_states = _pp.pformat(
             self.states.accepting,
             indent=3)
         newlines = 2 * '\n'
@@ -173,7 +172,7 @@ class FiniteStateAutomaton(LabeledDiGraph):
                       str(self.alphabet) + 2 * '\n')
         s += (
             'Transitions and labeling with Input Letters:\n' +
-            pformat(self.transitions(data=True), indent=3) +
+            _pp.pformat(self.transitions(data=True), indent=3) +
             f'\n{_hl}\n')
         return s
 
@@ -200,7 +199,7 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
             'name':
                 'cost',
             'values':
-                ValidTransitionCost(),
+                _cost.ValidTransitionCost(),
             'setter':
                 True}]
         super().__init__(
@@ -306,13 +305,13 @@ def tuple2ba(
         used for file export
     """
     # args
-    if not isinstance(S, Iterable):
+    if not isinstance(S, _abc.Iterable):
         raise TypeError(
             'States S must be iterable, '
             'even for single state.')
-    if not isinstance(S0, Iterable) or isinstance(S0, str):
+    if not isinstance(S0, _abc.Iterable) or isinstance(S0, str):
         S0 = [S0]
-    if not isinstance(Sa, Iterable) or isinstance(Sa, str):
+    if not isinstance(Sa, _abc.Iterable) or isinstance(Sa, str):
         Sa = [Sa]
     # comprehensive names
     states = S
@@ -325,11 +324,11 @@ def tuple2ba(
         logger.debug(
             f'Given string:\n\t{prepend_str}\n'
             'will be prepended to all states.')
-    states = prepend_with(
+    states = _graphs.prepend_with(
         states, prepend_str)
-    initial_states = prepend_with(
+    initial_states = _graphs.prepend_with(
         initial_states, prepend_str)
-    accepting_states = prepend_with(
+    accepting_states = _graphs.prepend_with(
         accepting_states, prepend_str)
     ba = BuchiAutomaton(
         atomic_proposition_based=atomic_proposition_based)
@@ -343,14 +342,14 @@ def tuple2ba(
         ba.alphabet.add(alphabet_or_ap)
     for transition in transitions:
         (from_state, to_state, guard) = transition
-        [from_state, to_state] = prepend_with(
+        [from_state, to_state] = _graphs.prepend_with(
             [from_state, to_state],
             prepend_str)
         # convention
         if atomic_proposition_based:
             if guard is None:
                 guard = set()
-            guard = str2singleton(guard)
+            guard = _graphs.str2singleton(guard)
         ba.transitions.add(
             from_state, to_state,
             letter=guard)
@@ -449,16 +448,16 @@ class RabinPairs:
         @param bad_states:
             set `U` of bad states for this pair
         """
-        good_set = SubSet(self._states)
+        good_set = _mset.SubSet(self._states)
         good_set |= good_states
-        bad_set = SubSet(self._states)
+        bad_set = _mset.SubSet(self._states)
         bad_set |= bad_states
         self._pairs.append((good_set, bad_set))
 
     def remove(
             self,
             good_states:
-                Iterable,
+                _abc.Iterable,
             bad_states):
         """Delete pair `(L, U)` of good-bad sets of states.
 
@@ -484,9 +483,9 @@ class RabinPairs:
         @param good_states:
             set of good states of this pair
         """
-        good_set = SubSet(self._states)
+        good_set = _mset.SubSet(self._states)
         good_set |= good_states
-        bad_set = SubSet(self._states)
+        bad_set = _mset.SubSet(self._states)
         bad_set |= bad_states
         self._pairs.remove((good_set, bad_set))
 
@@ -560,7 +559,7 @@ class DRA(RabinAutomaton):
         self.automaton_type = 'Deterministic Rabin Automaton'
 
 
-class ParityGame(GameGraph):
+class ParityGame(_trs.GameGraph):
     """GameGraph equipped with coloring.
 
     Define as `k` the highest color that

@@ -36,33 +36,23 @@ See Also
 ========
 `find_controller`
 """
+import copy
 import logging
 import os
 import warnings
 import pprint
-from copy import deepcopy
 import multiprocessing as mp
 
 import numpy as np
 import scipy.sparse as sp
 import polytope as pc
+import polytope.plot as _pplt
 
-from polytope.plot import (
-    plot_partition,
-    plot_transition_arrow)
+import tulip.abstract.feasible as _fsb
+import tulip.abstract.plot as _aplt
+import tulip.abstract.prop2partition as _p2p
+import tulip.hybrid as _hyb
 import tulip.transys as trs
-from tulip.hybrid import (
-    LtiSysDyn,
-    PwaSysDyn,
-    SwitchedSysDyn)
-from tulip.abstract.prop2partition import (
-    PropPreservingPartition,
-    pwa_partition,
-    part2convex)
-from tulip.abstract.feasible import (
-    is_feasible,
-    solve_feasible)
-from tulip.abstract.plot import plot_ts_on_partition
 # inline imports:
 #
 # import matplotlib.pyplot as plt
@@ -80,9 +70,9 @@ __all__ = [
 logger = logging.getLogger(__name__)
 debug = False
 SystemDynamics = (
-    LtiSysDyn |
-    PwaSysDyn)
-PPP = PropPreservingPartition
+    _hyb.LtiSysDyn |
+    _hyb.PwaSysDyn)
+PPP = _p2p.PropPreservingPartition
 
 
 class AbstractSwitched:
@@ -204,7 +194,7 @@ class AbstractSwitched:
                     show_ts=False,
                     only_adjacent=False,
                     color_seed=color_seed)
-                plot_ts_on_partition(
+                _aplt.plot_ts_on_partition(
                     self.ppp, self.ts, self.ppp2ts,
                     edge_label, only_adjacent, ax)
                 axs.append(ax)
@@ -451,7 +441,7 @@ class AbstractPwa:
                 k: v
                 for k, v in self.disc_params.items()
                 if k in params}
-            s0 = solve_feasible(
+            s0 = _fsb.solve_feasible(
                 from_region, to_region, sys,
                 trans_set=trans_set,
                 **disc_params)
@@ -703,10 +693,10 @@ def _discretize_bi(
         min_cell_volume /
         np.finfo(np.double).eps *
         np.finfo(np.double).eps)
-    ispwa = isinstance(ssys, PwaSysDyn)
-    islti = isinstance(ssys, LtiSysDyn)
+    ispwa = isinstance(ssys, _hyb.PwaSysDyn)
+    islti = isinstance(ssys, _hyb.LtiSysDyn)
     if ispwa:
-        part, ppp2pwa, part2orig = pwa_partition(ssys, part)
+        part, ppp2pwa, part2orig = _p2p.pwa_partition(ssys, part)
     else:
         part2orig = range(len(part))
     # Save original polytopes, require them to be convex
@@ -714,7 +704,7 @@ def _discretize_bi(
         orig_list = None
         orig = [0]
     else:
-        (part, new2old) = part2convex(part) # convexify
+        (part, new2old) = _p2p.part2convex(part) # convexify
         part2orig = [part2orig[i] for i in new2old]
         # map new regions to pwa subsystems
         if ispwa:
@@ -750,7 +740,7 @@ def _discretize_bi(
     transitions = np.zeros(
         [num_regions, num_regions],
         dtype = int)
-    sol = deepcopy(part.regions)
+    sol = copy.deepcopy(part.regions)
     adj = part.adj.copy().toarray()
     # next 2 lines omitted in discretize_overlap
     if ispwa:
@@ -788,8 +778,8 @@ def _discretize_bi(
         IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
-        si_tmp = deepcopy(si)
-        sj_tmp = deepcopy(sj)
+        si_tmp = copy.deepcopy(si)
+        sj_tmp = copy.deepcopy(sj)
         if ispwa:
             ss = ssys.list_subsys[subsys_list[i]]
             if len(ss.E) > 0:
@@ -802,7 +792,7 @@ def _discretize_bi(
         else:
             # Use original cell as trans_set
             trans_set = orig_list[orig[i]]
-        S0 = solve_feasible(
+        S0 = _fsb.solve_feasible(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set,
             max_num_poly)
@@ -1010,7 +1000,7 @@ def _discretize_bi(
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
-            tmp_part = PropPreservingPartition(
+            tmp_part = _p2p.PropPreservingPartition(
                 domain=part.domain,
                 regions=sol,
                 adj=sp.lil_matrix(adj),
@@ -1027,11 +1017,11 @@ def _discretize_bi(
         # no plotting ?
         if not plotit:
             continue
-        if plt is None or plot_partition is None:
+        if plt is None or _pplt.plot_partition is None:
             continue
         if iter_count % plot_every != 0:
             continue
-        tmp_part = PropPreservingPartition(
+        tmp_part = _p2p.PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
             prop_regions=part.prop_regions)
@@ -1040,13 +1030,13 @@ def _discretize_bi(
         si_tmp.plot(ax=ax2, color='green')
         sj_tmp.plot(
             ax2, color='red', hatch='o', alpha=0.5)
-        plot_transition_arrow(si_tmp, sj_tmp, ax2)
+        _pplt.plot_transition_arrow(si_tmp, sj_tmp, ax2)
         S0.plot(
             ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         # plot partition
         ax1.clear()
-        plot_partition(
+        _pplt.plot_partition(
             tmp_part,
             transitions.T,
             ax=ax1,
@@ -1067,13 +1057,13 @@ def _discretize_bi(
                 f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
-    new_part = PropPreservingPartition(
+    new_part = _p2p.PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
-        tmp_part = deepcopy(new_part)
+        tmp_part = copy.deepcopy(new_part)
         tmp_part.compute_adj()
     # Generate transition system and add transitions
     ofts = trs.FTS()
@@ -1218,10 +1208,10 @@ def _discretize_dual(
     min_cell_volume = (
         min_cell_volume / np.finfo(np.double).eps
         * np.finfo(np.double).eps)
-    ispwa = isinstance(ssys, PwaSysDyn)
-    islti = isinstance(ssys, LtiSysDyn)
+    ispwa = isinstance(ssys, _hyb.PwaSysDyn)
+    islti = isinstance(ssys, _hyb.LtiSysDyn)
     if ispwa:
-        part, ppp2pwa, part2orig = pwa_partition(ssys, part)
+        part, ppp2pwa, part2orig = _p2p.pwa_partition(ssys, part)
     else:
         part2orig = range(len(part))
     # Save original polytopes, require them to be convex
@@ -1229,7 +1219,7 @@ def _discretize_dual(
         orig_list = None
         orig = [0]
     else:
-        (part, new2old) = part2convex(part)  # convexify
+        (part, new2old) = _p2p.part2convex(part)  # convexify
         part2orig = [part2orig[i] for i in new2old]
         # map new regions to pwa subsystems
         if ispwa:
@@ -1264,7 +1254,7 @@ def _discretize_dual(
     transitions = np.zeros(
         [num_regions, num_regions],
         dtype = int)
-    sol = deepcopy(part.regions)
+    sol = copy.deepcopy(part.regions)
     adj = part.adj.copy().toarray()
     # next 2 lines omitted in `discretize_overlap`
     if ispwa:
@@ -1302,8 +1292,8 @@ def _discretize_dual(
         IJ[j, i] = 0
         si = sol[i]
         sj = sol[j]
-        si_tmp = deepcopy(si)
-        sj_tmp = deepcopy(sj)
+        si_tmp = copy.deepcopy(si)
+        sj_tmp = copy.deepcopy(sj)
         # num_new_reg[i] += 1
         # print(num_new_reg)
         if ispwa:
@@ -1318,7 +1308,7 @@ def _discretize_dual(
         else:
             # Use original cell as trans_set
             trans_set = orig_list[orig[i]]
-        S0 = solve_feasible(
+        S0 = _fsb.solve_feasible(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set, max_num_poly)
         logger.info(
@@ -1455,7 +1445,7 @@ def _discretize_dual(
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
-            tmp_part = PropPreservingPartition(
+            tmp_part = _p2p.PropPreservingPartition(
                 domain=part.domain,
                 regions=sol, adj=sp.lil_matrix(adj),
                 prop_regions=part.prop_regions)
@@ -1473,11 +1463,11 @@ def _discretize_dual(
         # no plotting ?
         if not plotit:
             continue
-        if plt is None or plot_partition is None:
+        if plt is None or _pplt.plot_partition is None:
             continue
         if iter_count % plot_every != 0:
             continue
-        tmp_part = PropPreservingPartition(
+        tmp_part = _p2p.PropPreservingPartition(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
             prop_regions=part.prop_regions)
@@ -1486,13 +1476,13 @@ def _discretize_dual(
         si_tmp.plot(ax=ax2, color='green')
         sj_tmp.plot(
             ax2, color='red', hatch='o', alpha=0.5)
-        plot_transition_arrow(si_tmp, sj_tmp, ax2)
+        _pplt.plot_transition_arrow(si_tmp, sj_tmp, ax2)
         S0.plot(
             ax2, color='none', hatch='/', alpha=0.3)
         fig.canvas.draw()
         # plot partition
         ax1.clear()
-        plot_partition(
+        _pplt.plot_partition(
             tmp_part,
             transitions.T,
             ax=ax1,
@@ -1513,13 +1503,13 @@ def _discretize_dual(
                 f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
-    new_part = PropPreservingPartition(
+    new_part = _p2p.PropPreservingPartition(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
-        tmp_part = deepcopy(new_part)
+        tmp_part = copy.deepcopy(new_part)
         tmp_part.compute_adj()
     # Generate transition system and add transitions
     ofts = trs.FTS()
@@ -1663,7 +1653,7 @@ def discretize_overlap(
 #             logger.info("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #
-#     new_part = PropPreservingPartition(
+#     new_part = _p2p.PropPreservingPartition(
 #                    domain=part.domain,
 #                    regions=sol, adj=np.array([]),
 #                    trans=transitions, prop_regions=part.prop_regions,
@@ -1768,7 +1758,7 @@ def discretize_switched(
         ppp:
             PPP,
         hybrid_sys:
-            SwitchedSysDyn,
+            _hyb.SwitchedSysDyn,
         disc_params:
             dict[..., dict] |
             None=None,
@@ -1964,7 +1954,7 @@ def get_transitions(
         # Use original cell as trans_set
         trans_set = abstract_sys.ppp2pwa(mode, i)[1]
         active_subsystem = abstract_sys.ppp2sys(mode, i)[1]
-        trans_feasible = is_feasible(
+        trans_feasible = _fsb.is_feasible(
             si, sj, active_subsystem, N,
             closed_loop = closed_loop,
             trans_set = trans_set)
@@ -2081,7 +2071,7 @@ def merge_partitions(
                 adj[i, j] = 1
                 adj[j, i] = 1
         adj[i, i] = 1
-    ppp = PropPreservingPartition(
+    ppp = _p2p.PropPreservingPartition(
         domain=ab0.ppp.domain,
         regions=new_list,
         prop_regions=ab0.ppp.prop_regions,
@@ -2176,7 +2166,7 @@ def merge_partition_pair(
             logger.debug(f'AP label 1: {ap_label_1}')
             logger.debug(f'AP label 2: {ap_label_2}')
             # original partitions may be
-            # different if `pwa_partition` used
+            # different if `_p2p.pwa_partition` used
             # but must originate from same
             # initial partition,
             # i.e., have same continuous propositions,

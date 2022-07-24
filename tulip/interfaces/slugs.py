@@ -42,7 +42,7 @@ import subprocess
 import tempfile
 
 import networkx as nx
-from tulip.spec import GRSpec, translate
+import tulip.spec as _spec
 
 
 # If this path begins with '/',
@@ -65,10 +65,10 @@ def check_realizable(spec):
         `True` if realizable,
         `False` if not, or an error occurs.
     """
-    if isinstance(spec, GRSpec):
+    if isinstance(spec, _spec.GRSpec):
         assert not spec.moore
         assert not spec.plus_one
-        struct = translate(spec, 'slugs')
+        struct = _spec.translate(spec, 'slugs')
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:
@@ -93,10 +93,10 @@ def synthesize(
         If realizable return synthesized strategy,
         otherwise `None`.
     """
-    if isinstance(spec, GRSpec):
+    if isinstance(spec, _spec.GRSpec):
         assert not spec.moore
         assert not spec.plus_one
-        struct = translate(spec, 'slugs')
+        struct = _spec.translate(spec, 'slugs')
     else:
         struct = spec
     with tempfile.NamedTemporaryFile(delete=False) as fin:

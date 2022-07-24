@@ -35,7 +35,7 @@ Routines in this module are cross-cutting in the sense that they
 concern multiple aspects of solutions created by TuLiP and accordingly
 should not be placed under a specific subpackage, like tulip.transys.
 """
-from itertools import chain, repeat
+import itertools as _itr
 import time
 
 import tulip.transys as _trs
@@ -122,7 +122,7 @@ def python_case(
             input_args=input_args,
             outputs=[str(v) for v in M.outputs])
     # cached generator
-    ifs = lambda: chain(['if'], repeat('elif'))
+    ifs = lambda: _itr.chain(['if'], _itr.repeat('elif'))
     proj = lambda d, keys: ((k, d[k]) for k in d if k in keys)
     proj = lambda d, keys: ((k, "'"+d[k]+"'" if isinstance(d[k], str) else d[k])
                             for k in d if k in keys)

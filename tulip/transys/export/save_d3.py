@@ -36,7 +36,7 @@
 import os
 import inspect
 
-from networkx.readwrite import json_graph
+import networkx.readwrite as _nxrw
 
 
 def _format_label(label_def, label_dot_format):
@@ -148,11 +148,11 @@ def labeled_digraph2d3(
     var graph = """
     # embed to avoid browser local file-loading restrictions
     try:
-        s += json_graph.dumps(graph)
+        s += _nxrw.json_graph.dumps(graph)
     except:
         # better error msg for numpy array
         import json
-        data = json_graph.node_link_data(graph)
+        data = _nxrw.json_graph.node_link_data(graph)
         s += json.dumps(data, default=lambda x: str(x))
     s += ';'
     s += """

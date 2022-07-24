@@ -30,11 +30,11 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Convert labeled graph to GraphViz DOT, with custom filtering."""
-from collections.abc import Iterable
+import collections.abc as _abc
 import io
 import logging
 import re
-from textwrap import fill
+import textwrap as _tw
 import typing as _ty
 
 import networkx as nx
@@ -283,7 +283,7 @@ def _form_node_label(state, state_data, label_def,
     # one math env per line. Just make 1st line math env
     # if latex:
     #    state_str = f'${state_str}$'
-    #    state_str = fill(state_str, width=width)
+    #    state_str = _tw.fill(state_str, width=width)
     node_dot_label = state_str
     # newline between state name and label, only if state is labeled
     if len(state_data) != 0:
@@ -300,17 +300,17 @@ def _form_node_label(state, state_data, label_def,
         # avoid turning strings to lists,
         # or non-iterables to lists
         if isinstance(label_value, str):
-            label_str = fill(
+            label_str = _tw.fill(
                 label_value,
                 width=width)
-        elif isinstance(label_value, Iterable):
+        elif isinstance(label_value, _abc.Iterable):
                 # and not str
             s = ', '.join([str(x) for x in label_value])
-            label_str = r'\\{' + fill(
+            label_str = r'\\{' + _tw.fill(
                 s,
                 width=width) + r'\\}'
         else:
-            label_str = fill(
+            label_str = _tw.fill(
                 str(label_value),
                 width=width)
         pieces.append(type_name + sep_type_value + label_str)
@@ -392,9 +392,9 @@ def _form_edge_label(edge_data, label_def,
         if isinstance(label_value, str):
             # str is Iterable: avoid turning it to list
             label_str = label_value
-        elif isinstance(label_value, Iterable):
+        elif isinstance(label_value, _abc.Iterable):
             s = ', '.join([str(x) for x in label_value])
-            label_str = r'\\{' + fill(s) + r'\\}'
+            label_str = r'\\{' + _tw.fill(s) + r'\\}'
         else:
             label_str = str(label_value)
         if tikz:

@@ -49,7 +49,8 @@ import typing as _ty
 
 import networkx as nx
 
-from tulip.spec import lexyacc, GRSpec
+import tulip.spec as _spec
+from tulip.spec import lexyacc
 from tulip.spec import transformation as tx
 from tulip.spec import parser
 from tulip.spec import ast as sast
@@ -189,7 +190,7 @@ def str_to_grspec(
     env, sys = t.operands
     d = {'assume': split_gr1(env),
          'assert': split_gr1(sys)}
-    return GRSpec(
+    return _spec.GRSpec(
         env_init=d['assume']['init'],
         env_safety=d['assume']['G'],
         env_prog=d['assume']['GF'],
@@ -348,7 +349,7 @@ def stability_to_gr1(
         a + ' -> ' + p,
         a + ' -> X ' + a}
     sys_prog = {a}
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
         sys_init=sys_init,
         sys_safety=sys_safe,
@@ -390,7 +391,7 @@ def response_to_gr1(
         f'({p} && !{q}) -> X !{a}',
         f'(!{a} && !{q}) -> X !{a}'}
     sys_prog = {a}
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
             # sys_init=sys_init,
         sys_safety=sys_safe,
@@ -429,7 +430,7 @@ def eventually_to_gr1(
         f'(!{p} && !{a}) -> X !{a}',
         f'{a} -> X {a}'}
     sys_prog = {a}
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
         sys_init=sys_init,
         sys_safety=sys_safe,
@@ -475,7 +476,7 @@ def until_to_gr1(
         a + ' -> X ' + a,
         '(!' + a + ') -> ' + p}
     sys_prog = {a}
-    return GRSpec(
+    return _spec.GRSpec(
         sys_vars=sys_vars,
         sys_init=sys_init,
         sys_safety=sys_safe,

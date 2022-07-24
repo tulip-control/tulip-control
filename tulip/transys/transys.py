@@ -31,18 +31,16 @@
 # SUCH DAMAGE.
 """Transition system representation."""
 import collections.abc as _abc
-from collections.abc import Iterable
 import logging
-from pprint import pformat
+import pprint as _pp
 import typing as _ty
 
-from networkx import MultiDiGraph
+import networkx as _nx
 import numpy as np
 
-from tulip.transys.cost import ValidTransitionCost
-from tulip.transys.labeled_graphs import (
-    LabeledDiGraph, str2singleton, prepend_with)
-from tulip.transys.mathset import PowerSet, MathSet
+import tulip.transys.cost as _cost
+import tulip.transys.labeled_graphs as _graphs
+import tulip.transys.mathset as _mset
 # inline imports
 #
 # from tulip.transys.export import graph2promela
@@ -67,7 +65,7 @@ _hl = 40 * '-'
 
 
 
-class KripkeStructure(LabeledDiGraph):
+class KripkeStructure(_graphs.LabeledDiGraph):
     """Directed graph with labeled vertices and initial vertices.
 
     References
@@ -85,7 +83,7 @@ class KripkeStructure(LabeledDiGraph):
     """
 
     def __init__(self):
-        ap_labels = PowerSet()
+        ap_labels = _mset.PowerSet()
         node_label_types = [
             dict(
                 name='ap',
@@ -120,14 +118,14 @@ class KripkeStructure(LabeledDiGraph):
 
     def __str__(self):
         newlines = 2 * '\n'
-        props = pformat(
+        props = _pp.pformat(
             self.atomic_propositions,
             indent=3)
         states = _dumps_states(self)
-        initial_states = pformat(
+        initial_states = _pp.pformat(
             self.states.initial,
             indent=3)
-        transitions = pformat(
+        transitions = _pp.pformat(
             self.transitions(),
             indent=3)
         return (
@@ -152,7 +150,7 @@ class WeightedKripkeStructure(KripkeStructure):
         edge_label_types = [
             dict(
                 name=self.cost_label,
-                values=ValidTransitionCost(),
+                values=_cost.ValidTransitionCost(),
                 setter=True)]
         super().__init__()
         super().add_label_types(
@@ -202,7 +200,7 @@ class MarkovDecisionProcess(MarkovChain):
             'name':
                 self.action_label,
             'values':
-                MathSet(),
+                _mset.MathSet(),
             'setter':
                 True}]
         super().__init__()
@@ -211,7 +209,7 @@ class MarkovDecisionProcess(MarkovChain):
         self.actions = self.action
 
 
-class FiniteTransitionSystem(LabeledDiGraph):
+class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     r"""Kripke structure with labeled states and edges.
 
     Who controls the state
@@ -482,7 +480,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 'name':
                     'env_actions',
                 'values':
-                    MathSet(),
+                    _mset.MathSet(),
                 'setter':
                     True}]
         if sys_actions is None:
@@ -490,7 +488,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 'name':
                     'sys_actions',
                 'values':
-                    MathSet(),
+                    _mset.MathSet(),
                 'setter':
                     True}]
         # NOTE:
@@ -498,7 +496,7 @@ class FiniteTransitionSystem(LabeledDiGraph):
         # in closed systems (old FTS)
         action_types = env_actions + sys_actions
         edge_label_types = action_types
-        ap_labels = PowerSet()
+        ap_labels = _mset.PowerSet()
         node_label_types = [
             dict(
                 name='ap',
@@ -560,31 +558,31 @@ class FiniteTransitionSystem(LabeledDiGraph):
             f'{_hl}\nFinite Transition System ({t}): '
             f'{self.name}\n{_hl}\n'
             'Atomic Propositions (APs):\n' +
-            pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
+            _pp.pformat(self.atomic_propositions, indent=3) + 2 * '\n' +
             'States labeled with sets of APs:\n' +
             _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
-            pformat(self.states.initial, indent=3) + 2 * '\n')
+            _pp.pformat(self.states.initial, indent=3) + 2 * '\n')
         for action_type, codomain in self.actions.items():
             if 'sys' in action_type:
                 s += (
                     f'System Action Type: {action_type}'
                     f', with possible values: {codomain}\n' +
-                    pformat(codomain, indent=3) + 2 * '\n')
+                    _pp.pformat(codomain, indent=3) + 2 * '\n')
             elif 'env' in action_type:
                 s += (
                     f'Environment Action Type: {action_type}'
                     f', with possible values:\n\t{codomain}\n' +
-                    pformat(codomain, indent=3) + 2 * '\n')
+                    _pp.pformat(codomain, indent=3) + 2 * '\n')
             else:
                 s += (
                     'Action type controlled by neither env nor sys\n'
                     ' (will cause you errors later)'
                     ', with possible values:\n\t' +
-                    pformat(codomain, indent=3) + 2 * '\n')
+                    _pp.pformat(codomain, indent=3) + 2 * '\n')
         s += (
             'Transitions labeled with sys and env actions:\n' +
-            pformat(self.transitions(data=True), indent=3) +
+            _pp.pformat(self.transitions(data=True), indent=3) +
             f'\n{_hl}\n')
         return s
 
@@ -690,7 +688,7 @@ def tuple2fts(
     def pair_labels_with_states(states, state_labeling):
         if state_labeling is None:
             return
-        if not isinstance(state_labeling, Iterable):
+        if not isinstance(state_labeling, _abc.Iterable):
             raise TypeError(
                 'The state-labeling function: `L -> 2^AP` must be '
                 'defined using an `Iterable`.')
@@ -713,12 +711,12 @@ def tuple2fts(
         state_labeling = zip(states, state_labeling)
         return state_labeling
     # args
-    if not isinstance(S, Iterable):
+    if not isinstance(S, _abc.Iterable):
         raise TypeError(
             'States `S` must be iterable, '
             'even for single state.')
     # convention
-    if not isinstance(S0, Iterable) or isinstance(S0, str):
+    if not isinstance(S0, _abc.Iterable) or isinstance(S0, str):
         S0 = [S0]
     # comprehensive names
     states = S
@@ -732,8 +730,9 @@ def tuple2fts(
         logger.debug(
             f'Given string:\n\t{prepend_str}\n'
             'will be prepended to all states.')
-    states = prepend_with(states, prepend_str)
-    initial_states = prepend_with(
+    states = _graphs.prepend_with(
+        states, prepend_str)
+    initial_states = _graphs.prepend_with(
         initial_states, prepend_str)
     ts = FTS()
     ts.name = name
@@ -748,7 +747,7 @@ def tuple2fts(
         for state, ap_label in state_labeling:
             if ap_label is None:
                 ap_label = set()
-            ap_label = str2singleton(ap_label)
+            ap_label = _graphs.str2singleton(ap_label)
             state = prepend_str + str(state)
             logger.debug(
                 f'Labeling state:\n\t{state}\n'
@@ -757,7 +756,7 @@ def tuple2fts(
     # any transition labeling ?
     if actions is None:
         for from_state, to_state in transitions:
-            (from_state, to_state) = prepend_with(
+            (from_state, to_state) = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
             logger.debug(
@@ -767,7 +766,7 @@ def tuple2fts(
     else:
         ts.actions |= actions
         for from_state, to_state, act in transitions:
-            (from_state, to_state) = prepend_with(
+            (from_state, to_state) = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
             logger.debug(
@@ -891,9 +890,11 @@ def add_initial_states(
     For example if isinstance(ofts, FTS):
 
     ```python
-    from tulip.transys.transys import add_initial_states
+    import tulip.transys.transys as _trs
+
+
     initial_labels = [{'home'}]
-    add_initial_states(ofts, initial_labels)
+    _trs.add_initial_states(ofts, initial_labels)
     ```
 
     @param ap_labels:
@@ -920,7 +921,7 @@ def _dumps_states(g: FTS):
     return ''.join(a)
 
 
-class GameGraph(LabeledDiGraph):
+class GameGraph(_graphs.LabeledDiGraph):
     """Store a game graph.
 
     When adding states, you have to say
@@ -1002,7 +1003,7 @@ class LabeledGameGraph(GameGraph):
     """
 
     def __init__(self):
-        ap_labels = PowerSet()
+        ap_labels = _mset.PowerSet()
         node_label_types = [{
             'name':
                 'ap',
@@ -1028,7 +1029,7 @@ class LabeledGameGraph(GameGraph):
 
 def _pre(
         graph:
-            MultiDiGraph,
+            _nx.MultiDiGraph,
         list_n:
             list
         ) -> set:
@@ -1052,12 +1053,12 @@ def _output_fts(
         ts:
             FTS,
         transitions:
-            MultiDiGraph,
+            _nx.MultiDiGraph,
         sol
         ) -> tuple[
             FTS,
             dict]:
-    """Convert the Part from `nx.MultiDiGraph` to FTS.
+    """Convert the Part from `MultiDiGraph` to FTS.
 
     The returned FTS does not contain any edge attribute in the original FTS.
     All the transitions are assumed to be controllable.
@@ -1145,10 +1146,10 @@ def simu_abstract(
        54th Annual Allerton Conference on CCC 2016
     """
     # create MultiDiGraph instance from the input FTS
-    G = MultiDiGraph(ts)
+    G = _nx.MultiDiGraph(ts)
     # build coarsest partition
     S0 = dict()
-    Part = MultiDiGraph()
+    Part = _nx.MultiDiGraph()
         # a graph associated with the new partition
     n_cells = 0
     hash_ap = dict()

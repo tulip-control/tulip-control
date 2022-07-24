@@ -45,7 +45,8 @@ of Model Checking" by Baier and Katoen (2008).
 """
 
 try:
-    from tulip._version import version as __version__
+    import tulip._version as _version
+    __version__ = _version.version
 except ImportError:
     __version__ = None
 

@@ -42,7 +42,7 @@ import typing as _ty
 
 import numpy as np
 
-from tulip.spec.form import GRSpec
+import tulip.spec.form as _form
 
 # inline:
 #
@@ -913,13 +913,13 @@ class GridWorld:
             spec_goal.append(self.__getitem__(loc, nonbool=nonbool))
         self.offset = orig_offset
         if controlled_dyn:
-            return GRSpec(
+            return _form.GRSpec(
                 sys_vars=sys_vars,
                 sys_init=init_str,
                 sys_safety=spec_trans,
                 sys_prog=spec_goal)
         else:
-            return GRSpec(
+            return _form.GRSpec(
                 env_vars=sys_vars,
                 env_init=init_str,
                 env_safety=spec_trans,

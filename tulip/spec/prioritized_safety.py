@@ -31,9 +31,12 @@
 # SUCH DAMAGE.
 #
 """Representing prioritized safety specifications."""
-from itertools import product
+import itertools as _itr
 
-from tulip.transys.automata import FiniteStateAutomaton as FA
+import tulip.transys.automata as _automata
+
+
+FA = _automata.FiniteStateAutomaton
 
 
 class FAWithPriority:
@@ -165,15 +168,15 @@ class PrioritizedSpecification:
 
     def get_states(self):
         """Get the product of the states in all the finite automata."""
-        return product(*[phi.automaton().states for phi in self])
+        return _itr.product(*[phi.automaton().states for phi in self])
 
     def get_initial_states(self):
         """Get the product of the initial states of all the finite automata."""
-        return product(*[phi.automaton().states.initial for phi in self])
+        return _itr.product(*[phi.automaton().states.initial for phi in self])
 
     def get_accepting_states(self):
         """Get product of the accepting states of all the finite automata."""
-        return product(*[phi.automaton().states.accepting for phi in self])
+        return _itr.product(*[phi.automaton().states.accepting for phi in self])
 
     def get_num_levels(self):
         """Get the number of levels."""

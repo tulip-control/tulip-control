@@ -38,14 +38,12 @@ import numpy as np
 import scipy.sparse as sp
 
 import polytope as pc
-from polytope.plot import (
-    plot_partition,
-    plot_transition_arrow)
-from tulip.abstract import find_controller
+import polytope.plot as _pplot
+import tulip.abstract as _abs
 # inline imports:
 #
 # import matplotlib as mpl
-# from tulip.graphics import newax
+# import tulip.graphics
 
 
 __all__ = [
@@ -59,6 +57,8 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
+plot_partition = _pplot.plot_partition
+plot_transition_arrow = _pplot.plot_transition_arrow
 
 
 def plot_abstraction_scc(ab, ax=None):
@@ -129,7 +129,7 @@ def plot_ts_on_partition(
         if only_adjacent:
             if ppp.adj[i, j] == 0:
                 continue
-        plot_transition_arrow(
+        _pplot.plot_transition_arrow(
             ppp.regions[i],
             ppp.regions[j],
             ax,
@@ -170,7 +170,7 @@ def plot_strategy(
     """
     proj_mealy = project_strategy_on_partition(
         ab.ppp, mealy)
-    ax = plot_partition(
+    ax = _pplot.plot_partition(
         ab.ppp,
         proj_mealy,
         color_seed=0)
@@ -214,15 +214,15 @@ def plot_trajectory(
         - `numpy.random.RandomState`
     """
     try:
-        from tulip.graphics import newax
+        import tulip.graphics as _graphics
     except:
         logger.error(
             'failed to import '
             '`tulip.graphics.newax`')
         return
     if ax is None:
-        ax, fig = newax()
-    plot_partition(
+        ax, fig = _graphics.newax()
+    _pplot.plot_partition(
         plot_numbers=False,
         ax=ax,
         show=False)
@@ -323,7 +323,7 @@ def simulate2d(
     elif qinit == '\A \A':
         assert d_init is not None
         assert x_init is not None
-        s0_part = find_controller.find_discrete_state(
+        s0_part = _abs.find_controller.find_discrete_state(
             x_init, disc_dynamics.ppp)
         assert s0_part == d_init['loc'], (s0_part, d_init)
         # find the machine node with `d_init` as discrete state
@@ -346,7 +346,7 @@ def simulate2d(
         # pick an initial continuous state
         x_init = pick_point_in_polytope(init_poly)
         # assert equal
-        s0_part_ = find_controller.find_discrete_state(
+        s0_part_ = _abs.find_controller.find_discrete_state(
             x_init, disc_dynamics.ppp)
         assert s0_part == s0_part_, (s0_part, s0_part_)
     x = [x_init[0]]
@@ -357,7 +357,7 @@ def simulate2d(
         x0 = np.array([x[i * N], y[i * N]])
         start = s0_part
         end = disc_dynamics.ppp2ts.index(out['loc'])
-        u = find_controller.get_input(
+        u = _abs.find_controller.get_input(
             x0=x0,
             ssys=sys_dyn,
             abstraction=disc_dynamics,
@@ -373,7 +373,7 @@ def simulate2d(
             x.append(s_now[0])
             y.append(s_now[1])
         point = [x[-1], y[-1]]
-        s0_part = find_controller.find_discrete_state(
+        s0_part = _abs.find_controller.find_discrete_state(
             point, disc_dynamics.ppp)
         s0_loc = disc_dynamics.ppp2ts[s0_part]
         assert s0_loc == out['loc'], (s0_loc, out['loc'])

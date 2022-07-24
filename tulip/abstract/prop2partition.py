@@ -37,7 +37,7 @@ import warnings
 
 import numpy as np
 import polytope as pc
-from polytope.plot import plot_partition
+import polytope.plot as _pplot
 import scipy.sparse as sp
 
 import tulip.transys as trs
@@ -631,7 +631,7 @@ class PropPreservingPartition(pc.MetricPartition):
             plot_numbers=True,
             color_seed=None):
         """For details see `polytope.plot.plot_partition`."""
-        return plot_partition(
+        return _pplot.plot_partition(
             self, trans,
             ppp2trans, only_adjacent,
             ax, plot_numbers, color_seed)

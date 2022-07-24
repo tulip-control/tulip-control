@@ -45,7 +45,7 @@ try:
     from tulip.interfaces import slugs
 except ImportError:
     slugs = None
-from tulip.spec import GRSpec
+import tulip.spec as _spec
 from tulip import transys
 
 

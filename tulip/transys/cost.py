@@ -30,7 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Cost Module for state or transition cost/weight"""
-from collections.abc import Iterable
+import collections.abc as _abc
 
 
 class ValidTransitionCost:
@@ -51,7 +51,7 @@ class VectorCost:
     def __init__(self, value):
         if isinstance(value, int) or isinstance(value, float):
             value = [value]
-        assert isinstance(value, Iterable)
+        assert isinstance(value, _abc.Iterable)
         self._value = value
 
     def __str__(self):

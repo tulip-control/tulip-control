@@ -31,13 +31,17 @@
 # SUCH DAMAGE.
 #
 """Minimum violation planning module"""
-from itertools import product
-from tulip.transys import KripkeStructure as KS
-from tulip.transys.automata import WeightedFiniteStateAutomaton as WFA
-from tulip.transys.cost import VectorCost
-from tulip.transys.graph_algorithms import dijkstra_multiple_sources_multiple_targets
-from tulip.spec.prioritized_safety import PrioritizedSpecification
-from tulip.transys.mathset import SubSet
+import itertools as _itr
+
+import tulip.transys as _trs
+import tulip.transys.cost as _cost
+import tulip.transys.graph_algorithms as _gralgo
+import tulip.spec.prioritized_safety as _prio
+
+
+KS = _trs.KripkeStructure
+WFA = _trs.WeightedFiniteStateAutomaton
+PrioSpec = _prio.PrioritizedSpecification
 
 
 def _get_rule_violation_cost(
@@ -120,7 +124,7 @@ def _add_transition(
             fa.transitions.add(
                 from_prod_state,
                 to_prod_state,
-                {"cost": VectorCost(cost)})
+                {"cost": _cost.VectorCost(cost)})
 
 
 def _construct_weighted_product_automaton(ks, spec):
@@ -144,27 +148,27 @@ def _construct_weighted_product_automaton(ks, spec):
     while null_state in ks.states:
         null_state += "0"
     fa = WFA()
-    fa.states.add_from(set(product(ks.states, spec.get_states())))
-    fa.states.add_from(set(product([null_state], spec.get_states())))
+    fa.states.add_from(set(_itr.product(ks.states, spec.get_states())))
+    fa.states.add_from(set(_itr.product([null_state], spec.get_states())))
     fa.states.initial.add_from(
-        set(product([null_state], spec.get_initial_states())))
+        set(_itr.product([null_state], spec.get_initial_states())))
     fa.states.accepting.add_from(
-        set(product(ks.states, spec.get_accepting_states())))
+        set(_itr.product(ks.states, spec.get_accepting_states())))
     fa.atomic_propositions.add_from(ks.atomic_propositions)
     for transition in ks.transitions.find():
         from_ks_state = transition[0]
         to_ks_state = transition[1]
         trans_ks_cost = transition[2].get("cost", 0)
         _add_transition(
-            product([from_ks_state], spec.get_states()),
-            product([to_ks_state], spec.get_states()),
+            _itr.product([from_ks_state], spec.get_states()),
+            _itr.product([to_ks_state], spec.get_states()),
             ks,
             spec,
             trans_ks_cost,
             fa)
     _add_transition(
         fa.states.initial,
-        product(ks.states.initial, spec.get_states()),
+        _itr.product(ks.states.initial, spec.get_states()),
         ks,
         spec,
         0,
@@ -195,17 +199,17 @@ def solve(ks, goal_label, spec):
     """
     if not isinstance(ks, KS):
         raise AssertionError(ks)
-    if not isinstance(spec, PrioritizedSpecification):
+    if not isinstance(spec, PrioSpec):
         raise AssertionError(spec)
     if ks.atomic_propositions != spec.atomic_propositions:
         raise AssertionError(ks, spec)
     (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
     goal_states = [
         state for state in ks.states if goal_label in ks.states[state]["ap"]]
-    accepting_goal_states = SubSet(wpa.states.accepting)
+    accepting_goal_states = _trs.SubSet(wpa.states.accepting)
     accepting_goal_states.add_from(
-        set(product(goal_states, spec.get_states())))
-    (cost, product_path) = dijkstra_multiple_sources_multiple_targets(
+        set(_itr.product(goal_states, spec.get_states())))
+    (cost, product_path) = _gralgo.dijkstra_multiple_sources_multiple_targets(
         wpa,
         wpa.states.initial,
         accepting_goal_states,
