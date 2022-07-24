@@ -52,7 +52,8 @@ def _get_rule_violation_cost(from_prod_state, to_prod_state, spec, to_ap):
     @param from_prod_state, to_prod_state:
         tuple (ks_state, aut_state)
         where ks_state is the state of the Kripke struture
-        and aut_state is a tuple, representing the state of the finite automaton.
+        and aut_state is a tuple,
+        representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
     @param spec:
         the prioritized safety specification of type
@@ -93,7 +94,8 @@ def _add_transition(
     @param from_prod_state, to_prod_state:
         tuple (ks_state, aut_state)
         where ks_state is the state of the Kripke struture
-        and aut_state is a tuple, representing the state of the finite automaton.
+        and aut_state is a tuple,
+        representing the state of the finite automaton.
         aut_state[i] corresponds to spec[i].
     @param ks:
         the Kripke structure
