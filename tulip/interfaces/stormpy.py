@@ -179,9 +179,14 @@ def to_tulip_transys(path):
         return f's{in_model_state}'
     # Only allow DTMC and MDP models
     in_model = build_stormpy_model(path)
-    assert (
-        in_model.model_type == stormpy.storage.ModelType.DTMC
-        or in_model.model_type == stormpy.storage.ModelType.MDP)
+    model_type_is_expected = (
+        in_model.model_type ==
+            stormpy.storage.ModelType.DTMC
+        or in_model.model_type ==
+            stormpy.storage.ModelType.MDP)
+    if not model_type_is_expected:
+        raise ValueError(
+            in_model.model_type)
     # The list of states and initial states
     state_list = [get_ts_state(s) for s in in_model.states]
     initial_state_list = [
@@ -229,9 +234,12 @@ def to_prism_file(ts, path):
         `str`
     """
     # Only deal with MDP and MC with a unique initial state
-    assert type(ts) == MDP or type(ts) == MC
-    assert len(ts.states) > 0
-    assert len(ts.states.initial) == 1
+    if not isinstance(ts, (MDP, MC)):
+        raise TypeError(ts)
+    if not ts.states:
+        raise ValueError(ts.states)
+    if len(ts.states.initial) != 1:
+        raise ValueError(ts.states.initial)
     # The state and action of prism file will be
     # of the form si and acti
     # where i is the index in state_list and
@@ -396,9 +404,12 @@ def model_checking(
 
 def _extract_policy(stormpy_result, stormpy_model, tulip_transys):
     """Extract policy from `stormpy_result`."""
-    assert stormpy_result.has_scheduler
+    if not stormpy_result.has_scheduler:
+        raise ValueError(
+            stormpy_result.has_scheduler)
     stormpy_policy = stormpy_result.scheduler
-    assert stormpy_policy is not None
+    if stormpy_policy is None:
+        raise ValueError(stormpy_policy)
     tulip_policy = FunctionOnLabeledState(
         'state', MDP.action_label)
     action_map = get_action_map(stormpy_model, tulip_transys)

@@ -190,9 +190,12 @@ def solve(ks, goal_label, spec):
         * weighted_product_automaton is the weighted product
           automaton ks times spec
     """
-    assert isinstance(ks, KS)
-    assert isinstance(spec, PrioritizedSpecification)
-    assert ks.atomic_propositions == spec.atomic_propositions
+    if not isinstance(ks, KS):
+        raise AssertionError(ks)
+    if not isinstance(spec, PrioritizedSpecification):
+        raise AssertionError(spec)
+    if ks.atomic_propositions != spec.atomic_propositions:
+        raise AssertionError(ks, spec)
     (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
     goal_states = [
         state for state in ks.states if goal_label in ks.states[state]["ap"]]
