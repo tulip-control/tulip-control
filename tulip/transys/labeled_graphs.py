@@ -45,7 +45,6 @@ from tulip.transys.mathset import SubSet, TypedDict
 #
 # from tulip.transys.export import graph2dot
 # from tulip.transys.export import save_d3
-# from tulip.transys.export import graph2dot
 
 
 __all__ = [
