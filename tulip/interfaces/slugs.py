@@ -147,10 +147,9 @@ def _bitfields_to_ints(bit_state, vrs):
         bitnames[0] = f'{var}@0.{dom[0]}.{dom[1]}'
         bitvalues = [bit_state[b] for b in bitnames]
         # little-endian
-        val = int(
-            ''.join(str(b) for b in reversed(bitvalues)),
-            2)
-        int_state[var] = val
+        bitvalues = map(str, reversed(bitvalues))
+        val = ''.join(bitvalues)
+        int_state[var] = int(val, 2)
     return int_state
 
 
