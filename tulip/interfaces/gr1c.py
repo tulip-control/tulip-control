@@ -339,24 +339,24 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
 def _parse_vars(variables, vardict):
     """Helper for parsing env, sys variables."""
     domains = list()
-    for v in variables:
-        dom = vardict[v]
+    for var in variables:
+        dom = vardict[var]
         if dom[0] == "[":
             end_ind = dom.find("]")
             if end_ind < 0:
                 raise ValueError(
-                    f'invalid domain for variable "{v}":  {dom}')
+                    f'invalid domain for variable "{var}":  {dom}')
             dom_parts = dom[1:end_ind].split(",")
             if len(dom_parts) != 2:
                 raise ValueError(
-                    f'invalid domain for variable "{v}":  {dom}')
+                    f'invalid domain for variable "{var}":  {dom}')
             domains.append((int(dom_parts[0]), int(dom_parts[1])))
         elif dom == 'boolean':
             domains.append('boolean')
         else:
             raise ValueError(
                 'unrecognized type of domain '
-                f'for variable "{v}":  {dom}')
+                f'for variable "{var}":  {dom}')
     if len(variables) != len(domains):
         raise AssertionError(
             len(variables),
