@@ -184,9 +184,7 @@ def to_tulip_state(
 def to_tulip_transys(
         path:
             str
-        ) -> (
-            MC |
-            MDP):
+        ) -> MC:
     """Return Markov chain or decisiom process from `prism` file.
 
     @param path:
@@ -244,8 +242,7 @@ def to_tulip_transys(
 
 def to_prism_file(
         ts:
-            MC |
-            MDP,
+            MC,
         path:
             str
         ) -> None:
@@ -255,7 +252,7 @@ def to_prism_file(
         path of output `prism` file
     """
     # Only deal with MDP and MC with a unique initial state
-    if not isinstance(ts, (MDP, MC)):
+    if not isinstance(ts, MC):
         raise TypeError(ts)
     if not ts.states:
         raise ValueError(ts.states)
@@ -365,8 +362,7 @@ def to_prism_file(
 
 def model_checking(
         tulip_transys:
-            MC |
-            MDP,
+            MC,
         formula:
             str,
         prism_file_path:
@@ -397,7 +393,7 @@ def model_checking(
           `policy[state]` is the action to be
           applied at `state`.
     """
-    if not isinstance(tulip_transys, (MDP, MC)):
+    if not isinstance(tulip_transys, MC):
         raise TypeError(tulip_transys)
     to_prism_file(tulip_transys, prism_file_path)
     prism_program = stormpy.parse_prism_program(prism_file_path)
