@@ -444,7 +444,7 @@ class Transitions:
     def __call__(self, **kwargs):
         """Return list of transitions.
 
-        Wraps `LabeledDiGraph.edges`.
+        Wraps `LabeledDiGraph.edges()`.
         """
         return self.graph.edges(**kwargs)
 
@@ -519,7 +519,7 @@ class Transitions:
         then only transitions annotated with
         those labels are removed.
 
-        Wraps `LabeledDiGraph.remove_labeled_edge`.
+        Wraps `LabeledDiGraph.remove_labeled_edge()`.
         """
         self.graph.remove_labeled_edge(
             from_state, to_state, attr_dict,
