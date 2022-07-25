@@ -565,7 +565,8 @@ def translate(
         - (assumption, guarantee), where each element of the tuple is `str`
     """
     if not isinstance(spec, tulip.spec.form.GRSpec):
-        raise TypeError('translate requires first argument (spec) to be of type GRSpec')
+        raise TypeError(
+            'translate requires first argument (spec) to be of type GRSpec')
     spec.check_syntax()
     spec.str_to_int()
     # pprint.pprint(spec._bool_int)
