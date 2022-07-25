@@ -1013,7 +1013,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             try:
                 attr_dict.update(attr)
             except AttributeError:
-                msg = 'The attr_dict argument must be a dictionary.'
+                msg = 'The `attr_dict` argument must be a dictionary.'
                 raise nx.NetworkXError(msg)
         return attr_dict
 
