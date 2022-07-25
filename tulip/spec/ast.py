@@ -35,6 +35,7 @@
 Syntax taken originally roughly from:
 <http://spot.lip6.fr/wiki/LtlSyntax>
 """
+import collections.abc as _abc
 import logging
 
 
@@ -229,7 +230,7 @@ def make_nodes(opmap=None):
         def __repr__(self):
             t = type(self).__name__
             op = repr(self.operator)
-            xyz = ', '.join(
+            xyz = _comma(
                 repr(x)
                 for x in self.operands)
             return f'{t}({op}, {xyz})'
@@ -253,7 +254,7 @@ def make_nodes(opmap=None):
             return ' '.join([
                 '(',
                 self.opmap[self.operator],
-                ', '.join(x.flatten(*arg, **kw) for x in self.operands),
+                _comma(x.flatten(*arg, **kw) for x in self.operands),
                 ')'])
 
     class Unary(Operator):
@@ -354,3 +355,16 @@ def make_fol_nodes(opmap=None):
 
 
 nodes = make_fol_nodes()
+
+
+def _comma(
+        items:
+            _abc.Iterable
+        ) -> str:
+    """Catenate with comma in-between.
+
+    Between the `__str__`-representations
+    of `items`, the string `', '` is
+    placed, in the returned value.
+    """
+    return ', '.join(items)
