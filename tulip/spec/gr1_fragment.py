@@ -321,8 +321,8 @@ def stability_to_gr1(
     """Convert `<>[] p` to GR(1).
 
     Warning: This conversion is sound, but not complete.
-    See p.2, U{[E10]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#e10>}
+    See p.2, [E10](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#e10)
 
     GR(1) form:
 

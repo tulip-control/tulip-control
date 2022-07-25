@@ -230,8 +230,8 @@ class States:
         See Also
         ========
         - `pre`
-        - Def. 2.3, p.23 U{[BK08]
-          <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+        - Def. 2.3, p.23 [BK08](
+            https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
 
         @param states:
           - None, so initial states returned
@@ -255,8 +255,8 @@ class States:
         See Also
         ========
         - `post`
-        - Def. 2.3, p.23 U{[BK08]
-          <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+        - Def. 2.3, p.23 [BK08](
+            https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
         """
         states = self._single_state2singleton(states)
         predecessors = set()
@@ -425,8 +425,8 @@ class States:
 
         See Also
         ========
-        Def. 2.4, p.23 U{[BK08]
-        <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+        Def. 2.4, p.23 [BK08](
+            https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
         """
         return self.graph.out_degree(state) == 0
 
@@ -1288,7 +1288,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 attr_dict=datadict)
 
     def has_deadends(self):
-        """Return False if all nodes have outgoing edges.
+        """Return `False` if all nodes have outgoing edges.
 
         Edge labels are not taken into account.
         """
