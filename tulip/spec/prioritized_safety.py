@@ -176,21 +176,21 @@ class PrioritizedSpecification:
 
     def get_states(self):
         """Get the product of the states in all the finite automata."""
-        return _itr.product(
+        return _itr.product(*(
             phi.automaton().states
-            for phi in self)
+            for phi in self))
 
     def get_initial_states(self):
         """Get the product of the initial states of all the finite automata."""
-        return _itr.product(
+        return _itr.product(*(
             phi.automaton().states.initial
-            for phi in self)
+            for phi in self))
 
     def get_accepting_states(self):
         """Get product of the accepting states of all the finite automata."""
-        return _itr.product(
+        return _itr.product(*(
             phi.automaton().states.accepting
-            for phi in self)
+            for phi in self))
 
     def get_num_levels(self):
         """Get the number of levels."""
