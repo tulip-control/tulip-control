@@ -207,7 +207,7 @@ class States:
         self.graph.remove_node(state)
 
     def remove_from(self, states):
-        """Remove a list of states.
+        """Remove multiple states.
 
         Iterates `States.remove` to imitate
         `networkx.MultiDiGraph.remove_nodes_from`,
@@ -532,7 +532,7 @@ class Transitions:
             **attr)
 
     def remove_from(self, transitions):
-        """Remove list of transitions.
+        """Remove multiple transitions.
 
         Each transition is either a:
 
