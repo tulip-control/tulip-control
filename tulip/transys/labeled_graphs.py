@@ -233,7 +233,7 @@ class States:
             https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
 
         @param states:
-          - None, so initial states returned
+          - `None`, so initial states returned
           - iterable of states
         """
         if states is None:
@@ -259,7 +259,7 @@ class States:
             states))
 
     def forward_reachable(self, state):
-        """Return states reachable from given state.
+        """Return states reachable from `state`.
 
         Wrapper of `networkx.descendants()`.
         """
@@ -267,9 +267,9 @@ class States:
         return descendants
 
     def backward_reachable(self, state):
-        """Return states from which the given state can be reached.
+        """Return states from which `state` can be reached.
 
-        A wrapper of networkx.ancestors.
+        Wrapper of `networkx.ancestors()`.
         """
         ancestors = nx.ancestors(self, state)
         return ancestors
@@ -415,7 +415,7 @@ class States:
         return found_state_label_pairs
 
     def is_terminal(self, state):
-        """Return True if state has no outgoing transitions.
+        """Return `True` if `state` has no outgoing transitions.
 
         See Also
         ========
@@ -457,7 +457,7 @@ class Transitions:
         return self.graph.number_of_edges()
 
     def _breaks_determinism(self, from_state, sublabels):
-        """Return True if adding transition conserves determinism."""
+        """Return `True` if adding transition conserves determinism."""
         if not self._deterministic:
             return
         if from_state not in self.graph.states:
