@@ -459,7 +459,7 @@ class Transitions:
     def _breaks_determinism(self, from_state, sublabels):
         """Return `True` if adding transition conserves determinism."""
         if not self._deterministic:
-            return
+            return False
         if from_state not in self.graph.states:
             raise Exception('from_state \notin graph')
         same_labeled = self.find(
@@ -471,6 +471,7 @@ class Transitions:
                 'Existing transitions with same label:\n'
                 f'{same_labeled}')
             raise Exception(msg)
+        return True
 
     def add(self, from_state, to_state, attr_dict=None, check=True, **attr):
         """Wrapper of `LabeledDiGraph.add_edge`,
