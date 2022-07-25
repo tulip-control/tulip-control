@@ -95,7 +95,8 @@ OPMAP = {
     '/':
         '/',
     '<<>>':
-        '<<>>'  # arithmetic
+        '<<>>'
+        # arithmetic
     }
 # this mapping is based on SPIN documentation:
 #   <http://spinroot.com/spin/Man/ltl.html>
@@ -113,7 +114,8 @@ FULL_OPERATOR_NAMES = {
     'weakuntil':
         'W',
     'unless':
-        'W',  # see Baier - Katoen
+        'W',
+        # see Baier - Katoen
     'release':
         'V',
     'implies':

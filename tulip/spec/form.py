@@ -508,7 +508,8 @@ class GRSpec(LTL):
         match existing ones.
         """
         env = kw.pop('env', False)
-        assert isinstance(env, bool), env  # "env" not a var name
+        assert isinstance(env, bool), env
+            # "env" not a var name
         d = dict()
         for k, v in kw.items():
             is_int = len(v) == 2 and all(
