@@ -374,11 +374,11 @@ def _to_jtlv(d):
     parts = [f(d['env_init'], 'valid initial env states', ''),
              f(d['env_safety'], 'safety assumption on environment', '[]'),
              f(d['env_prog'], 'justice assumption on environment', '[]<>')]
-    assumption = ' & \n'.join(x for x in parts if x)
+    assumption = ' & \n'.join(filter(None, parts))
     parts = [f(d['sys_init'], 'valid initial system states', ''),
              f(d['sys_safety'], 'safety requirement on system', '[]'),
              f(d['sys_prog'], 'progress requirement on system', '[]<>')]
-    guarantee = ' & \n'.join(x for x in parts if x)
+    guarantee = ' & \n'.join(filter(None, parts))
     return (assumption, guarantee)
 
 
