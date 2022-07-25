@@ -506,7 +506,7 @@ def _flatten(
         r = _flatten(tree, r, to_lang, **kw)
         return to_lang(u, l, r, **kw)
     else:
-        (c,) = s
+        c, = s
         if u.op == 'X':
             return to_lang(u, _flatten(tree, c, to_lang,
                            prime=True, **kw), **kw)
