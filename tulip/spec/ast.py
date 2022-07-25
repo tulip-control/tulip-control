@@ -314,7 +314,7 @@ def make_fol_nodes(opmap=None):
                 raise TypeError(
                     'value must be "true" or "false" '
                     f'(case insensitive), got: {value}')
-            self.value = 'True' if (value.lower() == 'true') else 'False'
+            self.value = value.title()
             self.type = 'bool'
 
         def flatten(self, *arg, **kw):
