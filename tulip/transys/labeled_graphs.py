@@ -234,7 +234,7 @@ class States:
 
         @param states:
           - None, so initial states returned
-          - set of states or
+          - iterable of states
         """
         if states is None:
             return set(self.initial)
