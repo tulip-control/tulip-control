@@ -297,7 +297,7 @@ def make_fol_nodes(opmap=None):
         """
 
         def __init__(self, value):
-            super(Var, self).__init__(value)
+            super().__init__(value)
             self.type = 'var'
 
     class Bool(nodes.Terminal):
@@ -323,7 +323,7 @@ def make_fol_nodes(opmap=None):
         """A 0-ary function."""
 
         def __init__(self, value):
-            super(Num, self).__init__(value)
+            super().__init__(value)
             self.type = 'num'
 
     class Str(nodes.Terminal):
@@ -331,7 +331,7 @@ def make_fol_nodes(opmap=None):
         # parser ensures that value has no quotes
 
         def __init__(self, value):
-            super(Str, self).__init__(value)
+            super().__init__(value)
             self.type = 'str'
 
     class Comparator(nodes.Binary):
