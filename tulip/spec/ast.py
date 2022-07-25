@@ -152,9 +152,6 @@ def make_nodes(opmap=None):
             pass
     Node.opmap = opmap
 
-    # Do not confuse "term" with the abbreviation of "terminal".
-    # A "term" in FOL can comprise of terminals,
-    # for example a function together with parentheses and its args.
     class Terminal(Node):
         """Terminal symbols of grammar.
 
