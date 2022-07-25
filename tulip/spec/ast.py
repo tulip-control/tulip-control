@@ -145,13 +145,13 @@ def make_nodes(opmap=None):
         opmap = None
 
         def __init__(self):
-            pass
+            raise NotImplementedError
 
         def __repr__(self):
-            pass
+            raise NotImplementedError
 
         def flatten(self):
-            pass
+            raise NotImplementedError
     Node.opmap = opmap
 
     class Terminal(Node):
