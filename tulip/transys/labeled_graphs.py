@@ -924,11 +924,17 @@ class LabeledDiGraph(nx.MultiDiGraph):
             logger.warning(
                 f'empty label types: {label_types}')
         # define the labeling
-        labeling = {d['name']: d['values'] for d in label_types}
-        defaults = {d['name']: d.get('default') for d in label_types
-                    if 'default' in d}
-        setters = {d['name']: d.get('setter') for d in label_types
-                   if 'setter' in d}
+        labeling = {
+            d['name']: d['values']
+            for d in label_types}
+        defaults = {
+            d['name']: d.get('default')
+            for d in label_types
+            if 'default' in d}
+        setters = {
+            d['name']: d.get('setter')
+            for d in label_types
+            if 'setter' in d}
         for name, setter in setters.items():
             # point to given values ?
             if setter is True:
@@ -1202,8 +1208,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
             return
         attr_dict = self._update_attr_dict_with_attr(
             attr_dict, attr)
-        rm_keys = {key for key, data in self[u][v].items()
-                   if data == attr_dict}
+        rm_keys = {
+            key
+            for key, data in
+                self[u][v].items()
+            if data == attr_dict}
         for key in rm_keys:
             self.remove_edge(
                 u, v,
