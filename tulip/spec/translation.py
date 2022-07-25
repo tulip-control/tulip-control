@@ -493,8 +493,7 @@ def _gr1c_str(s, name='SYSGOAL', prefix='[]<>'):
 
 
 def _to_slugs(d):
-    """Return structured slugs spec.
-    """
+    """Return structured slugs spec."""
     f = _slugs_str
     return (
         _format_slugs_vars(d['env_vars'], 'INPUT') +
