@@ -71,7 +71,10 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def check(formula: str):
+def check(
+        formula:
+            str
+        ) -> _ast.NodeSpec:
     """Return syntax tree for `formula`.
 
     Parse `formula` and create abstract
@@ -486,8 +489,12 @@ def _paren(x):
     return f'({x})'
 
 
-if __name__ == '__main__':
+def _main():
     logging.basicConfig(level=logging.INFO)
     s = '(a U b) && []a && <>a && <>a && []<>(<>z)'
     parsed_formula = check(s)
     print(f'Parsing result: {parsed_formula}')
+
+
+if __name__ == '__main__':
+    _main()
