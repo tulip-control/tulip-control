@@ -537,14 +537,14 @@ class GRSpec(LTL):
 
     def __repr__(self):
         args = ',\n\n'.join([
-                f'env_vars={self.env_vars!r}',
-                f'sys_vars={self.sys_vars!r}',
-                f'env_init={self.env_init!r}',
-                f'sys_init={self.sys_init!r}',
-                f'env_safety={self.env_safety!r}',
-                f'sys_safety={self.sys_safety!r}',
-                f'env_prog={self.env_prog!r}',
-                f'sys_prog={self.sys_prog!r}'])
+            f'env_vars={self.env_vars!r}',
+            f'sys_vars={self.sys_vars!r}',
+            f'env_init={self.env_init!r}',
+            f'sys_init={self.sys_init!r}',
+            f'env_safety={self.env_safety!r}',
+            f'sys_safety={self.sys_safety!r}',
+            f'env_prog={self.env_prog!r}',
+            f'sys_prog={self.sys_prog!r}'])
         return f'{type(self).__name__}({args})'
 
     def __str__(self):
