@@ -61,13 +61,12 @@ def parse(
     if parsers.get('ply') is None:
         parsers['ply'] = lexyacc.Parser()
     spec = parsers['ply'].parse(formula)
-    # did ply fail merely printing warnings ?
-    if spec is None:
-        raise Exception(
-            'Parsing formula:\n'
-            f'{formula}\n'
-            'failed')
-    return spec
+    if spec is not None:
+        return spec
+    raise Exception(
+        'Parsing formula:\n'
+        f'{formula}\n'
+        'failed')
 
 
 def _replace_full_name_operators(formula):

@@ -601,8 +601,7 @@ def translate_ast(
     """
     if lang == 'python':
         return _ast_to_python(tree, lang2nodes[lang])
-    else:
-        return _ast_to_lang(tree, lang2nodes[lang])
+    return _ast_to_lang(tree, lang2nodes[lang])
 
 
 def _ast_to_lang(u, nodes):
@@ -612,9 +611,8 @@ def _ast_to_lang(u, nodes):
     elif hasattr(u, 'operator'):
         xyz = [_ast_to_lang(x, nodes) for x in u.operands]
         return cls(u.operator, *xyz)
-    else:
-        raise TypeError(
-            f'Unknown node type "{type(u).__name__}"')
+    raise TypeError(
+        f'Unknown node type "{type(u).__name__}"')
 
 
 def _ast_to_python(u, nodes):
@@ -640,6 +638,5 @@ def _ast_to_python(u, nodes):
         return cls(u.operator,
                    _ast_to_python(u.operands[0], nodes),
                    _ast_to_python(u.operands[1], nodes))
-    else:
-        raise ValueError(
-            f'Operator: {u}, is neither unary nor binary.')
+    raise ValueError(
+        f'Operator: {u}, is neither unary nor binary.')

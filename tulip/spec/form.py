@@ -645,22 +645,24 @@ class GRSpec(LTL):
             a = self.ast(f)
             primed = tx.collect_primed_vars(a)
             for var in primed:
-                if var in self.sys_vars:
-                    raise AssertionError(
-                        'Syntax error: '
-                        f'primed system variable "{var}"'
-                        f' found in env safety: {f}')
+                if var not in self.sys_vars:
+                    continue
+                raise AssertionError(
+                    'Syntax error: '
+                    f'primed system variable "{var}"'
+                    f' found in env safety: {f}')
 
     def _assert_no_primed(self, formulae, name):
         """Raise `AssertionError` if primed vars in `formulae`."""
         for f in formulae:
             a = self.ast(f)
             primed = tx.collect_primed_vars(a)
-            if primed:
-                raise AssertionError(
-                    'Syntax error: '
-                    f'primed variables: {primed}'
-                    f' found in {name}: {f}')
+            if not primed:
+                continue
+            raise AssertionError(
+                'Syntax error: '
+                f'primed variables: {primed}'
+                f' found in {name}: {f}')
 
     def copy(self):
         """Return a copy of `self`."""
