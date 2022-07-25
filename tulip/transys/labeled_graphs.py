@@ -542,7 +542,8 @@ class Transitions:
 
     def add_adj(
             self,
-            adj,
+            adj:
+                'scipy.sparse.lil_array',
             adj2states:
                 dict |
                 list,
@@ -556,8 +557,6 @@ class Transitions:
 
         @param adj:
             new transitions represented by adjacency matrix.
-        @type adj:
-            scipy.sparse.lil (list of lists)
         @param adj2states:
             map from adjacency matrix indices to states.
             If value not a state, raise Exception.
@@ -590,7 +589,7 @@ class Transitions:
                     f'State: {state} not found.'
                     ' Consider adding it with sys.states.add')
         # convert to format friendly for edge iteration
-        nx_adj = nx.from_scipy_sparse_matrix(
+        nx_adj = nx.from_scipy_sparse_array(
             adj, create_using=nx.DiGraph())
         # add each edge using existing checks
         for i, j in nx_adj.edges():
