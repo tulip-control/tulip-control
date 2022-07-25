@@ -461,11 +461,15 @@ class GRSpec(LTL):
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
-            env_vars = dict([(v, 'boolean') for v in env_vars])
+            env_vars = dict(
+                (v, 'boolean')
+                for v in env_vars)
         if sys_vars is None:
             sys_vars = dict()
         elif not isinstance(sys_vars, dict):
-            sys_vars = dict([(v, 'boolean') for v in sys_vars])
+            sys_vars = dict(
+                (v, 'boolean')
+                for v in sys_vars)
         self.env_vars = copy.deepcopy(env_vars)
         self.sys_vars = copy.deepcopy(sys_vars)
         self.env_init = env_init
@@ -587,40 +591,40 @@ class GRSpec(LTL):
         if self.env_init:
             output += (
                 '    INITIAL\n\t  ' +
-                '\n\t& '.join([
+                '\n\t& '.join(
                     f'({f})' for f in self.env_init
-                ]) + '\n')
+                ) + '\n')
         if self.env_safety:
             output += (
                 '    SAFETY\n\t  []' +
-                '\n\t& []'.join([
+                '\n\t& []'.join(
                     f'({f})' for f in self.env_safety
-                ]) + '\n')
+                ) + '\n')
         if self.env_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
-                '\n\t& []<>'.join([
+                '\n\t& []<>'.join(
                     f'({f})' for f in self.env_prog
-                ]) + '\n')
+                ) + '\n')
         output += 'GUARANTEE:\n'
         if self.sys_init:
             output += (
                 '    INITIAL\n\t  ' +
-                '\n\t& '.join([
+                '\n\t& '.join(
                     f'({f})' for f in self.sys_init
-                ]) + '\n')
+                ) + '\n')
         if self.sys_safety:
             output += (
                 '    SAFETY\n\t  []' +
-                '\n\t& []'.join([
+                '\n\t& []'.join(
                     f'({f})' for f in self.sys_safety
-                ]) + '\n')
+                ) + '\n')
         if self.sys_prog:
             output += (
                 '    LIVENESS\n\t  []<>' +
-                '\n\t& []<>'.join([
+                '\n\t& []<>'.join(
                     f'({f})' for f in self.sys_prog
-                ]) + '\n')
+                ) + '\n')
         return output
 
     def check_syntax(self):
