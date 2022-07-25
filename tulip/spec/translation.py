@@ -246,6 +246,7 @@ def make_smv_nodes():
             'V'}
     return ast.make_fol_nodes(opmap)
 
+
 def make_wring_nodes():
     opmap = {
         'False':
@@ -296,6 +297,7 @@ def make_wring_nodes():
             return f'({self.value}=1)'
     nodes.Var = Var
     return nodes
+
 
 def make_python_nodes():
     opmap = {
@@ -432,6 +434,7 @@ def _to_gr1c(d):
         _gr1c_str(d['sys_safety'], 'SYSTRANS', '[]') +
         _gr1c_str(d['sys_prog'], 'SYSGOAL', '[]<>'))
     return output
+
 
 def _to_wring(d):
     """Dump to LTL formula in Wring syntax
