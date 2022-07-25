@@ -51,7 +51,7 @@ import logging
 import re
 import typing as _ty
 
-import tulip.spec.ast as ast
+import tulip.spec.ast as _ast
 import tulip.spec.form
 
 
@@ -98,7 +98,7 @@ def make_jtlv_nodes():
             '>',
         '!=':
             '!='}
-    nodes = ast.make_fol_nodes(opmap)
+    nodes = _ast.make_fol_nodes(opmap)
     class Str(nodes.Str):
         def flatten(self, **kw):
             return f'({self})'
@@ -153,7 +153,7 @@ def make_gr1c_nodes(opmap=None):
                 '>',
             '!=':
                 '!='}
-    nodes = ast.make_fol_nodes(opmap)
+    nodes = _ast.make_fol_nodes(opmap)
     class Var(nodes.Var):
         def flatten(self, prime=None, **kw):
             prm = "'" if prime else ''
@@ -215,7 +215,7 @@ def make_slugs_nodes():
 
 
 def make_promela_nodes():
-    opmap = dict(ast.OPMAP)
+    opmap = dict(_ast.OPMAP)
     opmap.update({
         'True':
             'true',
@@ -229,7 +229,7 @@ def make_promela_nodes():
             'V',
         '=':
             '=='})
-    return ast.make_fol_nodes(opmap)
+    return _ast.make_fol_nodes(opmap)
 
 
 def make_smv_nodes():
@@ -244,7 +244,7 @@ def make_smv_nodes():
             'U',
         'R':
             'V'}
-    return ast.make_fol_nodes(opmap)
+    return _ast.make_fol_nodes(opmap)
 
 
 def make_wring_nodes():
@@ -277,7 +277,7 @@ def make_wring_nodes():
             'R',
         'V':
             'V'}
-    nodes = ast.make_fol_nodes(opmap)
+    nodes = _ast.make_fol_nodes(opmap)
     class Var(nodes.Var):
         def flatten(self, *arg, **kw):
             if ('env_vars' in kw) or ('sys_vars' in kw):
@@ -331,7 +331,7 @@ def make_python_nodes():
             '+',
         '-':
             '-'}
-    nodes = ast.make_fol_nodes(opmap)
+    nodes = _ast.make_fol_nodes(opmap)
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
             l = self.operands[0].flatten()

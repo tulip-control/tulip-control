@@ -53,7 +53,7 @@ import tulip.spec as _spec
 import tulip.spec.lexyacc as lexyacc
 import tulip.spec.transformation as tx
 import tulip.spec.parser as parser
-import tulip.spec.ast as sast
+import tulip.spec.ast as _ast
 import tulip.transys as trs
 
 
@@ -116,14 +116,14 @@ def check(formula: str):
     # dfa.save('dfa.pdf')
     #
     # plot parse tree
-    sast.dump_dot(ast, 'ast.dot')
+    _ast.dump_dot(ast, 'ast.dot')
     # sync product of AST with DFA,
     # to check acceptance
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
         logger.info(f'visiting: {s}, {q}')
-        if isinstance(s, sast.Unary):
+        if isinstance(s, _ast.Unary):
             op = s.operator
             if op in {'!', 'G', 'F'}:
                 t = dfa.transitions.find(q, letter=op)
@@ -134,7 +134,7 @@ def check(formula: str):
             else:
                 # ignore
                 Q.append((s.operand, q))
-        elif isinstance(s, sast.Binary):
+        elif isinstance(s, _ast.Binary):
             op = s.operator
             if op in {'W', 'U'}:
                 t = dfa.transitions.find(
@@ -163,7 +163,7 @@ def check(formula: str):
                 # ignore
                 Q.append((s.op_l, q))
                 Q.append((s.op_r, q))
-        elif isinstance(s, sast.Var):
+        elif isinstance(s, _ast.Var):
             print('reached var')
     return ast
 

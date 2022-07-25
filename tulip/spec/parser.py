@@ -33,7 +33,7 @@
 """LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
 import re
 
-import tulip.spec.ast as ast
+import tulip.spec.ast as _ast
 import tulip.spec.lexyacc as lexyacc
 
 
@@ -79,7 +79,7 @@ def _replace_full_name_operators(formula):
     (as defined by `\b` in regexp).
     Substitution is case-insensitive.
     """
-    subs = ast.FULL_OPERATOR_NAMES.items()
+    subs = _ast.FULL_OPERATOR_NAMES.items()
     for name, symbol in subs:
         formula = re.sub(
             rf'(?i)\b{name}\b',
