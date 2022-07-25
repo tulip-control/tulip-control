@@ -47,9 +47,12 @@ class FAWithPriority:
     """
 
     def __init__(self, fa, priority, level):
-        assert isinstance(fa, FA)
-        assert isinstance(priority, int)
-        assert isinstance(level, int)
+        if not isinstance(fa, FA):
+            raise TypeError(fa)
+        if not isinstance(priority, int):
+            raise TypeError(priority)
+        if not isinstance(level, int):
+            raise TypeError(level)
         self._fa = fa
         self._priority = priority
         self._level = level
@@ -131,13 +134,16 @@ class PrioritizedSpecification:
         @param level:
             level of the rule in the hierarchy
         """
-        assert isinstance(fa, FA)
-        assert (
-            isinstance(priority, float) or
-            isinstance(priority, int))
-        assert isinstance(level, int)
-        assert priority > 0
-        assert level >= 0
+        if not isinstance(fa, FA):
+            raise TypeError(fa)
+        if not isinstance(priority, (float, int)):
+            raise TypeError(priority)
+        if not isinstance(level, int):
+            raise TypeError(level)
+        if priority <= 0:
+            raise ValueError(priority)
+        if level < 0:
+            raise ValueError(level)
         # Check the consistency of atomic propositions
         if len(self._Psi) == 0:
             self.atomic_propositions = fa.atomic_propositions
