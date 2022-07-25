@@ -977,7 +977,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 'Currently the allowed attributes are:'
                 f'{allowed_attrs}')
             if check:
-                msg += ('\nTo set attributes not included ' +
+                msg += ('\nTo set attributes not included '
                         'in the existing types, pass: check = False')
                 raise AttributeError(msg)
             else:
