@@ -173,7 +173,7 @@ class Tree(nx.MultiDiGraph):
 def ast_to_labeled_graph(tree, detailed):
     """Convert AST to `NetworkX.DiGraph` for graphics.
 
-    @param ast:
+    @param tree:
         Abstract syntax tree
     @rtype:
         `networkx.DiGraph`
