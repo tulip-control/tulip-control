@@ -251,11 +251,12 @@ def make_nodes(opmap=None):
             return 1 + sum(len(x) for x in self.operands)
 
         def flatten(self, *arg, **kw):
-            return ' '.join([
-                '(',
-                self.opmap[self.operator],
-                _comma(x.flatten(*arg, **kw) for x in self.operands),
-                ')'])
+            op = self.opmap[self.operator]
+            args = _comma(
+                x.flatten(*arg, **kw)
+                for x in self.operands)
+            return f'( {op} {args} )'
+
 
     class Unary(Operator):
         pass
@@ -266,12 +267,10 @@ def make_nodes(opmap=None):
 
             Override it if you want prefix or postfix.
             """
-            return ' '.join([
-                '(',
-                self.operands[0].flatten(*arg, **kw),
-                self.opmap[self.operator],
-                self.operands[1].flatten(*arg, **kw),
-                ')'])
+            op = self.opmap[self.operator]
+            first = self.operands[0].flatten(*arg, **kw)
+            second = self.operands[1].flatten(*arg, **kw)
+            return f'( {first} {op} {second} )'
 
     class Nodes:
         """AST nodes for a generic grammar."""
