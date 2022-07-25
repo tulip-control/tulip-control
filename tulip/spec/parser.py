@@ -79,7 +79,8 @@ def _replace_full_name_operators(formula):
     (as defined by `\b` in regexp).
     Substitution is case-insensitive.
     """
-    for name, symbol in ast.FULL_OPERATOR_NAMES.items():
+    subs = ast.FULL_OPERATOR_NAMES.items()
+    for name, symbol in subs:
         formula = re.sub(
             rf'(?i)\b{name}\b',
             symbol,

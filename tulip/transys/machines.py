@@ -1056,7 +1056,8 @@ def strip_ports(
     new.add_nodes_from(mealy)
     new.states.initial.add_from(
         mealy.states.initial)
-    for u, v, d in mealy.edges(data=True):
+    edges = mealy.edges(data=True)
+    for u, v, d in edges:
         d = trim_dict(d, names)
         new.add_edge(u, v, **d)
     return new

@@ -997,7 +997,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
         for node, attr_dict in self.nodes(data=True):
             if not attr_dict.is_consistent():
                 return False
-        for node_i, node_j, attr_dict in self.edges(data=True):
+        edges = self.edges(data=True)
+        for node_i, node_j, attr_dict in edges:
             if not attr_dict.is_consistent():
                 return False
         return True
