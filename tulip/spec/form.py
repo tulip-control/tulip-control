@@ -942,4 +942,5 @@ def replace_dependent_vars(spec, bool2form):
 
 def _conj(iterable, unary='', op='&&'):
     return f' {op} '.join(
-        f'{unary}({s})' for s in iterable)
+        f'{unary}({s})'
+        for s in iterable)
