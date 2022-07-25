@@ -140,7 +140,7 @@ class PropPreservingPartition(pc.MetricPartition):
                         f'{domain}')
             self.is_symbolic()
         self.domain = domain
-        super(PropPreservingPartition, self).__init__(domain)
+        super().__init__(domain)
         self.adj = adj
 
     def reg2props(

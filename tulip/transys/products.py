@@ -64,7 +64,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
     def __init__(self, ba, ts):
         self.ba = ba
         self.ts = ts
-        super(OnTheFlyProductAutomaton, self).__init__()
+        super().__init__()
         self.atomic_propositions |= ts.atomic_propositions
         self._add_initial()
 

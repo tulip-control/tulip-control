@@ -75,7 +75,7 @@ class Tree(nx.MultiDiGraph):
 
     def __init__(self):
         self.root = None
-        super(Tree, self).__init__()
+        super().__init__()
 
     def __repr__(self):
         return repr(self.root)

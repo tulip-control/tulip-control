@@ -530,7 +530,7 @@ class SubSet(MathSet):
             elements to add to subset
         """
         self._superset = superset
-        super(SubSet, self).__init__([])
+        super().__init__([])
         if not isinstance(superset, _abc.Container):
             raise TypeError(
                 'superset must be Iterable,\n'
@@ -570,7 +570,7 @@ class SubSet(MathSet):
                 'Add it first to states using e.g. sys.states.add()\n'
                 f'FYI: new element:\n\t{new_element}\n'
                 f'and superset:\n\t{self._superset}')
-        super(SubSet, self).add(new_element)
+        super().add(new_element)
 
     def add_from(self, new_elements):
         """Add multiple new elements to subset.
@@ -594,7 +594,7 @@ class SubSet(MathSet):
                 f'All new_elements:\n\t{new_elements}'
                 '\nshould already be \\in '
                 f'self.superset = {self._superset}')
-        super(SubSet, self).add_from(new_elements)
+        super().add_from(new_elements)
 
 
 class CartesianProduct:
@@ -890,7 +890,7 @@ class TypedDict(dict):
                 'Admissible values are:\n\t'
                 f'{self.allowed_values[i]}')
             raise ValueError(msg)
-        super(TypedDict, self).__setitem__(i, y)
+        super().__setitem__(i, y)
 
     def __str__(self):
         return f'TypedDict({dict.__str__(self)})'

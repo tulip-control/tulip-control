@@ -170,7 +170,7 @@ def make_gr1c_nodes(
             if self.operator == 'X':
                 kw.update(prime=True)
                 return self.operands[0].flatten(*arg, **kw)
-            return super(Unary, self).flatten(*arg, **kw)
+            return super().flatten(*arg, **kw)
     nodes.Var = Var
     nodes.Unary = Unary
     return nodes
