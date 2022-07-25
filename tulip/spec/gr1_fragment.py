@@ -477,8 +477,7 @@ def until_to_gr1(p, q, aux='aux'):
         q + ' -> ' + a,
         '( (X !' + q + ') && !' + a + ') -> X !' + a,
         a + ' -> X ' + a,
-        '(!' + a + ') -> ' + p
-    }
+        '(!' + a + ') -> ' + p}
     sys_prog = {a}
     return GRSpec(
         sys_vars=sys_vars,

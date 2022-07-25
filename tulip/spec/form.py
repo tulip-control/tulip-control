@@ -436,14 +436,12 @@ class GRSpec(LTL):
             'string': dict(),
             'jtlv': dict(),
             'gr1c': dict(),
-            'slugs': dict()
-        }
+            'slugs': dict()}
         self._bool_int = dict()
         self._parts = {
             x + y
             for x in {'env_', 'sys_'}
-            for y in {'init', 'safety', 'prog'}
-        }
+            for y in {'init', 'safety', 'prog'}}
         self.moore = moore
         self.plus_one = plus_one
         self.qinit = qinit
