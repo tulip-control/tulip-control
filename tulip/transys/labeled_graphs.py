@@ -241,10 +241,9 @@ class States:
         if states is None:
             return set(self.initial)
         states = self._single_state2singleton(states)
-        successors = set()
-        for state in states:
-            successors |= set(self.graph.successors(state))
-        return successors
+        return set().union(*map(
+            self.graph.successors,
+            states))
 
     def pre(
             self,
@@ -259,10 +258,9 @@ class States:
             https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
         """
         states = self._single_state2singleton(states)
-        predecessors = set()
-        for state in states:
-            predecessors |= set(self.graph.predecessors(state))
-        return predecessors
+        return set().union(*map(
+            self.graph.predecessors,
+            states))
 
     def forward_reachable(self, state):
         """Return states reachable from given state.
