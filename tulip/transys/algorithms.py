@@ -97,7 +97,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
             return v2 + v2
         except:
             raise TypeError(
-                'The state sublabel types should support ' +
+                'The state sublabel types should support '
                 'either | or + for labeled system products.')
     def state_label_union(attr_dict):
         prod_attr_dict = dict()

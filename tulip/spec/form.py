@@ -117,7 +117,7 @@ class LTL:
     def __repr__(self):
         return (
             f"LTL('{self.formula}', "
-            f"input_variables={self.input_variables}, " +
+            f"input_variables={self.input_variables}, "
             f"output_variables={self.output_variables})")
 
     def __str__(self):
