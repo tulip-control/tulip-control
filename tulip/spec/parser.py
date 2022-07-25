@@ -58,7 +58,7 @@ def parse(
     """
     if full_operators:
         formula = _replace_full_name_operators(formula)
-    if parsers.get('ply') is None:
+    if 'ply' not in parsers:
         parsers['ply'] = lexyacc.Parser()
     spec = parsers['ply'].parse(formula)
     if spec is not None:
