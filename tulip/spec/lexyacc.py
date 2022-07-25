@@ -41,7 +41,7 @@ import warnings
 import ply.lex
 import ply.yacc
 
-import tulip.spec.ast
+import tulip.spec.ast as _ast
 
 
 logger = logging.getLogger(__name__)
@@ -244,7 +244,7 @@ class Parser:
     def __init__(
             self, ast=None, lexer=None):
         if ast is None:
-            self.ast = tulip.spec.ast.nodes
+            self.ast = _ast.nodes
         else:
             self.ast = ast
         if lexer is None:
