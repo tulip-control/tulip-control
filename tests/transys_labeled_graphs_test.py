@@ -108,7 +108,6 @@ class Transitions_test:
         assert len(self.T) == 1
         self.T.add(2, 3)
         assert len(self.T) == 2
-
         # Transitions should be unaffected by new states
         self.T.graph.states.add_from([10])
         assert len(self.T) == 2
@@ -123,7 +122,6 @@ class Transitions_test:
         with pytest.raises(Exception):
             self.T.add(1, 4)
         assert len(self.T) == 1  # Edge already exists, so not added
-
         self.T.add_from([(5, 2), (4, 3)])
         assert len(self.T) == 3
         assert set([t for t in self.T()]) == set([(1, 4), (5, 2), (4, 3)])
@@ -169,10 +167,8 @@ class States_labeling_test:
         assert len(self.S_ap) == 2
         self.S_ap.add(3, ap={'q', 'r'} )
         assert len(self.S_ap) == 3
-
         assert self.S_ap[1] == {'ap': {'p'} }
         assert self.S_ap[3] == {'ap': {'q', 'r'} }
-
         nodes = {u for u,l in self.S_ap.find(
             with_attr_dict={'ap': {'p'} })}
         assert nodes == set([1, 2])
@@ -210,13 +206,11 @@ class States_labeling_test:
         self.S_ap.add_from(state_list, check=False)
         result = self.S_ap.find("state1")
         assert len(result) == 1 and result[0] == ("state1", {"ap": set(['q'])})
-
         result = self.S_ap.find(["state1", "state0"])
         assert (
             len(result) == 2 and
             ("state1", {"ap": set(['q'])}) in result and
             ("state0", {"ap": set(['p'])}) in result)
-
         result = self.S_ap.find(with_attr_dict={"ap": {'p'}})
         print(result)
         assert (
@@ -247,21 +241,16 @@ class LabeledDiGraph_test:
         ]
         edge_labeling = node_labeling
         G = labeled_graphs.LabeledDiGraph(node_labeling, edge_labeling)
-
         G.states.add_from({1, 2})
         G.transitions.add(1, 2, month='Jan', day='Mon')
-
         with pytest.raises(Exception):
             G.transitions.add(1, 2, {'month': 'Jan', 'day': 'abc'})
-
         # note how untyped keys can be set directly via assignment,
         # whereas check=False is needed for G.add_node
         G.nodes[1]['mont'] = 'Feb'
         assert(G.nodes[1] == {'mont':'Feb'})
-
         G[1][2][0]['day'] = 'Tue'
         assert(G[1][2][0] == {'month':'Jan', 'day':'Tue'})
-
         self.G = G
 
     @pytest.mark.xfail(raises=AttributeError)
@@ -292,7 +281,6 @@ class LabeledDiGraph_test:
 def open_fts_multiple_env_actions_test():
     env_modes = MathSet({'up', 'down'})
     env_choice = MathSet({'left', 'right'})
-
     env_actions = [
         {
             'name': 'env_modes',
@@ -310,29 +298,23 @@ def open_fts_multiple_env_actions_test():
 
 def test_remove_deadends():
     g = labeled_graphs.LabeledDiGraph()
-
     # cycle
     n = 5
     g.add_nodes_from(range(n))
     for i in range(n):
         j = (i + 1) % n
         g.add_edge(i, j)
-
     g.remove_deadends()
     assert(len(g) == n)
-
     # line + cycle
     g.add_nodes_from(range(n, 2*n))
     for i in range(n, 2*n-1):
         g.add_edge(i, i+1)
     assert(len(g) == 2*n)
-
     g.remove_deadends()
     assert(len(g) == n)
-
     # line + self-loop
     g.remove_edge(4, 0)
     g.add_edge(0, 0)
-
     g.remove_deadends()
     assert(len(g) == 1)

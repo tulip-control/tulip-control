@@ -138,13 +138,11 @@ class basic_test:
         assert g is not None
         assert len(g.env_vars) == 1 and 'x' in g.env_vars
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
-
         g = gr1c.synthesize(self.dcounter)
         assert g is not None
         assert len(g.env_vars) == 0
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         assert len(g) == 2
-
         # In the notation of gr1c SYSINIT: True;, so the strategy must
         # account for every initial state, i.e., for y=0, y=1, y=2, ...
         self.dcounter.qinit = r'\A \A'

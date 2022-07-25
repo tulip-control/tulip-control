@@ -708,7 +708,6 @@ def is_subset(small_iterable, big_iterable):
         except:
             logger.error(
                 'Could not convert `big_iterable` to `list`.')
-
         for item in small_iterable:
             if item not in big_iterable:
                 return False
@@ -804,7 +803,6 @@ class PowerSet:
             raise Exception(
                 f'Not iterable:\n\t{item},\n'
                 'this is a powerset, so it contains (math) sets.')
-
         return is_subset(item, self.math_set)
 
     def __iter__(self):
@@ -827,7 +825,6 @@ class PowerSet:
         if not isinstance(other, PowerSet):
             raise TypeError(
                 'Can only compare to another PowerSet.')
-
         return other.math_set == self.math_set
 
     def __setattr__(self, name, value):

@@ -129,7 +129,6 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     #
     #     prod_sys.states.min_free_id = idx +1
     # # no else needed: otherwise self already not mutant
-
     # action labeling is taken care by nx,
     # since transition taken at a time
     edges = prod_graph.edges(data=True)

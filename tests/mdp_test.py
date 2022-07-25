@@ -17,15 +17,11 @@ def mc_test():
         ("red", "red", 0.5),
     }
     init = "green"
-
     mc = _construct_mdpmc(states, transitions, init)
-
     assert len(mc.states) == len(states)
     assert len(mc.states.initial) == 1
-
     for state in mc.states:
         mc.states[state]["ap"] == {state}
-
     for transition in transitions:
         mc_transitions = mc.transitions.find(transition[0], transition[1])
         assert len(mc_transitions) == 1
@@ -48,15 +44,11 @@ def mdp_test():
     }
     init = "c8"
     actions = ["acc", "brake"]
-
     mc = _construct_mdpmc(states, transitions, init, actions)
-
     assert len(mc.states) == len(states)
     assert len(mc.states.initial) == 1
-
     for state in mc.states:
         mc.states[state]["ap"] == {state}
-
     for transition in transitions:
         mc_transitions = mc.transitions.find(transition[0], transition[1])
         assert len(mc_transitions) >= 1
@@ -74,7 +66,6 @@ def _construct_mdpmc(states, transitions, init, actions=None):
         ts = MC()
     ts.states.add_from(states)
     ts.states.initial.add(init)
-
     for transition in transitions:
         attr = {"probability": transition[2]}
         if len(transition) > 3:
@@ -84,9 +75,7 @@ def _construct_mdpmc(states, transitions, init, actions=None):
             transition[1],
             attr,
         )
-
     for s in states:
         ts.atomic_propositions.add(s)
         ts.states[s]["ap"] = {s}
-
     return ts

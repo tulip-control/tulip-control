@@ -79,7 +79,6 @@ def check(formula):
         `str`
     """
     from tulip import transys as trs
-
     ast = lexyacc.parse(formula)
     dfa = trs.automata.FiniteWordAutomaton(
         atomic_proposition_based=False,

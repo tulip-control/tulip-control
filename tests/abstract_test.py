@@ -26,31 +26,23 @@ input_bound = 0.4
 
 def subsys0():
     dom = pc.box2poly([[0., 3.], [0., 2.]])
-
     A = np.eye(2)
     B = np.eye(2)
-
     U = pc.box2poly([[0., 1.],
                      [0., 1.]])
     U.scale(input_bound)
-
     sys_dyn = hybrid.LtiSysDyn(A, B, Uset=U, domain=dom)
-
     return sys_dyn
 
 
 def subsys1():
     dom = pc.box2poly([[0., 3.], [0., 2.]])
-
     A = np.eye(2)
     B = np.eye(2)
-
     U = pc.box2poly([[0., 0.],
                      [-1., 0.]])
     U.scale(input_bound)
-
     sys_dyn = hybrid.LtiSysDyn(A, B, Uset=U, domain=dom)
-
     return sys_dyn
 
 
@@ -124,31 +116,23 @@ def test_transient_regions():
         - f5f4934ab9d21062f633eef3861ad935c3d3b54b
     """
     dom = pc.box2poly([[0.0, 4.0], [0.0, 3.0]])
-
     def cont_predicates():
         p = dict()
         p['safe'] = pc.box2poly([[0.5, 3.5], [0.5, 2.5]])
-
         ppp = abstract.prop2part(dom, p)
         ppp, new2old_reg = abstract.part2convex(ppp)
         ppp.plot()
         return ppp
-
     def drifting_dynamics():
         A = np.array([[1.0, 0.0],
                       [0.0, 1.0]])
-
         B = np.array([[1.0],
                       [0.0]])
-
         U = pc.box2poly([[0.0, 1.0]])
-
         K = np.array([[-100.0],
                       [0.0]])
-
         sys = hybrid.LtiSysDyn(A, B, None, K, U, None, dom)
         return sys
-
     ppp = cont_predicates()
     sys = drifting_dynamics()
     logger.info(sys)
@@ -157,9 +141,7 @@ def test_transient_regions():
     logger.debug(ab.ts)
     self_loops = {i for i, j in ab.ts.transitions() if i == j}
     logger.debug('self loops at states: ' + str(self_loops))
-
     assert(not self_loops)
-
     # ax = ab.plot(show_ts=True)
     # ax.figure.savefig('./very_simple.pdf')
 
@@ -168,7 +150,6 @@ def define_partition(dom):
     p = dict()
     p['a'] = pc.box2poly([[0.0, 10.0], [15.0, 18.0]])
     p['b'] = pc.box2poly([[0.0, 1.0], [0.0, 20.0]])
-
     ppp = abstract.prop2part(dom, p)
     ppp, new2old_reg = abstract.part2convex(ppp)
     return ppp
@@ -176,22 +157,16 @@ def define_partition(dom):
 
 def define_dynamics(dom):
     A = np.eye(2)
-
     B = np.array([[1.0, -1.0],
                   [0.0, +1.0]])
-
     U = pc.box2poly([[0.0, 3.0],
                      [-3.0, 3.0]])
-
     E = np.array([[0.0],
                   [-1.0]])
-
     W = pc.box2poly([[-1.0, 1.0]])
     W.scale(0.4)
-
     K = np.array([[0.0],
                   [-0.4]])
-
     sys = hybrid.LtiSysDyn(A, B, E, K, U, W, dom)
     return sys
 
@@ -199,29 +174,23 @@ def define_dynamics(dom):
 def define_dynamics_dual():
     # Continuous state space
     cont_state_space = pc.box2poly([[-1.5, 1.5]])
-
     # Continuous dynamics
     # (continuous-state, discrete-time)
     A = np.array([[2]])
     B = np.array([[1]])
-
     # Available control, possible disturbances
     U = np.array([[-2.0, 2.0]])
-
     # Convert to polyhedral representation
     U = pc.box2poly(U)
-
     # Construct the LTI system describing the dynamics
     sys_dyn = hybrid.LtiSysDyn(A, B, None, None, U, None, cont_state_space)
     # @dynamics_section_end@
-
     # @partition_section@
     # Define atomic propositions for relevant regions of state space
     cont_props = dict()
     cont_props['a'] = pc.box2poly([[-1.5, -1]])
     cont_props['b'] = pc.box2poly([[-1, 1]])
     cont_props['c'] = pc.box2poly([[1, 1.5]])
-
     part = list()
     part.append(pc.box2poly([[-1.5, -1]]))
     part.append(pc.box2poly([[-1, 1]]))
@@ -244,9 +213,7 @@ def test_abstract_the_dynamics():
     ppp = define_partition(dom)
     sys = define_dynamics(dom)
     logger.info(sys)
-
     disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
-
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, **disc_options)
     assert ab.ppp.compute_adj()
@@ -254,7 +221,6 @@ def test_abstract_the_dynamics():
     # ax = ab.plot(show_ts=True, color_seed=0)
     # sys.plot(ax, show_domain=False)
     # print(ab.ts)
-
     # self_loops = {i for i,j in ab.ts.transitions() if i==j}
     # print('self loops at states: ' + str(self_loops))
 
@@ -266,13 +232,10 @@ def test_abstract_the_dynamics_dual():
     ppp = define_partition(dom)
     sys = define_dynamics(dom)
     logger.info(sys)
-
     disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
-
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, simu_type='dual', **disc_options)
     assert ab.ppp.compute_adj()
-
     [sys_dyn, cont_partition, part] = define_dynamics_dual()
     disc_options = {'N': 1, 'trans_length': 1_000, 'min_cell_volume': 0.0}
     ab_2 = abstract.discretize(cont_partition, sys_dyn,
@@ -316,29 +279,23 @@ def test_find_controller_non_convex():
      reachable"""
     # Continuous state space
     cont_state_space = pc.box2poly([[0., 1.], [0., 2.]])
-
     # System dynamics (continuous state, discrete time): simple double integrator
     # but no reversing.
     h = 1.0
     A = np.array([[1.0, h], [0., 1.0]])
     B = np.array([[h ** 2 / 2.0], [h]])
     E = None
-
     # Available control, no disturbances. Can brake or accelerate.
     U = pc.box2poly(np.array([[-1., 1.]]))
     W = None
-
     # Construct the LTI system describing the dynamics
     sys_dyn = hybrid.LtiSysDyn(A, B, E, None, U, W, cont_state_space)
-
     # Define atomic propositions for relevant regions of state space
     cont_props = dict()
     cont_props['target'] = pc.box2poly([[0., 1.], [0., 2.]])
-
     # Compute the proposition preserving partition of the continuous state space
     # noinspection PyTypeChecker
     cont_partition = abstract.prop2part(cont_state_space, cont_props)
-
     # Abstraction
     disc_dynamics = abstract.discretize(
         cont_partition, sys_dyn,
@@ -346,7 +303,6 @@ def test_find_controller_non_convex():
         N=1, min_cell_volume=0.01, plotit=False,
         simu_type='bi', trans_length=1
     )
-
     # Setup a start point and a target point in a region that are problematic
     c_start_state = np.array([0.5, 0.0])
     c_end_desired = np.array([1.0, 2.0])

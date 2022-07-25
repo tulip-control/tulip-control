@@ -144,7 +144,6 @@ def readdstar(getline):
     A = None
     aut_type = None
     comments = list()
-
     last_state = -1
         # -1 indicates unset
     try:
@@ -157,13 +156,11 @@ def readdstar(getline):
             if len(parts) == 0:
                 continue
                     # Ignore blank lines
-
             if not parts[0].endswith(":") and len(parts) == 3:
                 # id line
                 aut_type = parts[0]
                 version = parts[1]
                 edge_type = parts[2]
-
                 A = Automaton(aut_type=aut_type)
             elif parts[0] == "Comment:":
                 comments.append(" ".join(parts[1:]))
@@ -201,11 +198,9 @@ def readdstar(getline):
                     A.edge[last_state][to_state]["formula"] += " | ("+gen_apformula(A.ap, apsubset_counter)+")"
                     A.edge[last_state][to_state]["subsets of AP"].append(gen_apsubset(A.ap, apsubset_counter))
                 apsubset_counter += 1
-
     except EOFError:
         pass
             # raw_input() throws this at end-of-file
-
     return A
 
 
@@ -213,12 +208,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or "-h" in sys.argv:
         print("Usage: "+sys.argv[0]+" FILE")
         exit(1)
-
     if sys.argv[1] == "-":
         # Read from stdin
         getline = input
     else:
         f = open(sys.argv[1], "r")
         getline = f.readline
-
     print(readdstar(getline) )

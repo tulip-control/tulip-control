@@ -226,34 +226,26 @@ def check_for_undefined_identifiers(tree, domains):
                 f'Undefined variable "{var}" missing from '
                 f'symbol table:\n\t{domains}\n'
                 f'in subformula:\n\t{tr}')
-
         if u.type not in {'str', 'num'}:
             continue
-
         # is a Const or Num
         var, c = pair_node_to_var(tree, u)
-
         if c.type == 'str':
             dom = domains[var]
-
             if not isinstance(dom, list):
                 raise Exception(
                     f'String constant "{c}" assigned to non-string '
                     f'variable "{var}" with domain:\n\t{dom}')
-
             if c.value not in domains[var.value]:
                 raise ValueError(
                     f'String constant "{c}" is not in the domain '
                     f'of variable "{var}"')
-
         if c.type == 'num':
             dom = domains[var]
-
             if not isinstance(dom, tuple):
                 raise Exception(
                     f'Number: {c}, assigned to non-integer {c}'
                     f'variable "{var}" with domain:\n\t{dom}')
-
             if not dom[0] <= c.value <= dom[1]:
                 raise Exception(
                     f'Integer variable "{var}", is assigned the '

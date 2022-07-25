@@ -17,7 +17,6 @@ with open(fname, 'r') as f:
     config = json.load(f)
 print('Your logging config is:\n{s}')
 pprint.pprint(config)
-
 logging.config.dictConfig(config)
 
 from tulip import transys, spec, synth
@@ -25,12 +24,8 @@ from tulip import transys, spec, synth
 sys = transys.FTS()
 sys.states.add_from({0, 1})
 sys.states.initial.add(0)
-
 sys.add_edges_from([(0, 1), (1, 0)])
-
 sys.atomic_propositions.add('p')
 sys.nodes[0]['ap'] = {'p'}
-
 specs = spec.GRSpec(sys_vars={'p'}, sys_prog={'p'})
-
 mealy = synth.synthesize(specs, sys=sys, solver='gr1c')

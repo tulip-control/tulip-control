@@ -538,7 +538,6 @@ class FiniteTransitionSystem(LabeledDiGraph):
             _dumps_states(self) + 2 * '\n' +
             'Initial States:\n' +
             pformat(self.states.initial, indent=3) + 2 * '\n')
-
         for action_type, codomain in self.actions.items():
             if 'sys' in action_type:
                 s += (
@@ -704,15 +703,11 @@ def tuple2fts(S, S0, AP, L, Act, trans, name='fts',
     states = prepend_with(states, prepend_str)
     initial_states = prepend_with(
         initial_states, prepend_str)
-
     ts = FTS()
     ts.name = name
-
     ts.states.add_from(states)
     ts.states.initial |= initial_states
-
     ts.atomic_propositions |= ap
-
     # note: verbosity before actions below
     # to avoid screening by possible error caused by action
     #
@@ -1120,11 +1115,9 @@ def simu_abstract(ts, simu_type):
                 # hash table S0--->G
             n_cells += 1
         S0[ap].add(node)
-
     sol = list()
     for ap in S0:
         sol.append(S0[ap])
-
     IJ = np.ones([n_cells, n_cells])
     transitions = np.zeros([n_cells, n_cells])
     while np.sum(IJ) > 0:

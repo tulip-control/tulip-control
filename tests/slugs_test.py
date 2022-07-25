@@ -12,21 +12,18 @@ logger = logging.getLogger(__name__)
 
 def bitfields_to_ints_test():
     t = {'a': (0, 30)}
-
     # test int values
     bits = {'a@0.0.30': 0, 'a@1': 1, 'a@2': 1,
             'a@3': 0, 'a@4': 1, 'a@5': 0}
     n = slugs._bitfields_to_ints(bits, t)
     logger.debug(n)
     assert n == {'a': 22}
-
     # test str values
     bits = {'a@0.0.30': '0', 'a@1': '1', 'a@2': '1',
             'a@3': '0', 'a@4': '1', 'a@5': '0'}
     n = slugs._bitfields_to_ints(bits, t)
     logger.debug(n)
     assert n == {'a': 22}
-
     # range
     for n in range(30):
         bits = list(bin(n).lstrip('0b').zfill(6))
@@ -72,7 +69,6 @@ class basic_test:
     def test_synthesize(self):
         g = self.synthesize(self.f_un)
         assert not isinstance(g, nx.DiGraph)
-
         g = self.synthesize(self.f)
         # There is more than one possible strategy realizing this
         # specification.  Checking only for one here makes this more like
@@ -80,7 +76,6 @@ class basic_test:
         # than simply checking that synthesize() returns something
         # non-None (i.e., realizability, which is tested elsewhere).
         assert g is not None
-
         # assert len(g.env_vars) == 1 and 'x' in g.env_vars
         # assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
         print(g.nodes())

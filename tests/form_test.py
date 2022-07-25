@@ -86,12 +86,10 @@ class GRSpec_test:
         assert (
             len(h.env_prog) == len(self.f.env_prog) + 1 and
             '!z' in h.env_prog)
-
         # Domain mismatch on system variable y
         g.sys_vars = {"y": (0, 5)}
         with pytest.raises(ValueError):
             self.f.__or__(g)
-
         # Domain mismatch on environment variable x
         g.sys_vars = dict()
         g.env_vars["x"] = (0, 3)

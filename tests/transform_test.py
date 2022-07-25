@@ -92,7 +92,6 @@ def test_str_to_int():
     f = g.to_recursive_ast()
     s = f.flatten()
     assert s == '( a = 0 )'
-
     x = '(loc = "s2") -> X((((env_alice = "left") && (env_bob = "bright"))))'
     var_str2int = {
         'loc': ['s0', 's2'],

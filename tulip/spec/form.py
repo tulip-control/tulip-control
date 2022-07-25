@@ -107,11 +107,9 @@ class LTL:
             input_variables = dict()
         if output_variables is None:
             output_variables = dict()
-
         self.formula = formula
         self.input_variables = input_variables
         self.output_variables = output_variables
-
         self.check_vars()
 
     def __repr__(self):
@@ -222,7 +220,6 @@ class LTL:
                 input_section = declar[input_ind:]
             input_section = input_section.replace('INPUT:', '')
             output_section = output_section.replace('OUTPUT:', '')
-
             variables = [dict(), dict()]
             sections = [input_section, output_section]
             for i in range(2):
@@ -252,10 +249,8 @@ class LTL:
                         variables[i][name] = domain
                     else:
                         raise TypeError
-
         except (ValueError, TypeError):
             raise ValueError('Malformed TuLiP LTL specification string.')
-
         return LTL(
             formula=formula,
             input_variables=variables[0],
@@ -452,7 +447,6 @@ class GRSpec(LTL):
         self.moore = moore
         self.plus_one = plus_one
         self.qinit = qinit
-
         if env_vars is None:
             env_vars = dict()
         elif not isinstance(env_vars, dict):
@@ -461,20 +455,16 @@ class GRSpec(LTL):
             sys_vars = dict()
         elif not isinstance(sys_vars, dict):
             sys_vars = dict([(v, 'boolean') for v in sys_vars])
-
         self.env_vars = copy.deepcopy(env_vars)
         self.sys_vars = copy.deepcopy(sys_vars)
-
         self.env_init = env_init
         self.sys_init = sys_init
         self.env_safety = env_safety
         self.sys_safety = sys_safety
         self.env_prog = env_prog
         self.sys_prog = sys_prog
-
         for formula_component in self._parts:
             x = getattr(self, formula_component)
-
             if isinstance(x, str):
                 if not x:
                     setattr(self, formula_component, [])
@@ -482,10 +472,8 @@ class GRSpec(LTL):
                     setattr(self, formula_component, [x])
             elif not isinstance(x, list):
                 setattr(self, formula_component, list(x))
-
             setattr(self, formula_component,
                     copy.deepcopy(getattr(self, formula_component)))
-
         LTL.__init__(
             self,
             formula=self.to_canon(),
@@ -570,23 +558,19 @@ class GRSpec(LTL):
 
     def pretty(self):
         """Return pretty printing string."""
-
         output = 'ENVIRONMENT VARIABLES:\n'
         if self.env_vars:
             for k, v in self.env_vars.items():
                 output += f'\t{k}\t{v}\n'
         else:
             output += '\t(none)\n'
-
         output += '\nSYSTEM VARIABLES:\n'
         if self.sys_vars:
             for k, v in self.sys_vars.items():
                 output += f'\t{k}\t{v}\n'
         else:
             output += '\t(none)\n'
-
         output += '\nFORMULA:\n'
-
         output += 'ASSUMPTION:\n'
         if self.env_init:
             output += (
@@ -606,7 +590,6 @@ class GRSpec(LTL):
                 '\n\t& []<>'.join([
                     f'({f})' for f in self.env_prog
                 ]) + '\n')
-
         output += 'GUARANTEE:\n'
         if self.sys_init:
             output += (
@@ -682,10 +665,8 @@ class GRSpec(LTL):
     def __or__(self, other):
         """Create union of two specifications."""
         result = self.copy()
-
         if not isinstance(other, GRSpec):
             raise TypeError('type(other) must be GRSpec')
-
         assert self.moore == other.moore, (
             self.moore, other.moore)
         assert self.plus_one == other.plus_one, (
@@ -696,17 +677,13 @@ class GRSpec(LTL):
         for varname in set(other.env_vars) & set(result.env_vars):
             if other.env_vars[varname] != result.env_vars[varname]:
                 raise ValueError('Mismatched variable domains')
-
         for varname in set(other.sys_vars) & set(result.sys_vars):
             if other.sys_vars[varname] != result.sys_vars[varname]:
                 raise ValueError('Mismatched variable domains')
-
         result.env_vars.update(other.env_vars)
         result.sys_vars.update(other.sys_vars)
-
         for x in self._parts:
             getattr(result, x).extend(getattr(other, x))
-
         return result
 
     def to_canon(self):
@@ -717,7 +694,6 @@ class GRSpec(LTL):
         of the TuLiP User's Guide.
         """
         conj_cstr = lambda s: ' && ' if s else ''
-
         assumption = ''
         if self.env_init:
             assumption += _conj(self.env_init)
@@ -725,7 +701,6 @@ class GRSpec(LTL):
             assumption += conj_cstr(assumption) + _conj(self.env_safety, '[]')
         if self.env_prog:
             assumption += conj_cstr(assumption) + _conj(self.env_prog, '[]<>')
-
         guarantee = ''
         if self.sys_init:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_init)
@@ -733,7 +708,6 @@ class GRSpec(LTL):
             guarantee += conj_cstr(guarantee) + _conj(self.sys_safety, '[]')
         if self.sys_prog:
             guarantee += conj_cstr(guarantee) + _conj(self.sys_prog, '[]<>')
-
         # Put the parts together, simplifying in special cases
         if guarantee:
             if assumption:

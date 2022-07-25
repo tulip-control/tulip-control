@@ -150,9 +150,7 @@ class Lexer:
           !
         | \~
         '''
-
     t_XOR = r' \^ '
-
     t_EQUALS = r' = '
         # a declarative language
         # has no assignment
@@ -168,11 +166,9 @@ class Lexer:
         '''
     t_GT = r' >= '
     t_GE = r' > '
-
     t_LPAREN = r' \( '
     t_RPAREN = r' \) '
     t_NUMBER = r' \d+ '
-
     t_IMP = r'''
           \- >
         | =>
@@ -181,17 +177,14 @@ class Lexer:
           < \- >
         | <=>
         '''
-
     t_PLUS = r' \+ '
     t_MINUS = r' \- '
     t_TIMES = r' \* '
     t_DIV = r' / '
     t_TRUNCATE = r' <<>> '
     t_COMMA = r' , '
-
     t_DQUOTES = r' " '
     t_PRIME = r" ' "
-
 
     def t_comment(self, t):
         r' \# .* '

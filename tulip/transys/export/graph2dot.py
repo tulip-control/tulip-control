@@ -182,7 +182,6 @@ def _state2tikz(
         style += ', fill = ' + _format_color(fill, 'tikz')
     else:
         logger.debug('fillcolor is None')
-
     to_dot_graph.add_node(
         state,
         texlbl=node_dot_label,

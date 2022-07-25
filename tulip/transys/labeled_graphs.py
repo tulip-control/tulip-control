@@ -460,14 +460,11 @@ class Transitions:
         """Return True if adding transition conserves determinism."""
         if not self._deterministic:
             return
-
         if from_state not in self.graph.states:
             raise Exception('from_state \notin graph')
-
         same_labeled = self.find(
             [from_state],
             with_attr_dict=sublabels)
-
         if same_labeled:
             msg = (
                 'Candidate transition violates determinism.\n'
@@ -873,25 +870,18 @@ class LabeledDiGraph(nx.MultiDiGraph):
             node_label_types)
         edge_labeling, edge_defaults = self._init_labeling(
             edge_label_types)
-
         self._state_label_def = node_labeling
         self._node_label_defaults = node_defaults
-
         self._transition_label_def = edge_labeling
         self._edge_label_defaults = edge_defaults
-
         # temporary hack until rename
         self._node_label_types = self._state_label_def
         self._edge_label_types = self._transition_label_def
-
         nx.MultiDiGraph.__init__(self)
-
         self.states = States(self)
-
         # todo: handle accepting states separately
         self.transitions = Transitions(
             self, deterministic)
-
         # export properties
         self.dot_node_shape = dict(
             normal='circle')

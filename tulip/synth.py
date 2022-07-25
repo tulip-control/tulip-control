@@ -355,7 +355,6 @@ def iter2var(states, variables, statevar, bool_states, must):
             domain = list(states)
             if not min_one:
                 domain += [f'{statevar}none']
-
                 logger.debug(
                     'domain has been extended, because all actions\n\t'
                     'could be False (constraint: min_one = False).')
@@ -1481,7 +1480,6 @@ def strategy2mealy(A, spec):
                 attr_dict=None,
                 check=False,
                 **d)
-
             logger.info(
                 f'node: {v}, state: {d}')
     # special initial state, for first reaction

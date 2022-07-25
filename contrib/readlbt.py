@@ -122,12 +122,9 @@ def readlbt(gbastr):
     """
     parts = _split2(gbastr)
     state_count = int(parts[0])
-
     A = GBAutomaton(int(parts[1]))
-
     state_parts = [part for part in parts[2].split('-1')
                    if len(part.strip()) > 0]
-
     for (ii, state_part) in enumerate(state_parts):
         if ii % 2 == 0:
             x = _split2(state_part)
@@ -140,7 +137,6 @@ def readlbt(gbastr):
             A.add_node(state_name,
                        initial=initial,
                        acceptance_sets=acceptance_sets)
-
         else:  # Transitions
             succ = None
             next_succ = None
@@ -165,7 +161,6 @@ def readlbt(gbastr):
                     gate += transitions_part
             if succ is not None:
                 A.add_edge(state_name, succ, gate=gate)
-
     return A
 
 
@@ -173,12 +168,10 @@ if __name__ == "__main__":
     if len(sys.argv) < 2 or "-h" in sys.argv:
         print(f'Usage: {sys.argv[0]} FILE')
         exit(1)
-
     if sys.argv[1] == "-":  # Read from stdin
         gbastr = sys.stdin.read()
     else:
         f = open(sys.argv[1], "r")
         gbastr = f.read()
-
     gba = readlbt(gbastr)
     print(gba.dumpdot())

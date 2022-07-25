@@ -274,7 +274,6 @@ class GridWorld:
         # Check input values and handle negative coordinates
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
-
         if len(start) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld start coordinate.")
@@ -288,7 +287,6 @@ class GridWorld:
             start = (self.W.shape[0] + start[0], start[1])
         if start[1] < 0:
             start = (start[0], self.W.shape[1] + start[1])
-
         if len(stop) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld stop coordinate.")
@@ -303,11 +301,9 @@ class GridWorld:
             stop = (self.W.shape[0] + stop[0], stop[1])
         if stop[1] < 0:
             stop = (stop[0], self.W.shape[1] + stop[1])
-
         # Quick sanity check
         if not (self.is_empty(start) and self.is_empty(stop)):
             return False
-
         # Similar to depth-first search
         OPEN = [start]
         CLOSED = list()
@@ -359,7 +355,6 @@ class GridWorld:
         except ImportError:
             print('matplotlib not available, so skipping GridWorld.plot()')
             return
-
         W = self.W.copy()
         W = np.ones(shape=W.shape) - W
         if axes is None:
@@ -436,13 +431,11 @@ class GridWorld:
         # See comments in code for the method loads regarding values in W
         if self.W is None:
             return ""
-
         # LEGEND:
         #  * - wall (as used in original world matrix definition);
         #  G - goal location;
         #  I - possible initial location.
         out_str = line_prefix
-
         def direct(c1, c2):
             (y1, x1) = c1
             (y2, x2) = c2
@@ -586,10 +579,8 @@ class GridWorld:
                 W = np.zeros((int(line_el[0]), int(line_el[1])),
                              dtype=np.int32)
                 row_index = 0
-
         if W is None:
             raise ValueError("malformed gridworld description.")
-
         # Arrived here without errors, so actually reincarnate
         self.W = W
         self.init_list = init_list
@@ -725,7 +716,6 @@ class GridWorld:
             raise ImportError(
                 '`GridWorld.dump_ppartition()` requires '
                 'the module `tulip.abstract`.')
-
         if self.W is None:
             raise ValueError(
                 "Gridworld does not exist.")
@@ -845,7 +835,6 @@ class GridWorld:
                         use_next=True,
                         nonbool=nonbool)
                 spec_trans[-1] += ")"
-
         # Safety, static
         for i in range(row_low, row_high):
             for j in range(col_low, col_high):
@@ -853,7 +842,6 @@ class GridWorld:
                     spec_trans.append(
                         "!(" + self.__getitem__((i, j), use_next=True,
                                                 nonbool=nonbool) + ")")
-
         # Safety, mutex; only needed when using boolean variables for cells
         if not nonbool:
             pos_indices = [k for k in itertools.product(
@@ -890,7 +878,6 @@ class GridWorld:
                                 nonbool=nonbool) + ")")
                 disj.append("(" + " && ".join(conj) + ")")
             spec_trans.append("\n|| ".join(disj))
-
         if nonbool:
             sys_vars = {
                 f"{self.prefix}_r": (0, self.W.shape[0] - 1),
@@ -900,7 +887,6 @@ class GridWorld:
             for i in range(row_low, row_high):
                 for j in range(col_low, col_high):
                     sys_vars.add(self.__getitem__((i, j), nonbool=nonbool))
-
         if nonbool:
             initspec = [self.__getitem__(loc, nonbool=nonbool)
                         for loc in self.init_list]
@@ -912,11 +898,9 @@ class GridWorld:
                               self.__getitem__(loc, nonbool=nonbool)])
                 initspec.append("(" + " && ".join(mutex) + ")")
         init_str = " || ".join(initspec)
-
         spec_goal = list()
         for loc in self.goal_list:
             spec_goal.append(self.__getitem__(loc, nonbool=nonbool))
-
         self.offset = orig_offset
         if controlled_dyn:
             return GRSpec(
@@ -1080,7 +1064,6 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
     world.W = W
     world.goal_list = goal_list
     world.init_list = init_list
-
     if num_trolls > 0:
         return world, troll_list
     else:
@@ -1240,12 +1223,10 @@ def add_trolls(Y, troll_list, prefix="X", start_anywhere=False, nonbool=True,
                     moves_N[-1].append(
                         X[-1][1].state((i, j),
                         offset=t_offset, nonbool=nonbool))
-
     spec = Y.spec(controlled_dyn=True, nonbool=nonbool)
     for Xi in X:
         spec |= Xi[1].spec(offset=(-Xi[0][0], -Xi[0][1]),
                            controlled_dyn=False, nonbool=nonbool)
-
     # Mutual exclusion
     for i in range(Y.size()[0]):
         for j in range(Y.size()[1]):
@@ -1327,17 +1308,14 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         print('matplotlib not available, '
               'so skipping gridworld.animate_paths()')
         return
-
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
-
     def init():
         Z.plot(
             font_pt=min(288 // Z.W.shape[1], 48),
             show_grid=True,
             axes=ax)
-
     def update_line(num, dlist, lines):
         for (p, t), d in zip(lines, dlist):
             t.set_data(d[..., :num + 1])
@@ -1345,7 +1323,6 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
         if save_prefix:
             fig.savefig(save_prefix + "%03d.png" % num)
         return lines,
-
     data = list()
     lines = list()
     for n, path in enumerate(paths):
@@ -1362,7 +1339,6 @@ def animate_paths(Z, paths, jitter=0.0, save_prefix=None):
             color=colors[n],
             zorder=1)
         lines.append((l, l_trail))
-
     if not save_prefix:
         anim = matplotlib.animation.FuncAnimation(
             fig, update_line, len(paths[0]),

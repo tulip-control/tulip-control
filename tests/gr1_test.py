@@ -65,16 +65,13 @@ def test_name_conflict():
 
 def test_stability():
     s = gr1.stability_to_gr1('p', aux='a')
-
     assert isinstance(s, spec.GRSpec)
     assert 'aux' not in s.sys_vars
     assert 'a' in s.sys_vars
     assert 'p' in s.sys_vars
-
     s.moore = False
     s.plus_one = False
     s.qinit = r'\A \E'
-
     # p && X[]!p
     s0 = spec.GRSpec(
         sys_vars={'p'}, sys_init={'p'},
@@ -85,7 +82,6 @@ def test_stability():
         qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
-
     # !p && X[]p
     s1 = spec.GRSpec(
         sys_vars={'p'}, sys_init={'!p'},
@@ -96,7 +92,6 @@ def test_stability():
         qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
-
     # []<>p && []<>!p
     s2 = spec.GRSpec(
         sys_vars={'p'},
@@ -106,7 +101,6 @@ def test_stability():
         qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s2)
-
     # env b can prevent !p, but has tp <> become !b,
     # releasing sys to set p
     #
@@ -120,12 +114,9 @@ def test_stability():
         moore=False,
         plus_one=False,
         qinit=r'\A \E')
-
     assert synth.is_realizable(s | s3)
-
     s3.env_prog = list()
     assert not synth.is_realizable(s | s3)
-
     # s4 = s | s3
     # print(s4.pretty() )
     # mealy = synth.synthesize('omega', s4)
@@ -134,15 +125,12 @@ def test_stability():
 
 def test_response():
     s = gr1.response_to_gr1('p', 'q')
-
     assert isinstance(s, spec.GRSpec)
     assert 'p' in s.sys_vars
     assert 'q' in s.sys_vars
-
     s.moore = False
     s.plus_one = False
     s.qinit = r'\A \E'
-
     # p && []!q
     s0 = spec.GRSpec(
         sys_vars={'p', 'q'},
@@ -153,7 +141,6 @@ def test_response():
         qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
-
     # []!p && []!q
     s1 = spec.GRSpec(
         sys_vars={'p', 'q'},
@@ -163,7 +150,6 @@ def test_response():
         qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
-
     # p && q
     s2 = spec.GRSpec(
         sys_vars={'p', 'q'},
@@ -173,7 +159,6 @@ def test_response():
         qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s2)
-
     # alternating p, alternating q
     s3 = spec.GRSpec(
         sys_vars={'p', 'q'},
@@ -192,16 +177,13 @@ def test_response():
 
 def test_eventually():
     s = gr1.eventually_to_gr1('p', aux='c')
-
     assert isinstance(s, spec.GRSpec)
     assert 'aux' not in str(s)
     assert 'c' in s.sys_vars
     assert 'p' in s.sys_vars
-
     s.moore = False
     s.plus_one = False
     s.qinit = r'\A \E'
-
     # []!p
     s0 = spec.GRSpec(
         sys_vars={'p'},
@@ -211,7 +193,6 @@ def test_eventually():
         qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
-
     # !p && []<>p && []<>!p
     s1 = spec.GRSpec(
         sys_vars={'p'},
@@ -222,7 +203,6 @@ def test_eventually():
         qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
-
     # s2 = s | s1
     # print(s4.pretty() )
     # mealy = synth.synthesize('omega', s4)
@@ -231,17 +211,14 @@ def test_eventually():
 
 def test_until():
     s = gr1.until_to_gr1('p', 'q', aux='c')
-
     assert isinstance(s, spec.GRSpec)
     assert 'aux' not in str(s)
     assert 'c' in s.sys_vars
     assert 'p' in s.sys_vars
     assert 'q' in s.sys_vars
-
     s.moore = False
     s.plus_one = False
     s.qinit = r'\A \E'
-
     # []!q
     s0 = spec.GRSpec(
         sys_vars={'q'},
@@ -251,7 +228,6 @@ def test_until():
         qinit=r'\A \E'
     )
     assert not synth.is_realizable(s | s0)
-
     # !q && <>q
     s1 = spec.GRSpec(
         sys_vars={'q'},
@@ -262,7 +238,6 @@ def test_until():
         qinit=r'\A \E'
     )
     assert synth.is_realizable(s | s1)
-
     # !q && []!p && <>q
     s1 = spec.GRSpec(
         sys_vars={'q'},

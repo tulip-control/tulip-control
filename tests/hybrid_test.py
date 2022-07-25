@@ -9,25 +9,18 @@ import polytope as pc
 
 def switched_system_test():
     subsystems = list()
-
     # subsystem 0
     A = np.eye(2)
     B = np.eye(2)
-
     Uset = pc.box2poly([[0.0, 1.0], [0.0, 1.0]])
     domain0 = pc.box2poly([[0.0, 2.0], [0.0, 2.0]])
-
     subsystems += [hybrid.LtiSysDyn(A, B, Uset=Uset, domain=domain0)]
-
     # subsystem 1
     domain1 = pc.box2poly([[2.0, 4.0], [0.0, 2.0]])
-
     subsystems += [hybrid.LtiSysDyn(A, B, Uset=Uset, domain=domain1)]
-
     # PWA system
     domain = domain0.union(domain1)
     pwa = hybrid.PwaSysDyn(subsystems, domain)
-
     # Switched system (mode dynamics the same, just testing code)
     dom = (2, 2)
     dyn = {
@@ -38,7 +31,6 @@ def switched_system_test():
     }
     env_labels = ['a', 'b']
     sys_labels = ['c', 'd']
-
     hyb = hybrid.SwitchedSysDyn(
         disc_domain_size=dom,
         dynamics=dyn,
@@ -46,9 +38,7 @@ def switched_system_test():
         env_labels=env_labels,
         disc_sys_labels=sys_labels
     )
-
     print(hyb)
-
     assert(hyb.disc_domain_size == dom)
     assert(hyb.dynamics == dyn)
     assert(hyb.env_labels == env_labels)
@@ -68,9 +58,7 @@ def switched_system_test():
             cts_ss=domain,
             env_labels=env_labels,
             disc_sys_labels=sys_labels)
-
     print(hyb)
-
     assert(hyb.disc_domain_size == dom)
     assert(hyb.dynamics == dyn)
     assert(hyb.env_labels == env_labels)
@@ -134,7 +122,6 @@ class time_semantics_test:
                                 Uset=self.Uset, domain=self.poly2)
         PWA1 = hybrid.PwaSysDyn(list_subsys=[LTI3, LTI4], domain=self.total_box,
                                 overwrite_time=False)
-
         # Putting pwa together successfully, with time overwrite
         PWA2 = hybrid.PwaSysDyn(list_subsys=[LTI1, LTI2], domain=self.total_box,
                                 time_semantics='sampled', timestep=.1,

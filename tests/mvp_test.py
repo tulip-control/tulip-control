@@ -32,7 +32,6 @@ def vectorcost_test():
     assert len(a) == num_item
     for i in range(num_item):
         assert a[i] == 2 * i
-
     b = a + 1
     c = 1 + a
     assert b >= a
@@ -43,14 +42,11 @@ def vectorcost_test():
     assert a != c
     assert len(b) == num_item
     assert len(c) == num_item
-
     i = 0
     for b_item in b:
         assert b_item == 2 * i + 1
         i += 1
-
     d = VectorCost([2 * i if i != 2 else 2 * i + 1 for i in range(num_item)])
-
     assert d > a
 
 
@@ -64,13 +60,10 @@ def wks_test():
         ("c9", "c9", 0),
     }
     init = "c8"
-
     ts = _construct_wks(states, transitions, init)
-
     assert len(ts.states) == len(states)
     for state in ts.states:
         ts.states[state]["ap"] == {state}
-
     for transition in transitions:
         ts_transitions = ts.transitions.find(transition[0], transition[1])
         assert len(ts_transitions) == 1
@@ -93,7 +86,6 @@ def composition_test():
         ("c2", "c1", 0),
     }
     init1 = "c1"
-
     states2 = {"c1", "c2", "c3"}
     transitions2 = {
         ("c1", "c2"),
@@ -101,31 +93,25 @@ def composition_test():
         ("c3", "c3"),
     }
     init2 = "c1"
-
     states3 = {"c4", "c5"}
     transitions3 = {
         ("c4", "c5", 1),
         ("c5", "c4", 0),
     }
     init3 = "c4"
-
     ts1 = _construct_wks(states1, transitions1, init1)
     ts2 = _construct_wks(states2, transitions2, init2)
     ts3 = _construct_wks(states3, transitions3, init3)
-
     ts = synchronous_parallel([ts1, ts2, ts3])
     assert isinstance(ts, WKS)
-
     assert len(ts.states) == len(states1) * len(states2) * len(states3)
     assert len(ts.states.initial) == 1
     init = list(ts.states.initial)[0]
     init_expected = (init1, init2, init3)
-
     visited = {init}
     visited_expected = {init_expected}
     Q = [init]
     Q_expected = [init_expected]
-
     while len(Q) > 0:
         v = Q.pop(0)
         v_expected = Q_expected.pop(0)
@@ -147,7 +133,6 @@ def composition_test():
             Q_expected.append(
                 (transitions1[0][1], transitions2[0][1], transitions3[0][1])
             )
-
     assert len(Q_expected) == 0
 
 
@@ -155,27 +140,22 @@ def prioritized_safety_test():
     fa1 = _construct_wfa(["a4", "h4"], [["a4"]])
     fa2 = _construct_wfa(["a4", "h4"], [["h4"]])
     fa3 = _construct_wfa(["a4", "h4"], [[]])
-
     automata = [fa1, fa2, fa3]
     priority = [1, 2, 3]
     level = [0, 0, 1]
-
     spec = PrioritizedSpecification()
     for i in [0, 2, 1]:
         spec.add_rule(automata[i], priority=priority[i], level=level[i])
-
     for i in range(len(automata)):
         assert spec[i].automaton() == automata[i]
         assert spec[i].priority() == priority[i]
         assert spec[i].level() == level[i]
-
     i = 0
     for aut in spec:
         assert aut.automaton() == automata[i]
         assert aut.priority() == priority[i]
         assert aut.level() == level[i]
         i += 1
-
     assert i == len(automata)
     assert len(spec) == len(automata)
     assert len(spec.get_rules_at(0)) == 2
@@ -197,12 +177,10 @@ def graph_algorithm_test():
         ("c3", "c5", 1),
         ("c4", "c5", 4),
     }
-
     ts = _construct_wks(states, transitions, "c1")
     result = dijkstra_single_source_multiple_targets(ts, "c1", ["c5"])
     assert result[0] == 4
     assert result[1] == ["c1", "c2", "c3", "c5"]
-
     result = dijkstra_multiple_sources_multiple_targets(ts, ["c2", "c4"], ["c5"])
     assert result[0] == 3
     assert result[1] == ["c2", "c3", "c5"]
@@ -218,7 +196,6 @@ def mvp_test():
         ("c9", "c9", 0),
     }
     init_a = "c8"
-
     states_h = {"c3", "c4", "c5", "c6"}
     transitions_h = {
         ("c3", "c4"),
@@ -227,37 +204,30 @@ def mvp_test():
         ("c6", "c6"),
     }
     init_h = "c3"
-
     states_l = {"green", "red"}
     transitions_l = {
         ("green", "red"),
         ("red", "red"),
     }
     init_l = "green"
-
     ts_a = _construct_wks(states_a, transitions_a, init_a, "a")
     ts_h = _construct_wks(states_h, transitions_h, init_h, "h")
     ts_l = _construct_wks(states_l, transitions_l, init_l)
-
     ts = synchronous_parallel([ts_a, ts_h, ts_l])
-
     # To define the transition !(h4 & a4), we define 2 sets:
     #   * ap_without_h4 contains all the atomic propositions except 'h4'
     #   * ap_without_a4 contains all the atomic propositions except 'a4'
     # The subset of 2^{AP} corresponding to !(h4 & a4) is the union of
     # PowerSet(ap_without_h4) and PowerSet(ap_without_a4).
     fa1 = _construct_wfa(ts.atomic_propositions, [["a4"], ["h4"]])
-
     # To define the transition !(red & (a8 | a4)), we define 2 sets:
     #   * ap_without_red contains all the atomic propositions except 'red'
     #   * ap_without_a4a8 contains all the atomic propositions except 'a4' and 'a8'
     fa2 = _construct_wfa(ts.atomic_propositions, [["red"], ["a4", "a8"]])
-
     # Define the prioritized safety specification
     spec = PrioritizedSpecification()
     spec.add_rule(fa1, priority=1, level=0)
     spec.add_rule(fa2, priority=1, level=1)
-
     # Solve the minimum violation planning problem
     (cost, state_path, product_path, wpa) = solve_mvp(ts, "a9", spec)
     assert cost == [0, 2, 1]
@@ -287,7 +257,6 @@ def _construct_wks(states, transitions, init, ap_key=None):
             )
         else:
             ts.transitions.add(transition[0], transition[1])
-
     for s in states:
         if not ap_key:
             ts.atomic_propositions.add(s)
@@ -296,7 +265,6 @@ def _construct_wks(states, transitions, init, ap_key=None):
             ap = ap_key + s[1:]
             ts.atomic_propositions.add(ap)
             ts.states[s]["ap"] = {ap}
-
     return ts
 
 
@@ -308,14 +276,12 @@ def _construct_wfa(all_propositions, false_propositions):
     fa.states.add_from({"q0"})
     fa.states.initial.add("q0")
     fa.states.accepting.add("q0")
-
     transition_letters = set()
     for propositions in false_propositions:
         props_without_false = copy.deepcopy(fa.atomic_propositions)
         for prop in propositions:
             props_without_false.remove(prop)
         transition_letters |= set(PowerSet(props_without_false))
-
     for letter in transition_letters:
         fa.transitions.add("q0", "q0", letter=letter)
     return fa

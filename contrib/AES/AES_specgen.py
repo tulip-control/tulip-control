@@ -120,7 +120,6 @@ def write_discdc_con(G,rulist,dcbuslist,nullist):
             remove.append((i,j))
     L = copy.deepcopy(G)
     L.remove_edges_from(remove)
-
     remove2 = all_pairs(nullist)
     L.remove_edges_from(remove2)
     edges = L.edges()
@@ -738,7 +737,6 @@ def write_sat_con(G,rulist,dcbuslist,nullist):
             remove.append((i,j))
     L = copy.deepcopy(G)
     L.remove_edges_from(remove)
-
     remove2 = all_pairs(nullist)
     L.remove_edges_from(remove2)
     edges = L.edges()
@@ -762,7 +760,6 @@ def write_sat_always(complist):
             f.write('(assert (= b'+str(i)+' true))\n')
         elif i in null:
             f.write('(assert (= b'+str(i)+' true))\n')
-
     remove2 = all_pairs(null)
     edges = G.edges()
     for j in range(0,len(remove2)):
@@ -1008,16 +1005,13 @@ def write_sat_env(gfail,rfail):
 
 start = time.time()
 file_name = 'test_spec'
-
 #Load adjacency matrix from matfile
 data = scipy.io.loadmat('SLD.mat')
 datatemp = data['A']
-
 #Failure Probabilities
 genfail = 1
 rufail = 1
 busfail = 0
-
 #Node definitions
 busac = [2,3]
 busess = [2,3]
@@ -1025,15 +1019,12 @@ busdc = [6,7]
 null = list()
 rus = [4,5]
 gens = [0,1]
-
 #Bus time
 nptime = 0
-
 #Create networkx graph from adjacency matrix
 G = nx.from_numpy_array(datatemp)
 print('number of edges ' + str(len(G.edges())))
 print('number of nodes ' + str(len(G.nodes())))
-
 #sets of failure states
 # fails = faulttol(10,gens,genfail)
 
@@ -1042,12 +1033,10 @@ print('number of nodes ' + str(len(G.nodes())))
 if ('tulip' in sys.argv):
     file_name = file_name+'.py'
     f = open(file_name, "w")
-
     # #environment variables
     print('writing environment variables')
     write_envgen(gens)
     write_envru(rus)
-
     #discrete system variables
     print('writing discrete system variables: buses')
     write_discbus(busac)
@@ -1060,7 +1049,6 @@ if ('tulip' in sys.argv):
     print(time.time()-start)
     print('writing discrete system variables: bus counters')
     write_essbusdisc(busess,nptime)
-
     #acbus discrete properties
     print('removing ru paths')
     H = remove_rus(G,busac,rus)
@@ -1071,20 +1059,17 @@ if ('tulip' in sys.argv):
     print('writing discrete bus properties: DC')
     write_dcbusprop(G,busdc,gens)
     print(time.time()-start)
-
     #Environment assumptions
     print('writing environment assumptions')
     write_genassump(genfail,gens)
     write_ruassump(rufail,rus)
     print(time.time()-start)
-
     #acbus power guarantees
     print('writing bus power specifications: AC')
     write_acbusspec(H,busac,gens)
     write_acbusspec2(H,busac,gens)
     write_essbusspec(busess,nptime)
     print(time.time()-start)
-
     #disconnect unhealthy guarantees
     print('disconnecting unhealthy generators')
     g_disconnect(G,gens,busac)
@@ -1094,20 +1079,16 @@ if ('tulip' in sys.argv):
     ru_disconnect(G,rus,busac)
     ru_disconnect(G,rus,null)
     print(time.time()-start)
-
     ##non-parallel guarantees
     print('writing no paralleling specs')
     noparallel(G,gens)
     print(time.time()-start)
-
     #dc bus power specifications
     print('writing bus power specifications: DC')
     write_dcbusspec(G,busdc,gens)
     write_dcbusspec2(G,busdc,gens)
     write_dcbusalways(busdc)
-
     f.close()
-
     print('It took', time.time()-start, 'seconds.')
 
 
@@ -1115,34 +1096,27 @@ if ('tulip' in sys.argv):
 if ('yices' in sys.argv):
     file_name = file_name+'.ys'
     f = open(file_name, "w")
-
     #Writing component definitions
     write_sat_bool(gens)
     write_sat_bool(busac)
     write_sat_bool(busdc)
     write_sat_bool(null)
     write_sat_bool(rus)
-
     #Writing contactor definitions
     write_sat_con(G,rus,busdc,null)
-
     #Writing always power bus and null assertions
     write_sat_always(busac)
     write_sat_always(busdc)
     write_sat_always(null)
-
     #Writing disconnect implications
     write_sat_disconnectgen(G,gens)
     write_sat_disconnectru(G,rus)
-
     write_sat_noparallel(G,gens)
     write_sat_acbusprop1(G,busac,gens)
     write_sat_acbusprop2(G,busac,gens)
     write_sat_dcbusprop1(G,busdc, gens)
     write_sat_dcbusprop2(G,busdc, gens)
-
     #write_environment assumptions
     write_sat_env(genfail,rufail)
-
     f.close()
     print('It took', time.time()-start, 'seconds.')

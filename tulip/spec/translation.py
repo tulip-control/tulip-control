@@ -62,11 +62,9 @@ def make_jtlv_nodes():
         'U': 'U',
         '<': '<', '<=': '<=', '=': '=', '>=': '>=', '>': '>', '!=': '!='}
     nodes = ast.make_fol_nodes(opmap)
-
     class Str(nodes.Str):
         def flatten(self, **kw):
             return f'({self})'
-
     class Var(nodes.Var):
         def flatten(self, env_vars=None, sys_vars=None, **kw):
             v = self.value
@@ -78,7 +76,6 @@ def make_jtlv_nodes():
                 raise ValueError(
                     f'{v} neither env nor sys var')
             return f'({player}.{v})'
-
     nodes.Str = Str
     nodes.Var = Var
     return nodes
@@ -94,19 +91,16 @@ def make_gr1c_nodes(opmap=None):
             '<': '<', '<=': '<=', '=': '=',
             '>=': '>=', '>': '>', '!=': '!='}
     nodes = ast.make_fol_nodes(opmap)
-
     class Var(nodes.Var):
         def flatten(self, prime=None, **kw):
             prm = "'" if prime else ''
             return f'{self.value}{prm}'
-
     class Unary(nodes.Unary):
         def flatten(self, *arg, **kw):
             if self.operator == 'X':
                 kw.update(prime=True)
                 return self.operands[0].flatten(*arg, **kw)
             return super(Unary, self).flatten(*arg, **kw)
-
     nodes.Var = Var
     nodes.Unary = Unary
     return nodes
@@ -145,7 +139,6 @@ def make_wring_nodes():
              'G': 'G', 'F': 'F', 'X': 'X',
              'U': 'U', 'R': 'R', 'V': 'V'}
     nodes = ast.make_fol_nodes(opmap)
-
     class Var(nodes.Var):
         def flatten(self, *arg, **kw):
             if ('env_vars' in kw) or ('sys_vars' in kw):
@@ -159,12 +152,10 @@ def make_wring_nodes():
                     raise TypeError(
                         f'"{self.value}" is not defined '
                         f'as a variable in {env_vars} nor {sys_vars}')
-
                 if this_type != 'boolean':
                     raise TypeError(
                         f'"{self.val}" is not Boolean, but {this_type}')
             return f'({self.value}=1)'
-
     nodes.Var = Var
     return nodes
 
@@ -176,19 +167,16 @@ def make_python_nodes():
              '>=': '>=', '<=': '<=', '>': '>',
              '+': '+', '-': '-'}
     nodes = ast.make_fol_nodes(opmap)
-
     class Imp(nodes.Binary):
         def flatten(self, *arg, **kw):
             l = self.operands[0].flatten()
             r = self.operands[1].flatten()
             return f'((not ({l})) or {r})'
-
     class BiImp(nodes.Binary):
         def flatten(self, *arg, **kw):
             l = self.operands[0].flatten()
             r = self.operands[1].flatten()
             return f'({l} == {r})'
-
     nodes.Imp = Imp
     nodes.BiImp = BiImp
     return nodes
@@ -215,7 +203,6 @@ def _to_jtlv(d):
              f(d['env_safety'], 'safety assumption on environment', '[]'),
              f(d['env_prog'], 'justice assumption on environment', '[]<>')]
     assumption = ' & \n'.join(x for x in parts if x)
-
     parts = [f(d['sys_init'], 'valid initial system states', ''),
              f(d['sys_safety'], 'safety requirement on system', '[]'),
              f(d['sys_prog'], 'progress requirement on system', '[]<>')]
@@ -262,7 +249,6 @@ def _to_gr1c(d):
                 raise ValueError(
                     f'Domain "{dom}" not supported by gr1c.')
         return output
-
     logger.info('translate to gr1c...')
     output = (
         'ENV:' + _to_gr1c_print_vars(d['env_vars']) + ';\n' +
@@ -295,7 +281,6 @@ def _to_wring(d):
         if len(assumption) > 0:
             assumption += ' * '
         assumption += ' * '.join([f'G(F({f}))' for f in d['env_prog']])
-
     guarantee = ''
     if d['sys_init']:
         guarantee += ' * '.join([f'({f})' for f in d['sys_init']])
@@ -307,7 +292,6 @@ def _to_wring(d):
         if len(guarantee) > 0:
             guarantee += ' * '
         guarantee += ' * '.join([f'G(F({f}))' for f in d['sys_prog']])
-
     # Put the parts together, simplifying in special cases
     if guarantee:
         if assumption:

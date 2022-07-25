@@ -16,19 +16,15 @@ def test_strip_ports():
 
     mealy.add_nodes_from(range(10))
     mealy.states.initial.add(0)
-
     mealy.add_edge(0, 1, door='open', window='open', led='on')
     mealy.add_edge(0, 2, door='open', window='open', led='off')
     mealy.add_edge(2, 3, door='closed', window='closed', led='on')
     mealy.add_edge(3, 4, door='open', window='closed', led='on')
     mealy.add_edge(9, 5, door='closed', window='open', led='off')
-
     new = machines.strip_ports(mealy, {'window'})
-
     assert('door' in new.inputs)
     assert('led' in new.outputs)
     assert('window' not in new.outputs)
-
     edges = [
         (0, 1, dict(door='open', led='on')),
         (0, 2, dict(door='open', led='off')),
@@ -36,7 +32,6 @@ def test_strip_ports():
         (3, 4, dict(door='open', led='on')),
         (9, 5, dict(door='closed', led='off')),
     ]
-
     assert(len(edges) == len(new.edges()))
     for (u, v, d), (x, y, b) in zip(new.edges(data=True), edges):
         assert(u == x)

@@ -129,11 +129,9 @@ def spin_to_AST(inform):
     spin_or = prs.Literal(SPIN_SYN["|"])
     spin_implies = prs.Literal(SPIN_SYN["->"])
     spin_equiv = prs.Literal(SPIN_SYN["<->"])
-
     identifier = prs.Word(
         prs.alphas + "_",
         prs.alphanums + "_")
-
     form = prs.Forward()
     unary_or_less = prs.Forward()
     unary_or_less << ((spin_negate + unary_or_less).setParseAction(push_op)
@@ -149,9 +147,7 @@ def spin_to_AST(inform):
          | spin_implies
          | spin_equiv) + form).setParseAction(push_op)))
          | unary_or_less)
-
     form.parseString(inform, parseAll=True)
-
     assert len(expr_stack) == 1
     return expr_stack.pop()
 

@@ -61,7 +61,6 @@ class basic_test:
         assert g is not None
         assert len(g.env_vars) == 1 and 'x' in g.env_vars
         assert len(g.sys_vars) == 1 and 'y' in g.sys_vars
-
         g = gr1py.synthesize(self.dcounter)
         assert g is not None
         assert len(g.env_vars) == 0
