@@ -80,7 +80,9 @@ class PrioritizedSpecification:
     def __getitem__(self, key):
         assert key >= 0
         level = 0
-        while level < len(self._Psi) and key >= len(self._Psi[level]):
+        while (
+                level < len(self._Psi) and
+                key >= len(self._Psi[level])):
             key -= len(self._Psi[level])
             level += 1
         if level < len(self._Psi) and key < len(self._Psi[level]):
