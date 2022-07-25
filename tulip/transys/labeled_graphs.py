@@ -673,9 +673,10 @@ class Transitions:
             nbunch=from_states,
             data=True)
         if to_states is not None:
-            u_v_edges = [(u, v, d)
-                         for u, v, d in u_v_edges
-                         if v in to_states]
+            u_v_edges = [
+                (u, v, d)
+                for u, v, d in u_v_edges
+                if v in to_states]
         for u, v, attr_dict in u_v_edges:
             ok = True
             if not with_attr_dict:
