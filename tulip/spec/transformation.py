@@ -281,6 +281,8 @@ def sub_values(
             v = _ast.nodes.Num(val)
         elif isinstance(val, str):
             v = _ast.nodes.Str(val)
+        else:
+            raise TypeError(val)
         old2new[u] = v
     # replace variable by value
     nx.relabel_nodes(tree, old2new, copy=False)
