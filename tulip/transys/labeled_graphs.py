@@ -261,7 +261,7 @@ class States:
     def forward_reachable(self, state):
         """Return states reachable from given state.
 
-        Iterated post(), a wrapper of networkx.descendants.
+        Wrapper of `networkx.descendants()`.
         """
         descendants = nx.descendants(self, state)
         return descendants
