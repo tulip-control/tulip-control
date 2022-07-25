@@ -196,6 +196,7 @@ class Lexer:
     t_COMMA = r' , '
     t_DQUOTES = r' " '
     t_PRIME = r" ' "
+    # skipped characters
     t_ignore = ''.join(['\x20', '\t'])
 
     def t_comment(self, t):
