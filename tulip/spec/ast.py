@@ -229,9 +229,8 @@ def make_nodes(opmap=None):
         def __repr__(self):
             t = type(self).__name__
             op = repr(self.operator)
-            xyz = _comma(
-                repr(x)
-                for x in self.operands)
+            xyz = _comma(map(
+                repr, self.operands))
             return f'{t}({op}, {xyz})'
 
         # depth allows limiting recursion to see a shallower view
@@ -241,19 +240,21 @@ def make_nodes(opmap=None):
             if depth == 0:
                 return '...'
             op = self.operator
-            xyz = ' '.join(
-                x.__str__(depth=depth)
-                for x in self.operands)
+            def str_of(x):
+                return x.__str__(depth=depth)
+            xyz = ' '.join(map(
+                str_of, self.operands))
             return f'({op} {xyz})'
 
         def __len__(self):
-            return 1 + sum(len(x) for x in self.operands)
+            return 1 + sum(map(len, self.operands))
 
         def flatten(self, *arg, **kw):
+            def flatten(x):
+                return x.flatten(*arg, **kw)
             op = self.opmap[self.operator]
-            args = _comma(
-                x.flatten(*arg, **kw)
-                for x in self.operands)
+            args = _comma(map(
+                flatten, self.operands))
             return f'( {op} {args} )'
 
 
@@ -267,8 +268,9 @@ def make_nodes(opmap=None):
             Override it if you want prefix or postfix.
             """
             op = self.opmap[self.operator]
-            first = self.operands[0].flatten(*arg, **kw)
-            second = self.operands[1].flatten(*arg, **kw)
+            def flatten(arg):
+                return arg.flatten(*arg, **kw)
+            first, second = map(flatten, self.operands)
             return f'( {first} {op} {second} )'
 
     class Nodes:
