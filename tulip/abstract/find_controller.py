@@ -57,7 +57,6 @@ try:
 except ImportError:
     solvers = None
 
-
 import tulip.abstract.discretization as _discr
 from tulip.abstract.feasible import (
     solve_feasible,
