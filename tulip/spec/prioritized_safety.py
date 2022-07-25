@@ -107,7 +107,7 @@ class PrioritizedSpecification:
         return self.__next__()
 
     def __len__(self):
-        return sum([len(psi) for psi in self._Psi])
+        return sum(map(len, self._Psi))
 
     def add_rule(
             self,
@@ -168,15 +168,21 @@ class PrioritizedSpecification:
 
     def get_states(self):
         """Get the product of the states in all the finite automata."""
-        return _itr.product(*[phi.automaton().states for phi in self])
+        return _itr.product(
+            phi.automaton().states
+            for phi in self)
 
     def get_initial_states(self):
         """Get the product of the initial states of all the finite automata."""
-        return _itr.product(*[phi.automaton().states.initial for phi in self])
+        return _itr.product(
+            phi.automaton().states.initial
+            for phi in self)
 
     def get_accepting_states(self):
         """Get product of the accepting states of all the finite automata."""
-        return _itr.product(*[phi.automaton().states.accepting for phi in self])
+        return _itr.product(
+            phi.automaton().states.accepting
+            for phi in self)
 
     def get_num_levels(self):
         """Get the number of levels."""
