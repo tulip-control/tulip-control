@@ -147,7 +147,7 @@ class PrioritizedSpecification:
         if level < 0:
             raise ValueError(level)
         # Check the consistency of atomic propositions
-        if len(self._Psi) == 0:
+        if not self._Psi:
             self.atomic_propositions = fa.atomic_propositions
         else:
             assert self.atomic_propositions == fa.atomic_propositions
