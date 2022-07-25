@@ -52,7 +52,7 @@ import re
 import typing as _ty
 
 import tulip.spec.ast as _ast
-import tulip.spec.form
+import tulip.spec.form as _form
 
 
 __all__ = [
@@ -564,7 +564,7 @@ def translate(
         - `str` if gr1c or slugs
         - (assumption, guarantee), where each element of the tuple is `str`
     """
-    if not isinstance(spec, tulip.spec.form.GRSpec):
+    if not isinstance(spec, _form.GRSpec):
         raise TypeError(
             'translate requires first argument (spec) to be of type GRSpec')
     spec.check_syntax()
