@@ -582,10 +582,11 @@ class Transitions:
         # check states exist,
         # before adding any transitions
         for state in adj2states:
-            if state not in self.graph:
-                raise Exception(
-                    f'State: {state} not found.'
-                    ' Consider adding it with sys.states.add')
+            if state in self.graph:
+                continue
+            raise Exception(
+                f'State: {state} not found.'
+                ' Consider adding it with sys.states.add')
         # convert to format friendly for
         # edge iteration
         nx_adj = nx.from_scipy_sparse_array(
