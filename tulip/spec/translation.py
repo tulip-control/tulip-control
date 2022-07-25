@@ -423,11 +423,11 @@ def _to_gr1c(d):
     output = (
         'ENV:' + _to_gr1c_print_vars(d['env_vars']) + ';\n' +
         'SYS:' + _to_gr1c_print_vars(d['sys_vars']) + ';\n' +
-
+        # env
         _gr1c_str(d['env_init'], 'ENVINIT', '') +
         _gr1c_str(d['env_safety'], 'ENVTRANS', '[]') +
         _gr1c_str(d['env_prog'], 'ENVGOAL', '[]<>') + '\n' +
-
+        # sys
         _gr1c_str(d['sys_init'], 'SYSINIT', '') +
         _gr1c_str(d['sys_safety'], 'SYSTRANS', '[]') +
         _gr1c_str(d['sys_prog'], 'SYSGOAL', '[]<>'))
@@ -498,11 +498,11 @@ def _to_slugs(d):
     return (
         _format_slugs_vars(d['env_vars'], 'INPUT') +
         _format_slugs_vars(d['sys_vars'], 'OUTPUT') +
-
+        # env
         f(d['env_safety'], 'ENV_TRANS') +
         f(d['env_prog'], 'ENV_LIVENESS') +
         f(d['env_init'], 'ENV_INIT', sep='&') +
-
+        # sys
         f(d['sys_safety'], 'SYS_TRANS') +
         f(d['sys_prog'], 'SYS_LIVENESS') +
         f(d['sys_init'], 'SYS_INIT', sep='&'))
