@@ -75,10 +75,10 @@ if solvers is None:
 
 
 def assert_cvxopt():
-    """Raise `ImportError` if `cvxopt.solvers` failed to import."""
+    """Raise `ImportError` if `cvxopt` failed to import."""
     if solvers is None:
         raise ImportError(
-            'Failed to import `cvxopt.solvers`.'
+            'Failed to import `cvxopt`.'
             'Unable to solve quadratic-programming problems.')
 
 
