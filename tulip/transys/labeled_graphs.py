@@ -88,7 +88,8 @@ def label_is_desired(attr_dict, desired_dict):
             else:
                 continue
         # no guard semantics given,
-        # then by convention: guard is singleton {cur_val},
+        # then by convention:
+        # guard is singleton {cur_val},
         if not value == desired_value:
             test_common_bug(value, desired_value)
             return False
@@ -521,7 +522,8 @@ class Transitions:
         then all transitions between them are removed.
 
         If `attr_dict`, `attr` are also passed,
-        then only transitions annotated with those labels are removed.
+        then only transitions annotated with
+        those labels are removed.
 
         Wraps `LabeledDiGraph.remove_labeled_edge`.
         """
@@ -582,13 +584,15 @@ class Transitions:
         if adj.shape[0] != adj.shape[1]:
             raise Exception(
                 'Adjacency matrix must be square.')
-        # check states exist, before adding any transitions
+        # check states exist,
+        # before adding any transitions
         for state in adj2states:
             if state not in self.graph:
                 raise Exception(
                     f'State: {state} not found.'
                     ' Consider adding it with sys.states.add')
-        # convert to format friendly for edge iteration
+        # convert to format friendly for
+        # edge iteration
         nx_adj = nx.from_scipy_sparse_array(
             adj, create_using=nx.DiGraph())
         # add each edge using existing checks
@@ -1143,7 +1147,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
             typed_attr,
             self._edge_label_types,
             check)
-        # the only change from nx in this clause is using TypedDict
+        # the only change from nx in
+        # this clause is using TypedDict
         logger.debug(f'adding edge: {u} ---> {v}')
         if key is None:
             key = self.new_edge_key(u, v)
@@ -1155,7 +1160,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 self, u, v, key,
                 **datadict)
         else:
-            # selfloops work this way without special treatment
+            # selfloops work this way
+            # without special treatment
             nx.MultiDiGraph.add_edge(
                 self, u, v,
                 **typed_attr)

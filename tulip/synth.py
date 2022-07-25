@@ -219,8 +219,10 @@ def _conj_actions(actions_dict, solver_expr=None, nxt=False):
     else:
         return _pstr(conjuncted_actions)
 
-# duplicate states are impossible, because each networkx vertex is unique
-# non-contiguous integerss for states fine: you are lossing efficiency
+# duplicate states are impossible,
+# because each networkx vertex is unique
+# non-contiguous integerss for
+# states fine: you are lossing efficiency
 # - synth doesn't care about that
 
 
@@ -643,9 +645,12 @@ def env_to_spec(
                 env_init,
                 env_trans)
             env_action_ids[action_type] = action_ids
-    # some duplication here, because we don't know
-    # whether the user will provide a system TS as well
-    # and whether that TS will contain all the system actions
+    # some duplication here,
+    # because we don't know
+    # whether the user will provide
+    # a system TS as well
+    # and whether that TS will contain
+    # all the system actions
     # defined in the environment TS
     state_ids, constraint = iter2var(
         states, env_vars,
@@ -810,8 +815,10 @@ def _sys_trans_from_ts(
                     next_sys_act, sys_action_ids,
                     nxt=True)]
             # if system FTS given
-            # in case 'actions in label, then action_ids is a dict,
-            # not a dict of dicts, because certainly this came
+            # in case 'actions in label,
+            # then action_ids is a dict,
+            # not a dict of dicts,
+            # because certainly this came
             # from an FTS, not an OpenFTS
             if 'actions' in previous:
                 postcond += [
@@ -863,7 +870,8 @@ def _env_trans_from_sys_ts(states, state_ids, trans, env_action_ids):
         cur_trans = trans.find([from_state])
         # no successor states ?
         if not cur_trans:
-            # nothing modeled for env, since sys has X(False) anyway
+            # nothing modeled for env,
+            # since sys has X(False) anyway
             # for action_type, codomain_map in env_action_ids.items():
             # env_trans += [f'{precond} -> X({s})']
             continue
@@ -932,7 +940,9 @@ def _env_trans_from_env_ts(
                     env_actions,
                     env_action_ids,
                     nxt=True)]
-            # remember: this is an environment FTS, so no next for sys
+            # remember: this is
+            # an environment FTS,
+            # so no next for sys
             sys_actions = {k: v for k, v in label.items() if 'sys' in k}
             postcond += [
                 _conj_actions(
@@ -947,7 +957,8 @@ def _env_trans_from_env_ts(
             if not sys_actions:
                 found_free = True
             cur_list += [_conj(postcond)]
-        # can sys block env by setting all previous sys outputs to False ?
+        # can sys block env by
+        # setting all previous sys outputs to False ?
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
@@ -1313,9 +1324,12 @@ def _trim_strategy(strategy, specs, rm_deadends):
         if `True`, then remove deadends
         from the Mealy machine
     """
-    # While the return values of the solver interfaces vary, we expect
-    # here that strategy is either None to indicate unrealizable or a
-    # networkx.DiGraph ready to be passed to strategy2mealy().
+    # While the return values of
+    # the solver interfaces vary,
+    # we expect here that strategy is
+    # either None to indicate unrealizable or
+    # a networkx.DiGraph ready to be
+    # passed to strategy2mealy().
     if strategy is None:
         return None
     ctrl = strategy2mealy(strategy, specs)
@@ -1542,7 +1556,8 @@ def _init_edges_using_initial_nodes(
 def _init_edges_using_compile_init(
         spec, A, mach, keys, all_vars, str_vars, initial_state):
     init_valuations = set()
-    # to store tuples of dict values for fast search
+    # to store tuples of
+    # dict values for fast search
     isinit = spec.compile_init(no_str=True)
     # Mealy reaction to initial env input
     init_valuations = set()
@@ -1564,15 +1579,18 @@ def _init_edges_using_compile_init(
                 check=False,
                 **label)
             # remember variable values to avoid
-            # spurious non-determinism wrt the machine's memory
+            # spurious non-determinism wrt
+            # the machine's memory
             #
             # in other words,
             # "state" omits the strategy's memory
             # hidden (existentially quantified)
-            # so multiple nodes can be labeled with the same state
+            # so multiple nodes can be
+            # labeled with the same state
             #
-            # non-uniqueness here would be equivalent to
-            # multiple choices for initializing the hidden memory.
+            # non-uniqueness here would be
+            # equivalent to multiple choices for
+            # initializing the hidden memory.
             init_valuations.add(vals)
             logger.debug(
                 f'found initial state: {u}')
@@ -1700,7 +1718,8 @@ def determinize_machine_init(
     if init_out_values is None:
         init_out_values = dict()
     '''determinize given outputs (uncontrolled)'''
-    # restrict attention to given output ports only
+    # restrict attention to
+    # given output ports only
     given_ports = tuple(k for k in mach.outputs if k in init_out_values)
     rm_edges = set()
     for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
@@ -1711,7 +1730,8 @@ def determinize_machine_init(
     mach.remove_edges_from(rm_edges)
     '''determinize arbitrarily any remnant non-determinism'''
     # input valuations already seen
-    # tuples of values used for efficiency (have __hash__)
+    # tuples of values used for
+    # efficiency (have __hash__)
     possible_inputs = set()
     # fix a key order
     inputs = tuple(k for k in mach.inputs)

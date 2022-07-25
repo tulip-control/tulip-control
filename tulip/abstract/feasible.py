@@ -307,7 +307,8 @@ def solve_open_loop(
         # Initial set
     r2 = P2.copy()
         # Terminal set
-    # use the max_num_poly largest volumes for reachability
+    # use the max_num_poly largest
+    # volumes for reachability
     r1 = volumes_for_reachability(
         r1, max_num_poly)
     r2 = volumes_for_reachability(
@@ -320,7 +321,8 @@ def solve_open_loop(
         target_polys = r2
     else:
         target_polys = [r2]
-    # union of s0 over all polytope combinations
+    # union of s0 over all
+    # polytope combinations
     s0 = pc.Polytope()
     for p1 in start_polys:
         for p2 in target_polys:

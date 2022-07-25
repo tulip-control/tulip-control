@@ -293,10 +293,12 @@ def simulate2d(
     """
     N = disc_dynamics.disc_params['N']
     # initialization:
-    #     pick initial continuous state consistent with
+    #     pick initial continuous state
+    #     consistent with
     #     initial controller state (discrete)
     if qinit == '\E \A' or qinit == '\A \E':
-        # pick an initial discrete system state given the#
+        # pick an initial discrete
+        # system state given the
         # initial discrete environment state
         (nd, out) = ctrl.reaction(
             'Sinit', env_inputs[0])
@@ -326,7 +328,8 @@ def simulate2d(
         s0_part = _abs.find_controller.find_discrete_state(
             x_init, disc_dynamics.ppp)
         assert s0_part == d_init['loc'], (s0_part, d_init)
-        # find the machine node with `d_init` as discrete state
+        # find the machine node with
+        # `d_init` as discrete state
         init_edges = ctrl.edges(
             'Sinit',
             data=True)
@@ -336,7 +339,8 @@ def simulate2d(
                 break
         assert edge_data == d_init, (edge_data, d_init)
         nd = v
-    # initialize continuous state for the cases that the initial
+    # initialize continuous state for
+    # the cases that the initial
     # continuous state is not given
     if qinit in ('\E \E', '\E \A', '\A \E'):
         # find initial polytope

@@ -266,7 +266,8 @@ def _form_node_label(state, state_data, label_def,
     # node itself
     state_str = str(state)
     state_str = state_str.replace("'", "")
-    # rm parentheses to reduce size of states in fig
+    # rm parentheses to reduce size of
+    # states in figure
     if tikz:
         state_str = state_str.replace('(', '')
         state_str = state_str.replace(')', '')
@@ -279,16 +280,20 @@ def _form_node_label(state, state_data, label_def,
             make_subscript,
             state_str,
             flags=re.VERBOSE)
-    # SVG requires breaking the math environment into
-    # one math env per line. Just make 1st line math env
+    # SVG requires breaking the
+    # math environment into
+    # one math env per line.
+    # Just make 1st line math env
     # if latex:
     #    state_str = f'${state_str}$'
     #    state_str = _tw.fill(state_str, width=width)
     node_dot_label = state_str
-    # newline between state name and label, only if state is labeled
+    # newline between state name and
+    # label, only if state is labeled
     if len(state_data) != 0:
         node_dot_label += r'\\n'
-    # add node annotations from action, AP sets etc
+    # add node annotations from
+    # action, AP sets etc
     # other key,values in state attr_dict ignored
     pieces = list()
     for (label_type, label_value) in state_data.items():
@@ -320,7 +325,8 @@ def _form_node_label(state, state_data, label_def,
         # replace LF by latex newline
         node_dot_label = node_dot_label.replace(
             r'\\n', r'\\\\ ')
-        # dot2tex math mode doesn't handle newlines properly
+        # dot2tex math mode does not
+        # handle newlines properly
         node_dot_label = (
             rf'$\\begin{{matrix}} {node_dot_label}'
             r'\\end{matrix}$')
@@ -390,7 +396,8 @@ def _form_edge_label(edge_data, label_def,
         # format iterable containers using
         # mathematical set notation: {...}
         if isinstance(label_value, str):
-            # str is Iterable: avoid turning it to list
+            # str is Iterable:
+            # avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, _abc.Iterable):
             s = ', '.join([str(x) for x in label_value])
@@ -476,7 +483,8 @@ def save_dot(
         tikz=tikz,
         rankdir=rankdir)
     if dot_graph is None:
-        # graph2dot must have printed warning already
+        # graph2dot must have
+        # printed warning already
         return False
     dot_graph.graph_attr['rankdir'] = rankdir
     dot_graph.graph_attr['splines'] = 'true'
@@ -567,7 +575,9 @@ def plot_dot(
         logger.warning(
             'IPython not found.\n'
             'So loaded dot images not inline.')
-    # not called from IPython QtConsole, try Matplotlib...
+    # not called from
+    # IPython QtConsole,
+    # try Matplotlib...
     # installed ?
     try:
         import matplotlib.pyplot as plt

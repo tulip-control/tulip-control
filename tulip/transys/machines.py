@@ -92,7 +92,8 @@ def create_machine_ports(spc_vars):
             start, end = var_type
             domain = set(range(start, end + 1))
         elif isinstance(var_type, list):
-            # arbitrary finite domain defined by list var_type
+            # arbitrary finite domain
+            # defined by list var_type
             domain = set(var_type)
         ports[env_var] = domain
     return ports
@@ -240,7 +241,8 @@ class Transducer(_graphs.LabeledDiGraph):
     """
 
     def __init__(self):
-        # values will point to values of _*_label_def below
+        # values will point to
+        # values of _*_label_def below
         self.state_vars = dict()
         self.inputs = dict()
         self.outputs = dict()
@@ -720,8 +722,10 @@ def guided_run(
     if len(set(len(x) for x in seqs.values())) > 1:
         raise ValueError(
             'All input sequences must be of equal length.')
-    # note: initial sys state non-determinism not checked
-    # initial sys edge non-determinism checked instead (more restrictive)
+    # note: initial sys state
+    # non-determinism not checked
+    # initial sys edge non-determinism
+    # checked instead (more restrictive)
     if from_state is None:
         state = next(iter(mealy.states.initial))
     else:
@@ -817,10 +821,13 @@ def interactive_run(
 def _interactive_run_step(mealy, state):
     if state is None:
         raise Exception('Current state is None')
-    # note: the spaghettiness of previous version was caused
-    #   by interactive simulation allowing both output-non-determinism
-    #   and implementing spawning (which makes sense only for generators,
-    #   *not* for transducers)
+    # note: the spaghettiness of
+    # previous version was caused
+    # by interactive simulation allowing
+    # both output-non-determinism and
+    # implementing spawning (which
+    # makes sense only for generators,
+    # *not* for transducers)
     trans = mealy.transitions.find([state])
     if not trans:
         print('Stop: no outgoing transitions.')

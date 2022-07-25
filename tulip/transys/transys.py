@@ -520,7 +520,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         self.atomic_propositions = self.ap
         self.aps = self.atomic_propositions
             # shortcut
-        # action constraint used in synth.synthesize
+        # action constraint used in
+        # synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
         # dot formatting

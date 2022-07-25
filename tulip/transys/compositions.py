@@ -121,14 +121,18 @@ def synchronous_parallel(
         transition_attr_operations = dict()
     # Let models = [K_1, ..., K_n].
     # Let
-    # * prod_states = [S_1, ..., S_n] where S_i is the set of states of K_i
-    # * prod_initials = [I_1, ..., I_n] where I_i is the set of initial
+    # * prod_states = [S_1, ..., S_n]
+    #   where S_i is the set of states of K_i
+    # * prod_initials = [I_1, ..., I_n]
+    #   where I_i is the set of initial
     #   states of K_i
     prod_states = list()
     prod_initials = list()
     #
-    # Construct prod_states and prod_initials and
-    # construct the composed model ts with all the atomic propositions.
+    # Construct prod_states and
+    # prod_initials and
+    # construct the composed model ts with
+    # all the atomic propositions.
     composed_type = _get_composed_model_type(models)
     if composed_type is None:
         raise TypeError("Can only compose [WKS, KS] or [MDP, MC, KS]")
@@ -139,9 +143,12 @@ def synchronous_parallel(
         ts.atomic_propositions.add_from(
             model.atomic_propositions)
     #
-    # Compute the state of ts: S = S_1 \times ... \times S_n.
-    # Also, compute the label at each state (s_1, ..., s_n).
-    # By definition L(s_1, ..., s_n) = \bigcup_i L_i(s_i)
+    # Compute the state of ts:
+    # S = S_1 \times ... \times S_n.
+    # Also, compute the label at
+    # each state (s_1, ..., s_n).
+    # By definition
+    # L(s_1, ..., s_n) = \bigcup_i L_i(s_i)
     # where L_i is the labeling function of K_i.
     for state in _itr.product(*prod_states):
         ts.states.add(state)
@@ -150,7 +157,8 @@ def synchronous_parallel(
                 models[i].states[state[i]]["ap"]
                 for i in range(len(models))])
     #
-    # Compute the initial state of ts: I = I_1 \times ... \times I_n
+    # Compute the initial state of ts:
+    # I = I_1 \times ... \times I_n
     for state in _itr.product(*prod_initials):
         ts.states.initial.add(state)
     #
@@ -171,7 +179,8 @@ def synchronous_parallel(
     # Compute the transition of ts according to the rule
     # ((s_1, ..., s_n), (a_1, ..., a_n), (s_1', ..., s_n'))
     # in the transition relation of ts
-    # iff (s_i, a_i, s_i') is in the transition relation of K_i for all i
+    # iff (s_i, a_i, s_i') is in
+    # the transition relation of K_i for all i
     for from_state in ts.states:
         transitions = [
             models[coord].transitions.find(from_state[coord])
