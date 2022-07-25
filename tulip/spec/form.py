@@ -129,7 +129,7 @@ class LTL:
         elif isinstance(d, tuple) and len(d) == 2:
             return f'[{d[0]}, {d[1]}]'
         elif hasattr(d, '__iter__'):
-            return '{' + ', '.join([str(e) for e in d]) + '}'
+            return '{' + ', '.join(map(str, d)) + '}'
         else:
             raise ValueError('Unrecognized variable domain type.')
 
