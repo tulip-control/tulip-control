@@ -132,7 +132,7 @@ class Tree(nx.MultiDiGraph):
         @type leaf:
             `FOL.Node`
         @param tree:
-            to be added, w/o copying AST nodes.
+            to be added, without copying AST nodes.
         @type tree:
             `Tree`
         """
