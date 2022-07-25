@@ -261,7 +261,7 @@ def get_input(
     if ofts is not None:
         start_state = start
         end_state = end
-        if end_state not in ofts.states.post(start_state):
+        if end_state not in ofts.states.post([start_state]):
             raise Exception(
                 f'no transition from state s{start}'
                 f' to state s{end}')

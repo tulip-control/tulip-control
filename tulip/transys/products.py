@@ -115,7 +115,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             'Creating successors from'
             f' product state:\t{sq}')
         # get next states
-        next_ss = ts.states.post(s)
+        next_ss = ts.states.post([s])
         next_sqs = set()
         for next_s in next_ss:
             enabled_ba_trans = find_ba_succ(q, next_s, ts, ba)
@@ -232,7 +232,7 @@ def ts_ba_sync_prod(
         (s, q) = sq
         logger.debug(f'Current product state:\t{sq}')
         # get next states
-        next_ss = fts.states.post(s)
+        next_ss = fts.states.post([s])
         next_sqs = set()
         for next_s in next_ss:
             enabled_ba_trans = find_ba_succ(q, next_s, fts, ba)

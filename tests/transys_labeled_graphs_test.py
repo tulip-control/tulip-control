@@ -80,9 +80,9 @@ class States_test:
     def test_postpre(self):
         self.S.add_from(range(5))
         self.S.graph.add_edges_from([(0, 1), (0, 2), (1, 3), (3, 4)])
-        assert self.S.post(0) == {1, 2}
+        assert self.S.post({0}) == {1, 2}
         assert self.S.post([0, 1]) == {1, 2, 3}
-        assert self.S.pre(4) == {3}
+        assert self.S.pre({4}) == {3}
         assert self.S.pre([1, 2, 4]) == {0, 3}
 
     def test_is_terminal(self):

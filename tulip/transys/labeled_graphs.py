@@ -224,8 +224,7 @@ class States:
 
         Edge labels are ignored.
 
-        If multiple states provided,
-        then union Post(s) for s in states provided.
+        Union of Post(s) for s in given states.
 
         See Also
         ========
@@ -235,12 +234,10 @@ class States:
 
         @param states:
           - None, so initial states returned
-          - single state or
           - set of states or
         """
         if states is None:
             return set(self.initial)
-        states = self._single_state2singleton(states)
         return set().union(*map(
             self.graph.successors,
             states))
@@ -257,7 +254,6 @@ class States:
         - Def. 2.3, p.23 [BK08](
             https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
         """
-        states = self._single_state2singleton(states)
         return set().union(*map(
             self.graph.predecessors,
             states))
