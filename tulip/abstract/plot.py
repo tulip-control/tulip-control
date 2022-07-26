@@ -171,7 +171,8 @@ def plot_strategy(
             'MealyMachine'):
     """Plot strategic transitions on PPP.
 
-    Assumes that `mealy` is feasible for `ab`.
+    Assumes that `mealy` is feasible for
+    the system `ab`, i.e., concretizable.
     """
     proj_mealy = project_strategy_on_partition(
         ab.ppp, mealy)
