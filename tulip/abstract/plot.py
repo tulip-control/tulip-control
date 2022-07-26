@@ -62,7 +62,7 @@ plot_transition_arrow = _pplot.plot_transition_arrow
 
 
 def plot_abstraction_scc(ab, ax=None):
-    """Plot Regions colored by strongly-connected component.
+    """Plot regions colored by strongly-connected component.
 
     Handy to develop new examples or debug existing ones.
     """
