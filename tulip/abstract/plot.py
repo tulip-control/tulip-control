@@ -149,7 +149,8 @@ def project_strategy_on_partition(
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))
-    for from_state, to_state, label in mealy.transitions.find():
+    edges = mealy.transitions.find()
+    for from_state, to_state, label in edges:
         from_label = mealy.states[from_state]
         to_label = mealy.states[to_state]
         if 'loc' not in from_label or 'loc' not in to_label:
