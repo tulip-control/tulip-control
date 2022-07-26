@@ -53,11 +53,17 @@ import tulip.spec.translation as ts
 
 
 __all__ = [
+    'QInit',
     'LTL',
     'GRSpec',
     'replace_dependent_vars']
 
 
+QInit = _ty.Literal[
+    r'\A \A',
+    r'\A \E',
+    r'\E \A',
+    r'\E \E']
 logger = logging.getLogger(__name__)
 
 
@@ -451,12 +457,7 @@ class GRSpec(LTL):
             plus_one:
                 bool=True,
             qinit:
-                _ty.Literal[
-                    r'\A \A',
-                    r'\A \E',
-                    r'\E \A',
-                    r'\E \E']
-                =r'\A \A',
+                QInit=r'\A \A',
             parser=parser):
         """Instantiate a GRSpec object.
 
