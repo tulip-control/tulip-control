@@ -125,7 +125,10 @@ def plot_ts_on_partition(
     """
     l, u = ppp.domain.bounding_box
     arr_size = (u[0, 0] - l[0, 0]) / 50.0
-    ts2ppp = {v: k for k, v in enumerate(ppp2ts)}
+    ts2ppp = {
+        state: index
+        for index, state in
+            enumerate(ppp2ts)}
     edges = ts.transitions.find(
         with_attr_dict=edge_label)
     for from_state, to_state, label in edges:
