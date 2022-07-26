@@ -249,7 +249,9 @@ def plot_trajectory(
             np.dot(A, x).flatten() +
             np.dot(B, u_seq[i, :]).flatten() +
             K.flatten())
-        x_arr = np.vstack([x_arr, x.flatten()])
+        x_arr = np.vstack([
+            x_arr,
+            x.flatten()])
     ax.plot(
         x_arr[:, 0],
         x_arr[:, 1],
