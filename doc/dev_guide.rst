@@ -70,10 +70,11 @@ be followed:
   which renders as `[WTOXM11] <bibliography.html#wtoxm11>`_.
   References in docstrings (in the code)
   should be to the URL of the corresponding entry on the TuLiP website,
-  using `Epydoc syntax <http://epydoc.sourceforge.net/manual-epytext.html>`_,
+  using `Markdown syntax <https://en.wikipedia.org/wiki/Markdown>`_,
   e.g., ::
 
-    U{[WTOXM11] <https://tulip-control.sourceforge.io/doc/bibliography.html#wtoxm11>}
+    [WTOXM11](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#wtoxm11)
 
 Testing
 -------
