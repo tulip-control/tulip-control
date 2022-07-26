@@ -67,7 +67,8 @@ def plot_abstraction_scc(ab, ax=None):
     SCC abbreviates
     "strongly-connected component".
 
-    Handy to develop new examples or debug existing ones.
+    Handy to develop new examples or
+    debug existing ones.
     """
     _assert_pyplot()
     if ax is None:
