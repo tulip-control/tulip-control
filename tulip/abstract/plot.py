@@ -39,6 +39,7 @@ import scipy.sparse as sp
 
 import polytope as pc
 import polytope.plot as _pplot
+
 import tulip.abstract as _abs
 # inline imports:
 #
