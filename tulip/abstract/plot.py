@@ -356,49 +356,15 @@ def simulate2d(
     #     pick initial continuous state
     #     consistent with
     #     initial controller state (discrete)
-    if qinit == r'\E \A' or qinit == r'\A \E':
-        # pick an initial discrete
-        # system state given the
-        # initial discrete environment state
-        (nd, out) = ctrl.reaction(
-            'Sinit', env_inputs[0])
-        init_edges = ctrl.edges(
-            'Sinit',
-            data=True)
-        for u, v, edge_data in init_edges:
-            assert u == 'Sinit', u
-            if v == nd:
-                break
-        assert v == nd, (v, nd)
-        s0_part = edge_data['loc']
-        assert s0_part == out['loc'], (s0_part, out)
-    elif qinit == r'\E \E':
-        # pick an initial discrete state
-        init_edges = ctrl.edges(
-            'Sinit',
-            data=True)
-        u, v, edge_data = next(
-            iter(init_edges))
-        assert u == 'Sinit', u
-        s0_part = edge_data['loc']
-        nd = v
-    elif qinit == r'\A \A':
-        assert d_init is not None
-        assert x_init is not None
-        s0_part = find_node(
-            x_init, disc_dynamics.ppp)
-        assert s0_part == d_init['loc'], (s0_part, d_init)
-        # find the machine node with
-        # `d_init` as discrete state
-        init_edges = ctrl.edges(
-            'Sinit',
-            data=True)
-        for u, v, edge_data in init_edges:
-            assert u == 'Sinit', u
-            if edge_data == d_init:
-                break
-        assert edge_data == d_init, (edge_data, d_init)
-        nd = v
+    match qinit:
+        case r'\E \A' | r'\A \E':
+            s0_part, nd = _simulate2d_ea()
+        case r'\E \E':
+            s0_part, nd = _simulate2d_ee()
+        case r'\A \A':
+            s0_part, nd = _simulate2d_aa()
+        case _:
+            raise ValueError(qinit)
     # initialize continuous state for
     # the cases that the initial
     # continuous state is not given
@@ -413,7 +379,9 @@ def simulate2d(
         # assert equal
         s0_part_ = find_node(
             x_init, disc_dynamics.ppp)
-        assert s0_part == s0_part_, (s0_part, s0_part_)
+        _assert(
+            s0_part == s0_part_,
+            (s0_part, s0_part_))
     x = [x_init[0]]
     y = [x_init[1]]
     for i in range(T):
@@ -441,7 +409,9 @@ def simulate2d(
         s0_part = find_node(
             point, disc_dynamics.ppp)
         s0_loc = disc_dynamics.ppp2ts[s0_part]
-        assert s0_loc == out['loc'], (s0_loc, out['loc'])
+        _assert(
+            s0_loc == out['loc'],
+            (s0_loc, out['loc']))
         print(f'outputs:\n    {out}\n')
     _assert_pyplot()
     if not show_traj:
@@ -454,6 +424,71 @@ def simulate2d(
     _plt.show()
 
 
+def _simulate2d_ea(
+        ctrl):
+    # pick an initial discrete
+    # system state given the
+    # initial discrete environment state
+    (nd, out) = ctrl.reaction(
+        'Sinit', env_inputs[0])
+    init_edges = ctrl.edges(
+        'Sinit',
+        data=True)
+    for u, v, edge_data in init_edges:
+        _assert(
+            u == 'Sinit', u)
+        if v == nd:
+            break
+    _assert(
+        v == nd, (v, nd))
+    s0_part = edge_data['loc']
+    _assert(
+        s0_part == out['loc'],
+        (s0_part, out))
+    return s0_part, nd
+
+
+def _simulate2d_ee(ctrl):
+    # pick an initial discrete state
+    init_edges = ctrl.edges(
+        'Sinit',
+        data=True)
+    u, v, edge_data = next(
+        iter(init_edges))
+    _assert(
+        u == 'Sinit', u)
+    s0_part = edge_data['loc']
+    nd = v
+    return s0_part, nd
+
+
+def _simulate2d_aa():
+    _assert(
+        d_init is not None)
+    _assert(
+        x_init is not None)
+    s0_part = find_node(
+        x_init, disc_dynamics.ppp)
+    _assert(
+        s0_part == d_init['loc'],
+        (s0_part, d_init))
+    # find the machine node with
+    # `d_init` as discrete state
+    init_edges = ctrl.edges(
+        'Sinit',
+        data=True)
+    for u, v, edge_data in init_edges:
+        _assert(
+            u == 'Sinit', u)
+        if edge_data == d_init:
+            break
+    _assert(
+        edge_data == d_init,
+        (edge_data, d_init))
+    nd = v
+    return s0_part, nd
+
+
 def pick_point_in_polytope(
         poly:
             Polytope
@@ -463,3 +498,64 @@ def pick_point_in_polytope(
     n_extreme = poly_vertices.shape[0]
     x = sum(poly_vertices) / n_extreme
     return x
+
+
+def _assert(
+        predicate,
+        message:
+            _ty.Optional=None,
+        is_thunk:
+            bool=False
+        ) -> None:
+    """Raise `AssertionError`.
+
+    Note that a message equal to `None`
+    is unnecessary, because the assertion
+
+    ```python
+    assert something is None
+    ```
+
+    implies that `something` equals the
+    singleton value `None`.
+    So in this case no additional
+    information can propagate to the
+    assertion message by passing `None`
+    as the message.
+
+    The code line recorded in the
+    traceback already contains the
+    information about the value of
+    `something` being `None`.
+
+    So the type hint `typing.Optional`
+    restricts not the use of the
+    function `_assert()`, compared to
+    using an `assert` statement.
+
+    @param is_thunk:
+        if `True`, then call `message()`
+        to emulate the second "parameter" of
+        Python's `assert` statement.
+
+        Example:
+
+        ```python
+        _assert(
+            value == expected,
+            lambda:
+                expensive_diagnostics())
+        ```
+    """
+    if predicate:
+        return
+    if not is_thunk:
+        raise AssertionError(message)
+    if callable(message):
+        message = message()
+        raise AssertionError(message)
+    raise TypeError(
+        'Expected a callable as `message`, '
+        f'but got: {message = }.'
+        ) from AssertionError(
+            predicate)
