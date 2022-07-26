@@ -66,14 +66,14 @@ def plot_abstraction_scc(ab, ax=None):
     Handy to develop new examples or debug existing ones.
     """
     _assert_pyplot()
+    if ax is None:
+        ax = _plt.subplot()
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
     # each connected component of
     # filtered graph is a symbol
     components = nx.strongly_connected_components(ts)
-    if ax is None:
-        ax = _plt.subplot()
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0, 0], u[0, 0])
     ax.set_ylim(l[1, 0], u[1, 0])
