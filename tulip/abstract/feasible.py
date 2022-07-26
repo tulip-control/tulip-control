@@ -687,7 +687,7 @@ def get_max_extreme(
     """Calculate the array `d_hat` such that:
 
     ```
-    d_hat = max(G*DN_extreme)
+    d_hat = max(G * DN_extreme)
     ```
 
     where `DN_extreme` are the vertices
