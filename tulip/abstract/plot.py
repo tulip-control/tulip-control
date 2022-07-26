@@ -58,7 +58,8 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 plot_partition = _pplot.plot_partition
-plot_transition_arrow = _pplot.plot_transition_arrow
+plot_transition_arrow = (
+    _pplot.plot_transition_arrow)
 
 
 def plot_abstraction_scc(ab, ax=None):
@@ -78,7 +79,8 @@ def plot_abstraction_scc(ab, ax=None):
     ppp2ts = ab.ppp2ts
     # each connected component of
     # filtered graph is a symbol
-    components = nx.strongly_connected_components(ts)
+    scc = nx.strongly_connected_components
+    components = scc(ts)
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0, 0], u[0, 0])
     ax.set_ylim(l[1, 0], u[1, 0])
@@ -297,6 +299,8 @@ def simulate2d(
         plot trajectory
     """
     N = disc_dynamics.disc_params['N']
+    _fnd = _abs.find_controller
+    find_node = _fnd.find_discrete_state
     # initialization:
     #     pick initial continuous state
     #     consistent with
@@ -330,7 +334,7 @@ def simulate2d(
     elif qinit == r'\A \A':
         assert d_init is not None
         assert x_init is not None
-        s0_part = _abs.find_controller.find_discrete_state(
+        s0_part = find_node(
             x_init, disc_dynamics.ppp)
         assert s0_part == d_init['loc'], (s0_part, d_init)
         # find the machine node with
@@ -356,7 +360,7 @@ def simulate2d(
         # pick an initial continuous state
         x_init = pick_point_in_polytope(init_poly)
         # assert equal
-        s0_part_ = _abs.find_controller.find_discrete_state(
+        s0_part_ = find_node(
             x_init, disc_dynamics.ppp)
         assert s0_part == s0_part_, (s0_part, s0_part_)
     x = [x_init[0]]
@@ -383,7 +387,7 @@ def simulate2d(
             x.append(s_now[0])
             y.append(s_now[1])
         point = [x[-1], y[-1]]
-        s0_part = _abs.find_controller.find_discrete_state(
+        s0_part = find_node(
             point, disc_dynamics.ppp)
         s0_loc = disc_dynamics.ppp2ts[s0_part]
         assert s0_loc == out['loc'], (s0_loc, out['loc'])
