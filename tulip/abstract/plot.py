@@ -320,19 +320,34 @@ def simulate2d(
         show_traj:
             bool=True
         ) -> None:
-    r"""Simulation for systems with two-dimensional continuous dynamics.
+    r"""Simulate 2-dimensional systems.
 
-    The first item in `env_inputs` is used as the initial environment
-    discrete state, if `qinit == r'\E \A' or qinit == r'\A \E'`.
-    This item is used to find the initial transition in `ctrl`.
+    Works for two-dimensional continuous dynamics.
 
-    The initial continuous state is selected within the initial polytope
-    of the partition, if `qinit \in (r'\E \E', r'\E \A', r'\A \E')`.
+    The first item in `env_inputs` is used as
+    the initial environment discrete state,
+    if `qinit == r'\E \A' or qinit == r'\A \E'`.
 
-    The initial continuous state is `x_init` if `qinit == r'\A \A'`,
-    and is asserted to correspond to `d_init['loc']`.
-    The initial discrete state is `d_init` if `qinit == r'\A \A'`,
-    and is used to find the initial transition in `ctrl`.
+    This item is used to find the
+    initial transition in `ctrl`.
+
+    The initial continuous state is selected
+    within the initial polytope of the partition,
+    if:
+
+    ```python
+    qinit in (
+        r'\E \E', r'\E \A', r'\A \E')
+    ```
+
+    The initial continuous state is `x_init`
+    if `qinit == r'\A \A'`, and
+    is asserted to correspond to
+    `d_init['loc']`.
+
+    The initial discrete state is `d_init`
+    if `qinit == r'\A \A'`, and is used to
+    find the initial transition in `ctrl`.
 
     @param env_inputs:
         has length `T + 1`
