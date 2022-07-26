@@ -33,7 +33,7 @@
 """Reachability between polytopes.
 
 Functions to check reachability between polytopes,
-for linear discrete-time and time-invariant system.
+for linear discrete-time and time-invariant systems.
 
 Primary functions:
 - `solve_feasible`
