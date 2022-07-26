@@ -420,7 +420,7 @@ def createLM(
         In which `k`s
         the disturbance should be
         taken into account.
-        Default is `1..N`
+        Default is `1..N`.
     """
     if not isinstance(list_P, _abc.Iterable):
         list_P = [list_P] + (N - 1) * [Pk] + [PN]
