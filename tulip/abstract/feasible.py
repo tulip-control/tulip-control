@@ -333,10 +333,12 @@ def _underapproximate_attractor(
 
 def _print_horizon_warning() -> None:
     print(
-        'WARNING: different timing semantics and assumptions '
+        'WARNING: different timing '
+        'semantics and assumptions '
         'from the case of fixed horizon. '
-        'Also, depending on dynamics, disconnected polytopes '
-        'can arise, which may cause issues in '
+        'Also, depending on dynamics, '
+        'disconnected polytopes can arise, '
+        'which may cause issues in '
         'the `polytope` package.')
 
 
