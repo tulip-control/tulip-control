@@ -399,13 +399,14 @@ def simulate2d(
         assert s0_loc == out['loc'], (s0_loc, out['loc'])
         print(f'outputs:\n    {out}\n')
     _assert_pyplot()
-    if show_traj:
-        _plt.plot(x, label='x')
-        _plt.plot(y, '--', label='y')
-        _plt.xlabel('time')
-        _plt.legend()
-        _plt.grid()
-        _plt.show()
+    if not show_traj:
+        return
+    _plt.plot(x, label='x')
+    _plt.plot(y, '--', label='y')
+    _plt.xlabel('time')
+    _plt.legend()
+    _plt.grid()
+    _plt.show()
 
 
 def pick_point_in_polytope(poly):
