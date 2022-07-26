@@ -42,9 +42,7 @@ import polytope.plot as _pplot
 
 import tulip.abstract as _abs
 import tulip.graphics as _graphics
-# inline imports:
-#
-# import matplotlib.pyplot
+plt = _graphics._plt
 
 
 __all__ = [
@@ -67,7 +65,7 @@ def plot_abstraction_scc(ab, ax=None):
 
     Handy to develop new examples or debug existing ones.
     """
-    import matplotlib.pyplot as plt
+    _assert_pyplot()
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
@@ -371,8 +369,8 @@ def simulate2d(
         s0_loc = disc_dynamics.ppp2ts[s0_part]
         assert s0_loc == out['loc'], (s0_loc, out['loc'])
         print(f'outputs:\n    {out}\n')
+    _assert_pyplot()
     if show_traj:
-        import matplotlib.pyplot as plt
         plt.plot(x, label='x')
         plt.plot(y, '--', label='y')
         plt.xlabel('time')
