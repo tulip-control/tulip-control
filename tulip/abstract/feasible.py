@@ -82,7 +82,10 @@ def is_feasible(
             Polytope |
             None=None
         ) -> bool:
-    """Return `True` if `to_region` is reachable `from_region`.
+    """Whether `to_region` is reachable `from_region`.
+
+    Returns `True` if `to_region` is
+    reachable from all points in `from_region`.
 
     For details read function `solve_feasible`.
     """
@@ -111,7 +114,20 @@ def solve_feasible(
             None=None,
         max_num_poly=5
         ) -> Polytope:
-    r"""Compute `S0 \subseteq trans_set` from which `P2` is `N`-reachable.
+    r"""Compute from where `P2` is `N`-reachable.
+
+    Computes a polytope `S0`, such that:
+
+    ```tla
+    S0 \subseteq trans_set
+    ```
+
+    from which polytope `P2` is reachable in
+    - *exactly* `N` steps
+        (when `use_all_horizon is False`),
+        or
+    - *within* `N` steps
+        (when `use_all_horizon is True`).
 
     `N`-reachable means reachable in horizon `N`.
     The system dynamics are `ssys`.
@@ -189,7 +205,7 @@ def _solve_closed_loop_fixed_horizon(
             Polytope |
             None=None
         ) -> Polytope:
-    """Underapproximate states in `P1` that can reach `P2`.
+    """Underapproximate set that can reach `P2`.
 
     Underapproximate states in polytope `P1` that
     can reach polytope `P2` in `N` steps,
@@ -243,7 +259,7 @@ def _solve_closed_loop_bounded_horizon(
             Polytope |
             None=None
         ) -> Polytope:
-    """Underapproximate `P1` subset that can reach `P2`.
+    """Underapproximate set that can reach `P2`.
 
     Underapproximates the states in polytope `P1`
     that can reach polytope `P2` in at most `N` steps.
