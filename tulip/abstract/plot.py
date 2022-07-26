@@ -42,7 +42,7 @@ import polytope.plot as _pplot
 
 import tulip.abstract as _abs
 import tulip.graphics as _graphics
-plt = _graphics._plt
+_plt = _graphics._plt
 
 
 __all__ = [
@@ -73,7 +73,7 @@ def plot_abstraction_scc(ab, ax=None):
     # filtered graph is a symbol
     components = nx.strongly_connected_components(ts)
     if ax is None:
-        ax = plt.subplot()
+        ax = _plt.subplot()
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0, 0], u[0, 0])
     ax.set_ylim(l[1, 0], u[1, 0])
@@ -373,12 +373,12 @@ def simulate2d(
         print(f'outputs:\n    {out}\n')
     _assert_pyplot()
     if show_traj:
-        plt.plot(x, label='x')
-        plt.plot(y, '--', label='y')
-        plt.xlabel('time')
-        plt.legend()
-        plt.grid()
-        plt.show()
+        _plt.plot(x, label='x')
+        _plt.plot(y, '--', label='y')
+        _plt.xlabel('time')
+        _plt.legend()
+        _plt.grid()
+        _plt.show()
 
 
 def pick_point_in_polytope(poly):
