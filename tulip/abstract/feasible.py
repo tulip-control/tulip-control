@@ -541,14 +541,14 @@ def createLM(
         if not isinstance(Li, pc.Polytope):
             logger.warning(
                 f'createLM: Li of type: {type(Li)}')
-        ######### FOR M #########
+        # FOR M
         idx = range(
             sum_vert,
             sum_vert + Li.A.shape[0])
         Mk[idx, :] = (
             Li.b.reshape(Li.b.size, 1) -
             Li.A.dot(A_k).dot(K_hat))
-        ######### FOR G #########
+        # FOR G
         if i in disturbance_ind:
             idx = np.ix_(
                 range(
@@ -568,7 +568,7 @@ def createLM(
                         LUn * (i + 1)),
                     range(p * N))
                 GU[idx] = PU.A.dot(d_mult)
-        ######### FOR L #########
+        # FOR L
         AB_line = np.hstack([A_n, A_k.dot(B_diag)])
         idx = np.ix_(
             range(
@@ -613,7 +613,7 @@ def createLM(
                     i * LUn,
                     (i + 1) * LUn),
                 :] -= PU.A.dot(b_mult)
-        ####### Iterate #########
+        # Iterate
         sum_vert += Li.A.shape[0]
         A_n = A.dot(A_n)
         A_k = A.dot(A_k)
