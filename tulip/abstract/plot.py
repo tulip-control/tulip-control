@@ -67,12 +67,7 @@ def plot_abstraction_scc(ab, ax=None):
 
     Handy to develop new examples or debug existing ones.
     """
-    try:
-        import matplotlib.pyplot as plt
-    except ImportError:
-        logger.error(
-            'failed to load `matplotlib`')
-        return
+    import matplotlib.pyplot as plt
     ppp = ab.ppp
     ts = ab.ts
     ppp2ts = ab.ppp2ts
