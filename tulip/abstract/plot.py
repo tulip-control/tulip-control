@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 #
 """Functions for plotting Partitions."""
+import functools as _ft
 import logging
 
 import networkx as nx
@@ -77,15 +78,19 @@ def plot_abstraction_scc(ab, ax=None):
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0, 0], u[0, 0])
     ax.set_ylim(l[1, 0], u[1, 0])
+    def plot_state(state, color):
+        i = ppp2ts.index(state)
+        ppp[i].plot(
+            ax=ax,
+            color=color)
     for component in components:
         # map to random colors
         red = np.random.rand()
         green = np.random.rand()
         blue = np.random.rand()
         color = (red, green, blue)
-        for state in component:
-            i = ppp2ts.index(state)
-            ppp[i].plot(ax=ax, color=color)
+        plot = _ft.partial(color=color)
+        any(map(plot, component))
     return ax
 
 
