@@ -68,7 +68,7 @@ def plot_abstraction_scc(ab, ax=None):
     Handy to develop new examples or debug existing ones.
     """
     try:
-        import matplotlib as mpl
+        import matplotlib.pyplot as plt
     except:
         logger.error(
             'failed to load `matplotlib`')
@@ -80,7 +80,7 @@ def plot_abstraction_scc(ab, ax=None):
     # filtered graph is a symbol
     components = nx.strongly_connected_components(ts)
     if ax is None:
-        ax = mpl.pyplot.subplot()
+        ax = plt.subplot()
     l, u = ab.ppp.domain.bounding_box
     ax.set_xlim(l[0, 0], u[0, 0])
     ax.set_ylim(l[1, 0], u[1, 0])
