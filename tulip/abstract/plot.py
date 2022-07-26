@@ -251,7 +251,7 @@ def simulate2d(
     r"""Simulation for systems with two-dimensional continuous dynamics.
 
     The first item in `env_inputs` is used as the initial environment
-    discrete state, if `qinit == '\E \A' or qinit == \A \E'`.
+    discrete state, if `qinit == '\E \A' or qinit == '\A \E'`.
     This item is used to find the initial transition in `ctrl`.
 
     The initial continuous state is selected within the initial polytope
