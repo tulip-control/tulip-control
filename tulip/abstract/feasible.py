@@ -728,7 +728,7 @@ def get_max_extreme(
         dim * N,
         nv**N])
     for i in range(nv**N):
-        # Last N digits are indices we want!
+        # Last N digits are indices we want
         ind = np.base_repr(
             i,
             base=nv,
