@@ -138,7 +138,8 @@ def solve_feasible(
         then force transitions to be in this set.
         Otherwise, `P1` is used.
     @return:
-        states from which `P2` is reachable
+        polytope of states from
+        which `P2` is reachable
     """
     if closed_loop:
         if use_all_horizon:
