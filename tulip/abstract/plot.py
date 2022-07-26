@@ -333,7 +333,8 @@ def simulate2d(
     # continuous state is not given
     if qinit in (r'\E \E', r'\E \A', r'\A \E'):
         # find initial polytope
-        init_poly = disc_dynamics.ppp.regions[s0_part].list_poly[0]
+        init_poly = disc_dynamics.ppp.regions[
+            s0_part].list_poly[0]
         # disc_dynamics.ppp[s0_part][0]
         #
         # pick an initial continuous state
