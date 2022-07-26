@@ -516,7 +516,7 @@ def createLM(
             uk_line[idx] = np.eye(m)
             A_mult = np.vstack([uk_line, AB_line])
             b_mult = np.zeros([m + n, 1])
-            b_mult[range(m, m+n), :] = A_k.dot(K_hat)
+            b_mult[range(m, m + n), :] = A_k.dot(K_hat)
             idx = np.ix_(
                 range(
                     i * LUn,
@@ -539,7 +539,7 @@ def createLM(
                 (i + 1) * n))
         A_k[idx] = np.eye(n)
     # Get disturbance sets
-    if not np.all(Gk==0):
+    if not np.all(Gk == 0):
         G = np.vstack([Gk, GU])
         D_hat = get_max_extreme(G, D, N)
     else:
@@ -552,10 +552,10 @@ def createLM(
         '`L x <= M`, where:\n'
         '\t`L = \n`'
         f'{L}\n\t M = \n{M}\n')
-    return L,M
+    return L, M
 
 
-def get_max_extreme(G,D,N):
+def get_max_extreme(G, D, N):
     """Calculate the array `d_hat` such that:
 
     ```

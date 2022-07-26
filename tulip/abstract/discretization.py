@@ -114,6 +114,7 @@ class AbstractSwitched:
 
     In each mode, a `PwaSysDyn` is active.
     """
+
     def __init__(
             self,
             ppp=None,
@@ -1864,8 +1865,8 @@ def plot_annot(ax):
         tick.label1.set_fontsize(fontsize)
     for tick in ax.yaxis.get_major_ticks():
         tick.label1.set_fontsize(fontsize)
-    ax.set_xlabel('$v_1$', fontsize=fontsize+6)
-    ax.set_ylabel('$v_2$', fontsize=fontsize+6)
+    ax.set_xlabel('$v_1$', fontsize=fontsize + 6)
+    ax.set_ylabel('$v_2$', fontsize=fontsize + 6)
 
 
 def merge_abstractions(
@@ -2050,7 +2051,7 @@ def merge_partitions(abstractions):
    	# Create a list of merged-together regions
     ab0 = abstractions[init_mode]
     regions = list(ab0.ppp)
-    parents = {init_mode:list(range(len(regions)))}
+    parents = {init_mode: list(range(len(regions)))}
     ap_labeling = {
         i: reg.props
         for i, reg in enumerate(regions)}
