@@ -44,7 +44,7 @@ import tulip.abstract as _abs
 import tulip.graphics as _graphics
 # inline imports:
 #
-# import matplotlib as mpl
+# import matplotlib.pyplot
 
 
 __all__ = [
