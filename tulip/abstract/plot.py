@@ -144,8 +144,10 @@ def project_strategy_on_partition(
             'MealyMachine'):
     """Project transitions of `ppp` on `mealy`.
 
-    Returns an `FTS` with the `PPP` (spatial)
-    transitions used by the Mealy strategy.
+    @return:
+        a matrix with the `ppp` (spatial)
+        transitions that are used by
+        the Mealy strategy `mealy`.
     """
     n = len(ppp)
     proj_adj = sp.lil_matrix((n, n))
