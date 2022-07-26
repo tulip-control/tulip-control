@@ -525,7 +525,9 @@ def createLM(
                     n + m * i,
                     n + m * (i + 1)))
             uk_line[idx] = np.eye(m)
-            A_mult = np.vstack([uk_line, AB_line])
+            A_mult = np.vstack([
+                uk_line,
+                AB_line])
             b_mult = np.zeros([m + n, 1])
             b_mult[range(m, m + n), :] = A_k.dot(K_hat)
             idx = np.ix_(
@@ -614,7 +616,9 @@ def get_max_extreme(
     D_extreme = pc.extreme(D)
     nv = D_extreme.shape[0]
     dim = D_extreme.shape[1]
-    DN_extreme = np.zeros([dim * N, nv**N])
+    DN_extreme = np.zeros([
+        dim * N,
+        nv**N])
     for i in range(nv**N):
         # Last N digits are indices we want!
         ind = np.base_repr(
@@ -626,7 +630,9 @@ def get_max_extreme(
                 range(
                     j * dim,
                     (j + 1) * dim),
-                i] = D_extreme[int(ind[-j - 1]), :]
+                i] = D_extreme[
+                    int(ind[-j - 1]),
+                    :]
     d_hat = np.amax(
         np.dot(G, DN_extreme),
         axis=1)
