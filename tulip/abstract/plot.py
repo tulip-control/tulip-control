@@ -120,9 +120,11 @@ def plot_ts_on_partition(
     for from_state, to_state, label in transitions:
         i = ts2ppp[from_state]
         j = ts2ppp[to_state]
-        if only_adjacent:
-            if ppp.adj[i, j] == 0:
-                continue
+        skip = (
+            only_adjacent and
+            ppp.adj[i, j] == 0)
+        if skip:
+            continue
         _pplot.plot_transition_arrow(
             ppp.regions[i],
             ppp.regions[j],
