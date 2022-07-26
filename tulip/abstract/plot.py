@@ -98,7 +98,9 @@ def plot_abstraction_scc(ab, ax=None):
 def plot_ts_on_partition(
         ppp, ts, ppp2ts,
         edge_label, only_adjacent, ax):
-    """Plot partition and arrows from labeled digraph.
+    """Plot partition, superimposing graph.
+
+    The graph `ts` edges are drawn as arrows.
 
     Edges can be filtered by
     selecting an `edge_label`.
