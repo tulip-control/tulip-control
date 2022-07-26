@@ -153,7 +153,10 @@ def project_strategy_on_partition(
     for from_state, to_state, label in edges:
         from_label = mealy.states[from_state]
         to_label = mealy.states[to_state]
-        if 'loc' not in from_label or 'loc' not in to_label:
+        intersects = (
+            'loc' in from_label and
+            'loc' in to_label)
+        if not intersects:
             continue
         from_loc = from_label['loc']
         to_loc = to_label['loc']
