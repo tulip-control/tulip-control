@@ -155,8 +155,8 @@ def ts_ba_sync_prod(
             set]:
     r"""Construct transition system for the synchronous product TS * BA.
 
-    Def. 4.62, p.200 U{[BK08]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+    Def. 4.62, p.200 [BK08](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
 
     Erratum
     =======

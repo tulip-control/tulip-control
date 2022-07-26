@@ -383,7 +383,8 @@ class RabinPairs:
     Caution
     =======
     Here and in ltl2dstar documentation `L` denotes a "good" set.
-    U{[BK08] <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+    [BK08](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
     denote the a "bad" set with `L`.
     To avoid ambiguity, attributes:
     `.good`, `.bad` were used here.
@@ -403,8 +404,8 @@ class RabinPairs:
     See Also
     ========
     - `RabinAutomaton`
-    - Def. 10.53, p.801, U{[BK08]
-      <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>}
+    - Def. 10.53, p.801, [BK08](
+          https://tulip-control.sourceforge.io/doc/bibliography.html#bk08)
     - [`ltl2dstar`](http://ltl2dstar.de/>) documentation
     """
 

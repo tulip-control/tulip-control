@@ -707,8 +707,8 @@ class GRSpec(LTL):
     def to_canon(self):
         """Output formula in TuLiP LTL syntax.
 
-        The format is described in the U{Specifications section
-        <https://tulip-control.sourceforge.io/doc/specifications.html>}
+        The format is described in the [Specifications section](
+            https://tulip-control.sourceforge.io/doc/specifications.html)
         of the TuLiP User's Guide.
         """
         conj_cstr = lambda s: ' && ' if s else ''

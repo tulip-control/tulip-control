@@ -522,8 +522,8 @@ def discretize(
 
     Reference
     =========
-    U{[NOTM12]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#notm12>}
+    [NOTM12](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#notm12)
 
 
     Relevant
@@ -633,8 +633,8 @@ def _discretize_bi(
 
     Reference
     =========
-    1. U{[NOTM12]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#notm12>}
+    1. [NOTM12](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#notm12)
     2. Wagenmaker, A. J.; Ozay, N.
        "A Bisimulation-like Algorithm for Abstracting Control Systems."
        54th Annual Allerton Conference on CCC 2016
@@ -1144,8 +1144,8 @@ def _discretize_dual(
 
     Reference
     =========
-    1. U{[NOTM12]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#notm12>}
+    1. [NOTM12](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#notm12)
     2. Wagenmaker, A. J.; Ozay, N.
        "A Bisimulation-like Algorithm for Abstracting Control Systems."
        54th Annual Allerton Conference on CCC 2016

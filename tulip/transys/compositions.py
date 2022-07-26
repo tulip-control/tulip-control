@@ -102,8 +102,8 @@ def synchronous_parallel(
     <https://en.wikipedia.org/wiki/Tensor_product_of_graphs>)
 
     It follows definition 2.42 (synchronous product) in
-    U{[BK08]
-        <https://tulip-control.sourceforge.io/doc/bibliography.html#bk08>},
+    [BK08](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#bk08),
     with the only exception that Act does not have the be the same
     for all the models in models.
 

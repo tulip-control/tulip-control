@@ -342,8 +342,8 @@ class MooreMachine(Transducer):
 
     Reference
     =========
-    U{[M56]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#m56>}
+    [M56](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#m56)
     """
 
     def __init__(self):
@@ -408,8 +408,8 @@ class MealyMachine(Transducer):
     Examples
     ========
 
-    Traffic Light: Fig. 3.14, p.72 U{[LS11]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
+    Traffic Light: Fig. 3.14, p.72 [LS11](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)
 
     ```python
     m = MealyMachine()
@@ -485,8 +485,8 @@ class MealyMachine(Transducer):
 
     Reference
     =========
-    U{[M55]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#m55>}
+    [M55](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#m55)
     """
 
     def __init__(self):
@@ -886,8 +886,8 @@ def moore2mealy(
 
     Reference
     =========
-    U{[LS11]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
+    [LS11](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)
     """
     if not isinstance(moore, MooreMachine):
         raise TypeError(
@@ -939,8 +939,8 @@ def mealy2moore(
 
     Reference
     =========
-    U{[LS11]
-    <https://tulip-control.sourceforge.io/doc/bibliography.html#ls11>}
+    [LS11](
+        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)
     """
     # TODO: check for when Mealy is exactly convertible to Moore
     if not isinstance(mealy, MealyMachine):
