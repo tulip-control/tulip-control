@@ -69,7 +69,7 @@ def plot_abstraction_scc(ab, ax=None):
     """
     try:
         import matplotlib.pyplot as plt
-    except:
+    except ImportError:
         logger.error(
             'failed to load `matplotlib`')
         return
