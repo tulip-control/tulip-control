@@ -41,10 +41,10 @@ import polytope as pc
 import polytope.plot as _pplot
 
 import tulip.abstract as _abs
+import tulip.graphics as _graphics
 # inline imports:
 #
 # import matplotlib as mpl
-# import tulip.graphics
 
 
 __all__ = [
@@ -214,13 +214,6 @@ def plot_trajectory(
         - `polytope.plot_partition()`
         - `numpy.random.RandomState`
     """
-    try:
-        import tulip.graphics as _graphics
-    except:
-        logger.error(
-            'failed to import '
-            '`tulip.graphics.newax`')
-        return
     if ax is None:
         ax, fig = _graphics.newax()
     _pplot.plot_partition(
