@@ -200,7 +200,8 @@ def plot_trajectory(
     @param ssys:
         system dynamics
     @param color_seed:
-        see `plot_partition`
+        read:
+        - `polytope.plot_partition()`
     @return:
         axis object
     """
