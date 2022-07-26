@@ -131,25 +131,36 @@ def solve_feasible(
 
     `N`-reachable means reachable in horizon `N`.
     The system dynamics are `ssys`.
-    The closed-loop algorithm solves for one step at a time,
-    which keeps the dimension of the polytopes down.
+    The closed-loop algorithm solves for
+    one step at a time, which keeps the
+    dimension of the polytopes down.
 
     Time semantics:
 
-    - `use_all_horizon = False`: fixed sampling period of
+    - `use_all_horizon = False`:
+      fixed sampling period of
       discrete-valued environment variables.
       Reachability in exactly `N` steps.
 
-    - `use_all_horizon = True`: sampling period that varies and
-      is chosen by the system, depending on how many steps are
-      taken during each trajectory from `P1` to `P2`.
-      Reachability in `1..N` steps, with an under-approximation
-      of the attractor set.
+    - `use_all_horizon = True`:
+      sampling period that varies and
+      is chosen by the system, depending on
+      how many steps are taken during
+      each trajectory from `P1` to `P2`.
 
-      If the system dynamics do not allow staying at the same state,
-      then disconnected polytopes can arise, possibly causing issues
-      in the computation. Consider decreasing the sampling period
-      used for discretizing the associated continuous-time dynamical system.
+      Reachability in `1..N` steps,
+      with an under-approximation of
+      the attractor set.
+
+      If the system dynamics do not allow
+      staying at the same state,
+      then disconnected polytopes can arise,
+      possibly causing issues in
+      the computation.
+
+      Consider decreasing the sampling period
+      used for discretizing the associated
+      continuous-time dynamical system.
 
     @param N:
         horizon length
@@ -207,12 +218,14 @@ def _solve_closed_loop_fixed_horizon(
         ) -> Polytope:
     """Underapproximate set that can reach `P2`.
 
-    Underapproximate states in polytope `P1` that
-    can reach polytope `P2` in `N` steps,
+    Underapproximate states in
+    polytope `P1` that can reach
+    polytope `P2` in `N` steps,
     with `N > 0`.
 
     If intermediate polytopes are convex,
-    then the result is exact and not an underapproximation.
+    then the result is exact and
+    not an underapproximation.
 
     @param ssys:
         system dynamics
@@ -261,11 +274,13 @@ def _solve_closed_loop_bounded_horizon(
         ) -> Polytope:
     """Underapproximate set that can reach `P2`.
 
-    Underapproximates the states in polytope `P1`
-    that can reach polytope `P2` in at most `N` steps.
+    Underapproximates the set of states in
+    polytope `P1` that can reach
+    polytope `P2` in at most `N` steps.
 
     For details, read the docstring of
-    the function `_solve_closed_loop_fixed_horizon`.
+    the function
+    `_solve_closed_loop_fixed_horizon`.
     """
     _print_horizon_warning()
     p1 = P1.copy()
@@ -317,7 +332,8 @@ def _underapproximate_attractor(
     Underapproximates the `N`-step attractor
     of polytope `P2`, with `N > 0`.
 
-    For details, read the docstring of the function
+    For details, read the docstring of
+    the function
     `_solve_closed_loop_fixed_horizon`.
     """
     assert N > 0, N
@@ -419,8 +435,8 @@ def poly_to_poly(
         ) -> Polytope:
     """Compute `s0` for open-loop `N`-reachability.
 
-    Computes `s0` for open-loop polytope-to-polytope
-    `N`-reachability.
+    Computes `s0` for open-loop
+    polytope-to-polytope `N`-reachability.
     """
     p1 = p1.copy()
     p2 = p2.copy()
@@ -738,12 +754,16 @@ def _block_diag2(
     """Similar to `block_diag()` in `scipy.linalg`.
 
     This function is similar to the function
-    `scipy.linalg.block_diag`, but is restricted to 2 inputs.
+    `scipy.linalg.block_diag`,
+    but is restricted to 2 inputs.
 
-    Old versions of the linear algebra package in SciPy (i.e.,
-    `scipy.linalg`) do not have a `block_diag()` function.
-    Providing `_block_diag2()` here until most folks are
-    using sufficiently up-to-date SciPy installations
+    Old versions of the linear algebra
+    package in SciPy (i.e., `scipy.linalg`)
+    do not have a `block_diag()` function.
+
+    Providing `_block_diag2()` here until
+    most folks are using sufficiently
+    up-to-date SciPy installations
     improves portability.
     """
     if len(A.shape) == 1:
