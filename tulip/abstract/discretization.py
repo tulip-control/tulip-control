@@ -211,6 +211,7 @@ class AbstractSwitched:
         #        axs.append(ax)
         return axs
 
+
 class AbstractPwa:
     """Discrete abstraction of PWA dynamics, with attributes:
 
@@ -1754,6 +1755,7 @@ def multiproc_discretize_switched(
             merged_abstr, show_ts, only_adjacent)
     return merged_abstr
 
+
 def discretize_switched(
         ppp:
             PPP,
@@ -1823,6 +1825,7 @@ def discretize_switched(
         plot_mode_partitions(
             merged_abstr, show_ts, only_adjacent)
     return merged_abstr
+
 
 def plot_mode_partitions(swab, show_ts, only_adjacent):
     """Save each mode's partition and final merged partition."""

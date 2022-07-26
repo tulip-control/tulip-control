@@ -841,7 +841,6 @@ class PowerSet:
             raise Exception(msg)
         object.__setattr__(self, name, value)
 
-
 class TypedDict(dict):
     """dict subclass where values can be constrained by key.
 

@@ -123,6 +123,7 @@ def gen_apformula(AP, intrep):
     """
     return " & ".join([AP[i] if ((intrep >> i) & 1) != 0 else "!"+AP[i] for i in range(len(AP))])
 
+
 def gen_apsubset(AP, intrep):
     """Generate set of atomic propositions corresponding to integer
 

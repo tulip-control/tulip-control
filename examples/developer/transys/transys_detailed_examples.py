@@ -204,6 +204,7 @@ def fts_maximal_example():
         fts.save(pdf_fname)
         #fts.save(dot_fname, 'dot')
 
+
 def ba_maximal_example():
     """Buchi Automaton demo."""
     print(hl +'\nBuchi Automaton\n' +hl)
@@ -244,6 +245,7 @@ def ba_maximal_example():
         #ba.save(dot_fname, 'dot')
     return ba
 
+
 def scipy_sparse_labeled_adj():
     n = 10
     A = lil_matrix((n, n) )
@@ -276,6 +278,7 @@ def scipy_sparse_labeled_adj():
     ofts.plot()
     return ofts
 
+
 def label_per_state():
     """Add states with (possibly) different AP labels each."""
     fts = trs.FTS()
@@ -284,6 +287,7 @@ def label_per_state():
     fts.states.add('s0', ap={'p'})
     fts.states.add('s1', ap=set())
     fts.plot()
+
 
 if __name__ == '__main__':
     fts_maximal_example()

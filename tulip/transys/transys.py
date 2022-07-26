@@ -64,7 +64,6 @@ logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
-
 class KripkeStructure(_graphs.LabeledDiGraph):
     """Directed graph with labeled vertices and initial vertices.
 
