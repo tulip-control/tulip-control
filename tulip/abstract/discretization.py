@@ -1069,7 +1069,7 @@ def _discretize_bi(
     ofts = trs.FTS()
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
-    ofts_states = range(n)
+    ofts_states = list(range(n))
     ofts.states.add_from(ofts_states)
     ofts.transitions.add_adj(adj, ofts_states)
     # Decorate TS with state labels
@@ -1515,7 +1515,7 @@ def _discretize_dual(
     ofts = trs.FTS()
     adj = sp.lil_matrix(transitions.T)
     n = adj.shape[0]
-    ofts_states = range(n)
+    ofts_states = list(range(n))
     ofts.states.add_from(ofts_states)
     ofts.transitions.add_adj(adj, ofts_states)
     # Decorate TS with state labels
