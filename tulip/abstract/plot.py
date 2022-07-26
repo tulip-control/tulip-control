@@ -244,22 +244,22 @@ def simulate2d(
         disc_dynamics:
             'AbstractPwa',
         T,
-        qinit='\E \A',
+        qinit=r'\E \A',
         d_init=None,
         x_init=None,
         show_traj=True):
     r"""Simulation for systems with two-dimensional continuous dynamics.
 
     The first item in `env_inputs` is used as the initial environment
-    discrete state, if `qinit == '\E \A' or qinit == '\A \E'`.
+    discrete state, if `qinit == r'\E \A' or qinit == r'\A \E'`.
     This item is used to find the initial transition in `ctrl`.
 
     The initial continuous state is selected within the initial polytope
-    of the partition, if `qinit \in ('\E \E', '\E \A', '\A \E')`.
+    of the partition, if `qinit \in (r'\E \E', r'\E \A', r'\A \E')`.
 
-    The initial continuous state is `x_init` if `qinit == '\A \A'`,
+    The initial continuous state is `x_init` if `qinit == r'\A \A'`,
     and is asserted to correspond to `d_init['loc']`.
-    The initial discrete state is `d_init` if `qinit == '\A \A'`,
+    The initial discrete state is `d_init` if `qinit == r'\A \A'`,
     and is used to find the initial transition in `ctrl`.
 
     @param env_inputs:
@@ -272,9 +272,9 @@ def simulate2d(
         quantification of initial conditions
     @param d_init:
         initial discrete state,
-        given when `qinit == '\A \A'`
+        given when `qinit == r'\A \A'`
     @param x_init: initial continuous state,
-        given when `qinit == '\A \A'`
+        given when `qinit == r'\A \A'`
     @param show_traj:
         plot trajectory
     """
@@ -283,7 +283,7 @@ def simulate2d(
     #     pick initial continuous state
     #     consistent with
     #     initial controller state (discrete)
-    if qinit == '\E \A' or qinit == '\A \E':
+    if qinit == r'\E \A' or qinit == r'\A \E':
         # pick an initial discrete
         # system state given the
         # initial discrete environment state
@@ -299,7 +299,7 @@ def simulate2d(
         assert v == nd, (v, nd)
         s0_part = edge_data['loc']
         assert s0_part == out['loc'], (s0_part, out)
-    elif qinit == '\E \E':
+    elif qinit == r'\E \E':
         # pick an initial discrete state
         init_edges = ctrl.edges(
             'Sinit',
@@ -309,7 +309,7 @@ def simulate2d(
         assert u == 'Sinit', u
         s0_part = edge_data['loc']
         nd = v
-    elif qinit == '\A \A':
+    elif qinit == r'\A \A':
         assert d_init is not None
         assert x_init is not None
         s0_part = _abs.find_controller.find_discrete_state(
@@ -329,7 +329,7 @@ def simulate2d(
     # initialize continuous state for
     # the cases that the initial
     # continuous state is not given
-    if qinit in ('\E \E', '\E \A', '\A \E'):
+    if qinit in (r'\E \E', r'\E \A', r'\A \E'):
         # find initial polytope
         init_poly = disc_dynamics.ppp.regions[s0_part].list_poly[0]
         # disc_dynamics.ppp[s0_part][0]

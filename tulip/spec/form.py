@@ -298,14 +298,14 @@ class GRSpec(LTL):
       `Op == expr` means operator `Op` is defined as
       the expression `expr`.
 
-      - `'\A \A'`:
+      - `r'\A \A'`:
         `forall env_vars:  forall sys_vars:  env_init -> win`.
         `sys_init` must be empty or contain true.
         The strategy enumeration iterates through
         all assignments that satisfy
         `env_init & internal_init`.
 
-      - `'\A \E'`:
+      - `r'\A \E'`:
         `forall env_vars:  exist sys_vars:  form`,
         where:
         - `form == sys_init & (env_init -> win)`
@@ -318,7 +318,7 @@ class GRSpec(LTL):
         picks assignments that satisfy
         `form & internal_init`.
 
-      - `'\E \A'`:
+      - `r'\E \A'`:
 
         ```
         exist sys_vars:  forall env_vars:  form
@@ -340,7 +340,7 @@ class GRSpec(LTL):
         and iterates through all assignments
         that satisfy `env_init`.
 
-      - `'\E \E'`:
+      - `r'\E \E'`:
 
         ```
         exist env_vars:  exist sys_vars:  sys_init & win
