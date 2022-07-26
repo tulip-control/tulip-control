@@ -178,6 +178,9 @@ def plot_trajectory(
         ppp, x0, u_seq, ssys,
         ax=None,
         color_seed=None):
+        color_seed:
+            int |
+            None=None
     """Plot trajectory, starting from `x0`.
 
     The trajectory is drawn on the partition.
@@ -202,6 +205,7 @@ def plot_trajectory(
     @param color_seed:
         read:
         - `polytope.plot_partition()`
+        - `numpy.random.RandomState`
     @return:
         axis object
     """
