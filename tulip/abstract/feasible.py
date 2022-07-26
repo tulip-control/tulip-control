@@ -189,8 +189,10 @@ def _solve_closed_loop_fixed_horizon(
         Otherwise, `P1` is used.
     """
     assert N > 0, N
-    p1 = P1.copy()  # initial set
-    p2 = P2.copy()  # terminal set
+    p1 = P1.copy()
+        # initial set
+    p2 = P2.copy()
+        # terminal set
     if trans_set is None:
         pinit = p1
     else:
@@ -219,8 +221,10 @@ def _solve_closed_loop_bounded_horizon(
     the function `_solve_closed_loop_fixed_horizon`.
     """
     _print_horizon_warning()
-    p1 = P1.copy()  # initial set
-    p2 = P2.copy()  # terminal set
+    p1 = P1.copy()
+        # initial set
+    p2 = P2.copy()
+        # terminal set
     if trans_set is None:
         pinit = p1
     else:
@@ -261,8 +265,10 @@ def _underapproximate_attractor(
     """
     assert N > 0, N
     _print_horizon_warning()
-    p1 = P1.copy()  # initial set
-    p2 = P2.copy()  # terminal set
+    p1 = P1.copy()
+        # initial set
+    p2 = P2.copy()
+        # terminal set
     if trans_set is None:
         pinit = p1
     else:
@@ -297,8 +303,10 @@ def solve_open_loop(
         P1, P2, ssys, N,
         trans_set=None,
         max_num_poly=5):
-    r1 = P1.copy() # Initial set
-    r2 = P2.copy() # Terminal set
+    r1 = P1.copy()
+        # Initial set
+    r2 = P2.copy()
+        # Terminal set
     # use the max_num_poly largest volumes for reachability
     r1 = volumes_for_reachability(
         r1, max_num_poly)
@@ -421,9 +429,12 @@ def createLM(
     K = ssys.K
     D = ssys.Wset
     PU = ssys.Uset
-    n = A.shape[1]  # State space dimension
-    m = B.shape[1]  # Input space dimension
-    p = E.shape[1]  # Disturbance space dimension
+    n = A.shape[1]
+        # State space dimension
+    m = B.shape[1]
+        # Input space dimension
+    p = E.shape[1]
+        # Disturbance space dimension
     # non-zero disturbance matrix E ?
     if not np.all(E == 0):
         if not pc.is_fulldim(D):
