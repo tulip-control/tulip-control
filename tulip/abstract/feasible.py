@@ -645,8 +645,9 @@ def _block_diag2(A, B):
     using sufficiently up-to-date SciPy installations
     improves portability.
     """
-    if len(A.shape) == 1:  # Cast 1d array into matrix
+    if len(A.shape) == 1:
         A = np.array([A])
+            # Cast 1d array into matrix
     if len(B.shape) == 1:
         B = np.array([B])
     C = np.zeros(
