@@ -37,7 +37,10 @@ import heapq as _hp
 
 def dijkstra_single_source_multiple_targets(
         graph, source, target_set, cost_key="cost"):
-    """Return the shortest path on graph from a source state to a set of target states
+    """Return a shortest path to `target_set`.
+
+    The path is through the `graph`,
+    starting at the node `source`.
 
     @param graph:
         the graph of type tuplip.transys.LabeledDiGraph
@@ -81,9 +84,10 @@ def dijkstra_single_source_multiple_targets(
 
 def dijkstra_multiple_sources_multiple_targets(
         graph, source_set, target_set, cost_key="cost"):
-    """Return the shortest path on graph from a set of source states
-    to a set of target states.
+    """Return a shortest path to `target_set`.
 
+    The path is through the `graph`,
+    starting at a node in the `source_set`.
     @param graph:
         the graph of type tuplip.transys.LabeledDiGraph
     @param source_set:
