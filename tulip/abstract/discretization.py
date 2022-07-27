@@ -611,26 +611,23 @@ def discretize(
         - `'bi'` (default): use bisimulation partition
         - `'dual'`: use dual-simulation partition
     """
-    if simu_type == 'bi':
-        return _discretize_bi(
-            part, ssys, N, min_cell_volume,
-            closed_loop, conservative,
-            max_num_poly, use_all_horizon,
-            trans_length, remove_trans,
-            abs_tol,
-            plotit, save_img, cont_props,
-            plot_every)
-    elif simu_type == 'dual':
-        return _discretize_dual(
-            part, ssys, N, min_cell_volume,
-            closed_loop, conservative,
-            max_num_poly, use_all_horizon,
-            trans_length, remove_trans,
-            abs_tol,
-            plotit, save_img, cont_props,
-            plot_every)
-    raise ValueError(
-        f'Unknown simulation type: "{simu_type}"')
+    match simu_type:
+        case 'bi':
+            _discretize = _discretize_bi
+        case 'dual':
+            _discretize = _discretize_dual
+        case _:
+            raise ValueError(
+                'Unknown simulation '
+                f'type: "{simu_type}"')
+    return _discretize(
+        part, ssys, N, min_cell_volume,
+        closed_loop, conservative,
+        max_num_poly, use_all_horizon,
+        trans_length, remove_trans,
+        abs_tol,
+        plotit, save_img, cont_props,
+        plot_every)
 
 
 def _discretize_bi(
