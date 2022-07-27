@@ -347,17 +347,18 @@ def _transitions2dot_str(
         tikz=False
         ) -> str:
     """Convert transitions to dot str."""
-    if not hasattr(trans.graph, '_transition_label_def'):
+    graph = trans.graph
+    if not hasattr(graph, '_transition_label_def'):
         return
-    if not hasattr(trans.graph, '_transition_dot_label_format'):
+    if not hasattr(graph, '_transition_dot_label_format'):
         return
-    if not hasattr(trans.graph, '_transition_dot_mask'):
+    if not hasattr(graph, '_transition_dot_mask'):
         return
     # get labeling def
-    label_def = trans.graph._transition_label_def
-    label_format = trans.graph._transition_dot_label_format
-    label_mask = trans.graph._transition_dot_mask
-    edges = trans.graph.edges(
+    label_def = graph._transition_label_def
+    label_format = graph._transition_dot_label_format
+    label_mask = graph._transition_dot_mask
+    edges = graph.edges(
         data=True,
         keys=True)
     for (u, v, key, edge_data) in edges:
