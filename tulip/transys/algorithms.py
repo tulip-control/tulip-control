@@ -35,45 +35,16 @@ import logging
 
 import networkx as nx
 
-import tulip.interfaces.ltl2ba as ltl2baint
 import tulip.transys.automata as _aut
 import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.transys as _trs
 
 
-__all__ = [
-    'ltl2ba']
+__all__ = []
 
 
 _hl = 40 * '-'
 logger = logging.getLogger(__name__)
-
-
-# build parser once only
-parser = ltl2baint.Parser()
-
-
-def ltl2ba(
-        formula:
-            str
-        ) -> 'Automaton':
-    """Convert LTL formula to Buchi Automaton using `ltl2ba`.
-
-    @param formula:
-        `str(formula)` must be admissible `ltl2ba` input
-    @return:
-        Buchi automaton whose edges are annotated
-        with Boolean formulas as `str`
-    """
-    ltl2ba_out = ltl2baint.call_ltl2ba(str(formula))
-    symbols, g, initial, accepting = parser.parse(ltl2ba_out)
-    ba = Automaton('Buchi', alphabet=symbols)
-    ba.add_nodes_from(g)
-    ba.add_edges_from(g.edges(data=True))
-    ba.initial_nodes = initial
-    ba.accepting_sets = accepting
-    logger.info(f'Resulting automaton:\n\n{ba}\n')
-    return ba
 
 
 def _multiply_mutable_states(self, other, prod_graph, prod_sys):

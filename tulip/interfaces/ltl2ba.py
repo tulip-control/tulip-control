@@ -37,6 +37,8 @@ import networkx as nx
 import ply.lex
 import ply.yacc
 
+import tulip.transys as _trs
+
 
 TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
 logger = logging.getLogger(__name__)
@@ -338,6 +340,31 @@ class Parser:
     def p_error(self, p):
         logger.error(
             f'Syntax error at {p.value}')
+
+
+def ltl2ba(
+        formula:
+            str
+        ) -> _trs.BuchiAutomaton:
+    """Convert LTL formula to Buchi Automaton using `ltl2ba`.
+
+    @param formula:
+        `str(formula)` must be admissible `ltl2ba` input
+    @return:
+        Buchi automaton whose edges are annotated
+        with Boolean formulas as `str`
+    """
+    ltl2ba_out = call_ltl2ba(str(formula))
+    parser = ltl2baint.Parser()
+    symbols, g, initial, accepting = parser.parse(ltl2ba_out)
+    ba = _trs.BuchiAutomaton()
+    ba.atomic_propositions.update(symbols)
+    ba.add_nodes_from(g)
+    ba.add_edges_from(g.edges(data=True))
+    ba.initial_nodes = initial
+    ba.accepting_sets = accepting
+    logger.info(f'Resulting automaton:\n\n{ba}\n')
+    return ba
 
 
 def call_ltl2ba(
