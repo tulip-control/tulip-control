@@ -255,11 +255,7 @@ class BuchiAutomaton(OmegaAutomaton):
         self.automaton_type = 'Buchi Automaton'
 
 
-class BA(BuchiAutomaton):
-    """Alias to `BuchiAutomaton`."""
-
-    def __init__(self, **args):
-        super().__init__(**args)
+BA = BuchiAutomaton
 
 
 def tuple2ba(

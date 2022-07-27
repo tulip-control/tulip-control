@@ -280,13 +280,7 @@ class PropPreservingPartition(pc.MetricPartition):
         return ax
 
 
-class PPP(PropPreservingPartition):
-    """Alias to `PropPreservingPartition`.
-
-    See that for details.
-    """
-    def __init__(self, **args):
-        PropPreservingPartition.__init__(self, **args)
+PPP = PropPreservingPartition
 
 
 def prop2part(

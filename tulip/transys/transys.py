@@ -622,8 +622,7 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         return True
 
 
-class FTS(FiniteTransitionSystem):
-    """Alias to `FiniteTransitionSystem`."""
+FTS = FiniteTransitionSystem
 
 
 def tuple2fts(
