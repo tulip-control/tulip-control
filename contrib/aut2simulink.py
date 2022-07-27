@@ -137,6 +137,7 @@ def load_file(aut_file):
             queue1.put(automaton)
             queue2.put(automaton)
 
+
 def read_variables(smv_file):
     """Put the enviroment and system variables from smv_file in two different
     Queues called system and enviroment.

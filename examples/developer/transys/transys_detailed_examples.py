@@ -49,9 +49,9 @@ def fts_maximal_example():
     # add state info
     fts.states.add('pay')
     fts.states.remove('pay')
-    fts.states.add_from({'pay', 'soda', 'select', 'beer'} )
-    fts.states.remove_from({'pay', 'soda'} )
-    fts.states.add_from({'pay', 'soda'} )
+    fts.states.add_from({'pay', 'soda', 'select', 'beer'})
+    fts.states.remove_from({'pay', 'soda'})
+    fts.states.add_from({'pay', 'soda'})
     fts.states.current = ['pay']
     fts.states.initial.add('pay')
         # should already be a state
@@ -61,8 +61,8 @@ def fts_maximal_example():
     fts.states.initial.add('water')
     fts.states.initial -= {'water', 'select'}
     # no transitions yet...
-    pre = fts.states.pre({'pay'} )
-    post = fts.states.post({'pay'} )
+    pre = fts.states.pre({'pay'})
+    post = fts.states.post({'pay'})
     print("Pre('pay') = " +str(pre) )
     print("Post('pay') = " +str(post) )
     try:
@@ -105,7 +105,7 @@ def fts_maximal_example():
     # use instead
     pre = fts.states.pre('pay')
     # all 1-hop post sets
-    print('\n' +10*'-' +'\nPost sets are:\n')
+    print('\n' + 10 * '-' + '\nPost sets are:\n')
     for state in fts.states():
         post = fts.states.post({state} )
         # same as:
@@ -248,12 +248,12 @@ def ba_maximal_example():
 
 def scipy_sparse_labeled_adj():
     n = 10
-    A = lil_matrix((n, n) )
+    A = lil_matrix((n, n))
     A[0, :3] = rand(3)
     adj2states = list(range(n))
     print(A)
     ofts = trs.FTS()
-    ofts.states.add_from(set(range(10) ) )
+    ofts.states.add_from(set(range(10)))
     ofts.sys_actions.add('move')
     ofts.env_actions.add('rain')
     ofts.transitions.add_adj(
@@ -263,12 +263,12 @@ def scipy_sparse_labeled_adj():
     ofts.plot()
     """same thing as above, using A as a submatrix instead
     """
-    A = lil_matrix((3, 3) )
+    A = lil_matrix((3, 3))
     A[0, :3] = rand(3)
     adj2states = [0, 1, 2]
     print(A)
     ofts = trs.FTS()
-    ofts.states.add_from(set(range(10) ) )
+    ofts.states.add_from(set(range(10)))
     ofts.sys_actions.add('move')
     ofts.env_actions.add('rain')
     ofts.transitions.add_adj(

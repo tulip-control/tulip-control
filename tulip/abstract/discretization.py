@@ -1611,8 +1611,8 @@ def reachable_within(
 
 
 def sym_adj_change(IJ, adj_k, transitions, i):
-    horizontal = adj_k[i, :] -transitions[i, :] > 0
-    vertical = adj_k[:, i] -transitions[:, i] > 0
+    horizontal = adj_k[i, :] - transitions[i, :] > 0
+    vertical = adj_k[:, i] - transitions[:, i] > 0
     IJ[i, :] = horizontal.astype(int)
     IJ[:, i] = vertical.astype(int)
 
