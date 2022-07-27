@@ -612,7 +612,7 @@ def discretize(
         - `'dual'`: use dual-simulation partition
     """
     if simu_type == 'bi':
-        AbstractPwa = _discretize_bi(
+        return _discretize_bi(
             part, ssys, N, min_cell_volume,
             closed_loop, conservative,
             max_num_poly, use_all_horizon,
@@ -621,7 +621,7 @@ def discretize(
             plotit, save_img, cont_props,
             plot_every)
     elif simu_type == 'dual':
-        AbstractPwa = _discretize_dual(
+        return _discretize_dual(
             part, ssys, N, min_cell_volume,
             closed_loop, conservative,
             max_num_poly, use_all_horizon,
@@ -632,7 +632,6 @@ def discretize(
     else:
         raise ValueError(
             f'Unknown simulation type: "{simu_type}"')
-    return AbstractPwa
 
 
 def _discretize_bi(
