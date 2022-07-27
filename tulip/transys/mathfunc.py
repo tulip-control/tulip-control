@@ -42,7 +42,14 @@ class LabeledStateInputOutputPair:
     labels on the state.
     """
 
-    def __init__(self, state, input_dict, output_dict, labels=[]):
+    def __init__(
+            self,
+            state,
+            input_dict,
+            output_dict,
+            labels=None):
+        if labels is None:
+            labels = list()
         self.state = state
         self.input_dict = input_dict
         self.output_dict = output_dict
@@ -211,11 +218,17 @@ class FunctionOnLabeledState:
             ),
             None)
 
-    def add(self, input_tuple, output_tuple, labels=[]):
+    def add(
+            self,
+            input_tuple,
+            output_tuple,
+            labels=None):
         """Add a map `input_tuple` -> `output_tuple` to this function.
 
         An optional label of the state may be provided.
         """
+        if labels is None:
+            labels = list()
         (state, input_dict) = self.get_state_and_input_dict(input_tuple)
         output_dict = self.get_output_dict(output_tuple)
         pair = self.get_state_input_output_pair(
