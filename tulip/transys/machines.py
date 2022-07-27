@@ -740,7 +740,9 @@ def guided_run(
         for k in output_seqs:
             output_seqs[k].append(
                 outputs[k])
-    return (states_seq, output_seqs)
+    return (
+        states_seq,
+        output_seqs)
 
 
 def random_run(
@@ -795,7 +797,9 @@ def random_run(
             f'\n\t to state: {new_state}'
             '\n\t reacting by producing '
             f'output: {outputs}')
-    return (states_seq, output_seqs)
+    return (
+        states_seq,
+        output_seqs)
 
 
 def interactive_run(

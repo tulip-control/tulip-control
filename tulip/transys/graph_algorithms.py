@@ -74,7 +74,9 @@ def dijkstra_single_source_multiple_targets(
             if not current_cost or new_cost < current_cost:
                 dist[v] = new_cost
                 _hp.heappush(Q, (new_cost, v, path_to_u))
-    return (float("inf"), ())
+    return (
+        float("inf"),
+        ())
 
 
 def dijkstra_multiple_sources_multiple_targets(
@@ -105,4 +107,6 @@ def dijkstra_multiple_sources_multiple_targets(
         if cost < best_cost:
             best_cost = cost
             best_path = path
-    return (best_cost, best_path)
+    return (
+        best_cost,
+        best_path)

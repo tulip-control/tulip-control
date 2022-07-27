@@ -481,7 +481,10 @@ def _fts2spec(
         states, state_ids, aps)
     sys_init += tmp_init
     sys_trans += tmp_trans
-    return (sys_vars, sys_init, sys_trans)
+    return (
+        sys_vars,
+        sys_init,
+        sys_trans)
 
 
 def sys_to_spec(

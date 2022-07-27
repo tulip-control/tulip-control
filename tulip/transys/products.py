@@ -250,7 +250,9 @@ def ts_ba_sync_prod(
         logger.debug(
             f'new unvisited product states: {new_sqs}')
         queue.update(new_sqs)
-    return (prodts, accepting_states_preimage)
+    return (
+        prodts,
+        accepting_states_preimage)
 
 
 def find_ba_succ(prev_q, next_s, fts, ba):
