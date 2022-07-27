@@ -45,13 +45,18 @@ def dijkstra_single_source_multiple_targets(
     @param graph:
         the graph of type tuplip.transys.LabeledDiGraph
     @param source:
-        a state in graph identified as the source state
+        a node in graph identified as
+        the source state
     @param target_set:
-        a set of list of states identified as the target states
+        nodes identified as
+        the target states
     @param cost_key:
-        the transition attribute that indicates the cost of the transition
-        The type of cost c can be anything that contains __add__ function
-        such that c + 0 is defined.
+        the transition attribute that
+        indicates the cost `c` of
+        the transition.
+
+        `c.__add__` need be callable,
+        so that `c + 0` be defined.
     @return:
         (cost, path) where path is a list representing the optimal path
         and cost is the sum of the edge costs on this path.
