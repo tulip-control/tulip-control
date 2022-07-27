@@ -79,7 +79,7 @@ def assert_cvxopt() -> None:
     """Raise `ImportError` if `cvxopt` failed to import."""
     if _cvx is None:
         raise ImportError(
-            'Failed to import `cvxopt`.'
+            'Failed to import `cvxopt`. '
             'Unable to solve quadratic-programming problems.')
 
 
