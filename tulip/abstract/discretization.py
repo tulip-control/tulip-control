@@ -51,11 +51,10 @@ import scipy.sparse as sp
 import tulip.abstract.feasible as _fsb
 import tulip.abstract.plot as _aplt
 import tulip.abstract.prop2partition as _p2p
+import tulip.graphics as _graphics
+plt = _graphics._plt
 import tulip.hybrid as _hyb
 import tulip.transys as trs
-# inline imports:
-#
-# import matplotlib.pyplot as plt
 
 
 __all__ = [
@@ -779,16 +778,12 @@ def _discretize_bi(
     ss = ssys
     # init graphics
     if plotit:
-        try:
-            import matplotlib.pyplot as plt
-            plt.ion()
-            fig, (ax1, ax2) = plt.subplots(1, 2)
-            ax1.axis('scaled')
-            ax2.axis('scaled')
-            file_extension = 'pdf'
-        except:
-            logger.error('failed to import `matplotlib`')
-            plt = None
+        _graphics._assert_pyplot()
+        plt.ion()
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        ax1.axis('scaled')
+        ax2.axis('scaled')
+        file_extension = 'pdf'
     else:
         plt = None
     iter_count = 0
@@ -1287,16 +1282,12 @@ def _discretize_dual(
     ss = ssys
     # init graphics
     if plotit:
-        try:
-            import matplotlib.pyplot as plt
-            plt.ion()
-            fig, (ax1, ax2) = plt.subplots(1, 2)
-            ax1.axis('scaled')
-            ax2.axis('scaled')
-            file_extension = 'pdf'
-        except:
-            logger.error('failed to import matplotlib')
-            plt = None
+        _graphics._assert_pyplot()
+        plt.ion()
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        ax1.axis('scaled')
+        ax2.axis('scaled')
+        file_extension = 'pdf'
     else:
         plt = None
     iter_count = 0
