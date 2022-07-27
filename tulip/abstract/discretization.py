@@ -629,9 +629,8 @@ def discretize(
             abs_tol,
             plotit, save_img, cont_props,
             plot_every)
-    else:
-        raise ValueError(
-            f'Unknown simulation type: "{simu_type}"')
+    raise ValueError(
+        f'Unknown simulation type: "{simu_type}"')
 
 
 def _discretize_bi(
