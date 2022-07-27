@@ -1230,12 +1230,6 @@ def _discretize_dual(
         requires `plotit=True`
     @param cont_props:
         continuous propositions to plot
-    @param simu_type:
-        flag used to choose
-        abstraction algorithm
-        (bisimulation or dual-simulation):
-        - `'bi'` (default), or
-        - `'dual'`
     """
     start_time = os.times()[0]
     orig_ppp = part
