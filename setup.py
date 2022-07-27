@@ -41,7 +41,7 @@ classifiers = [
     'Programming Language :: Python :: 3 :: Only',
     'Topic :: Scientific/Engineering']
 package_data = {
-    'tulip.spec': ['parsetab.py']}
+    'tulip.spec': ['ltl_parsetab.py']}
 
 
 def git_version(version):
