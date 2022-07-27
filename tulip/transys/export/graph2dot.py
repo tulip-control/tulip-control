@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 """Convert labeled graph to GraphViz DOT, with custom filtering."""
 import collections.abc as _abc
+import functools as _ft
 import io
 import logging
 import re
@@ -348,11 +349,13 @@ def _transitions2dot_str(
         ) -> str:
     """Convert transitions to dot str."""
     graph = trans.graph
-    if not hasattr(graph, '_transition_label_def'):
-        return
-    if not hasattr(graph, '_transition_dot_label_format'):
-        return
-    if not hasattr(graph, '_transition_dot_mask'):
+    graph_hasattr = _ft.partial(
+        hasattr, graph)
+    has_attr = all(map(graph_hasattr, [
+        '_transition_label_def',
+        '_transition_dot_label_format',
+        '_transition_dot_mask']))
+    if not has_attr:
         return
     # get labeling def
     label_def = graph._transition_label_def
