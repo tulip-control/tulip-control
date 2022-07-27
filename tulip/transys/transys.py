@@ -60,6 +60,9 @@ __all__ = [
 
 _logger = logging.getLogger(__name__)
 _hl = 40 * '-'
+EnvSys = _ty.Literal[
+    'env',
+    'sys']
 
 
 class KripkeStructure(_graphs.LabeledDiGraph):
@@ -162,7 +165,7 @@ class MarkovChain(KripkeStructure):
     class ValidProbability:
         """A class for defining valid transition cost."""
 
-        def __contains__(self, obj):
+        def __contains__(self, obj) -> bool:
             try:
                 in_01 = (
                     obj >= 0 and
@@ -463,8 +466,12 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
 
     def __init__(
             self,
-            env_actions=None,
-            sys_actions=None):
+            env_actions:
+                list[dict] |
+                None=None,
+            sys_actions:
+                list[dict] |
+                None=None):
         """Instantiate finite transition system.
 
         @param env_actions:
@@ -475,7 +482,6 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
             `edge_label_types` in `LabeledDiGraph.__init__`
         """
         self._owner = 'sys'
-
         if env_actions is None:
             env_actions = [{
                 'name':
@@ -592,17 +598,30 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         return s
 
     @property
-    def owner(self):
+    def owner(self) -> str:
         return self._owner
 
     @owner.setter
-    def owner(self, x):
+    def owner(
+            self,
+            x:
+                EnvSys):
         if x not in {'env', 'sys'}:
             raise ValueError(
                 "The owner can be either `'sys'` or `'env'`.")
         self._owner = x
 
-    def _save(self, path, fileformat):
+    def _save(
+            self,
+            path:
+                str,
+            fileformat:
+                _ty.Literal[
+                    'pml',
+                    'promela',
+                    'Promela',
+                    ]
+            ) -> bool:
         """Export options available only for closed systems.
 
         Provides: pml (Promela)
@@ -644,7 +663,10 @@ def tuple2fts(
             list[tuple],
         name:
             str='fts',
-        prepend_str=None):
+        prepend_str:
+            str |
+            None=None
+        ) -> FTS:
     """Create a Finite Transition System from a tuple of fields.
 
     Hint
@@ -783,7 +805,8 @@ def line_labeled_with(
         L:
             _abc.Iterable,
         m:
-            int=0):
+            int=0
+        ) -> FTS:
     """Return linear FTS with given labeling.
 
     The resulting system will be a terminating sequence:
@@ -839,7 +862,10 @@ def line_labeled_with(
     return ts
 
 
-def cycle_labeled_with(L: _abc.Iterable):
+def cycle_labeled_with(
+        L:
+            _abc.Iterable
+        ) -> FTS:
     """Return cycle FTS with given labeling.
 
     The resulting system will be a cycle:
@@ -885,7 +911,8 @@ def add_initial_states(
         ts:
             FiniteTransitionSystem,
         ap_labels:
-            _abc.Iterable):
+            _abc.Iterable
+        ) -> None:
     """Make initial any state of ts labeled with any label in ap_labels.
 
     For example if isinstance(ofts, FTS):
@@ -908,7 +935,10 @@ def add_initial_states(
         ts.states.initial |= new_init_states
 
 
-def _dumps_states(g: FTS):
+def _dumps_states(
+        g:
+            FTS
+        ) -> str:
     """Dump string of transition system states."""
     nodes = g
     a = list()
@@ -945,7 +975,14 @@ class GameGraph(_graphs.LabeledDiGraph):
        CONCUR'08, LNCS 5201, pp. 147-161, 2008
     """
 
-    def __init__(self, node_label_types, edge_label_types):
+    def __init__(
+            self,
+            node_label_types:
+                list[
+                    dict[str, ...]],
+            edge_label_types:
+                list[
+                    dict[str, ...]]):
         node_label_types.append({
             'name':
                 'player',
@@ -1058,7 +1095,8 @@ def _output_fts(
             FTS,
         transitions:
             _nx.MultiDiGraph,
-        sol
+        sol:
+            list[_abc.Iterable]
         ) -> tuple[
             FTS,
             dict]:
@@ -1128,7 +1166,10 @@ def _output_fts(
 def simu_abstract(
         ts:
             FTS,
-        simu_type
+        simu_type:
+            _ty.Literal[
+                'bi',
+                'dual']
         ) -> tuple[
             FTS,
             dict]:

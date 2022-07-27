@@ -30,11 +30,12 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Convert Finite State Machines to State Chart XML (SCXML)."""
+import tulip.transys as _trs
 
 
 def mealy2scxml(
         mealy:
-            'MealyMachine'
+            '_trs.MealyMachine'
         ) -> str:
     """Convert Mealy machine to SCXML.
 
@@ -61,9 +62,16 @@ def mealy2scxml(
     @return:
         SCXML string
     """
-    def indent(n):
+    def indent(
+            n:
+                int
+            ) -> str:
         return '\n' + n * '\t'
-    def transitions_str(from_state, mealy):
+    def transitions_str(
+            from_state,
+            mealy:
+                '_trs.MealyMachine'
+            ) -> str:
         s = ''
         trans = mealy.transitions.find([from_state])
         n = 2

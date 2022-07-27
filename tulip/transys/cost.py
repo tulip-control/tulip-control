@@ -34,6 +34,7 @@ import collections.abc as _abc
 import functools as _ft
 import itertools as _itr
 import operator as _op
+import typing as _ty
 
 
 class ValidTransitionCost:
@@ -54,7 +55,12 @@ class ValidTransitionCost:
 class VectorCost:
     """Cost with addition and comparison operations."""
 
-    def __init__(self, value):
+    def __init__(
+            self,
+            value:
+                int |
+                float |
+                _abc.Iterable):
         if isinstance(value, int | float):
             value = [value]
         if not isinstance(value, _abc.Iterable):
@@ -78,7 +84,12 @@ class VectorCost:
 
     def _convert(
             self,
-            other):
+            other:
+                _ty.Union[
+                    int,
+                    float,
+                    'VectorCost']
+            ) -> 'VectorCost':
         if isinstance(other, int | float):
             repeated = _itr.repeat(
                 other, len(self))

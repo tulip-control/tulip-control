@@ -36,6 +36,7 @@ import logging
 import operator as _op
 import pprint as _pp
 import random
+import typing as _ty
 import warnings
 
 
@@ -156,7 +157,7 @@ class MathSet:
             f'MathSet({_pp.pformat(list(self._set))}'
             f'{self._list})')
 
-    def _debug_repr(self):
+    def _debug_repr(self) -> str:
         set_str = ', '.join(map(
             repr, self._set))
         return f'MathSet({{{set_str}}} +{self._list})'
@@ -257,7 +258,11 @@ class MathSet:
         self.add_from(iterable)
         return self
 
-    def __sub__(self, rm_items):
+    def __sub__(
+            self,
+            rm_items:
+                _abc.Iterable
+            ) -> 'MathSet':
         s = MathSet(self)
         print(f'{s =}')
         print(rm_items)
@@ -267,14 +272,22 @@ class MathSet:
                 s.remove(item)
         return s
 
-    def __isub__(self, rm_items):
+    def __isub__(
+            self,
+            rm_items:
+                _abc.Iterable
+            ) -> 'MathSet':
         """Delete multiple elements."""
         for item in rm_items:
             if item in self:
                 self.remove(item)
         return self
 
-    def __eq__(self, other):
+    def __eq__(
+            self,
+            other:
+                'MathSet'
+            ) -> bool:
         if not isinstance(other, MathSet):
             raise TypeError(
                 'For now comparison only to another MathSet.\n'
@@ -286,7 +299,10 @@ class MathSet:
             self._set == other._set and
             same_lists)
 
-    def __contains__(self, item):
+    def __contains__(
+            self,
+            item
+            ) -> bool:
         if isinstance(item, _abc.Hashable):
             try:
                 return item in self._set
@@ -302,23 +318,34 @@ class MathSet:
         """Number of elements in set."""
         return len(self._set) + len(self._list)
 
-    def _filter_hashables(self, iterable):
+    def _filter_hashables(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> _abc.Iterable:
         return filter(
             lambda x:
                 isinstance(x, _abc.Hashable),
             iterable)
 
-    def _filter_unhashables(self, iterable):
+    def _filter_unhashables(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> _abc.Iterable:
         return list(filter(
             lambda x:
                 not isinstance(x, _abc.Hashable),
             iterable))
 
-    def _delete_all(self):
+    def _delete_all(self) -> None:
         self._set = set()
         self._list = list()
 
-    def add(self, item):
+    def add(
+            self,
+            item
+            ) -> None:
         """Add element to mathematical set.
 
         Example
@@ -355,7 +382,8 @@ class MathSet:
     def add_from(
             self,
             iterable:
-                _abc.Iterable):
+                _abc.Iterable
+            ) -> None:
         """Add multiple elements to mathematical set.
 
         Equivalent to |=
@@ -404,7 +432,10 @@ class MathSet:
             # ...if contents of elements in iterable are mutable
             self._list = list(unique(self._list + list(iterable)))
 
-    def remove(self, item):
+    def remove(
+            self,
+            item
+            ) -> None:
         """Remove existing element from mathematical set.
 
         Example
@@ -438,7 +469,7 @@ class MathSet:
                     f'item: {item}, contains unhashables.')
         self._list.remove(item)
 
-    def pop(self):
+    def pop(self) -> object:
         """Remove and return random MathSet element.
 
         Raises KeyError if MathSet is empty.
@@ -533,7 +564,8 @@ class SubSet(MathSet):
             superset:
                 _abc.Container,
             iterable:
-                _abc.Iterable=None):
+                _abc.Iterable |
+                None=None):
         """Define the superset of this set.
 
         @param superset:
@@ -553,16 +585,19 @@ class SubSet(MathSet):
             f'SubSet({_pp.pformat(list(self._set))}'
             f'{self._list})')
 
-    def _debug_repr(self):
+    def _debug_repr(self) -> str:
         set_str = ', '.join(map(
             repr, self._set))
         return f'SubSet({{{set_str}}} +{self._list})'
 
     @property
-    def superset(self):
+    def superset(self) -> _abc.Iterable:
         return self._superset
 
-    def add(self, new_element):
+    def add(
+            self,
+            new_element
+            ) -> None:
         """Add state to subset.
 
         Extends MathSet.add with subset relation checking.
@@ -586,7 +621,11 @@ class SubSet(MathSet):
                 f'and superset:\n\t{self._superset}')
         super().add(new_element)
 
-    def add_from(self, new_elements):
+    def add_from(
+            self,
+            new_elements:
+                _abc.Iterable
+            ) -> None:
         """Add multiple new elements to subset.
 
         Extends MathSet.add_from with subset relation checking.
@@ -618,7 +657,11 @@ class CartesianProduct:
     def __init__(self):
         self.mathsets = list()
 
-    def __contains__(self, element):
+    def __contains__(
+            self,
+            element:
+                _abc.Iterable
+            ) -> bool:
         # TODO check ordered
         if not isinstance(element, _abc.Iterable):
             raise TypeError(
@@ -629,21 +672,36 @@ class CartesianProduct:
         return all(map(
             _op.contains, pairs))
 
-    def add(self, mathset):
+    def add(
+            self,
+            mathset
+            ) -> None:
         self.mathsets.append(mathset)
 
-    def add_from(self, mathsets):
+    def add_from(
+            self,
+            mathsets:
+                _abc.Iterable
+            ) -> None:
         self.mathsets.extend(mathsets)
 
-    def remove(self, mathset):
+    def remove(
+            self,
+            mathset
+            ) -> None:
         self.mathsets.remove(mathset)
 
-    def remove_from(self, mathsets):
+    def remove_from(
+            self,
+            mathsets:
+                _abc.Iterable
+            ) -> None:
         any(map(self.remove, mathsets))
 
 
 def unique(
-        iterable
+        iterable:
+            _abc.Iterable
         ) -> (
             set |
             list):
@@ -674,15 +732,20 @@ def unique(
     return unique_items
 
 
-def contains_multiple(iterable):
+def contains_multiple(
+        iterable:
+            _abc.Collection
+        ) -> bool:
     """Does iterable contain any item multiple times ?"""
     return len(iterable) != len(unique(iterable))
 
 
 def is_subset(
-        small_iterable,
+        small_iterable:
+            _abc.Iterable,
         big_iterable:
-            _abc.Iterable):
+            _abc.Iterable
+        ) -> bool:
     """Comparison for handling list <= set, and lists with unhashable items."""
     # asserts removed when compiling with optimization on...
     # it would have been elegant to use instead:
@@ -719,7 +782,10 @@ def is_subset(
         small_iterable))
 
 
-def powerset(iterable):
+def powerset(
+        iterable:
+            _abc.Iterable
+        ) -> _abc.Iterable:
     """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
     From <http://docs.python.org/2/library/itertools.html>,
@@ -872,7 +938,11 @@ class TypedDict(dict):
         self.update(*args, **kwargs)
         self.allowed_values = dict()
 
-    def __setitem__(self, i, y):
+    def __setitem__(
+            self,
+            i,
+            y
+            ) -> None:
         """Raise ValueError if value y not allowed for key i."""
         valid_y = True
         if hasattr(self, 'allowed_values') and i in self.allowed_values:
@@ -896,7 +966,11 @@ class TypedDict(dict):
     def __str__(self):
         return f'TypedDict({dict.__str__(self)})'
 
-    def update(self, *args, **kwargs):
+    def update(
+            self,
+            *args,
+            **kwargs
+            ) -> None:
         if args:
             if len(args) > 1:
                 raise TypeError(
@@ -908,12 +982,19 @@ class TypedDict(dict):
         for key in kwargs:
             self[key] = kwargs[key]
 
-    def setdefault(self, key, value=None):
+    def setdefault(
+            self,
+            key,
+            value:
+                _ty.Optional=None):
         if key not in self:
             self[key] = value
         return self[key]
 
-    def set_types(self, allowed_values):
+    def set_types(
+            self,
+            allowed_values
+            ) -> None:
         """Restrict values the key can be paired with.
 
         @param allowed_values: dict of the form:

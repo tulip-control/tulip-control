@@ -34,6 +34,7 @@ import copy
 import functools as _ft
 import itertools as _itr
 import operator as _op
+import typing as _ty
 
 import tulip.transys as _trs
 
@@ -44,7 +45,7 @@ MC = _trs.MarkovChain
 MDP = _trs.MarkovDecisionProcess
 
 
-def sum_values(*values):
+def sum_values(*values) -> float:
     """Return the sum of values that are not `None`.
 
     An item `v, w` in `values` can be anything with
@@ -55,7 +56,7 @@ def sum_values(*values):
         filter(_is_not_none, values))
 
 
-def mult_values(*values):
+def mult_values(*values) -> float:
     """Return product of values that are not `None`.
 
     An item `v, w` in `values` can be anything with
@@ -66,7 +67,7 @@ def mult_values(*values):
         filter(_is_not_none, values))
 
 
-def neglect_none(*values):
+def neglect_none(*values) -> tuple:
     """Return a tuple of values that are not `None`.
 
     If the tuple only has one element,
@@ -82,17 +83,20 @@ def _is_not_none(x):
     return x is not None
 
 
+Model = (
+    KS |
+    WKS |
+    MC |
+    MDP)
+
+
 def synchronous_parallel(
         models:
-            list[KS | WKS | MC | MDP],
+            list[Model],
         transition_attr_operations:
             dict |
             None=None
-        ) -> (
-            KS |
-            WKS |
-            MC |
-            MDP):
+        ) -> Model:
     """Construct synchronous parallel composition.
 
     Construct a model that represents the synchronous parallel composition
@@ -238,7 +242,8 @@ def _get_transition_attr(
         trans_prod:
             list,
         transition_attr_operations:
-            dict):
+            dict
+        ) -> dict:
     """Return product of transitions in `trans_prod`.
 
     Return the attribute of
@@ -275,9 +280,19 @@ def _get_transition_attr(
     return trans_attr
 
 
+Model = (
+    KS |
+    WKS |
+    MC |
+    MDP)
+
+
 def _get_composed_model_type(
         models:
-            list[KS | WKS | MC | MDP]):
+            list[Model]
+        ) -> (
+            type[Model] |
+            None):
     """Return class representing composition.
 
     Return the class of model obtained from
@@ -314,7 +329,8 @@ def _get_apply_policy_model_type(
         model:
             KS |
             WKS |
-            MDP):
+            MDP
+        ) -> type[MC]:
     """Return class representing policy application.
 
     Return the class of model that results when

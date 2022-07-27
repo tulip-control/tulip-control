@@ -41,6 +41,7 @@ import logging
 import multiprocessing as mp
 import os
 import pprint
+import typing as _ty
 import warnings
 
 import numpy as np
@@ -53,6 +54,7 @@ import tulip.abstract.plot as _aplt
 import tulip.abstract.prop2partition as _p2p
 import tulip.graphics as _graphics
 plt = _graphics._plt
+_mpl = _graphics._mpl
 import tulip.hybrid as _hyb
 import tulip.transys as trs
 
@@ -68,10 +70,14 @@ __all__ = [
 
 _logger = logging.getLogger(__name__)
 debug = False
+Polytope = (
+    pc.Polytope |
+    pc.Region)
 SystemDynamics = (
     _hyb.LtiSysDyn |
     _hyb.PwaSysDyn)
 PPP = _p2p.PropPreservingPartition
+FTS = trs.FiniteTransitionSystem
 
 
 class AbstractSwitched:
@@ -112,11 +118,19 @@ class AbstractSwitched:
 
     def __init__(
             self,
-            ppp=None,
-            ts=None,
+            ppp:
+                PPP |
+                None=None,
+            ts:
+                FTS |
+                None=None,
             ppp2ts=None,
-            modes=None,
-            ppp2modes=None):
+            modes:
+                dict |
+                None=None,
+            ppp2modes:
+                dict[..., list] |
+                None=None):
         if modes is None:
             modes = dict()
         self.ppp = ppp
@@ -137,7 +151,14 @@ class AbstractSwitched:
                 f', with abstraction:\n{ab}')
         return ''.join(items)
 
-    def ppp2pwa(self, mode, i):
+    def ppp2pwa(
+            self,
+            mode,
+            i:
+                int
+            ) -> tuple[
+                int,
+                Polytope]:
         """Return original `Region` containing `Region` `i` in `mode`.
 
         @param mode:
@@ -519,15 +540,24 @@ def discretize(
             PPP,
         ssys:
             SystemDynamics,
-        N=10,
-        min_cell_volume=0.1,
-        closed_loop=True,
-        conservative=False,
-        max_num_poly=5,
-        use_all_horizon=False,
-        trans_length=1,
-        remove_trans=False,
-        abs_tol=1e-7,
+        N:
+            int=10,
+        min_cell_volume:
+            float=0.1,
+        closed_loop:
+            bool=True,
+        conservative:
+            bool=False,
+        max_num_poly:
+            int=5,
+        use_all_horizon:
+            bool=False,
+        trans_length:
+            int=1,
+        remove_trans:
+            bool=False,
+        abs_tol:
+            float=1e-7,
         plotit:
             bool=False,
         save_img:
@@ -535,7 +565,8 @@ def discretize(
         cont_props:
             list[pc.Polytope] |
             None=None,
-        plot_every=1,
+        plot_every:
+            int=1,
         simu_type:
             _ty.Literal[
                 'bi',
@@ -634,15 +665,24 @@ def _discretize_bi(
             PPP,
         ssys:
             SystemDynamics,
-        N=10,
-        min_cell_volume=0.1,
-        closed_loop=True,
-        conservative=False,
-        max_num_poly=5,
-        use_all_horizon=False,
-        trans_length=1,
-        remove_trans=False,
-        abs_tol=1e-7,
+        N:
+            int=10,
+        min_cell_volume:
+            float=0.1,
+        closed_loop:
+            bool=True,
+        conservative:
+            bool=False,
+        max_num_poly:
+            int=5,
+        use_all_horizon:
+            bool=False,
+        trans_length:
+            int=1,
+        remove_trans:
+            bool=False,
+        abs_tol:
+            float=1e-7,
         plotit:
             bool=False,
         save_img:
@@ -650,7 +690,8 @@ def _discretize_bi(
         cont_props:
             list[pc.Polytope] |
             None=None,
-        plot_every=1
+        plot_every:
+            int=1
         ) -> AbstractPwa:
     """Refine partition, based on reachability analysis.
 
@@ -1140,15 +1181,24 @@ def _discretize_dual(
             PPP,
         ssys:
             SystemDynamics,
-        N=10,
-        min_cell_volume=0.1,
-        closed_loop=True,
-        conservative=False,
-        max_num_poly=5,
-        use_all_horizon=False,
-        trans_length=1,
-        remove_trans=False,
-        abs_tol=1e-7,
+        N:
+            int=10,
+        min_cell_volume:
+            float=0.1,
+        closed_loop:
+            bool=True,
+        conservative:
+            bool=False,
+        max_num_poly:
+            int=5,
+        use_all_horizon:
+            bool=False,
+        trans_length:
+            int=1,
+        remove_trans:
+            bool=False,
+        abs_tol:
+            float=1e-7,
         plotit:
             bool=False,
         save_img:
@@ -1156,7 +1206,8 @@ def _discretize_dual(
         cont_props:
             list[pc.Polytope] |
             None=None,
-        plot_every=1
+        plot_every:
+            int=1
         ) -> AbstractPwa:
     """Refine partition, based on reachability analysis.
 
@@ -1590,7 +1641,16 @@ def reachable_within(
     return adj_k
 
 
-def sym_adj_change(IJ, adj_k, transitions, i):
+def sym_adj_change(
+        IJ:
+            np.ndarray,
+        adj_k:
+            np.ndarray,
+        transitions:
+            np.ndarray,
+        i:
+            int
+        ) -> None:
     horizontal = adj_k[i, :] - transitions[i, :] > 0
     vertical = adj_k[:, i] - transitions[:, i] > 0
     IJ[i, :] = horizontal.astype(int)
@@ -1599,8 +1659,11 @@ def sym_adj_change(IJ, adj_k, transitions, i):
 
 # DEFUNCT until further notice
 def discretize_overlap(
-        closed_loop=False,
-        conservative=False):
+        closed_loop:
+            bool=False,
+        conservative:
+            bool=False
+        ) -> PPP:
     """default False.
 
     UNDER DEVELOPMENT; function signature may change without notice.
@@ -1811,8 +1874,10 @@ def discretize_switched(
             None=None,
         plot:
             bool=False,
-        show_ts=False,
-        only_adjacent=True
+        show_ts:
+            bool=False,
+        only_adjacent:
+            bool=True
         ) -> AbstractSwitched:
     """Abstract switched dynamics over given partition.
 

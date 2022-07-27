@@ -40,7 +40,8 @@ def fts2promela(
             '_trs.FiniteTransitionSystem',
         procname:
             str |
-            None=None):
+            None=None
+        ) -> str:
     """Convert (possibly labeled) state graph to Promela str.
 
     Creates a process which can be simulated as an independent
@@ -69,7 +70,9 @@ def fts2promela(
     def state_ap2promela(
             state,
             graph,
-            ap_alphabet):
+            ap_alphabet:
+                _abc.Iterable
+            ) -> str:
         ap_label = get_label_of(state, graph)
         s = ''
         for prop in ap_alphabet:
@@ -84,9 +87,12 @@ def fts2promela(
         return s
 
     def trans2promela(
-            transitions,
+            transitions:
+                _abc.Iterable,
             graph,
-            ap_alphabet):
+            ap_alphabet:
+                _abc.Iterable
+            ) -> str:
         s = '\t if\n'
         for from_state, to_state, sublabels_dict in transitions:
             s += (

@@ -58,8 +58,11 @@ pure = {'present', 'absent'}
 
 
 def is_valuation(
-        ports,
-        valuations):
+        ports:
+            dict[str, ...],
+        valuations:
+            dict[str, ...]
+        ) -> None:
     for name, port_type in ports.items():
         curvaluation = valuations[name]
         # functional set membership description ?
@@ -72,7 +75,10 @@ def is_valuation(
                 'Not a valuation.')
 
 
-def create_machine_ports(spc_vars):
+def create_machine_ports(
+        spc_vars:
+            dict
+        ) -> dict:
     """Create proper port domains of valuations, given port types.
 
     @param spc_vars:
@@ -273,7 +279,9 @@ class Transducer(_graphs.LabeledDiGraph):
             new_inputs:
                 dict,
             masks:
-                dict=None):
+                dict |
+                None=None
+            ) -> None:
         """Create new inputs.
 
         @param new_inputs:
@@ -304,7 +312,11 @@ class Transducer(_graphs.LabeledDiGraph):
                 mask_func = masks[port_name]
                 self._transition_dot_mask[port_name] = mask_func
 
-    def add_state_vars(self, new_state_vars):
+    def add_state_vars(
+            self,
+            new_state_vars:
+                dict
+            ) -> None:
         for var_name, var_type in new_state_vars.items():
             # append
             self._state_label_def[var_name] = var_type
@@ -391,7 +403,14 @@ class MooreMachine(Transducer):
         s += f'{_hl}\n'
         return s
 
-    def add_outputs(self, new_outputs, masks=None):
+    def add_outputs(
+            self,
+            new_outputs:
+                dict,
+            masks:
+                dict |
+                None=None
+            ) -> None:
         for port_name, port_type in new_outputs.items():
             # append
             self._state_label_def[port_name] = port_type
@@ -530,9 +549,11 @@ class MealyMachine(Transducer):
 
     def _save(
             self,
-            path,
+            path:
+                str,
             fileformat:
-                _ty.Literal['scxml']):
+                _ty.Literal['scxml']
+            ) -> bool:
         """Export options available only for Mealy machines."""
         if fileformat != 'scxml':
             return False
@@ -547,7 +568,9 @@ class MealyMachine(Transducer):
             new_outputs:
                 dict,
             masks:
-                dict=None):
+                dict |
+                None=None
+            ) -> None:
         """Add new outputs.
 
         @param new_outputs:
@@ -586,7 +609,9 @@ class MealyMachine(Transducer):
                 dict[str, ...],
             lazy:
                 bool=False
-            ) -> tuple:
+            ) -> tuple[
+                _ty.Any,
+                dict[str, ...]]:
         """Return next state and output, when reacting to given inputs.
 
         The machine must be deterministic.
@@ -660,13 +685,26 @@ class MealyMachine(Transducer):
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
 
-    def reactionpart(self, from_state, inputs):
+    def reactionpart(
+            self,
+            from_state,
+            inputs:
+                dict[str, ...]
+            ) -> tuple[
+                _ty.Any,
+                dict[str, ...]]:
         """Wraps `reaction()` with `lazy=True`."""
         return self.reaction(
             from_state, inputs,
             lazy=True)
 
-    def run(self, from_state=None, input_sequences=None):
+    def run(
+            self,
+            from_state:
+                _ty.Optional=None,
+            input_sequences:
+                dict[..., list] |
+                None=None):
         """Guided or interactive run.
 
         @param input_sequences:
@@ -689,7 +727,8 @@ class MealyMachine(Transducer):
 def guided_run(
         mealy:
             MealyMachine,
-        from_state=None,
+        from_state:
+            _ty.Optional=None,
         input_sequences:
             dict[..., list] |
             None=None
@@ -767,9 +806,13 @@ def guided_run(
 def random_run(
         mealy:
             MealyMachine,
-        from_state=None,
+        from_state:
+            _ty.Optional=None,
         N:
-            int=10):
+            int=10
+        ) -> tuple[
+            list,
+            dict[str, list]]:
     """Return run from given state for N random inputs.
 
     Inputs selected randomly in a way that does not block the machine
@@ -826,7 +869,9 @@ def random_run(
 def interactive_run(
         mealy:
             MealyMachine,
-        from_state=None):
+        from_state:
+            _ty.Optional=None
+        ) -> None:
     """Run input-deterministic Mealy machine using user input.
 
     @param mealy:
@@ -843,7 +888,11 @@ def interactive_run(
             break
 
 
-def _interactive_run_step(mealy, state):
+def _interactive_run_step(
+        mealy:
+            MealyMachine,
+        state
+        ) -> bool | None:
     if state is None:
         raise Exception('Current state is None')
     # note: the spaghettiness of
@@ -879,7 +928,12 @@ def _interactive_run_step(mealy, state):
     return True
 
 
-def _select_transition(mealy, trans):
+def _select_transition(
+        mealy:
+            MealyMachine,
+        trans:
+            list[tuple]
+        ) -> tuple:
     msg = 'Found more than 1 outgoing transitions:' + 2 * '\n'
     for i, t in enumerate(trans):
         from_state, to_state, attr_dict = t
@@ -1026,7 +1080,10 @@ def mealy2moore(
     return moore
 
 
-def _print_ports(port_dict):
+def _print_ports(
+        port_dict:
+            dict
+        ) -> str:
     def print_port(name_type):
         port_name, port_type = name_type
         return (
@@ -1038,7 +1095,10 @@ def _print_ports(port_dict):
     return f'{text}\n'
 
 
-def _print_label(label_dict):
+def _print_label(
+        label_dict:
+            dict
+        ) -> str:
     def print_label(name_value):
         name, value = name_value
         return f'\t\t{name} : {value}\n'
@@ -1048,9 +1108,16 @@ def _print_label(label_dict):
     return f'{text}\n'
 
 
-def _create_state_str(mealy_state, output, moore,
-                      moore2mealy_states,
-                      mealy2moore_states):
+def _create_state_str(
+        mealy_state,
+        output,
+        moore:
+            MooreMachine,
+        moore2mealy_states:
+            dict,
+        mealy2moore_states:
+            dict
+        ) -> str:
     """Used to create Moore states when converting Mealy -> Moore."""
     for s in mealy2moore_states.setdefault(mealy_state, set()):
         # check output values
@@ -1064,7 +1131,14 @@ def _create_state_str(mealy_state, output, moore,
     return s
 
 
-def _split_io(attr_dict, machine):
+def _split_io(
+        attr_dict:
+            dict,
+        machine:
+            Transducer
+        ) -> tuple[
+            dict[str, ...],
+            dict[str, ...]]:
     """Split into inputs and outputs."""
     input_values = {
         k: v
@@ -1107,7 +1181,8 @@ def strip_ports(
         mealy:
             MooreMachine,
         names:
-            _abc.Iterable[str]):
+            _abc.Iterable[str]
+        ) -> MealyMachine:
     """Remove ports in `names`.
 
     For example, to remove the atomic propositions

@@ -40,7 +40,12 @@ import os
 import networkx.readwrite as _nxrw
 
 
-def _format_label(label_def, label_dot_format):
+def _format_label(
+        label_def:
+            dict[str, ...],
+        label_dot_format:
+            dict[str, str]
+        ) -> str:
     """Format state/edge labels, which pop-up on mouse hover."""
     s = '"\\n\\n" +'
     for sublabel_name in label_def:
@@ -56,7 +61,9 @@ def _format_label(label_def, label_dot_format):
 def labeled_digraph2d3(
         graph:
             'LabeledDiGraph',
-        html_file_name='index.html'):
+        html_file_name:
+            str='index.html'
+        ) -> bool:
     """Export to SVG embedded in HTML, animated with d3.js
 
     Example

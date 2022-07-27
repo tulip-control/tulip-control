@@ -1258,7 +1258,7 @@ def unoccupied(
             IJ,
         prefix:
             str="Y"
-        ) -> 'GridWorld':
+        ) -> GridWorld:
     """Generate entirely unoccupied gridworld of given size.
 
     @param size:

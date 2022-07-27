@@ -50,6 +50,13 @@ __all__ = [
 
 
 _logger = logging.getLogger(__name__)
+GraphVizProgramName = graph2dot.GraphVizProgramName
+FileFormat = _ty.Literal[
+    'dot',
+    'pdf',
+    'png',
+    'svg']
+DotRankdir = graph2dot.DotRankdir
 
 
 def label_is_desired(
@@ -675,7 +682,7 @@ class Transitions:
             typed_only:
                 bool=False,
             **with_attr
-            ) -> list:
+            ) -> list[tuple]:
         r"""Find all edges between given states with given labels.
 
         Instead of having two separate methods to:
@@ -1473,18 +1480,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 str |
                 None=None,
             fileformat:
-                _ty.Literal[
-                    'pdf',
-                    'svg',
-                    'png',
-                    'dot'] |
+                FileFormat |
                 None=None,
             rankdir:
                 _ty.Literal[
                     'LR',
                     'TB']
                 ='LR',
-            prog=None,
+            prog:
+                GraphVizProgramName |
+                None=None,
             wrap:
                 int=10,
             tikz:

@@ -40,6 +40,7 @@ import tulip.transys.cost as _cost
 import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.mathset as _mset
 import tulip.transys.transys as _trs
+import tulip._utils as _utl
 
 
 __all__ = [
@@ -83,10 +84,16 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
     """
 
     def __init__(
-            self, deterministic=False,
-            accepting_states_type=None,
-            atomic_proposition_based=True,
-            symbolic=False):
+            self,
+            deterministic:
+                bool=False,
+            accepting_states_type:
+                _abc.Callable |
+                None=None,
+            atomic_proposition_based:
+                bool=True,
+            symbolic:
+                bool=False):
         """Initialize FiniteStateAutomaton.
 
         Additional keyword arguments are
@@ -197,10 +204,16 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
     """FiniteStateAutomaton with weight/cost on the transitions."""
 
     def __init__(
-            self, deterministic=False,
-            accepting_states_type=None,
-            atomic_proposition_based=True,
-            symbolic=False):
+            self,
+            deterministic:
+                bool=False,
+            accepting_states_type:
+                _abc.Callable |
+                None=None,
+            atomic_proposition_based:
+                bool=True,
+            symbolic:
+                bool=False):
         edge_label_types = [{
             'name':
                 'cost',
@@ -228,15 +241,21 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
     ```
     """
     def __init__(
-            self, deterministic=False,
-            atomic_proposition_based=True):
+            self,
+            deterministic:
+                bool=False,
+            atomic_proposition_based:
+                bool=True):
         super().__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based)
         self.automaton_type = 'Finite-Word Automaton'
 
 
-def dfa2nfa(dfa):
+def dfa2nfa(
+        dfa:
+            FiniteStateAutomaton
+        ) -> FiniteStateAutomaton:
     """Copy DFA to an NFA, so remove determinism restriction."""
     nfa = copy.deepcopy(dfa)
     nfa.transitions._deterministic = False
@@ -251,9 +270,13 @@ class OmegaAutomaton(FiniteStateAutomaton):
 
 class BuchiAutomaton(OmegaAutomaton):
     def __init__(
-            self, deterministic=False,
-            atomic_proposition_based=True,
-            symbolic=False):
+            self,
+            deterministic:
+                bool=False,
+            atomic_proposition_based:
+                bool=True,
+            symbolic:
+                bool=False):
         super().__init__(
             deterministic=deterministic,
             atomic_proposition_based=atomic_proposition_based,
@@ -265,15 +288,24 @@ BA = BuchiAutomaton
 
 
 def tuple2ba(
-        S,
-        S0,
-        Sa,
-        Sigma_or_AP,
-        trans,
+        S:
+            _abc.Iterable,
+        S0:
+            _abc.Iterable,
+        Sa:
+            _abc.Iterable,
+        Sigma_or_AP:
+            set,
+        trans:
+            list[
+                _utl.n_tuple(3)],
         name:
             str='ba',
-        prepend_str=None,
-        atomic_proposition_based=True
+        prepend_str:
+            str |
+            None=None,
+        atomic_proposition_based:
+            bool=True
         ) -> BuchiAutomaton:
     """Create a Buchi Automaton from a tuple of fields.
 
@@ -413,7 +445,10 @@ class RabinPairs:
     - [`ltl2dstar`](http://ltl2dstar.de/>) documentation
     """
 
-    def __init__(self, automaton_states):
+    def __init__(
+            self,
+            automaton_states:
+                _abc.Container):
         self._states = automaton_states
         self._pairs = list()
 
@@ -428,20 +463,29 @@ class RabinPairs:
                 f', U = {bad}\n')
         return s
 
-    def __getitem__(self, index):
+    def __getitem__(
+            self,
+            index:
+                int
+            ) -> _utl.n_tuple(2):
         return self._pairs[index]
 
-    def __iter__(self):
+    def __iter__(self) -> _abc.Iterator:
         return iter(self._pairs)
 
-    def __call__(self):
+    def __call__(
+            self
+            ) -> list[
+                _utl.n_tuple(2)]:
         """Get list of 2-`tuple`s `(L, U)` of good-bad sets of states."""
         return list(self._pairs)
 
     def add(
             self,
-            good_states,
-            bad_states):
+            good_states:
+                _abc.Iterable,
+            bad_states:
+                _abc.Iterable):
         """Add new acceptance pair `(L, U)`.
 
         See Also
@@ -463,7 +507,8 @@ class RabinPairs:
             self,
             good_states:
                 _abc.Iterable,
-            bad_states):
+            bad_states:
+                _abc.Iterable):
         """Delete pair `(L, U)` of good-bad sets of states.
 
         Note
@@ -494,7 +539,14 @@ class RabinPairs:
         bad_set.update(bad_states)
         self._pairs.remove((good_set, bad_set))
 
-    def add_states(self, pair_index, good_states, bad_states):
+    def add_states(
+            self,
+            pair_index:
+                int,
+            good_states:
+                _abc.Iterable,
+            bad_states:
+                _abc.Iterable):
         try:
             self._pairs[pair_index][0].add_from(good_states)
             self._pairs[pair_index][1].add_from(bad_states)
@@ -527,7 +579,10 @@ class RabinPairs:
         """
         return self._pairs[index][1]
 
-    def has_superset(self, superset):
+    def has_superset(
+            self,
+            superset
+            ) -> bool:
         """Return `True` if the given argument is the superset."""
         return superset is self._states
 
@@ -540,8 +595,12 @@ class RabinAutomaton(OmegaAutomaton):
     `DRA`, `BuchiAutomaton`
     """
 
-    def __init__(self, deterministic=False,
-                 atomic_proposition_based=False):
+    def __init__(
+            self,
+            deterministic:
+                bool=False,
+            atomic_proposition_based:
+                bool=False):
         super().__init__(
             deterministic=deterministic,
             accepting_states_type=RabinPairs,
@@ -557,7 +616,10 @@ class DRA(RabinAutomaton):
     `RabinAutomaton`
     """
 
-    def __init__(self, atomic_proposition_based=True):
+    def __init__(
+            self,
+            atomic_proposition_based:
+                bool=True):
         super().__init__(
             deterministic=True,
             atomic_proposition_based=atomic_proposition_based)
@@ -587,7 +649,10 @@ class ParityGame(_trs.GameGraph):
     `transys.GameGraph`
     """
 
-    def __init__(self, c=2):
+    def __init__(
+            self,
+            c:
+                int=2):
         node_label_types = [dict(
             name=
                 'color',
@@ -611,7 +676,7 @@ class ParityGame(_trs.GameGraph):
         return s
 
     @property
-    def max_color(self):
+    def max_color(self) -> int:
         max_c = -1
         for x in self:
             if self.nodes[x]['color'] > max_c:

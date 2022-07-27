@@ -45,7 +45,10 @@ package_data = {
     'tulip.interfaces': ['ltl2ba_parsetab.py']}
 
 
-def git_version(version):
+def git_version(
+        version:
+            str
+        ) -> str:
     """Return version with local version identifier."""
     import git
     repo = git.Repo('.git')
@@ -67,7 +70,7 @@ def git_version(version):
     return version
 
 
-def run_setup():
+def run_setup() -> None:
     """Build parser, get version from `git`, install."""
     # Build PLY table, to be installed as tulip package data
     try:
@@ -152,7 +155,7 @@ def run_setup():
               '!' * 65)
 
 
-def install_cvxopt():
+def install_cvxopt() -> None:
     """Install `cvxopt` version compatible with polytope requirements."""
     import polytope
     ver = polytope.__version__

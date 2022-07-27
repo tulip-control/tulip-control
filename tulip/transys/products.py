@@ -30,11 +30,14 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Products between automata and transition systems"""
+import collections.abc as _abc
 import logging
 import warnings
 
 import tulip.transys.automata as automata
+import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.transys as transys
+import tulip._utils as _utl
 
 
 __all__ = [
@@ -43,6 +46,7 @@ __all__ = [
 
 _logger = logging.getLogger(__name__)
 _hl = 40 * '-'
+FTS = transys.FTS
 
 
 class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
@@ -61,7 +65,12 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
     when it is poped from the queue.
     """
 
-    def __init__(self, ba, ts):
+    def __init__(
+            self,
+            ba:
+                automata.BuchiAutomaton,
+            ts:
+                FTS):
         self.ba = ba
         self.ts = ts
         super().__init__()
@@ -99,7 +108,11 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                     if q in ba.states.accepting:
                         self.states.accepting.add(new_sq0)
 
-    def add_successors(self, s, q):
+    def add_successors(
+            self,
+            s,
+            q
+            ) -> set:
         """Add the successors of (s, q) to the state space.
 
         @param s:
@@ -150,8 +163,10 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
 
 
 def ts_ba_sync_prod(
-        transition_system,
-        buchi_automaton
+        transition_system:
+            FTS,
+        buchi_automaton:
+            automata.BuchiAutomaton
         ) -> tuple[
             transys.FiniteTransitionSystem,
             set]:
@@ -259,7 +274,14 @@ def ts_ba_sync_prod(
         accepting_states_preimage)
 
 
-def find_ba_succ(prev_q, next_s, fts, ba):
+def find_ba_succ(
+        prev_q,
+        next_s,
+        fts:
+            FTS,
+        ba:
+            automata.BuchiAutomaton
+        ) -> list[tuple]:
     q = prev_q
     _logger.debug('Next state:\t' + str(next_s))
     try:
@@ -284,7 +306,22 @@ def find_ba_succ(prev_q, next_s, fts, ba):
     return enabled_ba_trans
 
 
-def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
+def find_prod_succ(
+        prev_sq:
+            _utl.n_tuple(2),
+        next_s,
+        enabled_ba_trans:
+            _abc.Iterable[
+                _utl.n_tuple(3)],
+        product:
+            _graphs.LabeledDiGraph,
+        ba:
+            automata.BuchiAutomaton,
+        fts:
+            FTS
+        ) -> tuple[
+            set,
+            set]:
     s, q = prev_sq
     new_accepting = set()
     next_sqs = set()
@@ -330,7 +367,12 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
     return (next_sqs, new_accepting)
 
 
-def ba_ts_sync_prod(buchi_automaton, transition_system):
+def ba_ts_sync_prod(
+        buchi_automaton:
+            automata.BuchiAutomaton,
+        transition_system:
+            FTS
+        ) -> automata.BuchiAutomaton:
     """Construct Buchi Automaton equal to synchronous product TS x NBA.
 
     See Also

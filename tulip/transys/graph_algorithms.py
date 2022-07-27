@@ -31,19 +31,29 @@
 # SUCH DAMAGE.
 #
 """Graph algorithms."""
+import collections.abc as _abc
 import copy
 import heapq as _hp
 
+import tulip.transys.labeled_graphs as _graphs
+
 
 def dijkstra_single_source_multiple_targets(
-        graph, source, target_set, cost_key="cost"):
+        graph:
+            _graphs.LabeledDiGraph,
+        source,
+        target_set:
+            _abc.Container,
+        cost_key:
+            str="cost"
+        ) -> tuple[
+            float,
+            list]:
     """Return a shortest path to `target_set`.
 
     The path is through the `graph`,
     starting at the node `source`.
 
-    @param graph:
-        the graph of type tuplip.transys.LabeledDiGraph
     @param source:
         a node in graph identified as
         the source state
@@ -58,8 +68,9 @@ def dijkstra_single_source_multiple_targets(
         `c.__add__` need be callable,
         so that `c + 0` be defined.
     @return:
-        (cost, path) where path is a list representing the optimal path
-        and cost is the sum of the edge costs on this path.
+        `(cost, optimal_path)`, where:
+        - `cost` is the sum of
+          the edge costs on `optimal_path`.
     """
     dist = {source: 0}
     visited = set()
@@ -88,24 +99,23 @@ def dijkstra_single_source_multiple_targets(
 
 
 def dijkstra_multiple_sources_multiple_targets(
-        graph, source_set, target_set, cost_key="cost"):
+        graph:
+            _graphs.LabeledDiGraph,
+        source_set:
+            _abc.Iterable,
+        target_set:
+            _abc.Container,
+        cost_key="cost"
+        ) -> tuple[
+            float,
+            list]:
     """Return a shortest path to `target_set`.
 
     The path is through the `graph`,
     starting at a node in the `source_set`.
-    @param graph:
-        the graph of type tuplip.transys.LabeledDiGraph
-    @param source_set:
-        a set or list of states identified as the source states
-    @param target_set:
-        a set or list of states identified as the target states
-    @param cost_key:
-        the transition attribute that indicates the cost of the transition
-        The type of cost c can be anything that contains __add__ function
-        such that c + 0 is defined.
-    @return:
-        (cost, path) where path is a list representing the optimal path
-        and cost is the sum of the edge costs on this path.
+
+    Read the docstring of the function
+    `dijkstra_single_source_multiple_targets`.
     """
     best_cost = float("inf")
     best_path = list()

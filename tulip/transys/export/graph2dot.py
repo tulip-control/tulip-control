@@ -45,17 +45,36 @@ import numpy as np
 # import webcolors
 
 import tulip.graphics as _graphics
+import tulip.transys as _trs
 
 
 _logger = logging.getLogger(__name__)
+DotRankdir = _ty.Literal[
+    'BT',
+    'LR',
+    'RL',
+    'TB',
+    ]
+GraphVizProgramName = _ty.Literal[
+    'circo',
+    'dot',
+    'fdp',
+    'neato',
+    'sfdp',
+    'twopi']
 
 
 def _states2dot_str(
-        graph,
+        graph:
+            '_trs.LabeledDiGraph',
         to_dot_graph,
-        wrap=10,
-        tikz=False,
-        rankdir='TB'):
+        wrap:
+            int=10,
+        tikz:
+            bool=False,
+        rankdir:
+            DotRankdir='TB'
+        ) -> None:
     """Copy nodes to given graph,
 
     with attributes for dot export.
@@ -97,9 +116,22 @@ def _states2dot_str(
 
 
 def _state2dot(
-        graph, to_dot_graph, state,
-        is_initial, is_accepting,
-        rim_color, d, node_dot_label):
+        graph:
+            '_trs.LabeledDiGraph',
+        to_dot_graph,
+        state,
+        is_initial:
+            bool,
+        is_accepting:
+            bool,
+        rim_color:
+            str |
+            dict,
+        d:
+            dict,
+        node_dot_label:
+            str
+        ) -> None:
     if is_initial:
         _add_incoming_edge(to_dot_graph, state)
     normal_shape = graph.dot_node_shape['normal']
@@ -150,9 +182,24 @@ def _state2dot(
 
 
 def _state2tikz(
-        graph, to_pydot_graph, state,
-        is_initial, is_accepting, rankdir,
-        rim_color, d, node_dot_label):
+        graph:
+            '_trs.LabeledDiGraph',
+        to_pydot_graph,
+        state,
+        is_initial:
+            bool,
+        is_accepting:
+            bool,
+        rankdir:
+            DotRankdir,
+        rim_color:
+            str |
+            dict,
+        d:
+            dict,
+        node_dot_label:
+            str
+        ) -> None:
     style = 'state'
     match rankdir:
         case 'LR':
@@ -204,7 +251,8 @@ def _format_color(
             _ty.Literal[
                 'tikz',
                 'dot']
-            ='tikz'):
+            ='tikz'
+        ) -> str:
     """Encode color in syntax for given program.
 
     @param color:
@@ -247,7 +295,11 @@ def _format_color(
     return s
 
 
-def _place_initial_states(trs_graph, pd_graph, tikz):
+def _place_initial_states(
+        trs_graph:
+            '_trs.LabeledDiGraph',
+        pd_graph,
+        tikz):
     empty = nx.DiGraph()
     init_subg = _graphics.networkx_to_graphviz(empty)
     init_subg.graph_attr['rank'] = 'source'
@@ -270,8 +322,19 @@ def _add_incoming_edge(
     g.add_edge(phantom_node, state)
 
 
-def _form_node_label(state, state_data, label_def,
-                     label_format, width=10, tikz=False):
+def _form_node_label(
+        state,
+        state_data:
+            dict,
+        label_def:
+            dict,
+        label_format:
+            dict[str, ...],
+        width:
+            int=10,
+        tikz:
+            bool=False
+        ) -> str:
     # node itself
     state_str = str(state)
     state_str = state_str.replace("'", "")
@@ -347,7 +410,11 @@ def _form_node_label(state, state_data, label_def,
     return node_dot_label
 
 
-def _is_accepting(graph, state):
+def _is_accepting(
+        graph:
+            '_trs.LabeledDiGraph',
+        state
+        ) -> bool:
     """accepting state ?"""
     # no accepting states defined ?
     if not hasattr(graph.states, 'accepting'):
@@ -356,9 +423,11 @@ def _is_accepting(graph, state):
 
 
 def _transitions2dot_str(
-        trans,
+        trans:
+            '_trs.Transitions',
         to_dot_graph,
-        tikz=False
+        tikz:
+            bool=False
         ) -> str:
     """Convert transitions to dot str."""
     graph = trans.graph
@@ -389,8 +458,18 @@ def _transitions2dot_str(
             color=edge_color)
 
 
-def _form_edge_label(edge_data, label_def,
-                     label_format, label_mask, tikz):
+def _form_edge_label(
+        edge_data:
+            dict,
+        label_def:
+            dict,
+        label_format:
+            dict[str, ...],
+        label_mask:
+            dict,
+        tikz:
+            bool
+        ) -> str:
     label = ''
         # dot label for edge
     sep_label_sets = label_format['separator']
@@ -434,10 +513,13 @@ def _form_edge_label(edge_data, label_def,
 
 def _graph2dot(
         graph:
-            'LabeledDiGraph',
-        wrap=10,
-        tikz=False,
-        rankdir='TB'
+            '_trs.LabeledDiGraph',
+        wrap:
+            int=10,
+        tikz:
+            bool=False,
+        rankdir:
+            DotRankdir='TB'
         ) -> str:
     """Convert state graph to DOT."""
     dummy_nx_graph = nx.MultiDiGraph()
@@ -464,9 +546,11 @@ def _graph2dot(
 
 def graph2dot_str(
         graph:
-            'LabeledDiGraph',
-        wrap=10,
-        tikz=False
+            '_trs.LabeledDiGraph',
+        wrap:
+            int=10,
+        tikz:
+            bool=False
         ) -> str:
     """Convert graph to DOT string.
 
@@ -482,13 +566,19 @@ def graph2dot_str(
 
 def save_dot(
         graph:
-            'LabeledDiGraph',
-        path,
-        fileformat,
-        rankdir,
-        prog,
-        wrap,
-        tikz=False
+            '_trs.LabeledDiGraph',
+        path:
+            str,
+        fileformat:
+            str,
+        rankdir:
+            DotRankdir,
+        prog:
+            GraphVizProgramName,
+        wrap:
+            int,
+        tikz:
+            bool=False
         ) -> bool:
     """Save state graph to DOT file.
 
@@ -520,22 +610,20 @@ def plot_dot(
         graph:
             nx.Graph,
         prog:
-            _ty.Literal[
-                'dot',
-                'neato',
-                'circo',
-                'twopi',
-                'fdp',
-                'sfdp']
+            GraphVizProgramName
             ='dot',
         rankdir:
-            _ty.Literal[
-                'LR',
-                'TB']
+            DotRankdir
             ='LR',
-        wrap=10,
-        ax=None):
-    """Plot a networkx graph using dot.
+        wrap:
+            int=10,
+        ax:
+            _ty.Union[
+                '_mpl.axes.Axes',
+                None]
+            =None
+        ) -> '_mpl.axes.Axes':
+    """Plot `graph` using GraphViz.
 
     No files written or deleted from disk.
 
@@ -550,8 +638,6 @@ def plot_dot(
         GraphViz program to use
     @param rankdir:
         direction to layout nodes
-    @param ax:
-        axes
     """
     if not isinstance(graph, nx.Graph):
         raise TypeError(

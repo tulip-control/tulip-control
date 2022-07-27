@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """Driver script for testing TuLiP.  Try calling it with "-h" flag."""
 import argparse
+import collections.abc as _abc
 import importlib
 import os
 import pprint
 import sys
+import typing as _ty
 
 import pytest
 
@@ -73,13 +75,17 @@ Besides what is below, OPTIONS... are passed on to `pytest`.
 
 
 class ArgParser(argparse.ArgumentParser):
-    def error(self, message):
+    def error(
+            self,
+            message:
+                str
+            ) -> _ty.NoReturn:
         sys.stderr.write(f'error: {message}\n')
         self.print_help()
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Entry point."""
     args, unknown_args = _parse_args()
     if (not args.testfiles) and len(args.testfamily) > 1:
@@ -135,7 +141,14 @@ def main():
     sys.exit(int(ret))
 
 
-def _test_files(tests_dir, basenames):
+def _test_files(
+        tests_dir:
+            str,
+        basenames:
+            _abc.Iterable[str]
+        ) -> tuple[
+            list[str],
+            list[str]]:
     """Collect test files."""
     testfiles, excludefiles, more_args = _collect_testfiles_and_excludefiles(
         tests_dir, basenames)
@@ -152,7 +165,15 @@ def _test_files(tests_dir, basenames):
     return more_args, testfiles
 
 
-def _collect_testfiles_and_excludefiles(tests_dir, basenames):
+def _collect_testfiles_and_excludefiles(
+        tests_dir:
+            str,
+        basenames:
+            _abc.Iterable[str]
+        ) -> tuple[
+            list[str],
+            list[str],
+            list[str]]:
     """Return Python files to include and to omit in tests."""
     available = _collect_testdir_files(tests_dir)
     more_args = list()
@@ -167,7 +188,10 @@ def _collect_testfiles_and_excludefiles(tests_dir, basenames):
     return testfiles, excludefiles, more_args
 
 
-def _collect_testdir_files(tests_dir):
+def _collect_testdir_files(
+        tests_dir:
+            str
+        ) -> list[str]:
     """Return files contained in directory `tests_dir`."""
     available = list()
     for _, _, filenames in os.walk(tests_dir):
@@ -176,7 +200,15 @@ def _collect_testdir_files(tests_dir):
 
 
 def _add_files_matching_basename(
-        basename, testfiles, excludefiles, available):
+        basename:
+            str,
+        testfiles:
+            list[str],
+        excludefiles:
+            list[str],
+        available:
+            _abc.Iterable[str]
+        ) -> str:
     """Add to lists of files the matching Python files."""
     match = _filter_filenames(basename, available)
     if len(match) > 1:
@@ -196,7 +228,12 @@ def _add_files_matching_basename(
     return filename
 
 
-def _filter_filenames(basename, available):
+def _filter_filenames(
+        basename:
+            str,
+        available:
+            _abc.Iterable[str]
+        ) -> list[str]:
     """Return Python files in `available` that start with `basename`.
 
     If `basename` starts with a hyphen `-`, then the hyphen is
@@ -214,7 +251,17 @@ def _filter_filenames(basename, available):
 
 
 def _map_basename_to_filename(
-        basename, testfiles, excludefiles, more_args, tests_dir):
+        basename:
+            str,
+        testfiles:
+            list[str],
+        excludefiles:
+            list[str],
+        more_args:
+            list,
+        tests_dir:
+            str
+        ) -> None:
     base = basename[1:]
     filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
@@ -232,7 +279,10 @@ def _map_basename_to_filename(
         more_args.append(basename)
 
 
-def _test_family(testfamily):
+def _test_family(
+        testfamily:
+            str
+        ) -> list[str]:
     """Return `list` of test files that comprise `testfamily`."""
     if testfamily.lower() == 'base':
         testfiles = list(BASE)
@@ -247,7 +297,7 @@ def _test_family(testfamily):
     return testfiles
 
 
-def _parse_args():
+def _parse_args() -> tuple:
     """Return known and unknown command-line arguments."""
     parser = ArgParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(

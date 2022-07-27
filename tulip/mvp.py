@@ -38,14 +38,13 @@ import tulip.transys as _trs
 import tulip.transys.cost as _cost
 import tulip.transys.graph_algorithms as _gralgo
 import tulip.spec.prioritized_safety as _prio
+import tulip._utils as _utl
 
 
 KS = _trs.KripkeStructure
 WFA = _trs.WeightedFiniteStateAutomaton
 PrioSpec = _prio.PrioritizedSpecification
-ProductState = tuple[
-    _ty.Any,
-    _ty.Any]
+ProductState = _utl.n_tuple(2)
 
 
 def _get_rule_violation_cost(
