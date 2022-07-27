@@ -76,7 +76,7 @@ def dijkstra_single_source_multiple_targets(
                 _hp.heappush(Q, (new_cost, v, path_to_u))
     return (
         float("inf"),
-        ())
+        list())
 
 
 def dijkstra_multiple_sources_multiple_targets(
