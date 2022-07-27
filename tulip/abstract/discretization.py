@@ -1001,7 +1001,7 @@ def _discretize_bi(
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
-            tmp_part = _p2p.PropPreservingPartition(
+            tmp_part = PPP(
                 domain=part.domain,
                 regions=sol,
                 adj=sp.lil_matrix(adj),
@@ -1022,7 +1022,7 @@ def _discretize_bi(
             continue
         if iter_count % plot_every != 0:
             continue
-        tmp_part = _p2p.PropPreservingPartition(
+        tmp_part = PPP(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
             prop_regions=part.prop_regions)
@@ -1058,7 +1058,7 @@ def _discretize_bi(
                 f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
-    new_part = _p2p.PropPreservingPartition(
+    new_part = PPP(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions)
@@ -1446,7 +1446,7 @@ def _discretize_dual(
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
-            tmp_part = _p2p.PropPreservingPartition(
+            tmp_part = PPP(
                 domain=part.domain,
                 regions=sol, adj=sp.lil_matrix(adj),
                 prop_regions=part.prop_regions)
@@ -1468,7 +1468,7 @@ def _discretize_dual(
             continue
         if iter_count % plot_every != 0:
             continue
-        tmp_part = _p2p.PropPreservingPartition(
+        tmp_part = PPP(
             domain=part.domain,
             regions=sol, adj=sp.lil_matrix(adj),
             prop_regions=part.prop_regions)
@@ -1504,7 +1504,7 @@ def _discretize_dual(
                 f'.{file_extension}')
             fig.savefig(fname, dpi=250)
         plt.pause(1)
-    new_part = _p2p.PropPreservingPartition(
+    new_part = PPP(
         domain=part.domain,
         regions=sol, adj=sp.lil_matrix(adj),
         prop_regions=part.prop_regions)
@@ -1654,7 +1654,7 @@ def discretize_overlap(
 #             logger.info("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #
-#     new_part = _p2p.PropPreservingPartition(
+#     new_part = PPP(
 #                    domain=part.domain,
 #                    regions=sol, adj=np.array([]),
 #                    trans=transitions, prop_regions=part.prop_regions,
@@ -2074,7 +2074,7 @@ def merge_partitions(
                 adj[i, j] = 1
                 adj[j, i] = 1
         adj[i, i] = 1
-    ppp = _p2p.PropPreservingPartition(
+    ppp = PPP(
         domain=ab0.ppp.domain,
         regions=new_list,
         prop_regions=ab0.ppp.prop_regions,
