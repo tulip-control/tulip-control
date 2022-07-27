@@ -77,10 +77,11 @@ if _cvx is None:
 
 def assert_cvxopt() -> None:
     """Raise `ImportError` if `cvxopt` failed to import."""
-    if _cvx is None:
-        raise ImportError(
-            'Failed to import `cvxopt`. '
-            'Unable to solve quadratic-programming problems.')
+    if _cvx is not None:
+        return
+    raise ImportError(
+        'Failed to import `cvxopt`. '
+        'Unable to solve quadratic-programming problems.')
 
 
 Point = np.ndarray
