@@ -51,7 +51,7 @@ class VectorCost:
     """A class for defining a vector cost, with addition and comparision operations"""
 
     def __init__(self, value):
-        if isinstance(value, int) or isinstance(value, float):
+        if isinstance(value, (int, float)):
             value = [value]
         assert isinstance(value, _abc.Iterable)
         self._value = list(value)
@@ -71,7 +71,7 @@ class VectorCost:
     def _convert(
             self,
             other):
-        if isinstance(other, int) or isinstance(other, float):
+        if isinstance(other, (int, float)):
             other = VectorCost([other] * len(self))
         assert len(self) == len(other)
         return other
