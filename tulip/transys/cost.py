@@ -120,9 +120,8 @@ class VectorCost:
 
     def __gt__(self, other):
         other = self._convert(other)
-        for i in range(len(self)):
-            if self[i] > other[i]:
-                return True
-            elif other[i] > self[i]:
-                return False
-        return False
+        for a, b in zip(self, other):
+            if a == b:
+                continue
+            return a > b
+        return True
