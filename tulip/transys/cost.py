@@ -41,11 +41,13 @@ class ValidTransitionCost:
 
     def __contains__(self, other):
         try:
-            return (
-                other + 0 >= 0 and
-                other + 0 == other)
+            other + 0
+            other >= 0
         except TypeError:
             return False
+        return (
+            other + 0 >= 0 and
+            other + 0 == other)
 
 
 @_ft.total_ordering
