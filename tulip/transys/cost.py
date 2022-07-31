@@ -83,9 +83,21 @@ class VectorCost:
             self,
             other):
         other = self._convert(other)
+        self._assert_equal_len(other)
         return VectorCost(
             self[i] + other[i]
             for i in range(len(self)))
+
+    def _assert_equal_len(
+            self,
+            other):
+        """Raise `ValueError` if lengths differ."""
+        if len(self) == len(other):
+            return
+        raise ValueError(
+            'Mismatch of lengths: '
+            f'{len(self) = } and '
+            f'{len(other) = }')
 
     def __radd__(
             self,
