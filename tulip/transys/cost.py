@@ -57,7 +57,11 @@ class VectorCost:
     def __init__(self, value):
         if isinstance(value, (int, float)):
             value = [value]
-        assert isinstance(value, _abc.Iterable)
+        if not isinstance(value, _abc.Iterable):
+            raise TypeError(
+                'Expected iterable, '
+                f'got instead: {value}, '
+                f'of type {type(value)}')
         self._value = list(value)
 
     def __str__(self):
