@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 """Cost Module for state or transition cost/weight"""
 import collections.abc as _abc
+import functools as _ft
 
 
 class ValidTransitionCost:
@@ -45,6 +46,7 @@ class ValidTransitionCost:
             return False
 
 
+@_ft.total_ordering
 class VectorCost:
     """A class for defining a vector cost, with addition and comparision operations"""
 
@@ -100,15 +102,3 @@ class VectorCost:
             elif obj[i] > self[i]:
                 return False
         return False
-
-    def __ne__(self, obj):
-        return not (self.__eq__(obj))
-
-    def __ge__(self, obj):
-        return self.__gt__(obj) or self.__eq__(obj)
-
-    def __lt__(self, obj):
-        return not (self.__ge__(obj))
-
-    def __le__(self, obj):
-        return self.__lt__(obj) or self.__eq__(obj)
