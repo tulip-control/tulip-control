@@ -49,7 +49,7 @@ class ValidTransitionCost:
 
 @_ft.total_ordering
 class VectorCost:
-    """A class for defining a vector cost, with addition and comparision operations"""
+    """A class for defining a vector cost, with addition and comparison operations"""
 
     def __init__(self, value):
         if isinstance(value, (int, float)):
