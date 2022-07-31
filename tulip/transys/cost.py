@@ -54,7 +54,7 @@ class VectorCost:
         if isinstance(value, int) or isinstance(value, float):
             value = [value]
         assert isinstance(value, _abc.Iterable)
-        self._value = value
+        self._value = list(value)
 
     def __str__(self):
         return str(self._value)
