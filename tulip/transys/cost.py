@@ -41,9 +41,9 @@ class ValidTransitionCost:
 
     def __contains__(self, other):
         try:
-            if other + 0 >= 0 and other + 0 == other:
-                return True
-            return False
+            return (
+                other + 0 >= 0 and
+                other + 0 == other)
         except TypeError:
             return False
 
