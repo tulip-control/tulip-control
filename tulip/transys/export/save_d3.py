@@ -33,6 +33,7 @@
 # there exists: <https://github.com/mikedewar/d3py>,
 # but it is not sufficiently developed yet,
 # so here the wheel is partially re-invented
+import json
 import inspect
 import os
 
@@ -151,7 +152,6 @@ def labeled_digraph2d3(
         s += _nxrw.json_graph.dumps(graph)
     except:
         # better error msg for numpy array
-        import json
         data = _nxrw.json_graph.node_link_data(graph)
         s += json.dumps(data, default=lambda x: str(x))
     s += ';'
