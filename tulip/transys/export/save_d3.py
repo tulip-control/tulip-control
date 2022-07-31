@@ -33,8 +33,8 @@
 # there exists: <https://github.com/mikedewar/d3py>,
 # but it is not sufficiently developed yet,
 # so here the wheel is partially re-invented
-import os
 import inspect
+import os
 
 import networkx.readwrite as _nxrw
 
