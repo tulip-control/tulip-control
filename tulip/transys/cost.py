@@ -37,9 +37,9 @@ import functools as _ft
 class ValidTransitionCost:
     """A class for defining valid transition cost."""
 
-    def __contains__(self, obj):
+    def __contains__(self, other):
         try:
-            if obj + 0 >= 0 and obj + 0 == obj:
+            if other + 0 >= 0 and other + 0 == other:
                 return True
             return False
         except TypeError:
@@ -68,37 +68,39 @@ class VectorCost:
     def __len__(self):
         return len(self._value)
 
-    def _convert(self, obj):
-        if isinstance(obj, int) or isinstance(obj, float):
-            obj = VectorCost([obj] * len(self))
-        assert len(self) == len(obj)
-        return obj
+    def _convert(
+            self,
+            other):
+        if isinstance(other, int) or isinstance(other, float):
+            other = VectorCost([other] * len(self))
+        assert len(self) == len(other)
+        return other
 
     def __add__(
             self,
-            obj):
-        obj = self._convert(obj)
+            other):
+        other = self._convert(other)
         return VectorCost(
-            self[i] + obj[i]
+            self[i] + other[i]
             for i in range(len(self)))
 
     def __radd__(
             self,
-            obj):
-        return self.__add__(obj)
+            other):
+        return self.__add__(other)
 
-    def __eq__(self, obj):
-        obj = self._convert(obj)
+    def __eq__(self, other):
+        other = self._convert(other)
         for i in range(len(self)):
-            if not (self[i] == obj[i]):
+            if not (self[i] == other[i]):
                 return False
         return True
 
-    def __gt__(self, obj):
-        obj = self._convert(obj)
+    def __gt__(self, other):
+        other = self._convert(other)
         for i in range(len(self)):
-            if self[i] > obj[i]:
+            if self[i] > other[i]:
                 return True
-            elif obj[i] > self[i]:
+            elif other[i] > self[i]:
                 return False
         return False
