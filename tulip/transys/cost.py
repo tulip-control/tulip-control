@@ -32,6 +32,7 @@
 """Cost Module for state or transition cost/weight"""
 import collections.abc as _abc
 import functools as _ft
+import itertools as _itr
 
 
 class ValidTransitionCost:
@@ -72,7 +73,9 @@ class VectorCost:
             self,
             other):
         if isinstance(other, (int, float)):
-            other = VectorCost([other] * len(self))
+            repeated = _itr.repeat(
+                other, len(self))
+            other = VectorCost(repeated)
         assert len(self) == len(other)
         return other
 
