@@ -80,8 +80,8 @@ def labeled_digraph2d3(
     file_path = inspect.getfile(inspect.currentframe())
     dir_path = os.path.dirname(os.path.abspath(file_path))
     d3_file_name = os.path.join(dir_path, 'd3.v3.min.js')
-    d3_file = open(d3_file_name)
-    d3_js = d3_file.read()
+    with open(d3_file_name) as d3_file:
+        d3_js = d3_file.read()
     s = """
     <!DOCTYPE html>
     <meta charset="utf-8">
@@ -234,6 +234,6 @@ def labeled_digraph2d3(
     </script>
     </body>
     """
-    html_file = open(html_file_name, 'w')
-    html_file.write(s)
+    with open(html_file_name, 'w') as html_file:
+        html_file.write(s)
     return True
