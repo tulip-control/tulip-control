@@ -605,9 +605,7 @@ class ParityGame(_trs.GameGraph):
     @property
     def max_color(self):
         max_c = -1
-        # node = None
         for x in self:
             if self.nodes[x]['color'] > max_c:
                 max_c = self.nodes[x]['color']
-                # node = x
         return max_c
