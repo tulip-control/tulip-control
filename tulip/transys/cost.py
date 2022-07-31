@@ -83,7 +83,7 @@ class VectorCost:
             repeated = _itr.repeat(
                 other, len(self))
             other = VectorCost(repeated)
-        assert len(self) == len(other)
+        self._assert_equal_len(other)
         return other
 
     def __add__(
