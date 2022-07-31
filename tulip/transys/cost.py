@@ -33,6 +33,7 @@
 import collections.abc as _abc
 import functools as _ft
 import itertools as _itr
+import operator as _op
 
 
 class ValidTransitionCost:
@@ -107,10 +108,9 @@ class VectorCost:
 
     def __eq__(self, other):
         other = self._convert(other)
-        for i in range(len(self)):
-            if not (self[i] == other[i]):
-                return False
-        return True
+        pairs = zip(self, other)
+        return all(_itr.starmap(
+            _op.eq, pairs))
 
     def __gt__(self, other):
         other = self._convert(other)
