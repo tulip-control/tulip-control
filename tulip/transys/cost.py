@@ -93,8 +93,7 @@ class VectorCost:
         self._assert_equal_len(other)
         pairs = zip(self, other)
         return VectorCost(
-            a + b
-            for a, b in pairs)
+            _itr.starmap(_op.add, pairs))
 
     def _assert_equal_len(
             self,
