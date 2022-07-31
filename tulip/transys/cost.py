@@ -84,9 +84,10 @@ class VectorCost:
             other):
         other = self._convert(other)
         self._assert_equal_len(other)
+        pairs = zip(self, other)
         return VectorCost(
-            self[i] + other[i]
-            for i in range(len(self)))
+            a + b
+            for a, b in pairs)
 
     def _assert_equal_len(
             self,
