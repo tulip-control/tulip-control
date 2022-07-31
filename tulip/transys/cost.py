@@ -41,7 +41,7 @@ class ValidTransitionCost:
             if obj + 0 >= 0 and obj + 0 == obj:
                 return True
             return False
-        except Exception:
+        except TypeError:
             return False
 
 
