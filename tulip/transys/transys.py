@@ -615,9 +615,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
             return False
         s = _pml.fts2promela(self, self.name)
         # dump to file
-        f = open(path, 'w')
-        f.write(s)
-        f.close()
+        with open(path, 'w') as fd:
+            fd.write(s)
         return True
 
 

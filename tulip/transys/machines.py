@@ -531,9 +531,8 @@ class MealyMachine(Transducer):
             return False
         s = _scxml.mealy2scxml(self)
         # dump to file
-        f = open(path, 'w')
-        f.write(s)
-        f.close()
+        with open(path, 'w') as f:
+            f.write(s)
         return True
 
     def add_outputs(
