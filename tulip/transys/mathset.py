@@ -120,7 +120,7 @@ class MathSet:
 
     The output is:
 
-    ```
+    ```python
     MathSet([2, 3, 4, 5, 6, '5', '7', [1, 2], {'a': 1}, set([8, 9])])
     ```
 
