@@ -1651,10 +1651,6 @@ def prepend_with(
         text prepended to `states`.  If None, then
         `states` is returned without modification
     """
-    if not isinstance(states, _abc.Iterable):
-        raise TypeError(
-            'states must be Iterable. '
-            f'Got:\n\t{states}\ninstead.')
     if not isinstance(prepend_str, str) and prepend_str is not None:
         raise TypeError(
             '`prepend_str` must be of type `str`. '
