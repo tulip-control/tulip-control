@@ -32,9 +32,12 @@
 """Convert state graphs to Promela."""
 import time
 
+import tulip.transys as _trs
+
 
 def fts2promela(
-        graph,
+        graph:
+            '_trs.FiniteTransitionSystem',
         procname:
             str |
             None=None):
@@ -59,8 +62,6 @@ def fts2promela(
     especially if intermediate states are introduced in
     one of multiple processes.
 
-    @param graph:
-        networkx
     @param procname:
         Promela process name (after proctype)
         (default: system name)
