@@ -1653,4 +1653,6 @@ def prepend_with(
     """
     if prepend_str is None:
         return states
-    return [f'{prepend_str}{s}' for s in states]
+    return [
+        f'{prepend_str}{s}'
+        for s in states]
