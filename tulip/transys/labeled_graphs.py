@@ -384,9 +384,10 @@ class States:
         else:
             try:
                 with_attr_dict.update(with_attr)
-            except AttributeError:
+            except AttributeError as error:
                 raise TypeError(
-                    'with_attr_dict must be a dict')
+                    'with_attr_dict must be a dict'
+                    ) from error
         found_state_label_pairs = list()
         for state, attr_dict in self.graph.nodes(data=True):
             logger.debug(
