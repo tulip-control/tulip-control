@@ -943,6 +943,6 @@ class TypedDict(dict):
         """
         for k, v in self:
             if k in self.allowed_values:
-                if v in self.allowed_values[k]:
+                if v not in self.allowed_values[k]:
                     return False
         return True
