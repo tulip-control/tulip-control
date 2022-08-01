@@ -33,6 +33,7 @@
 import collections.abc as _abc
 import itertools as _itr
 import logging
+import operator as _op
 import pprint as _pp
 import random
 import warnings
@@ -610,10 +611,9 @@ class CartesianProduct:
                 'Argument element must be `Iterable`, otherwise cannot '
                 'recover which item in it belongs to which set in the '
                 'Cartesian product.')
-        for idx, item in enumerate(element):
-            if item not in self.mathsets[idx]:
-                return False
-        return True
+        pairs = zip(self.mathsets, elements)
+        return all(map(
+            _op.contains, pairs))
 
     def __mul__(self, mathsets):
         """Multiply Cartesian products."""
