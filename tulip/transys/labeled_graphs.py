@@ -174,20 +174,6 @@ class States:
         s.update(states)
         self._initial = s
 
-    def _single_state2singleton(
-            self,
-            state
-            ) -> list:
-        """Convert to a singleton list, if argument is a single state.
-
-        Otherwise return given argument.
-        """
-        if state in self:
-            states = [state]
-        else:
-            states = state
-        return states
-
     def add(
             self,
             new_state,
