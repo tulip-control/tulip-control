@@ -1044,7 +1044,8 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 dict[str, ...],
             check:
                 bool):
-        untyped_keys = set(typed_attr).difference(type_defs)
+        untyped_keys = set(typed_attr
+            ).difference(type_defs)
         logger.debug(
             'checking for untyped keys...\n'
             f'attribute dict: {typed_attr}\n'
