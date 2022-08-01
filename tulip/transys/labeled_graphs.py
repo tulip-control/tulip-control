@@ -1103,16 +1103,16 @@ class LabeledDiGraph(nx.MultiDiGraph):
             attr:
                 dict):
         if attr_dict is None:
-            attr_dict = attr
+            return attr
         else:
             try:
                 attr_dict.update(attr)
+                return attr_dict
             except AttributeError as error:
                 raise nx.NetworkXError(
                     'The `attr_dict` argument '
                     'must be a dictionary.'
                     ) from error
-        return attr_dict
 
     def add_node(
             self,
