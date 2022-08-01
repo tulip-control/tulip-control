@@ -1651,10 +1651,6 @@ def prepend_with(
         text prepended to `states`.  If None, then
         `states` is returned without modification
     """
-    if not isinstance(prepend_str, str) and prepend_str is not None:
-        raise TypeError(
-            '`prepend_str` must be of type `str`. '
-            f'Got:\n\t{prepend_str}\ninstead.')
     if prepend_str is None:
         return states
     return [f'{prepend_str}{s}' for s in states]
