@@ -574,7 +574,8 @@ class SubSet(MathSet):
             raise ValueError(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
-                f'FYI: new element:\n\t{new_element}\n'
+                'The new element is:\n'
+                f'\t{new_element}\n'
                 f'and superset:\n\t{self._superset}')
         super().add(new_element)
 
