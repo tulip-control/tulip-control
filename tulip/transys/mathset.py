@@ -681,7 +681,7 @@ def is_subset(small_iterable, big_iterable):
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
-    if not isinstance(big_iterable, (_abc.Iterable, _abc.Container)):
+    if not isinstance(big_iterable, _abc.Iterable | _abc.Container):
         raise TypeError(
             'big_iterable must be either Iterable or Container, '
             'otherwise subset relation undefined.\n'

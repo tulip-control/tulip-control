@@ -146,7 +146,7 @@ class PrioritizedSpecification:
         """
         if not isinstance(fa, FA):
             raise TypeError(fa)
-        if not isinstance(priority, (float, int)):
+        if not isinstance(priority, float | int):
             raise TypeError(priority)
         if not isinstance(level, int):
             raise TypeError(level)

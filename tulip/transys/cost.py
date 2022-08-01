@@ -55,7 +55,7 @@ class VectorCost:
     """Cost with addition and comparison operations."""
 
     def __init__(self, value):
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             value = [value]
         if not isinstance(value, _abc.Iterable):
             raise TypeError(
@@ -79,7 +79,7 @@ class VectorCost:
     def _convert(
             self,
             other):
-        if isinstance(other, (int, float)):
+        if isinstance(other, int | float):
             repeated = _itr.repeat(
                 other, len(self))
             other = VectorCost(repeated)

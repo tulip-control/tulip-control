@@ -577,7 +577,8 @@ class SwitchedSysDyn:
         else:
             if not isinstance(
                     cts_ss,
-                    (pc.Polytope, pc.Region)):
+                    pc.Polytope |
+                    pc.Region):
                 raise Exception(
                    '`cts_ss` must be '
                    'a `Polytope` or `Region`')
@@ -844,7 +845,7 @@ def _check_time_data(
             'or unspecified.')
         if timestep <= 0:
             raise ValueError(error_string)
-        if not isinstance(timestep, (int, float)):
+        if not isinstance(timestep, int | float):
             raise TypeError(error_string)
 
 
