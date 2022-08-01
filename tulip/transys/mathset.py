@@ -716,8 +716,6 @@ def is_subset(
         return all(map(
             big_iterable.__contains__,
             small_iterable))
-    except:
-        raise Exception('Failed to compare iterables.')
 
 
 def powerset(iterable):
