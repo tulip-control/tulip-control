@@ -141,8 +141,8 @@ class FunctionOnLabeledState:
         self._state_index = input_keys.index("state")
 
     def __str__(self):
-        ret = [str(pair) for pair in self._state_input_output_list]
-        return ", ".join(ret)
+        return ', '.join(map(
+            str, self._state_input_output_list))
 
     def __len__(self):
         return len(self._state_input_output_list)
