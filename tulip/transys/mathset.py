@@ -659,10 +659,11 @@ def unique(
     try:
         return set(iterable)
     except TypeError:
-        unique_items = list()
-        for item in iterable:
-            if item not in unique_items:
-                unique_items.append(item)
+        pass
+    unique_items = list()
+    for item in iterable:
+        if item not in unique_items:
+            unique_items.append(item)
     return unique_items
 
 
