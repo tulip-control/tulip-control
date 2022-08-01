@@ -888,12 +888,11 @@ class TypedDict(dict):
                 except:
                     valid_y = False
         if not valid_y:
-            msg = (
+            raise ValueError(
                 f'key: {i}, cannot be'
                 f' assigned value: {y}\n'
                 'Admissible values are:\n\t'
                 f'{self.allowed_values[i]}')
-            raise ValueError(msg)
         super().__setitem__(i, y)
 
     def __str__(self):
