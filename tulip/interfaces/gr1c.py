@@ -283,9 +283,9 @@ def load_aut_xml(
             'unsupported tulipcon XML version: '
             f'{elem.attrib["version"]}')
     # Extract discrete variables and LTL specification
-    (tag_name, env_vardict, env_vars) = _untagdict(elem.find(
+    tag_name, env_vardict, env_vars = _untagdict(elem.find(
         ns_prefix+"env_vars"), get_order=True)
-    (tag_name, sys_vardict, sys_vars) = _untagdict(elem.find(
+    tag_name, sys_vardict, sys_vars = _untagdict(elem.find(
         ns_prefix+"sys_vars"), get_order=True)
     # variables
     env_vars = _parse_vars(env_vars, env_vardict)
@@ -301,7 +301,7 @@ def load_aut_xml(
             raise ValueError(
                 'invalid specification in '
                 'tulipcon XML string.')
-        (tag_name, li) = _untaglist(
+        tag_name, li = _untaglist(
             s_elem.find(ns_prefix + spec_tag),
             cast_f=str,
             namespace=namespace)
@@ -332,14 +332,14 @@ def load_aut_xml(
         this_id = int(node.find(f'{ns_prefix}id').text)
         # this_name = node.find(f'{ns_prefix}anno').text
         #     # Assume version 1
-        (tag_name, this_name_list) = _untaglist(
+        tag_name, this_name_list = _untaglist(
             node.find(f'{ns_prefix}anno'),
             cast_f=int)
         if len(this_name_list) == 2:
-            (mode, rgrad) = this_name_list
+            mode, rgrad = this_name_list
         else:
-            (mode, rgrad) = (-1, -1)
-        (tag_name, this_child_list) = _untaglist(
+            mode, rgrad = (-1, -1)
+        tag_name, this_child_list = _untaglist(
             node.find(f'{ns_prefix}child_list'),
             cast_f=int)
         if tag_name != f'{ns_prefix}child_list':

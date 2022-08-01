@@ -71,9 +71,9 @@ else:
     print_pretty = False
 
 if len(sys.argv) >= 3 and sys.argv[-2][0] != "-":
-    (height, width) = (int(sys.argv[-2]), int(sys.argv[-1]))
+    height, width = (int(sys.argv[-2]), int(sys.argv[-1]))
 else:
-    (height, width) = (5, 10)
+    height, width = (5, 10)
 
 Z, troll_list = gw.random_world((height, width),
                                 wall_density=0.2,
@@ -85,7 +85,7 @@ for i in range(len(troll_list)):
 print(Z.pretty(show_grid=True, line_prefix="## "))
 
 print(Z.dumps(line_prefix="# "))
-(spec, moves_N) = gw.add_trolls(Z, troll_list)
+spec, moves_N = gw.add_trolls(Z, troll_list)
 print(spec.pretty())
 
 if print_pretty:

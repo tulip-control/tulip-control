@@ -65,7 +65,7 @@ def dijkstra_single_source_multiple_targets(
     visited = set()
     Q = [(0, source, list())]
     while Q:
-        (cost, u, path) = _hp.heappop(Q)
+        cost, u, path = _hp.heappop(Q)
         if u in visited:
             continue
         visited.add(u)
@@ -110,7 +110,7 @@ def dijkstra_multiple_sources_multiple_targets(
     best_cost = float("inf")
     best_path = list()
     for source in source_set:
-        (cost, path) = dijkstra_single_source_multiple_targets(
+        cost, path = dijkstra_single_source_multiple_targets(
             graph, source,
             target_set, cost_key)
         if cost < best_cost:

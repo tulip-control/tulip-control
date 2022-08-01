@@ -12,7 +12,7 @@ def single_input_test():
     num = 10
     _fill(num, func)
     _common_tests(num, func)
-    (state, input_dict) = func.get_state_and_input_dict((0, 0))
+    state, input_dict = func.get_state_and_input_dict((0, 0))
     assert state == (0, 0)
     assert len(input_dict) == 0
     _get_state_input_output_pair(
@@ -26,7 +26,7 @@ def multiple_inputs_test():
     num = 10
     _fill(num, func)
     _common_tests(num, func)
-    (state, input_dict) = func.get_state_and_input_dict((0, 0))
+    state, input_dict = func.get_state_and_input_dict((0, 0))
     assert state == 0
     assert input_dict == {"mode": 0}
     _get_state_input_output_pair(

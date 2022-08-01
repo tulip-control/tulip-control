@@ -400,7 +400,7 @@ def simulate2d(
     x = [x_init[0]]
     y = [x_init[1]]
     for i in range(T):
-        (nd, out) = ctrl.reaction(
+        nd, out = ctrl.reaction(
             nd, env_inputs[i + 1])
         x0 = np.array([x[i * N], y[i * N]])
         start = s0_part
@@ -444,7 +444,7 @@ def _simulate2d_ea(
     # pick an initial discrete
     # system state given the
     # initial discrete environment state
-    (nd, out) = ctrl.reaction(
+    nd, out = ctrl.reaction(
         'Sinit', env_inputs[0])
     init_edges = ctrl.edges(
         'Sinit',

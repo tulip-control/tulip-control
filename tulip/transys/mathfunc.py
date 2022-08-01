@@ -148,7 +148,7 @@ class FunctionOnLabeledState:
         return len(self._state_input_output_list)
 
     def __getitem__(self, input_tuple):
-        (state, input_dict) = self.get_state_and_input_dict(input_tuple)
+        state, input_dict = self.get_state_and_input_dict(input_tuple)
         pair = self.get_state_input_output_pair(state, input_dict)
         if pair is None:
             raise KeyError(
@@ -229,7 +229,7 @@ class FunctionOnLabeledState:
         """
         if labels is None:
             labels = list()
-        (state, input_dict) = self.get_state_and_input_dict(input_tuple)
+        state, input_dict = self.get_state_and_input_dict(input_tuple)
         output_dict = self.get_output_dict(output_tuple)
         pair = self.get_state_input_output_pair(
             state, input_dict)

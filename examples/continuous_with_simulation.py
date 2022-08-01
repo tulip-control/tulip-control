@@ -107,10 +107,10 @@ def simulate(randParkSignal, sys_dyn, ctrl, disc_dynamics, T):
     s0_part = find_controller.find_discrete_state(
         [x[0], y[0]], disc_dynamics.ppp)
     ctrl = synth.determinize_machine_init(ctrl, {'loc': s0_part})
-    (s, dum) = ctrl.reaction('Sinit', {'park': randParkSignal[0]})
+    s, dum = ctrl.reaction('Sinit', {'park': randParkSignal[0]})
     print(dum)
     for i in range(0, T):
-        (s, dum) = ctrl.reaction(s, {'park': randParkSignal[i]})
+        s, dum = ctrl.reaction(s, {'park': randParkSignal[i]})
         u = find_controller.get_input(
             x0=np.array([x[i * N], y[i * N]]),
             ssys=sys_dyn,

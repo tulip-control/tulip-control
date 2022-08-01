@@ -87,7 +87,7 @@ def fts2promela(
             graph,
             ap_alphabet):
         s = '\t if\n'
-        for (from_state, to_state, sublabels_dict) in transitions:
+        for from_state, to_state, sublabels_dict in transitions:
             s += (
                 '\t :: atomic{\n'
                 f'\t\t printf("{sublabels_dict}\\n");\n'
@@ -98,7 +98,7 @@ def fts2promela(
         return s
     def get_label_of(state, graph):
         state_label_pairs = graph.states.find([state])
-        (state_, ap_label) = state_label_pairs[0]
+        state_, ap_label = state_label_pairs[0]
         print(f'state:\t{state}')
         print(f'ap label:\t{ap_label}')
         return ap_label['ap']

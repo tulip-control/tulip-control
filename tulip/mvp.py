@@ -211,13 +211,13 @@ def solve(
         raise AssertionError(spec)
     if ks.atomic_propositions != spec.atomic_propositions:
         raise AssertionError(ks, spec)
-    (wpa, null_state) = _construct_weighted_product_automaton(ks, spec)
+    wpa, null_state = _construct_weighted_product_automaton(ks, spec)
     goal_states = [
         state for state in ks.states if goal_label in ks.states[state]["ap"]]
     accepting_goal_states = _trs.SubSet(wpa.states.accepting)
     accepting_goal_states.add_from(
         set(_itr.product(goal_states, spec.get_states())))
-    (cost, product_path) = _gralgo.dijkstra_multiple_sources_multiple_targets(
+    cost, product_path = _gralgo.dijkstra_multiple_sources_multiple_targets(
         wpa,
         wpa.states.initial,
         accepting_goal_states,

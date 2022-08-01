@@ -140,7 +140,7 @@ def newax(
     if fig is None:
         fig = _plt.figure()
     # create subplot(s)
-    (nv, nh) = subplot_layout
+    nv, nh = subplot_layout
     n = np.prod(subplot_layout)
     try:
         dim = tuple(dim)

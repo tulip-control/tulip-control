@@ -94,7 +94,7 @@ def synthesis_test():
     reach = '"a9"'
     formula = f"Pmax=? [ ({safety}) U ({reach}) ]"
     # Construct policy
-    (result, policy) = stormpy_int.model_checking(
+    result, policy = stormpy_int.model_checking(
         composed, formula, out_model_path, True
     )
     os.remove(out_model_path)

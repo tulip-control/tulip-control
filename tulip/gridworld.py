@@ -505,8 +505,8 @@ class GridWorld:
         #  I - possible initial location.
         out_str = line_prefix
         def direct(c1, c2):
-            (y1, x1) = c1
-            (y2, x2) = c2
+            y1, x1 = c1
+            y2, x2 = c2
             if x1 > x2:
                 return "<"
             elif x1 < x2:
@@ -1037,8 +1037,8 @@ class GridWorld:
         scale_init = list()
         for row in range(shape_scaled[0]):
             for col in range(shape_scaled[1]):
-                (y, x) = (row // yf, col // xf)
-                (yr, xr) = (row % yf, col % xf)
+                y, x = (row // yf, col // xf)
+                yr, xr = (row % yf, col % xf)
                 if self.W[y, x] == 1:
                     scaleW[row, col] = 1
                 if (yr, xr) == (0, 0):
@@ -1225,7 +1225,7 @@ def narrow_passage(
         string to be used as prefix for naming gridworld
         cell variables.
     """
-    (w, h) = size
+    w, h = size
     if w < 3 or h < 3:
         raise ValueError("Gridworld too small: minimum dimension 3")
     Z = unoccupied(size, prefix)
@@ -1327,7 +1327,7 @@ def add_trolls(
     X_ID = -1
     if get_moves_lists:
         moves_N = list()
-    (num_rows, num_cols) = Y.size()
+    num_rows, num_cols = Y.size()
     for (center, radius) in troll_list:
         if (
                 center[0] >= num_rows or

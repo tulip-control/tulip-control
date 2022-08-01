@@ -54,9 +54,9 @@ else:
     print_pretty = False
 
 if len(sys.argv) >= 3:
-    (height, width) = (int(sys.argv[1]), int(sys.argv[2]))
+    height, width = (int(sys.argv[1]), int(sys.argv[2]))
 else:
-    (height, width) = (5, 10)
+    height, width = (5, 10)
 
 Z = gw.random_world((height, width),
                     wall_density=0.2,

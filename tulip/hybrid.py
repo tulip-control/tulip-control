@@ -275,7 +275,7 @@ class LtiSysDyn:
             return
         if color is None:
             color = np.random.rand(3)
-        (x, res) = pc.grid_region(
+        x, res = pc.grid_region(
             self.domain,
             res=res)
         n = self.A.shape[0]

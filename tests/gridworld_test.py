@@ -268,7 +268,7 @@ class RandomWorld_test:
         for r in range(len(self.rworlds)):
             print("test world index", r)
             print(self.rworlds[r])
-            (num_rows, num_cols) = self.rworlds[r].size()
+            num_rows, num_cols = self.rworlds[r].size()
             num_occupied = 0
             for i in range(num_rows):
                 for j in range(num_cols):

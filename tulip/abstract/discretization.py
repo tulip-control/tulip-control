@@ -732,7 +732,7 @@ def _discretize_bi(
         orig_list = None
         orig = [0]
     else:
-        (part, new2old) = _p2p.part2convex(part) # convexify
+        part, new2old = _p2p.part2convex(part) # convexify
         part2orig = [part2orig[i] for i in new2old]
         # map new regions to pwa subsystems
         if ispwa:
@@ -1237,7 +1237,7 @@ def _discretize_dual(
         orig_list = None
         orig = [0]
     else:
-        (part, new2old) = _p2p.part2convex(part)  # convexify
+        part, new2old = _p2p.part2convex(part)  # convexify
         part2orig = [part2orig[i] for i in new2old]
         # map new regions to pwa subsystems
         if ispwa:
@@ -1771,7 +1771,7 @@ def multiproc_discretize_switched(
     for job in jobs:
         job.join()
     # merge their domains
-    (merged_abstr, ap_labeling) = merge_partitions(abstractions)
+    merged_abstr, ap_labeling = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
     logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition

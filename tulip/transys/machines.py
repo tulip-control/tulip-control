@@ -632,7 +632,7 @@ class MealyMachine(Transducer):
                     some_possibilities.append(possible_inputs)
         # must be deterministic
         try:
-            ((_, next_state, attr_dict), ) = enabled_trans
+            (_, next_state, attr_dict), = enabled_trans
         except ValueError:
             if len(enabled_trans) == 0:
                 if len(some_possibilities) == 0:
@@ -843,7 +843,7 @@ def _interactive_run_step(mealy, state):
             print('Selection not recognized. Please try again.')
     if selected_trans is None:
         return None
-    (from_, to_state, attr_dict) = selected_trans
+    from_, to_state, attr_dict = selected_trans
     inputs = project_dict(
         attr_dict, mealy.inputs)
     outputs = project_dict(
@@ -859,7 +859,7 @@ def _interactive_run_step(mealy, state):
 def _select_transition(mealy, trans):
     msg = 'Found more than 1 outgoing transitions:' + 2 * '\n'
     for i, t in enumerate(trans):
-        (from_state, to_state, attr_dict) = t
+        from_state, to_state, attr_dict = t
         inputs = project_dict(
             attr_dict, mealy.inputs)
         outputs = project_dict(

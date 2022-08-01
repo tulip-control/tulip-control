@@ -842,10 +842,10 @@ def _export_adj(matrix, parent, tag=None):
     else:
         tree = ET.SubElement(parent, tag, type=T_ADJ)
     # number of states, because the matrix must be square
-    (M,N) = matrix.shape
+    M, N = matrix.shape
     _export_xml(N, tree, 'num_states')
     # list of nonzero indices
-    (row_indices, col_indices) = matrix.nonzero()
+    row_indices, col_indices = matrix.nonzero()
     indices = list()
     for i, row_ind in enumerate(row_indices):
         col_ind = col_indices[i]

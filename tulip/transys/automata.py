@@ -338,7 +338,7 @@ def tuple2ba(
     else:
         ba.alphabet.add(alphabet_or_ap)
     for transition in transitions:
-        (from_state, to_state, guard) = transition
+        from_state, to_state, guard = transition
         [from_state, to_state] = _graphs.prepend_with(
             [from_state, to_state],
             prepend_str)

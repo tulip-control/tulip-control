@@ -700,7 +700,7 @@ def tuple2fts(
         if state_labeling[0] is None:
             state_label_pairs = False
         try:
-            (state, ap_label) = state_labeling[0]
+            state, ap_label = state_labeling[0]
         except:
             state_label_pairs = False
         if state_label_pairs:
@@ -757,7 +757,7 @@ def tuple2fts(
     # any transition labeling ?
     if actions is None:
         for from_state, to_state in transitions:
-            (from_state, to_state) = _graphs.prepend_with(
+            from_state, to_state = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
             logger.debug(
@@ -767,7 +767,7 @@ def tuple2fts(
     else:
         ts.actions |= actions
         for from_state, to_state, act in transitions:
-            (from_state, to_state) = _graphs.prepend_with(
+            from_state, to_state = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
             logger.debug(

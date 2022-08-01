@@ -121,7 +121,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             enabled_ba_trans = find_ba_succ(q, next_s, ts, ba)
             if not enabled_ba_trans:
                 continue
-            (new_sqs, new_accepting) = find_prod_succ(
+            new_sqs, new_accepting = find_prod_succ(
                 sq, next_s, enabled_ba_trans,
                 self, ba, ts)
             next_sqs.update(new_sqs)
@@ -141,7 +141,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         while Q:
             Qnew = set()
             for sq in Q:
-                (s, q) = sq
+                s, q = sq
                 new = self.add_successors(s, q)
                 Qnew.update(new)
             Q = Qnew
@@ -229,7 +229,7 @@ def ts_ba_sync_prod(
     while queue:
         sq = queue.pop()
         visited.add(sq)
-        (s, q) = sq
+        s, q = sq
         logger.debug(f'Current product state:\t{sq}')
         # get next states
         next_ss = fts.states.post([s])
@@ -238,7 +238,7 @@ def ts_ba_sync_prod(
             enabled_ba_trans = find_ba_succ(q, next_s, fts, ba)
             if not enabled_ba_trans:
                 continue
-            (new_sqs, new_accepting) = find_prod_succ(
+            new_sqs, new_accepting = find_prod_succ(
                 sq, next_s, enabled_ba_trans,
                 prodts, ba, fts)
             next_sqs.update(new_sqs)
@@ -340,7 +340,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
         f'\n{_hl}\n'
         'Product: BA * TS'
         f'\n{_hl}\n')
-    (prod_ts, persistent) = ts_ba_sync_prod(
+    prod_ts, persistent = ts_ba_sync_prod(
         transition_system, buchi_automaton)
 
     prod_name = (
@@ -371,7 +371,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
             f'prod_TS: to_state =\n\t{to_state}\n'
             f'TS: ts_to_state =\n\t{ts_to_state}')
         state_label_pairs = transition_system.states.find(ts_to_state)
-        (ts_to_state_, transition_label_dict) = state_label_pairs[0]
+        ts_to_state_, transition_label_dict = state_label_pairs[0]
         transition_label_value = transition_label_dict['ap']
         prod_ba.transitions.add(
             from_state, to_state,
