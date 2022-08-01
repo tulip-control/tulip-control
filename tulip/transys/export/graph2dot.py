@@ -576,7 +576,9 @@ def plot_dot(
                 display(Image(data=png_str))
                 return True
         except:
-            print('IPython installed, but not called from it.')
+            print(
+                'IPython installed, '
+                'but not called from it.')
     except ImportError:
         logger.warning(
             'IPython not found.\n'
