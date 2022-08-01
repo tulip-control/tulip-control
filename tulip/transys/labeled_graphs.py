@@ -1051,27 +1051,31 @@ class LabeledDiGraph(nx.MultiDiGraph):
             f'attribute dict: {typed_attr}\n'
             f'type definitions: {type_defs}\n'
             f'untyped_keys: {untyped_keys}')
-        if untyped_keys:
-            edge_attrs = {
-                k: typed_attr[k]
-                for k in untyped_keys}
-            allowed_attrs = ', '.join(map(
-                str, type_defs))
-            msg = (
-                'The following edge attributes:\n'
-                f'{edge_attrs}\n'
-                'are not allowed.\n'
-                'Currently the allowed attributes are:'
-                f'{allowed_attrs}')
-            if check:
-                msg += ('\nTo set attributes not included '
-                        'in the existing types, pass: check = False')
-                raise AttributeError(msg)
-            else:
-                msg += '\nAllowed because you passed: check = False'
-                logger.warning(msg)
-        else:
+        if not untyped_keys:
             logger.debug('no untyped keys.')
+            return
+        edge_attrs = {
+            k: typed_attr[k]
+            for k in untyped_keys}
+        allowed_attrs = ', '.join(map(
+            str, type_defs))
+        msg = (
+            'The following edge attributes:\n'
+            f'{edge_attrs}\n'
+            'are not allowed.\n'
+            'Currently the allowed attributes are:'
+            f'{allowed_attrs}')
+        if not check:
+            logger.warning(
+                f'{msg}\n'
+                'Allowed because you passed: '
+                'check = False')
+            return
+        raise AttributeError(
+            f'{msg}\n'
+            'To set attributes not included '
+            'in the existing types, '
+            'pass: check = False')
 
     def is_consistent(self) -> bool:
         """Whether labels agree with type definitions.
