@@ -538,9 +538,6 @@ def plot_dot(
 
     No files written or deleted from the disk.
 
-    Note that all networkx graph classes are inherited
-    from `networkx.Graph`.
-
 
     See Also
     ========
