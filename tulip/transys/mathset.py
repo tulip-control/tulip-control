@@ -627,7 +627,7 @@ class CartesianProduct:
         self.mathsets.append(mathset)
 
     def add_from(self, mathsets):
-        self.mathsets += mathsets
+        self.mathsets.extend(mathsets)
 
     def remove(self, mathset):
         self.mathsets.remove(mathset)
