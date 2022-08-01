@@ -571,7 +571,7 @@ class SubSet(MathSet):
         `MathSet.add`
         """
         if new_element not in self._superset:
-            raise Exception(
+            raise ValueError(
                 'New element state \\notin superset.\n'
                 'Add it first to states using e.g. sys.states.add()\n'
                 f'FYI: new element:\n\t{new_element}\n'
