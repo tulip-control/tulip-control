@@ -597,7 +597,7 @@ class SubSet(MathSet):
         `add`, `__ior__`
         """
         if not is_subset(new_elements, self._superset):
-            raise Exception(
+            raise ValueError(
                 f'All new_elements:\n\t{new_elements}'
                 '\nshould already be \\in '
                 f'self.superset = {self._superset}')
