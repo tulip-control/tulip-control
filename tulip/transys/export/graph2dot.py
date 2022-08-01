@@ -416,7 +416,8 @@ def _form_edge_label(edge_data, label_def,
             # avoid turning it to list
             label_str = label_value
         elif isinstance(label_value, _abc.Iterable):
-            s = ', '.join([str(x) for x in label_value])
+            s = ', '.join(map(
+                str, label_value))
             label_str = r'\\{' + _tw.fill(s) + r'\\}'
         else:
             label_str = str(label_value)
