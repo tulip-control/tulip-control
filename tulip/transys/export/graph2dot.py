@@ -438,7 +438,7 @@ def _graph2dot(
         tikz=False,
         rankdir='TB'
         ) -> str:
-    """Convert (possibly labeled) state graph to dot str."""
+    """Convert state graph to DOT."""
     dummy_nx_graph = nx.MultiDiGraph()
     _states2dot_str(
         graph, dummy_nx_graph,
