@@ -1023,20 +1023,25 @@ def mealy2moore(
 
 
 def _print_ports(port_dict):
-    s = ''
-    for port_name, port_type in port_dict.items():
-        s += '\t' + str(port_name) + ' : '
-        s += _pp.pformat(port_type) + '\n'
-    s += '\n'
-    return s
+    def print_port(name_type):
+        port_name, port_type = name_type
+        return (
+            f'\t{port_name} : '
+            f'{_pp.pformat(port_type)}\n')
+    text = ''.join(map(
+        print_port,
+        port_dict.items()))
+    return f'{text}\n'
 
 
 def _print_label(label_dict):
-    s = ''
-    for name, value in label_dict.items():
-        s += '\t\t' + str(name) + ' : ' + str(value) + '\n'
-    s += '\n'
-    return s
+    def print_label(name_value):
+        name, value = name_value
+        return f'\t\t{name} : {value}\n'
+    text = ''.join(map(
+        print_label,
+        label_dict.items()))
+    return f'{text}\n'
 
 
 def _create_state_str(mealy_state, output, moore,
