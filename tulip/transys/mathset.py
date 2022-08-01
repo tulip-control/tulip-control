@@ -836,12 +836,14 @@ class PowerSet:
         expected_type = (
             name != 'math_set' or
             isinstance(value, MathSet))
-        if not expected_type:
-            raise TypeError(
-                'PowerSet.math_set must be of class MathSet.\n'
-                f'Got instead:\n\t{value}'
-                f'\nof class:\nt\t{type(value)}')
-        object.__setattr__(self, name, value)
+        if expected_type:
+            object.__setattr__(self, name, value)
+            return
+        raise TypeError(
+            'PowerSet.math_set must be of class MathSet.\n'
+            f'Got instead:\n\t{value}'
+            f'\nof class:\nt\t{type(value)}')
+
 
 class TypedDict(dict):
     """dict subclass where values can be constrained by key.
