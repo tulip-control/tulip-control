@@ -272,7 +272,9 @@ class MathSet:
                 f'{type(other)}, instead.')
         same_lists = compare_lists(
             self._list, other._list)
-        return (self._set == other._set) and same_lists
+        return (
+            self._set == other._set and
+            same_lists)
 
     def __contains__(self, item):
         if isinstance(item, _abc.Hashable):
