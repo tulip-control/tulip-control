@@ -425,12 +425,11 @@ class States:
                     logger.debug(
                         f'state_id = {state}, not desired.')
                     continue
-            msg = (
+            logger.debug(
                 'Checking state label:\n'
                 f'\t attr_dict = {attr_dict}\n'
                 ' vs:\n'
                 f'\t desired_label = {with_attr_dict}')
-            logger.debug(msg)
             if not with_attr_dict:
                 logger.debug('Any label acceptable.')
                 ok = True
@@ -1069,12 +1068,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
             check:
                 bool):
         untyped_keys = set(typed_attr).difference(type_defs)
-        msg = (
+        logger.debug(
             'checking for untyped keys...\n'
             f'attribute dict: {typed_attr}\n'
             f'type definitions: {type_defs}\n'
             f'untyped_keys: {untyped_keys}')
-        logger.debug(msg)
         if untyped_keys:
             edge_attrs = {
                 k: typed_attr[k]
@@ -1235,11 +1233,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # legacy
         if 'check_states' in attr:
-            msg = (
+            logger.warning(
                 'saw keyword argument: check_states '
                 'which is no longer available, '
                 'firstly add the new nodes.')
-            logger.warning(msg)
         # check nodes exist
         if u not in self._succ:
             raise ValueError(
@@ -1269,14 +1266,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             raise Exception(msg)
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
-            msg = (
+            logger.warning(
                 'Same labeled transition:\n'
                 'from_state---[label]---> to_state\n'
                 'already exists, where:\n'
                 f'\t from_state = {u}\n'
                 f'\t to_state = {v}\n'
                 f'\t label = {typed_attr}\n')
-            logger.warning(msg)
             return
         # self._breaks_determinism(from_state, labels)
         self._check_for_untyped_keys(
