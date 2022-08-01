@@ -547,7 +547,7 @@ def plot_dot(
     """
     if not isinstance(graph, nx.Graph):
         raise TypeError(
-            'graph not networkx class.' +
+            'graph not networkx class.'
             f'Got instead: {type(graph)}')
     dot_graph = _graphics.networkx_to_graphviz(graph)
     dot_graph.graph_attr['rankdir'] = rankdir

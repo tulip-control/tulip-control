@@ -867,10 +867,10 @@ def _select_transition(mealy, trans):
             f'\t inputs: {inputs}'
             f'\t outputs: {outputs}\n\n')
     msg += (
-        '\n' +
-        'Select from the available transitions above\n' +
-        'by giving its integer,\n' +
-        'Press "Enter" to stop the simulation:\n' +
+        '\n'
+        'Select from the available transitions above\n'
+        'by giving its integer,\n'
+        'Press "Enter" to stop the simulation:\n'
         '\t int = ')
     print(msg)
     id_selected = sys.stdin.readline().rstrip('\r\n')
