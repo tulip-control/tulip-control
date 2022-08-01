@@ -49,13 +49,13 @@ logger = logging.getLogger(__name__)
 
 def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     def prod_ids2states(prod_state_id, self, other):
-        (idx1, idx2) = prod_state_id
+        idx1, idx2 = prod_state_id
         state1 = self.states._int2mutant(idx1)
         state2 = other.states._int2mutant(idx2)
         prod_state = (state1, state2)
         return prod_state
     def label_union(nx_label):
-        (v1, v2) = nx_label
+        v1, v2 = nx_label
         if v1 is None or v2 is None:
             raise Exception(
                 'At least one factor has unlabeled state, '
