@@ -56,7 +56,10 @@ def _states2dot_str(
         wrap=10,
         tikz=False,
         rankdir='TB'):
-    """Copy nodes to given graph, with attributes for dot export."""
+    """Copy nodes to given graph,
+
+    with attributes for dot export.
+    """
     # TODO generate LaTeX legend table for edge labels
     states = graph.states
     # get labeling def
