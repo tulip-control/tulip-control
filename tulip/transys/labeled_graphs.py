@@ -659,9 +659,14 @@ class Transitions:
         nx_adj = nx.from_scipy_sparse_array(
             adj, create_using=nx.DiGraph())
         # add each edge using existing checks
-        for i, j in nx_adj.edges():
-            si = adj2states[i]
-            sj = adj2states[j]
+        def map_edge(edge):
+            return map(
+                adj2states.__getitem__,
+                edge)
+        edges = map(
+            map_edge,
+            nx_adj.edges())
+        for si, sj in edges:
             self.add(
                 si, sj, attr_dict, check,
                 **attr)
