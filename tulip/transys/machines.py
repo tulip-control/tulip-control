@@ -1059,8 +1059,13 @@ def strip_ports(
     ```
     """
     new = MealyMachine()
-    new.add_inputs(trim_dict(mealy.inputs, names))
-    new.add_outputs(trim_dict(mealy.outputs, names))
+    def trim(ports):
+        return trim_dict(
+            ports, names)
+    new.add_inputs(trim(
+        mealy.inputs))
+    new.add_outputs(trim(
+        mealy.outputs))
     new.add_nodes_from(mealy)
     new.states.initial.add_from(
         mealy.states.initial)
