@@ -1083,13 +1083,15 @@ def _output_fts(
           the other direction.
     """
     env_actions = [
-        dict(name='env_actions',
-             values=ts.env_actions,
-             setter=True)]
+        dict(
+            name='env_actions',
+            values=ts.env_actions,
+            setter=True)]
     sys_actions = [
-        dict(name='sys_actions',
-             values=ts.sys_actions,
-             setter=True)]
+        dict(
+            name='sys_actions',
+            values=ts.sys_actions,
+            setter=True)]
     ts_simu = FTS(env_actions, sys_actions)
     ts2simu = dict()
     simu2ts = dict()
