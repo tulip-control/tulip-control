@@ -110,7 +110,8 @@ def _state2dot(
     fc = d.get('fillcolor', 'none')
     filled = '' if fc == 'none' else 'filled'
     if fc == 'gradient':
-        # top/bottom colors not supported for dot
+        # top/bottom colors
+        # not supported for dot
         lc = d.get(
             'left_color',
             d['top_color'])
