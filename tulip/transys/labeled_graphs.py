@@ -1081,14 +1081,15 @@ class LabeledDiGraph(nx.MultiDiGraph):
         Use case: removing values from a label type
         can invalidate existing labels that use them.
         """
-        for node, attr_dict in self.nodes(data=True):
-            if not attr_dict.is_consistent():
-                return False
+        nodes = self.nodes(data=True)
         edges = self.edges(data=True)
-        for node_i, node_j, attr_dict in edges:
-            if not attr_dict.is_consistent():
-                return False
-        return True
+        def consistent(items):
+            return all(
+                t[-1].is_consistent()
+                for t in items)
+        return (
+            consistent(nodes) and
+            consistent(edges))
 
     def _update_attr_dict_with_attr(
             self,
