@@ -1107,10 +1107,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         else:
             try:
                 attr_dict.update(attr)
-            except AttributeError:
+            except AttributeError as error:
                 raise nx.NetworkXError(
                     'The `attr_dict` argument '
-                    'must be a dictionary.')
+                    'must be a dictionary.'
+                    ) from error
         return attr_dict
 
     def add_node(
