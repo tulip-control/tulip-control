@@ -156,7 +156,8 @@ class MathSet:
             f'{self._list})')
 
     def _debug_repr(self):
-        set_str = ', '.join([repr(i) for i in self._set])
+        set_str = ', '.join(map(
+            repr, self._set))
         return f'MathSet({{{set_str}}} +{self._list})'
 
     def __or__(
@@ -542,7 +543,8 @@ class SubSet(MathSet):
             f'{self._list})')
 
     def _debug_repr(self):
-        set_str = ', '.join([repr(i) for i in self._set])
+        set_str = ', '.join(map(
+            repr, self._set))
         return f'SubSet({{{set_str}}} +{self._list})'
 
     @property
