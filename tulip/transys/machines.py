@@ -618,7 +618,7 @@ class MealyMachine(Transducer):
             if project_dict(d, restricted_inputs) == inputs]
         if not enabled_trans:
             some_possibilities = list()
-            for i, j, d in self.edges([from_state], data=True):
+            for _, _, d in self.edges([from_state], data=True):
                 # The number of possible inputs to suggest here is
                 # arbitrary. Consider making it a function parameter.
                 if len(some_possibilities) >= 5:
