@@ -108,18 +108,18 @@ def test_common_bug(
     logger.debug(
         'Desired value:\n'
         f'\t{desired_value}')
-    if (
-        isinstance(value, (set, list)) and
-        isinstance(desired_value, (set, list)) and
-        value.__class__ != desired_value.__class__
-    ):
-        msg = (
-            'Set SubLabel:\n'
-            f'\t{value}'
-            'compared to list SubLabel:\n'
-            f'\t{desired_value}'
-            'Did you mix sets & lists when setting AP labels ?')
-        raise AssertionError(msg)
+    mismatch = (
+        isinstance(value, set | list) and
+        isinstance(desired_value, set | list) and
+        value.__class__ != desired_value.__class__)
+    if not mismatch:
+        return
+    raise AssertionError(
+        'Set SubLabel:\n'
+        f'\t{value}'
+        'compared to list SubLabel:\n'
+        f'\t{desired_value}'
+        'Did you mix sets & lists when setting AP labels ?')
 
 
 class States:
