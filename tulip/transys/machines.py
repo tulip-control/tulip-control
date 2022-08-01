@@ -77,7 +77,8 @@ def create_machine_ports(spc_vars):
 
     @param spc_vars:
         port names and types inside tulip.
-        For arbitrary finite types the type can be a list of strings,
+        For arbitrary finite types the type
+        can be a list of strings,
         instead of a range of integers.
         These are as originally defined by the user or synth.
     """
