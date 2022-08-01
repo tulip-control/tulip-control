@@ -39,11 +39,9 @@ import networkx as _nx
 import numpy as np
 
 import tulip.transys.cost as _cost
+import tulip.transys.export.graph2promela as _pml
 import tulip.transys.labeled_graphs as _graphs
 import tulip.transys.mathset as _mset
-# inline imports
-#
-# import tulip.transys.export.graph2promela
 
 
 __all__ = [
@@ -615,7 +613,6 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         # closed ?
         if self.env_vars:
             return False
-        import tulip.transys.export.graph2promela as _pml
         s = _pml.fts2promela(self, self.name)
         # dump to file
         f = open(path, 'w')

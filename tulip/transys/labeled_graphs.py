@@ -39,11 +39,9 @@ import typing as _ty
 
 import networkx as nx
 
+import tulip.transys.export.graph2dot as graph2dot
+import tulip.transys.export.save_d3 as save_d3
 import tulip.transys.mathset as _mset
-# inline imports:
-#
-# import tulip.transys.export.graph2dot as graph2dot
-# import tulip.transys.export.save_d3 as save_d3
 
 
 __all__ = [
@@ -1474,7 +1472,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             **kwargs
             ) -> str:
         """Return dot string."""
-        import tulip.transys.export.graph2dot as graph2dot
         return graph2dot.graph2dot_str(
             self, wrap,
             **kwargs)
@@ -1580,7 +1577,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
         fileformat = fextension[1:]
         # check for html
         if fileformat == 'html':
-            import tulip.transys.export.save_d3 as save_d3
             return save_d3.labeled_digraph2d3(self, filename)
         # subclass has extra export formats ?
         if hasattr(self, '_save'):
@@ -1588,7 +1584,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 return True
         if prog is None:
             prog = self.default_layout
-        import tulip.transys.export.graph2dot as graph2dot
         graph2dot.save_dot(
             self, filename,
             fileformat, rankdir,
@@ -1641,7 +1636,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             return
         if prog is None:
             prog = self.default_layout
-        import tulip.transys.export.graph2dot as graph2dot
         return graph2dot.plot_dot(
             self, prog, rankdir, wrap, ax=ax)
 

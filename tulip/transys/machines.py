@@ -37,10 +37,8 @@ import random
 import sys
 import typing as _ty
 
+import tulip.transys.export.machine2scxml as _scxml
 import tulip.transys.labeled_graphs as _graphs
-# inline imports:
-#
-# import tulip.transys.export.machine2scxml
 
 
 __all__ = [
@@ -531,7 +529,6 @@ class MealyMachine(Transducer):
         """Export options available only for Mealy machines."""
         if fileformat != 'scxml':
             return False
-        import tulip.transys.export.machine2scxml as _scxml
         s = _scxml.mealy2scxml(self)
         # dump to file
         f = open(path, 'w')
