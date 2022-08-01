@@ -833,7 +833,10 @@ class PowerSet:
         return other.math_set == self.math_set
 
     def __setattr__(self, name, value):
-        if name == 'math_set' and not isinstance(value, MathSet):
+        expected_type = (
+            name != 'math_set' or
+            isinstance(value, MathSet))
+        if not expected_type:
             raise TypeError(
                 'PowerSet.math_set must be of class MathSet.\n'
                 f'Got instead:\n\t{value}'
