@@ -357,7 +357,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     here `'p'`:
 
     ```python
-    ts.atomic_propositions |= ['p', None]
+    ts.atomic_propositions.update(
+        ['p', None])
     ts.states.add('s0', ap={'p'})
     ts.states.add_from([('s1', {'ap': {'p'}}),
                         ('s3', {'ap': {}})])
@@ -373,7 +374,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     Having added states, we can also add some labeled transitions:
 
     ```python
-    ts.actions |= ['think', 'write']
+    ts.actions.update(
+        ['think', 'write'])
     ts.transitions.add(
         's0', 's1',
         actions='think')

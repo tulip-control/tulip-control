@@ -173,7 +173,7 @@ class States:
     @initial.setter
     def initial(self, states):
         s = _mset.SubSet(self)
-        s |= states
+        s.update(states)
         self._initial = s
 
     def _single_state2singleton(

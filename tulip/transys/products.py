@@ -65,7 +65,8 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         self.ba = ba
         self.ts = ts
         super().__init__()
-        self.atomic_propositions |= ts.atomic_propositions
+        self.atomic_propositions.update(
+            ts.atomic_propositions)
         self._add_initial()
 
     def _add_initial(self):
@@ -125,7 +126,8 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                 sq, next_s, enabled_ba_trans,
                 self, ba, ts)
             next_sqs.update(new_sqs)
-            self.states.accepting |= new_accepting
+            self.states.accepting.update(
+                new_accepting)
         # new_sqs = {x for x in next_sqs if x not in self}
         logger.debug(f'next product states: {next_sqs}')
         logger.debug(f'new unvisited product states: {new_sqs}')
@@ -350,9 +352,10 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     prod_ba.name = prod_name
     # copy S, S0, from prod_TS-> prod_BA
     prod_ba.states.add_from(prod_ts.states())
-    prod_ba.states.initial |= set(prod_ts.states.initial)
+    prod_ba.states.initial.update(
+        prod_ts.states.initial)
     # accepting states = persistent set
-    prod_ba.states.accepting |= persistent
+    prod_ba.states.accepting.update(persistent)
     # copy edges, translating transitions,
     # i.e., changing transition labels
     if not buchi_automaton.atomic_proposition_based:
@@ -363,7 +366,8 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     # direct access, not the inefficient
     #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
     # which would generate a combinatorially large alphabet
-    prod_ba.alphabet.math_set |= buchi_automaton.alphabet.math_set
+    prod_ba.alphabet.math_set.update(
+        buchi_automaton.alphabet.math_set)
     for from_state, to_state in prod_ts.transitions():
         # prject prod_TS state to TS state
         ts_to_state = to_state[0]

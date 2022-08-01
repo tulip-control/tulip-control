@@ -331,10 +331,13 @@ def tuple2ba(
         atomic_proposition_based=atomic_proposition_based)
     ba.name = name
     ba.states.add_from(states)
-    ba.states.initial |= initial_states
-    ba.states.accepting |= accepting_states
+    ba.states.initial.update(
+        initial_states)
+    ba.states.accepting.update(
+        accepting_states)
     if atomic_proposition_based:
-        ba.alphabet.math_set |= alphabet_or_ap
+        ba.alphabet.math_set.update(
+            alphabet_or_ap)
     else:
         ba.alphabet.add(alphabet_or_ap)
     for transition in transitions:
@@ -447,9 +450,9 @@ class RabinPairs:
             set `U` of bad states for this pair
         """
         good_set = _mset.SubSet(self._states)
-        good_set |= good_states
+        good_set.update(good_states)
         bad_set = _mset.SubSet(self._states)
-        bad_set |= bad_states
+        bad_set.update(bad_states)
         self._pairs.append((good_set, bad_set))
 
     def remove(
@@ -482,9 +485,9 @@ class RabinPairs:
             set of good states of this pair
         """
         good_set = _mset.SubSet(self._states)
-        good_set |= good_states
+        good_set.update(good_states)
         bad_set = _mset.SubSet(self._states)
-        bad_set |= bad_states
+        bad_set.update(bad_states)
         self._pairs.remove((good_set, bad_set))
 
     def add_states(self, pair_index, good_states, bad_states):

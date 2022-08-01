@@ -188,7 +188,7 @@ def ts_sync_prod(
     """Synchronous (tensor) product with other `FTS`."""
     prod_ts = _trs.FiniteTransitionSystem()
     # union of AP sets
-    prod_ts.atomic_propositions |= (
+    prod_ts.atomic_propositions.update(
         ts1.atomic_propositions |
         ts2.atomic_propositions)
     # use more label sets, instead of this explicit approach
@@ -327,7 +327,8 @@ def add(
             'other class must be FiniteTransitionSystem.\n'
             f'Got instead:\n\t{other}'
             f'\nof type:\n\t{type(other)}')
-    self.atomic_propositions |= other.atomic_propositions
+    self.atomic_propositions.update(
+        other.atomic_propositions)
     self.actions |= other.actions
     # add extra states & their labels
     for state, label in other.states.find():
@@ -335,7 +336,8 @@ def add(
             self.states.add(state)
         if label:
             self.states[state]['ap'] = label['ap']
-    self.states.initial |= set(other.states.initial)
+    self.states.initial.update(
+        other.states.initial)
     # copy extra transitions (be careful w/ labeling)
     for from_state, to_state, label_dict in other.transitions.find():
         # labeled edge ?
@@ -371,11 +373,13 @@ def async_prod(self, ts):
         mutable = False
     # union of AP sets
     prod_ts = _trs.FiniteTransitionSystem(mutable=mutable)
-    prod_ts.atomic_propositions |= (
+    prod_ts.atomic_propositions.update(
         self.atomic_propositions |
         ts.atomic_propositions)
     # for parallel product: union of action sets
-    prod_ts.actions |= self.actions | ts.actions
+    prod_ts.actions.update(
+        self.actions |
+        ts.actions)
     prod_ts = super(_trs.FiniteTransitionSystem, self).cartesian_product(
         ts, prod_sys=prod_ts)
     return prod_ts
