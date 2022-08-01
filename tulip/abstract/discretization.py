@@ -1886,7 +1886,7 @@ def plot_mode_partitions(
         logger.error('failed to plot the partitions.')
         return
     n = len(swab.modes)
-    assert(len(axs) == 2*n)
+    assert len(axs) == 2*n
     # annotate
     for ax in axs:
         plot_annot(ax)

@@ -285,7 +285,7 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
     new_accepting = set()
     next_sqs = set()
     for (curq, next_q, sublabels) in enabled_ba_trans:
-        assert(curq == q)
+        assert curq == q
         new_sq = (next_s, next_q)
         if new_sq not in product:
             next_sqs.add(new_sq)
@@ -307,8 +307,8 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
             [s], to_states=[next_s],
             with_attr_dict=None)
         for (from_s, to_s, sublabel_values) in enabled_ts_trans:
-            assert(from_s == s)
-            assert(to_s == next_s)
+            assert from_s == s
+            assert to_s == next_s
             logger.debug('Sublabel value:\n\t' +
                          str(sublabel_values))
             # labeled transition ?
