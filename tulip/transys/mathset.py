@@ -714,10 +714,9 @@ def is_subset(small_iterable, big_iterable):
         except:
             logger.error(
                 'Could not convert `big_iterable` to `list`.')
-        for item in small_iterable:
-            if item not in big_iterable:
-                return False
-        return True
+        return all(map(
+            big_iterable.__contains__,
+            small_iterable))
     except:
         raise Exception('Failed to compare iterables.')
 
