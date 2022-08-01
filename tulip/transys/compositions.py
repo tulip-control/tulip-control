@@ -45,10 +45,11 @@ MDP = _trs.MarkovDecisionProcess
 
 
 def sum_values(*values):
-    """Return the sum of values, considering only elements that are not None.
+    """Return the sum of values that are not `None`.
 
-    An item v,w in values can be anything that contains __add__ function
-    such that v+0 and v+w is defined.
+    An item `v, w` in `values` can be anything with
+    an `__add__` method,
+    so that `v + 0` and `v + w` be defined.
     """
     # Cannot simply return sum([v for v in values if v is not None])
     # because it does 0 + v which will not work for v of type,
@@ -61,10 +62,11 @@ def sum_values(*values):
 
 
 def mult_values(*values):
-    """Return product of values, considering only elements that are not None.
+    """Return product of values that are not `None`.
 
-    An item v,w in values can be anything that contains __mul__ function
-    such that v*1 and v*w is defined.
+    An item `v, w` in `values` can be anything with
+    a `__mul__` nethod
+    so that `v * 1` and `v * w` be defined.
     """
     current = 1
     for v in values:
@@ -74,9 +76,10 @@ def mult_values(*values):
 
 
 def neglect_none(*values):
-    """Return a tuple of values, considering only elements that are not None.
+    """Return a tuple of values that are not `None`.
 
-    If the tuple only has one element, just return that element.
+    If the tuple only has one element,
+    then return that element (unpack).
     """
     ret = tuple([v for v in values if v is not None])
     if len(ret) == 1:
