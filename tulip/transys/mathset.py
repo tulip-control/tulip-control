@@ -658,7 +658,7 @@ def unique(
     # hashable items ?
     try:
         return set(iterable)
-    except:
+    except TypeError:
         unique_items = list()
         for item in iterable:
             if item not in unique_items:
