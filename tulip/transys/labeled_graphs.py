@@ -119,7 +119,7 @@ def test_common_bug(
             'compared to list SubLabel:\n'
             f'\t{desired_value}'
             'Did you mix sets & lists when setting AP labels ?')
-        raise Exception(msg)
+        raise AssertionError(msg)
 
 
 class States:
