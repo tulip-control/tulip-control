@@ -374,7 +374,9 @@ def iter2var(
             raise TypeError(
                 'If Boolean, all states must be strings.')
         state_ids = {x: x for x in states}
-        variables.update({s: 'boolean' for s in states})
+        variables.update({
+            s: 'boolean'
+            for s in states})
         # single action ?
         if len(mutex(state_ids.values())) == 0:
             return state_ids
@@ -417,7 +419,9 @@ def iter2var(
         else:
             raise TypeError(
                 'Integer and string states must not be mixed.')
-        state_ids = {x: f(x) for x in states}
+        state_ids = {
+            x: f(x)
+            for x in states}
         variables[statevar] = domain
         constraint = None
     tabs = 2 * '\t'
@@ -464,7 +468,9 @@ def _fts2spec(
     actions = fts.actions
     sys_init = list()
     sys_trans = list()
-    sys_vars = {ap: 'boolean' for ap in aps}
+    sys_vars = {
+        ap: 'boolean'
+        for ap in aps}
     action_ids, constraint = iter2var(
         actions, sys_vars,
         actionvar, bool_actions,
@@ -578,7 +584,9 @@ def sys_to_spec(
     sys_trans = list()
     env_init = list()
     env_trans = list()
-    sys_vars = {ap: 'boolean' for ap in aps}
+    sys_vars = {
+        ap: 'boolean'
+        for ap in aps}
     env_vars = dict()
     actions = ofts.actions
     sys_action_ids = dict()
@@ -874,20 +882,40 @@ def _sys_trans_from_ts(
                 previous = set()
             logger.debug(
                 f'previous = {previous}')
-            env_actions = {k: v for k, v in label.items() if 'env' in k}
-            prev_env_act = {k: v for k, v in env_actions.items()
-                            if k in previous}
-            next_env_act = {k: v for k, v in env_actions.items()
-                            if k not in previous}
+            env_actions = {
+                k: v
+                for k, v in
+                    label.items()
+                if 'env' in k}
+            prev_env_act = {
+                k: v
+                for k, v in
+                    env_actions.items()
+                if k in previous}
+            next_env_act = {
+                k: v
+                for k, v in
+                    env_actions.items()
+                if k not in previous}
             postcond += [_conj_actions(prev_env_act, env_action_ids,
                                        nxt=False)]
             postcond += [_conj_actions(next_env_act, env_action_ids,
                                        nxt=True)]
-            sys_actions = {k: v for k, v in label.items() if 'sys' in k}
-            prev_sys_act = {k: v for k, v in sys_actions.items()
-                            if k in previous}
-            next_sys_act = {k: v for k, v in sys_actions.items()
-                            if k not in previous}
+            sys_actions = {
+                k: v
+                for k, v in
+                    label.items()
+                if 'sys' in k}
+            prev_sys_act = {
+                k: v
+                for k, v in
+                    sys_actions.items()
+                if k in previous}
+            next_sys_act = {
+                k: v
+                for k, v in
+                    sys_actions.items()
+                if k not in previous}
             postcond += [
                 _conj_actions(
                     prev_sys_act, sys_action_ids,
@@ -965,7 +993,11 @@ def _env_trans_from_sys_ts(
         # collect possible next env actions
         next_env_action_combs = set()
         for from_state, to_state, label in cur_trans:
-            env_actions = {k: v for k, v in label.items() if 'env' in k}
+            env_actions = {
+                k: v
+                for k, v in
+                    label.items()
+                if 'env' in k}
             if not env_actions:
                 continue
             logger.debug(
@@ -1190,7 +1222,9 @@ def map_ap_to_states(
         `'p'` a proposition and
         `s` a set of states in `fts`.
     """
-    table = {p: set() for p in fts.atomic_propositions}
+    table = {
+        p: set()
+        for p in fts.atomic_propositions}
     for u in fts:
         for p in fts.nodes[u]['ap']:
             table[p].add(u)
@@ -1606,10 +1640,14 @@ def strategy2mealy(
     outputs = transys.machines.create_machine_ports(sys_vars)
     mach.add_outputs(outputs)
     str_vars = {
-        k: v for k, v in env_vars.items()
+        k: v
+        for k, v in
+            env_vars.items()
         if isinstance(v, list)}
     str_vars.update({
-        k: v for k, v in sys_vars.items()
+        k: v
+        for k, v in
+            sys_vars.items()
         if isinstance(v, list)})
     mach.states.add_from(A)
     all_vars = dict(env_vars)
@@ -1621,7 +1659,11 @@ def strategy2mealy(
     for u in A:
         for v in A.successors(u):
             d = A.nodes[v]['state']
-            d = {k: v for k, v in d.items() if k in all_vars}
+            d = {
+                k: v
+                for k, v in
+                    d.items()
+                if k in all_vars}
             d = _int2str(d, str_vars)
             mach.transitions.add(
                 u, v,
@@ -1687,7 +1729,11 @@ def _init_edges_using_initial_nodes(
         if vals in init_valuations:
             continue
         init_valuations.add(vals)
-        d = {k: v for k, v in d.items() if k in all_vars}
+        d = {
+            k: v
+            for k, v in
+                d.items()
+            if k in all_vars}
         d = _int2str(d, str_vars)
         mach.transitions.add(
             initial_state, u,
@@ -1724,7 +1770,11 @@ def _init_edges_using_compile_init(
         # add edge: Sinit -> u ?
         tmp.update(var_values)
         if eval(isinit, tmp):
-            var_values = {k: v for k, v in var_values.items() if k in all_vars}
+            var_values = {
+                k: v
+                for k, v in
+                    var_values.items()
+                if k in all_vars}
             label = _int2str(var_values, str_vars)
             mach.transitions.add(
                 initial_state, u,
@@ -1770,9 +1820,12 @@ def _int2str(
         correspond to string literals for that variable.
     """
     label = dict(label)
-    label.update({k: str_vars[k][int(v)]
-                 for k, v in label.items()
-                 if k in str_vars})
+    label.update({
+        k:
+            str_vars[k][int(v)]
+        for k, v in
+            label.items()
+        if k in str_vars})
     return label
 
 

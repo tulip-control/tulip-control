@@ -508,7 +508,10 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
             node_label_types, edge_label_types)
         # make them available also via an "actions" dicts
         # name, codomain, *rest = x
-        actions = {x['name']: x['values'] for x in edge_label_types}
+        actions = {
+            x['name']:
+                x['values']
+            for x in edge_label_types}
         if 'actions' in actions:
             raise ValueError(
                 '"actions" cannot be used as an action type name,\n'
