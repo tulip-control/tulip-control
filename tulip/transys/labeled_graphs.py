@@ -1258,12 +1258,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
             u, v,
             default=dict())
         if dict() in existing_u_v.values():
-            msg = (
+            raise Exception(
                 'Unlabeled transition: '
                 'from_state-> to_state already exists,\n'
                 f'where:\t from_state = {u}\n'
                 f'and:\t to_state = {v}\n')
-            raise Exception(msg)
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
             logger.warning(
