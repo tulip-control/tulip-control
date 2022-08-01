@@ -277,7 +277,7 @@ class MathSet:
         if isinstance(item, _abc.Hashable):
             try:
                 return item in self._set
-            except:
+            except TypeError:
                 logger.error(
                     'UnHashable items within Hashable.')
         return item in self._list
