@@ -76,7 +76,7 @@ def create_machine_ports(spc_vars):
     """Create proper port domains of valuations, given port types.
 
     @param spc_vars:
-        port names and types inside tulip.
+        port names and types inside `tulip`.
         For arbitrary finite types the type
         can be a list of strings,
         instead of a range of integers.
