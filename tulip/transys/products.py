@@ -187,7 +187,7 @@ def ts_ba_sync_prod(
         msg = '''Buchi automaton not stored as Atomic Proposition-based.
                 synchronous product with Finite Transition System
                 is not well-defined.'''
-        raise Exception(msg)
+        raise ValueError(msg)
     fts = transition_system
     ba = buchi_automaton
     prodts_name = f'{fts.name}*{ba.name}'
