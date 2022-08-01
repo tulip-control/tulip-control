@@ -657,7 +657,7 @@ def unique(
     """
     # hashable items ?
     try:
-        unique_items = set(iterable)
+        return set(iterable)
     except:
         unique_items = list()
         for item in iterable:
