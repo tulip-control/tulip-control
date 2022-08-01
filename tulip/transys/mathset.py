@@ -802,7 +802,7 @@ class PowerSet:
         return f'PowerSet({self.math_set} )'
 
     def __contains__(self, item):
-        """Is item \\in 2^iterable = this powerset(iterable)."""
+        r"""Is item \\in 2^iterable = this powerset(iterable)."""
         if not isinstance(item, _abc.Iterable):
             raise Exception(
                 f'Not iterable:\n\t{item},\n'
