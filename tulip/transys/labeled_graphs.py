@@ -1418,10 +1418,10 @@ class LabeledDiGraph(nx.MultiDiGraph):
 
         Edge labels are not taken into account.
         """
-        for _, d in self.out_degree():
-            if d == 0:
-                return True
-        return False
+        return any(
+            d == 0
+            for _, d in
+                self.out_degree())
 
     def remove_deadends(self):
         """Recursively delete nodes with no outgoing transitions."""
