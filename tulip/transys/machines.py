@@ -727,7 +727,9 @@ def guided_run(
             'Values must be lists, '
             f'for: {non_lists}')
     # uniform list len ?
-    if len(set(len(x) for x in seqs.values())) > 1:
+    cardinalities = set(map(
+        len, seqs.values()))
+    if len(cardinalities) > 1:
         raise ValueError(
             'All input sequences must be of equal length.')
     # note: initial sys state
