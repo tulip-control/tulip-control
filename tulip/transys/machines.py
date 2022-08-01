@@ -710,7 +710,8 @@ def guided_run(
         where:
         - `states` not containing `from_state`
     """
-    seqs = input_sequences  # abbrv
+    seqs = input_sequences
+        # abbreviation
     missing_ports = set(mealy.inputs).difference(seqs)
     if missing_ports:
         raise ValueError(
