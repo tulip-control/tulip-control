@@ -184,10 +184,12 @@ def ts_ba_sync_prod(
             'transition_system not transys.BuchiAutomaton.\n'
             f'Actual type passed: {type(buchi_automaton)}')
     if not buchi_automaton.atomic_proposition_based:
-        msg = '''Buchi automaton not stored as Atomic Proposition-based.
-                synchronous product with Finite Transition System
-                is not well-defined.'''
-        raise ValueError(msg)
+        raise ValueError(
+            'Buchi automaton not stored as '
+            'Atomic Proposition-based. '
+            'Synchronous product with '
+            'Finite Transition System is '
+            'not well-defined.')
     fts = transition_system
     ba = buchi_automaton
     prodts_name = f'{fts.name}*{ba.name}'
