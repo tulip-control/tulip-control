@@ -1435,8 +1435,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         n = len(self)
         s = {1}
         while s:
-            s = {u for u, d in self.out_degree()
-                 if d == 0}
+            s = {
+                u
+                for u, d in
+                    self.out_degree()
+                if d == 0}
             self.states.remove_from(s)
         m = len(self)
         assert n == 0 or m > 0, (

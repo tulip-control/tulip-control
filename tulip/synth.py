@@ -1021,7 +1021,11 @@ def _env_trans_from_env_ts(
         for from_state, to_state, label in cur_trans:
             to_state_id = state_ids[to_state]
             postcond = [f'X{_pstr(to_state_id)}']
-            env_actions = {k: v for k, v in label.items() if 'env' in k}
+            env_actions = {
+                k: v
+                for k, v in
+                    label.items()
+                if 'env' in k}
             postcond += [
                 _conj_actions(
                     env_actions,
@@ -1030,7 +1034,11 @@ def _env_trans_from_env_ts(
             # remember: this is
             # an environment FTS,
             # so no next for sys
-            sys_actions = {k: v for k, v in label.items() if 'sys' in k}
+            sys_actions = {
+                k: v
+                for k, v in
+                    label.items()
+                if 'sys' in k}
             postcond += [
                 _conj_actions(
                     sys_actions,

@@ -366,10 +366,16 @@ class MooreMachine(Transducer):
         for state, label_dict in self.states(data=True):
             s += f'\t{state} :\n'
             # split into vars and outputs
-            var_values = {k: v for k, v in label_dict.items()
-                          if k in self.state_vars}
-            output_values = {k: v for k, v in label_dict.items()
-                             if k in self.outputs}
+            var_values = {
+                k: v
+                for k, v in
+                    label_dict.items()
+                if k in self.state_vars}
+            output_values = {
+                k: v
+                for k, v in
+                    label_dict.items()
+                if k in self.outputs}
             s += (
                 f'{_print_label(var_values)} : '
                 f'{_print_label(output_values)}')
@@ -615,7 +621,8 @@ class MealyMachine(Transducer):
         # match only inputs (explicit valuations, not symbolic)
         enabled_trans = [
             (i, j, d)
-            for i, j, d in self.edges([from_state], data=True)
+            for i, j, d in
+                self.edges([from_state], data=True)
             if project_dict(d, restricted_inputs) == inputs]
         if not enabled_trans:
             some_possibilities = list()
@@ -710,7 +717,11 @@ def guided_run(
             'missing input port(s): '
             f'{missing_ports}')
     # dict of lists ?
-    non_lists = {k: v for k, v in seqs.items() if not isinstance(v, list)}
+    non_lists = {
+        k: v
+        for k, v in
+            seqs.items()
+        if not isinstance(v, list)}
     if non_lists:
         raise TypeError(
             'Values must be lists, '
@@ -729,9 +740,14 @@ def guided_run(
         state = from_state
     n = len(next(iter(seqs.values())))
     states_seq = list()
-    output_seqs = {k: list() for k in mealy.outputs}
+    output_seqs = {
+        k: list()
+        for k in mealy.outputs}
     for i in range(n):
-        inputs = {k: v[i] for k, v in seqs.items()}
+        inputs = {
+            k: v[i]
+            for k, v in
+                seqs.items()}
         state, outputs = mealy.reaction(state, inputs)
         states_seq.append(state)
         for k in output_seqs:
@@ -769,7 +785,9 @@ def random_run(
     else:
         state = from_state
     states_seq = list()
-    output_seqs = {k: list() for k in mealy.outputs}
+    output_seqs = {
+        k: list()
+        for k in mealy.outputs}
     for i in range(N):
         trans = mealy.transitions.find([state])
         # choose next transition
@@ -967,7 +985,10 @@ def mealy2moore(
             masks = {port_name: mask_func}
         moore.add_outputs({port_name: port_type}, masks=masks)
     # initial state with arbitrary label
-    out = {k: list(v)[0] for k, v in mealy.outputs.items()}
+    out = {
+        k: list(v)[0]
+        for k, v in
+            mealy.outputs.items()}
     s0 = list(mealy.states.initial)[0]
     # create maps between Moore and Mealy states
     moore2mealy_states = dict()
@@ -1034,10 +1055,16 @@ def _create_state_str(mealy_state, output, moore,
 
 def _split_io(attr_dict, machine):
     """Split into inputs and outputs."""
-    input_values = {k: v for k, v in attr_dict.items()
-                    if k in machine.inputs}
-    output_values = {k: v for k, v in attr_dict.items()
-                     if k in machine.outputs}
+    input_values = {
+        k: v
+        for k, v in
+            attr_dict.items()
+        if k in machine.inputs}
+    output_values = {
+        k: v
+        for k, v in
+            attr_dict.items()
+        if k in machine.outputs}
     return input_values, output_values
 
 
