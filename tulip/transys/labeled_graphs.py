@@ -1311,20 +1311,21 @@ class LabeledDiGraph(nx.MultiDiGraph):
         for e in labeled_ebunch:
             datadict = dict(attr_dict)
             # distinguish by number of elements given
-            ne = len(e)
-            if ne == 4:
-                u, v, key, dd = e
-            elif ne == 3:
-                u, v, dd = e
-                key = None
-            elif ne == 2:
-                u, v = e
-                dd = dict()
-                key = None
-            else:
-                raise ValueError(
-                    f'Edge tuple {e} must '
-                    'be a 2-, 3-, or 4-tuple .')
+            match len(e):
+                case 4:
+                    u, v, key, dd = e
+                case 3:
+                    u, v, dd = e
+                    key = None
+                case 2:
+                    u, v = e
+                    dd = dict()
+                    key = None
+                case _:
+                    raise ValueError(
+                        f'Edge tuple {e} must '
+                        'be a 2-, 3-, '
+                        'or 4-tuple .')
             datadict.update(dd)
             self.add_edge(
                 u, v,
@@ -1400,13 +1401,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
             attr_dict, attr)
         for e in labeled_ebunch:
             datadict = dict(attr_dict)
-            ne = len(e)
-            if ne == 3:
-                u, v, dd = e
-                datadict.update(dd)
-            elif ne == 2:
-                u, v = e
-            else:
+            match len(e):
+                case 3:
+                    u, v, dd = e
+                    datadict.update(dd)
+                case 2:
+                    u, v = e
+                case _:
                         raise ValueError(
                             f'Edge tuple {e} must '
                             'be a 2- or 3-tuple .')
