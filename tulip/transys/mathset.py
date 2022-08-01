@@ -215,7 +215,10 @@ class MathSet:
             Cartesian product of `self` with `other`.
             (explicit construction)
         """
-        cartesian = [(x, y) for x in self for y in other]
+        cartesian = [
+            (x, y)
+            for x in self
+            for y in other]
         return MathSet(cartesian)
 
     def __ior__(

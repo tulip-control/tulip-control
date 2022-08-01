@@ -213,7 +213,9 @@ def solve(
         raise AssertionError(ks, spec)
     wpa, null_state = _construct_weighted_product_automaton(ks, spec)
     goal_states = [
-        state for state in ks.states if goal_label in ks.states[state]["ap"]]
+        state
+        for state in ks.states
+        if goal_label in ks.states[state]["ap"]]
     accepting_goal_states = _trs.SubSet(wpa.states.accepting)
     accepting_goal_states.add_from(
         set(_itr.product(goal_states, spec.get_states())))

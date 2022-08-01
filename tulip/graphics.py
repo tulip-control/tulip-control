@@ -264,7 +264,9 @@ def quiver(
     _assert_pyplot()
     # multiple axes ?
     try:
-        fields = [quiver(x, v, i, **kwargs) for i in ax]
+        fields = [
+            quiver(x, v, i, **kwargs)
+            for i in ax]
         return fields
     except:
         pass

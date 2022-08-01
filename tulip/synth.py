@@ -241,8 +241,12 @@ def _conj_actions(
         logger.debug('actions_dict empty, returning empty string\n')
         return ''
     if solver_expr is not None:
-        actions = [solver_expr[type_name][action_value]
-                   for type_name, action_value in actions_dict.items()]
+        actions = [
+            solver_expr[
+                type_name][
+                action_value]
+            for type_name, action_value in
+                actions_dict.items()]
     else:
         actions = actions_dict
     logger.debug(
