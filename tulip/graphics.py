@@ -149,7 +149,7 @@ def newax(
         dim = [dim] * n
     # matplotlib (2D) or mayavi (3D) ?
     ax = list()
-    for (i, curdim) in enumerate(dim):
+    for i, curdim in enumerate(dim):
         if curdim == 2:
             curax = fig.add_subplot(nv, nh, i + 1)
             ax.append(curax)

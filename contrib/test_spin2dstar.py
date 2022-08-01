@@ -23,7 +23,7 @@ def check_spin_to_dstar(informula, expected_outformula):
     assert expected_outformula == spin_to_dstar(informula)
 
 def test_spin_to_dstar():
-    for (k,v) in S2D_BATTERY.items():
+    for k, v in S2D_BATTERY.items():
         yield check_spin_to_dstar, k, v
 
 

@@ -86,7 +86,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     inits1 = self.states.initial
     inits2 = other.states.initial
     prod_init = list()
-    for (init1, init2) in zip(inits1, inits2):
+    for init1, init2 in zip(inits1, inits2):
         new_init = (init1, init2)
         prod_init.append(new_init)
     prod_sys.states.initial |= prod_init
@@ -337,7 +337,7 @@ def add(
             self.states[state]['ap'] = label['ap']
     self.states.initial |= set(other.states.initial)
     # copy extra transitions (be careful w/ labeling)
-    for (from_state, to_state, label_dict) in other.transitions.find():
+    for from_state, to_state, label_dict in other.transitions.find():
         # labeled edge ?
         if not label_dict:
             self.transitions.add(from_state, to_state)

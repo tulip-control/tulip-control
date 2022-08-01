@@ -359,7 +359,7 @@ class GridWorld:
             current = OPEN.pop()
             if current == stop:
                 return True
-            for (i, j) in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            for i, j in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 if (
                         current[0] + i < 0 or
                         current[0] + i >= self.W.shape[0] or
@@ -442,7 +442,7 @@ class GridWorld:
                 ax.text(p[1], p[0], "G", size=font_pt)
             else:
                 ax.plot(p[1], p[0], 'r*')
-        for (center, radius) in troll_list:
+        for center, radius in troll_list:
             if font_pt > 0:
                 ax.text(center[1], center[0], "E", size=font_pt)
             else:
@@ -1328,7 +1328,7 @@ def add_trolls(
     if get_moves_lists:
         moves_N = list()
     num_rows, num_cols = Y.size()
-    for (center, radius) in troll_list:
+    for center, radius in troll_list:
         if (
                 center[0] >= num_rows or
                 center[0] < 0 or

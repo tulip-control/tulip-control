@@ -67,7 +67,7 @@ def mealy2scxml(
         s = ''
         trans = mealy.transitions.find([from_state])
         n = 2
-        for (from_state_, to_state, sublabel_dict) in trans:
+        for from_state_, to_state, sublabel_dict in trans:
             s += f'{indent(n)}<transition '
             n = n + 1
             s += (

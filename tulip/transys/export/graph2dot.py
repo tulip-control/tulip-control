@@ -297,7 +297,7 @@ def _form_node_label(state, state_data, label_def,
     # action, AP sets etc
     # other key,values in state attr_dict ignored
     pieces = list()
-    for (label_type, label_value) in state_data.items():
+    for label_type, label_value in state_data.items():
         if label_type not in label_def:
             continue
         # label formatting
@@ -364,7 +364,7 @@ def _transitions2dot_str(
     edges = graph.edges(
         data=True,
         keys=True)
-    for (u, v, key, edge_data) in edges:
+    for u, v, key, edge_data in edges:
         edge_dot_label = _form_edge_label(
             edge_data, label_def,
             label_format, label_mask, tikz)

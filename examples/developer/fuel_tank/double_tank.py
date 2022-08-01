@@ -279,7 +279,7 @@ ax.figure.savefig(imgpath + 'proj_mealy.pdf')
 
 # uin_arr = list()
 # cellid_arr = list()
-# for (autID, state) in states:
+# for autID, state in states:
 #     uin_arr.append(state.state['u_in'])
 #     cellid_arr.append(state.state['cellID'])
 # uin_arr = np.array(uin_arr)

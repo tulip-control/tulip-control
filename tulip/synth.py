@@ -858,7 +858,7 @@ def _sys_trans_from_ts(
                 f'{precond} -> X(False)']
             continue
         cur_str = list()
-        for (from_state, to_state, label) in cur_trans:
+        for from_state, to_state, label in cur_trans:
             to_state_id = state_ids[to_state]
             postcond = [
                 f'X{_pstr(to_state_id)}']
@@ -960,7 +960,7 @@ def _env_trans_from_sys_ts(
             continue
         # collect possible next env actions
         next_env_action_combs = set()
-        for (from_state, to_state, label) in cur_trans:
+        for from_state, to_state, label in cur_trans:
             env_actions = {k: v for k, v in label.items() if 'env' in k}
             if not env_actions:
                 continue
@@ -1018,7 +1018,7 @@ def _env_trans_from_env_ts(
         found_free = False
             # any environment transition
         # not conditioned on the previous system output ?
-        for (from_state, to_state, label) in cur_trans:
+        for from_state, to_state, label in cur_trans:
             to_state_id = state_ids[to_state]
             postcond = [f'X{_pstr(to_state_id)}']
             env_actions = {k: v for k, v in label.items() if 'env' in k}

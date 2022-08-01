@@ -125,7 +125,7 @@ def readlbt(gbastr):
     A = GBAutomaton(int(parts[1]))
     state_parts = [part for part in parts[2].split('-1')
                    if len(part.strip()) > 0]
-    for (ii, state_part) in enumerate(state_parts):
+    for ii, state_part in enumerate(state_parts):
         if ii % 2 == 0:
             x = _split2(state_part)
             state_name = int(x[0])

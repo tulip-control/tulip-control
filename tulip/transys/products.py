@@ -90,7 +90,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                 if not enabled_ba_trans:
                     continue
                 # which q next ?     (note: curq0 = q0)
-                for (curq0, q, sublabels) in enabled_ba_trans:
+                for curq0, q, sublabels in enabled_ba_trans:
                     new_sq0 = (s0, q)
                     self.states.add(new_sq0)
                     self.states.initial.add(new_sq0)
@@ -214,7 +214,7 @@ def ts_ba_sync_prod(
             if not enabled_ba_trans:
                 continue
             # which q next ?     (note: curq0 = q0)
-            for (curq0, q, sublabels) in enabled_ba_trans:
+            for curq0, q, sublabels in enabled_ba_trans:
                 new_sq0 = (s0, q)
                 prodts.states.add(new_sq0)
                 prodts.states.initial.add(new_sq0)
@@ -284,7 +284,7 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
     s, q = prev_sq
     new_accepting = set()
     next_sqs = set()
-    for (curq, next_q, sublabels) in enabled_ba_trans:
+    for curq, next_q, sublabels in enabled_ba_trans:
         assert curq == q
         new_sq = (next_s, next_q)
         if new_sq not in product:
@@ -306,7 +306,7 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
         enabled_ts_trans = fts.transitions.find(
             [s], to_states=[next_s],
             with_attr_dict=None)
-        for (from_s, to_s, sublabel_values) in enabled_ts_trans:
+        for from_s, to_s, sublabel_values in enabled_ts_trans:
             assert from_s == s
             assert to_s == next_s
             logger.debug('Sublabel value:\n\t' +
@@ -364,7 +364,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     #   prod_ba.alphabet.add_from(buchi_automaton.alphabet() ),
     # which would generate a combinatorially large alphabet
     prod_ba.alphabet.math_set |= buchi_automaton.alphabet.math_set
-    for (from_state, to_state) in prod_ts.transitions():
+    for from_state, to_state in prod_ts.transitions():
         # prject prod_TS state to TS state
         ts_to_state = to_state[0]
         logger.debug(

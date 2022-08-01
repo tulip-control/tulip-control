@@ -299,7 +299,7 @@ def eq_gridworld_param():
     trivial_nonempty_2goals.goal_list = [(0, 0), (1, 1)]
     trivial_nonempty_2init = gw.GridWorld(TRIVIAL_GWFILE)
     trivial_nonempty_2init.init_list = [(0, 0), (1, 1)]
-    for (G, H, is_equal) in [
+    for G, H, is_equal in [
             (gw.GridWorld(), gw.GridWorld(), True),
             (empty, trivial_nonempty, False),
             (trivial_nonempty_2goals, trivial_nonempty, False),
