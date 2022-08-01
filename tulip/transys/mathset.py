@@ -672,16 +672,19 @@ def contains_multiple(iterable):
     return len(iterable) != len(unique(iterable))
 
 
-def is_subset(small_iterable, big_iterable):
+def is_subset(
+        small_iterable,
+        big_iterable:
+            _abc.Iterable):
     """Comparison for handling list <= set, and lists with unhashable items.
     """
     # asserts removed when compiling with optimization on...
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
     # since the error msg is succintly stated by the assert itself
-    if not isinstance(big_iterable, _abc.Iterable | _abc.Container):
+    if not isinstance(big_iterable, _abc.Iterable):
         raise TypeError(
-            'big_iterable must be either Iterable or Container, '
+            'big_iterable must be an `Iterable`, '
             'otherwise subset relation undefined.\n'
             f'Got:\n\t{big_iterable}\ninstead.')
     if not isinstance(small_iterable, _abc.Iterable):
@@ -707,14 +710,9 @@ def is_subset(small_iterable, big_iterable):
         return small_iterable <= big_iterable
     except TypeError:
         # not all items hashable...
-        try:
-            # list to avoid: unhashable \in set ? => error
-            if not isinstance(big_iterable, list):
-                # avoid object duplication
-                big_iterable = list(big_iterable)
-        except:
-            logger.error(
-                'Could not convert `big_iterable` to `list`.')
+        if not isinstance(big_iterable, list):
+            # avoid object duplication
+            big_iterable = list(big_iterable)
         return all(map(
             big_iterable.__contains__,
             small_iterable))
