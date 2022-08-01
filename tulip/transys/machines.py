@@ -837,7 +837,9 @@ def _interactive_run_step(mealy, state):
         try:
             selected_trans = _select_transition(mealy, trans)
         except:
-            print('Selection not recognized. Please try again.')
+            print(
+                'Selection not recognized. '
+                'Please try again.')
     if selected_trans is None:
         return None
     from_, to_state, attr_dict = selected_trans
