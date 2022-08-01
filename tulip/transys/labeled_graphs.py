@@ -386,18 +386,6 @@ class States:
                 with_attr_dict.update(with_attr)
             except AttributeError:
                 raise Exception('with_attr_dict must be a dict')
-        if states is not None:
-            # singleton check
-            if states in self:
-                state = states
-                msg = (
-                    '`LabeledStates.find` got '
-                    f'single state: {state},\n'
-                    'instead of `Iterable` of states.\n')
-                states = [state]
-                msg += f'Replaced given states = {state}'
-                msg += f' with states = {states}'
-                logger.debug(msg)
         found_state_label_pairs = list()
         for state, attr_dict in self.graph.nodes(data=True):
             logger.debug(
