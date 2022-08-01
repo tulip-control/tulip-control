@@ -239,8 +239,7 @@ class States:
         `networkx.MultiDiGraph.remove_nodes_from`,
         handling also initial states.
         """
-        for state in states:
-            self.remove(state)
+        any(map(self.remove, states))
 
     def post(
             self,
