@@ -214,7 +214,8 @@ def _format_color(
     if prog == 'tikz':
         s = '!'.join(
             f'{k}!{v}'
-            for k, v in color.items())
+            for k, v in
+                color.items())
     elif prog == 'dot':
         t = sum(color.values())
         try:
@@ -231,7 +232,8 @@ def _format_color(
                 'failed to import webcolors')
             s = ':'.join(
                 f'{k};{v / t}'
-                for k, v in color.items())
+                for k, v in
+                    color.items())
     else:
         raise ValueError(
             f'Unknown program: {prog}. '
