@@ -295,8 +295,7 @@ class States:
 
         Wrapper of `networkx.descendants()`.
         """
-        descendants = nx.descendants(self, state)
-        return descendants
+        return nx.descendants(self, state)
 
     def backward_reachable(
             self,
@@ -306,8 +305,7 @@ class States:
 
         Wrapper of `networkx.ancestors()`.
         """
-        ancestors = nx.ancestors(self, state)
-        return ancestors
+        return nx.ancestors(self, state)
 
     def paint(
             self,
