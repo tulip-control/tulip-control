@@ -72,7 +72,7 @@ def neglect_none(*values):
     If the tuple only has one element,
     then return that element (unpack).
     """
-    ret = tuple([v for v in values if v is not None])
+    ret = tuple(filter(_is_not_none, values))
     if len(ret) == 1:
         return ret[0]
     return ret
