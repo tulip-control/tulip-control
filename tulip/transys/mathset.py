@@ -487,10 +487,8 @@ class MathSet:
             `True` if `self` has common element with `iterable`.
             Otherwise `False`.
         """
-        for item in iterable:
-            if item in self:
-                return True
-        return False
+        return any(map(
+            self.__contains__, iterable))
 
 
 class SubSet(MathSet):
