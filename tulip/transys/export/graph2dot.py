@@ -489,7 +489,7 @@ def save_dot(
         wrap,
         tikz=False
         ) -> bool:
-    """Save state graph to dot file.
+    """Save state graph to DOT file.
 
     @return:
         `True` upon success
