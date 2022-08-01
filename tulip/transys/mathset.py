@@ -633,8 +633,7 @@ class CartesianProduct:
         self.mathsets.remove(mathset)
 
     def remove_from(self, mathsets):
-        for mathset in mathsets:
-            self.remove(mathset)
+        any(map(self.remove, mathsets))
 
 
 def unique(
