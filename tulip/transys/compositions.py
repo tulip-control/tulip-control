@@ -51,14 +51,8 @@ def sum_values(*values):
     an `__add__` method,
     so that `v + 0` and `v + w` be defined.
     """
-    # Cannot simply return sum([v for v in values if v is not None])
-    # because it does 0 + v which will not work for v of type,
-    # e.g., VectorCost
-    current = 0
-    for v in values:
-        if v is not None:
-            current = v + current
-    return current
+    return _ft.reduce(_op.add,
+        filter(_is_not_none, values))
 
 
 def mult_values(*values):
@@ -68,11 +62,8 @@ def mult_values(*values):
     a `__mul__` nethod
     so that `v * 1` and `v * w` be defined.
     """
-    current = 1
-    for v in values:
-        if v is not None:
-            current = v * current
-    return current
+    return _ft.reduce(_op.mul,
+        filter(_is_not_none, values))
 
 
 def neglect_none(*values):
@@ -85,6 +76,10 @@ def neglect_none(*values):
     if len(ret) == 1:
         return ret[0]
     return ret
+
+
+def _is_not_none(x):
+    return x is not None
 
 
 def synchronous_parallel(
