@@ -624,7 +624,7 @@ class CartesianProduct:
                 'mathsets given must be a list of `MathSet`.')
 
     def add(self, mathset):
-        self.mathsets += [mathset]
+        self.mathsets.append(mathset)
 
     def add_from(self, mathsets):
         self.mathsets += mathsets
