@@ -477,7 +477,7 @@ class MathSet:
         ```python
         s = MathSet()
         s.add(1)
-        r = [1,2]
+        r = [1, 2]
         assert s.intersects(r)
         ```
 
