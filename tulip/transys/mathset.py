@@ -596,12 +596,13 @@ class SubSet(MathSet):
         ========
         `add`, `__ior__`
         """
-        if not is_subset(new_elements, self._superset):
-            raise ValueError(
-                f'All new_elements:\n\t{new_elements}'
-                '\nshould already be \\in '
-                f'self.superset = {self._superset}')
-        super().add_from(new_elements)
+        if is_subset(new_elements, self._superset):
+            super().add_from(new_elements)
+            return
+        raise ValueError(
+            f'All new_elements:\n\t{new_elements}'
+            '\nshould already be \\in '
+            f'self.superset = {self._superset}')
 
 
 class CartesianProduct:
