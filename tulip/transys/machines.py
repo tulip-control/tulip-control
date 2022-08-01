@@ -640,17 +640,17 @@ class MealyMachine(Transducer):
         except ValueError:
             if not enabled_trans:
                 if not some_possibilities:
-                    raise Exception(
+                    raise ValueError(
                         f'state {from_state} is a dead-end. '
                         'There are no possible inputs from '
                         'it.')
                 else:
-                    raise Exception(
+                    raise ValueError(
                         'not a valid input, '
                         'some possible inputs include: '
                         f'{some_possibilities}')
             else:
-                raise Exception(
+                raise ValueError(
                     'must be input-deterministic, '
                     'found enabled transitions: '
                     f'{enabled_trans}')
