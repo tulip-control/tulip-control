@@ -1074,7 +1074,9 @@ class LabeledDiGraph(nx.MultiDiGraph):
             logger.debug('no untyped keys.')
 
     def is_consistent(self) -> bool:
-        """Check if labels are consistent with their type definitions.
+        """Whether labels agree with type definitions.
+
+        Return `True` if yes.
 
         Use case: removing values from a label type
         can invalidate existing labels that use them.
