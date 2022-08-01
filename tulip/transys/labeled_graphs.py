@@ -95,7 +95,7 @@ def label_is_desired(
         # no guard semantics given,
         # then by convention:
         # guard is singleton {cur_val},
-        if not value == desired_value:
+        if value != desired_value:
             test_common_bug(value, desired_value)
             return False
     return True
