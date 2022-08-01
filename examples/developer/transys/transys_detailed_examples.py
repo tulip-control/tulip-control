@@ -62,7 +62,8 @@ def fts_maximal_example():
 
     fts.states.current = ['pay']
 
-    fts.states.initial.add('pay') # should already be a state
+    fts.states.initial.add('pay')
+        # should already be a state
     fts.states.initial |= {'soda', 'select'}
     fts.states.initial.remove('soda')
 

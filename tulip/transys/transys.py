@@ -480,7 +480,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
             raise ValueError(msg)
         self.actions = actions
         self.atomic_propositions = self.ap
-        self.aps = self.atomic_propositions  # shortcut
+        self.aps = self.atomic_propositions
+            # shortcut
         # action constraint used in synth.synthesize
         self.env_actions_must = 'xor'
         self.sys_actions_must = 'xor'
@@ -490,9 +491,11 @@ class FiniteTransitionSystem(LabeledDiGraph):
             'type?label': '',
             'separator': r'\\n'}
         self._transition_dot_label_format = {
-            'sys_actions': 'sys',  # todo: '' if no env
+            'sys_actions': 'sys',
+                # todo: '' if no env
             'env_actions': 'env',
-            'type?label': ':',  # todo: '' if no env
+            'type?label': ':',
+                # todo: '' if no env
             'separator': r'\\n'}
         self._transition_dot_mask = dict()
         self.dot_node_shape = dict(
@@ -747,7 +750,8 @@ def line_labeled_with(L, m=0):
     """
     n = len(L)
     S = range(m, m + n)
-    S0 = []  # user will define them
+    S0 = []
+        # user will define them
     AP = {True}
     for ap_subset in L:
         # skip empty label ?
@@ -798,7 +802,8 @@ def cycle_labeled_with(L):
     ts = line_labeled_with(L)
     last_state = 's' + str(len(L) - 1)
     ts.transitions.add(last_state, 's0')
-    # trans += [(n-1, 0)] # close cycle
+    # trans += [(n-1, 0)]
+    #     # close cycle
     return ts
 
 
@@ -1023,15 +1028,18 @@ def simu_abstract(ts, simu_type):
     G = MultiDiGraph(ts)
     # build coarsest partition
     S0 = dict()
-    Part = MultiDiGraph()  # a graph associated with the new partition
+    Part = MultiDiGraph()
+        # a graph associated with the new partition
     n_cells = 0
-    hash_ap = dict()  # map ap to cells in Part
+    hash_ap = dict()
+        # map ap to cells in Part
     for node in G:
         ap = repr(G.nodes[node]['ap'])
         if ap not in S0:
             S0[ap] = set()
             hash_ap[ap] = set()
-            Part.add_node(n_cells, ap=ap, cov=S0[ap])  # hash table S0--->G
+            Part.add_node(n_cells, ap=ap, cov=S0[ap])
+                # hash table S0--->G
             n_cells += 1
         S0[ap].add(node)
 

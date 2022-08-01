@@ -891,8 +891,10 @@ def mealy2moore(mealy):
     out = {k: list(v)[0] for k, v in mealy.outputs.items()}
     s0 = list(mealy.states.initial)[0]
     # create maps between Moore and Mealy states
-    moore2mealy_states = dict()  # {qj : si} (function)
-    mealy2moore_states = dict()  # {si : {qj, qk, ...} } (relation)
+    moore2mealy_states = dict()
+        # {qj: si} (function)
+    mealy2moore_states = dict()
+        # {si: {qj, qk, ...}} (relation)
     new_s0 = _create_state_str(
         s0, out, moore, moore2mealy_states,
         mealy2moore_states)

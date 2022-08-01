@@ -274,7 +274,8 @@ def _form_node_label(state, state_data, label_def,
         # or non-iterables to lists
         if isinstance(label_value, str):
             label_str = fill(label_value, width=width)
-        elif isinstance(label_value, Iterable):  # and not str
+        elif isinstance(label_value, Iterable):
+                # and not str
             s = ', '.join([str(x) for x in label_value])
             label_str = r'\\{' + fill(s, width=width) + r'\\}'
         else:
@@ -331,7 +332,8 @@ def _transitions2dot_str(trans, to_dot_graph, tikz=False):
 
 def _form_edge_label(edge_data, label_def,
                      label_format, label_mask, tikz):
-    label = ''  # dot label for edge
+    label = ''
+        # dot label for edge
     sep_label_sets = label_format['separator']
     for label_type, label_value in edge_data.items():
         if label_type not in label_def:

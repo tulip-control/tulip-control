@@ -269,7 +269,9 @@ def load_aut_xml(x, namespace=DEFAULT_NAMESPACE):
     if aut_elem.attrib['type'] != 'basic':
         raise ValueError('Automaton class only recognizes type "basic".')
     node_list = aut_elem.findall(ns_prefix+"node")
-    id_list = []  # For more convenient searching, and to catch redundancy
+    id_list = []
+        # For more convenient searching, and
+        # to catch redundancy
     A = nx.DiGraph()
     A.env_vars = env_vars
     A.sys_vars = sys_vars

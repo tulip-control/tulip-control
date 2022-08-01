@@ -87,7 +87,9 @@ class GridWorld:
         if self.W is None and other.W is None:
             return True
         if self.W is None or other.W is None:
-            return False  # Only one of the two is undefined.
+            return False
+                # Only one of
+                # the two is undefined.
         if self.size() != other.size():
             return False
         if np.all(self.W != other.W):
@@ -422,7 +424,8 @@ class GridWorld:
                 return "^"
             elif y1 < y2:
                 return "v"
-            else:  # c1 == c2
+            else:
+                # c1 == c2
                 return "."
         if show_grid:
             out_str += "  " + "".join([str(k).rjust(2)
@@ -544,7 +547,9 @@ class GridWorld:
             else:
                 # Still looking for gridworld size in the given string
                 if len(line.strip()) == 0 or line.lstrip()[0] == "#":
-                    continue  # Ignore blank and comment lines
+                    continue
+                        # Ignore blank and
+                        # comment lines
                 line_el = line.split()
                 W = np.zeros((int(line_el[0]), int(line_el[1])),
                              dtype=np.int32)
@@ -763,7 +768,9 @@ class GridWorld:
         for i in range(row_low, row_high):
             for j in range(col_low, col_high):
                 if self.W[i][j] == 1:
-                    continue  # Cannot start from an occupied cell.
+                    continue
+                        # Cannot start from
+                        # an occupied cell.
                 spec_trans.append(self.__getitem__(
                     (i, j), nonbool=nonbool) + " -> (")
                 # Normal transitions:
@@ -964,7 +971,8 @@ def random_world(size, wall_density=.2, num_init=1, num_goals=2, prefix="Y",
         troll_list.append(
             avail_inds[np.random.randint(low=0, high=len(avail_inds))])
     bcounter = 0
-    while bcounter < num_blocks:  # Add blocks (or "wall cells")
+    while bcounter < num_blocks:
+        # Add blocks (or "wall cells")
         avail_inds = np.array(range(num_cells))[W == 0]
         avail_inds = [
             k for k in avail_inds
@@ -1037,8 +1045,10 @@ def narrow_passage(size, passage_width=1, num_init=1, num_goals=2,
     Z = unoccupied(size, prefix)
     # Zone width is 30% of world width by default
     zone_width = ((1.0 - passage_length) / 2.0) * size[1]
-    izone = int(max(1, zone_width))  # boundary of left zone
-    gzone = size[1] - int(max(1, zone_width))  # boundary of right zone
+    izone = int(max(1, zone_width))
+        # boundary of left zone
+    gzone = size[1] - int(max(1, zone_width))
+        # boundary of right zone
     if izone * size[0] < num_init or gzone * size[0] < num_goals:
         raise ValueError("Too many initials/goals for grid size")
     if ptop is None:

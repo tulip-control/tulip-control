@@ -147,17 +147,21 @@ def readdstar(getline):
     aut_type = None
     comments = []
 
-    last_state = -1  # -1 indicates unset
+    last_state = -1
+        # -1 indicates unset
     try:
         while True:
             line = getline()
             if len(line) == 0:
-                break  # file.readline() returns empty string at EOF
+                break
+                    # file.readline() returns empty string at EOF
             parts = line.split()
             if len(parts) == 0:
-                continue  # Ignore blank lines
+                continue
+                    # Ignore blank lines
 
-            if not parts[0].endswith(":") and len(parts) == 3:  # id line
+            if not parts[0].endswith(":") and len(parts) == 3:
+                # id line
                 aut_type = parts[0]
                 version = parts[1]
                 edge_type = parts[2]
@@ -201,7 +205,8 @@ def readdstar(getline):
                 apsubset_counter += 1
 
     except EOFError:
-        pass  # raw_input() throws this at end-of-file
+        pass
+            # raw_input() throws this at end-of-file
 
     return A
 
@@ -211,7 +216,8 @@ if __name__ == "__main__":
         print("Usage: "+sys.argv[0]+" FILE")
         exit(1)
 
-    if sys.argv[1] == "-":  # Read from stdin
+    if sys.argv[1] == "-":
+        # Read from stdin
         getline = input
     else:
         f = open(sys.argv[1], "r")

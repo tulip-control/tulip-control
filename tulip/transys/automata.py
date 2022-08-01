@@ -101,7 +101,8 @@ class FiniteStateAutomaton(LabeledDiGraph):
         self.symbolic = symbolic
         # edge labeling
         if symbolic:
-            alphabet = None  # no checks
+            alphabet = None
+                # no checks
         else:
             if atomic_proposition_based:
                 alphabet = PowerSet([])

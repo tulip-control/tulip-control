@@ -809,7 +809,8 @@ def _env_trans_from_env_ts(
             warnings.warn(msg)
             continue
         cur_list = list()
-        found_free = False  # any environment transition
+        found_free = False
+            # any environment transition
         # not conditioned on the previous system output ?
         for (from_state, to_state, label) in cur_trans:
             to_state_id = state_ids[to_state]
