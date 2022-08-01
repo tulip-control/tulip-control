@@ -1626,23 +1626,6 @@ class LabeledDiGraph(nx.MultiDiGraph):
             self, prog, rankdir, wrap, ax=ax)
 
 
-def str2singleton(ap_label) -> set:
-    """If string, convert to set(string).
-
-    Convention: singleton str {'*'}
-    can be passed as str '*' instead.
-    """
-    if isinstance(ap_label, str):
-        logger.debug(
-            'Saw str state label:\n'
-            f'\t{ap_label}')
-        ap_label = {ap_label}
-        logger.debug(
-            'Replaced with singleton:\n'
-            f'\t{ap_label}\n')
-    return ap_label
-
-
 def prepend_with(
         states:
             _abc.Iterable,

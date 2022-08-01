@@ -6,11 +6,6 @@ from tulip.transys.mathset import PowerSet, MathSet
 from tulip.transys.transys import FTS
 
 
-def str2singleton_test():
-    assert labeled_graphs.str2singleton("p") == {"p"}
-    assert labeled_graphs.str2singleton({"Cal"}) == {"Cal"}
-
-
 @pytest.mark.parametrize('states,prepend_str,expected',
     [([0,1], 's', ['s0', 's1']),
      ([], 's', []),

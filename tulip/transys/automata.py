@@ -349,7 +349,6 @@ def tuple2ba(
         if atomic_proposition_based:
             if guard is None:
                 guard = set()
-            guard = _graphs.str2singleton(guard)
         ba.transitions.add(
             from_state, to_state,
             letter=guard)

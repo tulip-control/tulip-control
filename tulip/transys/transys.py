@@ -746,7 +746,6 @@ def tuple2fts(
         for state, ap_label in state_labeling:
             if ap_label is None:
                 ap_label = set()
-            ap_label = _graphs.str2singleton(ap_label)
             state = prepend_str + str(state)
             logger.debug(
                 f'Labeling state:\n\t{state}\n'
