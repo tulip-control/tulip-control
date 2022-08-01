@@ -838,7 +838,7 @@ class PowerSet:
                 'PowerSet.math_set must be of class MathSet.\n'
                 f'Got instead:\n\t{value}'
                 f'\nof class:\nt\t{type(value)}')
-            raise Exception(msg)
+            raise TypeError(msg)
         object.__setattr__(self, name, value)
 
 class TypedDict(dict):
