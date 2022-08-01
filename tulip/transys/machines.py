@@ -637,23 +637,26 @@ class MealyMachine(Transducer):
         # must be deterministic
         try:
             (_, next_state, attr_dict), = enabled_trans
-        except ValueError:
+        except ValueError as error:
             if not enabled_trans:
                 if not some_possibilities:
                     raise ValueError(
                         f'state {from_state} is a dead-end. '
                         'There are no possible inputs from '
-                        'it.')
+                        'it.'
+                        ) from error
                 else:
                     raise ValueError(
                         'not a valid input, '
                         'some possible inputs include: '
-                        f'{some_possibilities}')
+                        f'{some_possibilities}'
+                        ) from error
             else:
                 raise ValueError(
                     'must be input-deterministic, '
                     'found enabled transitions: '
-                    f'{enabled_trans}')
+                    f'{enabled_trans}'
+                    ) from error
         outputs = project_dict(attr_dict, self.outputs)
         return (next_state, outputs)
 
