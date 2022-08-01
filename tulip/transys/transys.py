@@ -972,7 +972,10 @@ class GameGraph(_graphs.LabeledDiGraph):
         @return:
             set of states
         """
-        return {x for x in self if self.nodes[x]['player'] == n}
+        def matches(node):
+            return n == self.nodes[
+                node]['player']
+        return filter(matches, self)
 
     def edge_controlled_by(
             self,
