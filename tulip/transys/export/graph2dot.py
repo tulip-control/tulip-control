@@ -237,7 +237,8 @@ def _format_color(
     else:
         raise ValueError(
             f'Unknown program: {prog}. '
-            "Available options are: 'dot' or 'tikz'.")
+            'Available options are: '
+            "'dot' or 'tikz'.")
     return s
 
 
