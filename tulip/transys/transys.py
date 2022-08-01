@@ -944,13 +944,13 @@ class GameGraph(_graphs.LabeledDiGraph):
     """
 
     def __init__(self, node_label_types, edge_label_types):
-        node_label_types += [{
+        node_label_types.append({
             'name':
                 'player',
             'values':
                 {0, 1},
             'default':
-                0}]
+                0})
         super().__init__(
             node_label_types,
             edge_label_types)
