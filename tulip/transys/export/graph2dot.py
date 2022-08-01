@@ -536,7 +536,7 @@ def plot_dot(
         ax=None):
     """Plot a networkx graph using dot.
 
-    No files written or deleted from the disk.
+    No files written or deleted from disk.
 
 
     See Also
