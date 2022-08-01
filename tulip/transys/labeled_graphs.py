@@ -507,7 +507,8 @@ class Transitions:
         if not self._deterministic:
             return False
         if from_state not in self.graph.states:
-            raise Exception('from_state \notin graph')
+            raise Exception(
+                r'from_state \notin graph')
         same_labeled = self.find(
             [from_state],
             with_attr_dict=sublabels)
