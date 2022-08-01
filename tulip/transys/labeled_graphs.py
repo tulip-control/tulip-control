@@ -83,7 +83,7 @@ def label_is_desired(
             f'\t{type_name}')
         type_def = label_def[type_name]
         desired_value = desired_dict[type_name]
-        if hasattr(type_def, '__call__'):
+        if callable(type_def):
             logger.debug(
                 'Found label semantics:\n'
                 f'\t{type_def}')
