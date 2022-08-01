@@ -616,7 +616,7 @@ class MealyMachine(Transducer):
             (i, j, d)
             for i, j, d in self.edges([from_state], data=True)
             if project_dict(d, restricted_inputs) == inputs]
-        if len(enabled_trans) == 0:
+        if not enabled_trans:
             some_possibilities = list()
             for i, j, d in self.edges([from_state], data=True):
                 # The number of possible inputs to suggest here is
@@ -630,8 +630,8 @@ class MealyMachine(Transducer):
         try:
             (_, next_state, attr_dict), = enabled_trans
         except ValueError:
-            if len(enabled_trans) == 0:
-                if len(some_possibilities) == 0:
+            if not enabled_trans:
+                if not some_possibilities:
                     raise Exception(
                         f'state {from_state} is a dead-end. '
                         'There are no possible inputs from '
