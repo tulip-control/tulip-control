@@ -65,7 +65,7 @@ def label_is_desired(
     Supports symbolic evaluation, if label type is callable.
     """
     if not isinstance(attr_dict, _mset.TypedDict):
-        raise Exception(
+        raise TypeError(
             'attr_dict must be TypedDict'
             f', instead: {type(attr_dict)}')
     if attr_dict == desired_dict:
