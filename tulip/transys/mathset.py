@@ -701,15 +701,13 @@ def is_subset(
             'and non-string may introduce bugs.\nGot:\n\t'
             f'{small_iterable},\t{big_iterable}'
             '\ninstead.')
-    try:
-        # first, avoid object duplication
-        if not isinstance(big_iterable, set):
+    if not isinstance(big_iterable, _abc.Container):
+        big_iterable = list(big_iterable)
+    if isinstance(big_iterable, list):
+        try:
             big_iterable = set(big_iterable)
-    except TypeError:
-        # not all items hashable...
-        if not isinstance(big_iterable, list):
-            # avoid object duplication
-            big_iterable = list(big_iterable)
+        except TypeError:
+            pass
     return all(map(
         big_iterable.__contains__,
         small_iterable))
