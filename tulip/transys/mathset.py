@@ -703,19 +703,16 @@ def is_subset(
             '\ninstead.')
     try:
         # first, avoid object duplication
-        if not isinstance(small_iterable, set):
-            small_iterable = set(small_iterable)
         if not isinstance(big_iterable, set):
             big_iterable = set(big_iterable)
-        return small_iterable <= big_iterable
     except TypeError:
         # not all items hashable...
         if not isinstance(big_iterable, list):
             # avoid object duplication
             big_iterable = list(big_iterable)
-        return all(map(
-            big_iterable.__contains__,
-            small_iterable))
+    return all(map(
+        big_iterable.__contains__,
+        small_iterable))
 
 
 def powerset(iterable):
