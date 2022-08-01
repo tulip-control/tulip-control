@@ -617,9 +617,10 @@ class CartesianProduct:
 
     def __mul__(self, mathsets):
         """Multiply Cartesian products."""
-        if not isinstance(mathsets, list):
-            raise TypeError(
-                'mathsets given must be a list of `MathSet`.')
+        if isinstance(mathsets, list):
+            return
+        raise TypeError(
+            'mathsets given must be a list of `MathSet`.')
 
     def add(self, mathset):
         self.mathsets.append(mathset)
