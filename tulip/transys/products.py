@@ -281,7 +281,7 @@ def find_ba_succ(prev_q, next_s, fts, ba):
 
 
 def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
-    (s, q) = prev_sq
+    s, q = prev_sq
     new_accepting = set()
     next_sqs = set()
     for (curq, next_q, sublabels) in enabled_ba_trans:
