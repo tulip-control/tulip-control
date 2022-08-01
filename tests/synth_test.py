@@ -515,14 +515,14 @@ def test_determinize_machine_init():
     detmach = synth.determinize_machine_init(mach)
     assert detmach is not mach
     for a in {0, 1}:
-        edges = [(i, j) for (i, j, d) in detmach.edges(u, data=True)
+        edges = [(i, j) for i, j, d in detmach.edges(u, data=True)
                  if d['a'] == a]
         assert len(edges) == 1
     # determinize output b arbitrarily,
     # but output c is constrained to the initial value 0
     detmach = synth.determinize_machine_init(mach, {'c': 0})
     for a in {0, 1}:
-        edges = [(i, j, d) for (i, j, d) in detmach.edges(u, data=True)
+        edges = [(i, j, d) for i, j, d in detmach.edges(u, data=True)
                  if d['a'] == a]
         assert len(edges) == 1
         ((i, j, d), ) = edges

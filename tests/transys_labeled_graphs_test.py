@@ -178,7 +178,7 @@ class States_labeling_test:
             [(0, {'ap':{'p'}}),
              (1, {'ap':{'q'} })])
         assert len(self.S_ap) == 2
-        current_labels = [l["ap"] for (s, l) in self.S_ap(data=True)]
+        current_labels = [l["ap"] for s, l in self.S_ap(data=True)]
         assert len(current_labels) == 2
         assert MathSet(current_labels) == MathSet([{'p'}, {'q'}])
         self.S_ap.add_from(
@@ -190,12 +190,12 @@ class States_labeling_test:
             [(10, {'ap': {'a'}}),
              (11, {'ap': {'b'}})])
         assert len(self.S_ap) == 4
-        current_labels = [l["ap"] for (s, l) in self.S_ap(data=True)]
+        current_labels = [l["ap"] for s, l in self.S_ap(data=True)]
         assert len(current_labels) == 4
         a = MathSet(current_labels)
         b = MathSet([{'p'}, {'q'}, {'a'}, {'b'}])
         assert a == b, (a, b)
-        a = MathSet([l["ap"] for (s, l) in self.S_ap(data=True)])
+        a = MathSet([l["ap"] for s, l in self.S_ap(data=True)])
         b = MathSet(current_labels)
         assert a == b, (a, b)
 
@@ -215,8 +215,7 @@ class States_labeling_test:
         print(result)
         assert (
             len(result) == 2 and
-            set([s for (s, l) in result]) == set(["state0", "state2"]))
-
+            set([s for s, l in result]) == set(["state0", "state2"]))
         same_result = self.S_ap.find(ap={'p'})
         assert(same_result == result)
 

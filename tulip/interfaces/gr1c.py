@@ -780,7 +780,7 @@ class GR1CSession:
                 if loc >= 0:
                     line = line[len(self.prompt):]
             env_moves.append(dict([
-                (k, int(s)) for (k,s) in
+                (k, int(s)) for k, s in
                 zip(self.env_vars, line.split())
             ]))
             line = self.p.stdout.readline()
@@ -858,7 +858,7 @@ class GR1CSession:
                 if loc >= 0:
                     line = line[len(self.prompt):]
             sys_moves.append(dict([
-                (k, int(s)) for (k,s) in
+                (k, int(s)) for k, s in
                 zip(self.sys_vars, line.split())
             ]))
             line = self.p.stdout.readline()

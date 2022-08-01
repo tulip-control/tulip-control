@@ -545,7 +545,7 @@ class GridWorld:
                         else:
                             out_str += "G"
                     elif (i, j) in path:
-                        indices = (n for (n, c) in enumerate(
+                        indices = (n for n, c in enumerate(
                             path) if c == (i, j))
                         for x in indices:
                             d = direct((i, j), path[(x + 1) % len(path)])
@@ -1482,7 +1482,7 @@ def animate_paths(
     data = list()
     lines = list()
     for n, path in enumerate(paths):
-        arr = np.array([[x, y] for (y, x) in path]).transpose()
+        arr = np.array([[x, y] for y, x in path]).transpose()
         arr = np.add(arr, jitter * (np.random.rand(*arr.shape) - 0.5))
         data.append(arr)
         l, = ax.plot(
