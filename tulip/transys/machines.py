@@ -1039,8 +1039,28 @@ def _split_io(attr_dict, machine):
     return input_values, output_values
 
 
-project_dict = lambda x, y: {k: x[k] for k in x if k in y}
-trim_dict = lambda x, y: {k: x[k] for k in x if k not in y}
+def project_dict(
+        x:
+            _abc.Mapping,
+        y:
+            _abc.Container
+        ) -> dict:
+    return {
+        k: x[k]
+        for k in x
+        if k in y}
+
+
+def trim_dict(
+        x:
+            _abc.Mapping,
+        y:
+            _abc.Container
+        ) -> dict:
+    return {
+        k: x[k]
+        for k in x
+        if k not in y}
 
 
 def strip_ports(
