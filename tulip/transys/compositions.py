@@ -162,7 +162,10 @@ def synchronous_parallel(
     #
     # Compute the set of actions
     if type(ts) == MDP:
-        prod_actions = [list(m.actions) for m in models if type(m) == MDP]
+        prod_actions = [
+            list(m.actions)
+            for m in models
+            if type(m) == MDP]
         if len(prod_actions) == 1:
             ts.actions.add_from(prod_actions[0])
         else:

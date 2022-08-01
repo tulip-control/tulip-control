@@ -731,8 +731,9 @@ def powerset(iterable):
     also in <https://pypi.python.org/pypi/more-itertools>
     """
     s = list(iterable)
-    return _itr.chain.from_iterable(_itr.combinations(s, r)
-                               for r in range(len(s) + 1))
+    return _itr.chain.from_iterable(
+        _itr.combinations(s, r)
+        for r in range(len(s) + 1))
 
 
 class PowerSet:
