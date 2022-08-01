@@ -200,7 +200,9 @@ class FunctionOnLabeledState:
             return None
         if len(output_dict) == 1:
             return next(iter(output_dict.values()))
-        return (output_dict[key] for key in self._output_keys)
+        return tuple(
+            output_dict[key]
+            for key in self._output_keys)
 
     def get_state_input_output_pair(self, state, input_dict):
         """Find the first element with the given state and additional input.
