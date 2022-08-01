@@ -622,13 +622,6 @@ class CartesianProduct:
         return all(map(
             _op.contains, pairs))
 
-    def __mul__(self, mathsets):
-        """Multiply Cartesian products."""
-        if isinstance(mathsets, list):
-            return
-        raise TypeError(
-            'mathsets given must be a list of `MathSet`.')
-
     def add(self, mathset):
         self.mathsets.append(mathset)
 
