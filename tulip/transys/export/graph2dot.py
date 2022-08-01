@@ -421,7 +421,7 @@ def _form_edge_label(edge_data, label_def,
         else:
             label_str = str(label_value)
         if tikz:
-            type_name = r'\mathrm' + '{' + type_name + '}'
+            type_name = r'\mathrm{' + type_name + '}'
         label += (type_name + sep_type_value +
                   label_str + sep_label_sets)
     if tikz:
