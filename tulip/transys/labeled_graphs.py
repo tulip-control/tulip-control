@@ -504,17 +504,16 @@ class Transitions:
         if not self._deterministic:
             return False
         if from_state not in self.graph.states:
-            raise Exception(
+            raise ValueError(
                 r'from_state \notin graph')
         same_labeled = self.find(
             [from_state],
             with_attr_dict=sublabels)
         if same_labeled:
-            msg = (
+            raise ValueError(
                 'Candidate transition violates determinism.\n'
                 'Existing transitions with same label:\n'
                 f'{same_labeled}')
-            raise Exception(msg)
         return True
 
     def add(
@@ -662,14 +661,14 @@ class Transitions:
         """
         # square ?
         if adj.shape[0] != adj.shape[1]:
-            raise Exception(
+            raise ValueError(
                 'Adjacency matrix must be square.')
         # check states exist,
         # before adding any transitions
         for state in adj2states:
             if state in self.graph:
                 continue
-            raise Exception(
+            raise ValueError(
                 f'State: {state} not found.'
                 ' Consider adding it with sys.states.add')
         # convert to format friendly for
