@@ -676,8 +676,7 @@ def is_subset(
         small_iterable,
         big_iterable:
             _abc.Iterable):
-    """Comparison for handling list <= set, and lists with unhashable items.
-    """
+    """Comparison for handling list <= set, and lists with unhashable items."""
     # asserts removed when compiling with optimization on...
     # it would have been elegant to use instead:
     #   assert(isinstance(big_iterable, Iterable))
