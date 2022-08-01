@@ -834,11 +834,10 @@ class PowerSet:
 
     def __setattr__(self, name, value):
         if name == 'math_set' and not isinstance(value, MathSet):
-            msg = (
+            raise TypeError(
                 'PowerSet.math_set must be of class MathSet.\n'
                 f'Got instead:\n\t{value}'
                 f'\nof class:\nt\t{type(value)}')
-            raise TypeError(msg)
         object.__setattr__(self, name, value)
 
 class TypedDict(dict):
