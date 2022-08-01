@@ -139,7 +139,7 @@ class States:
     def __call__(self, *args, **kwargs):
         """Return list of states.
 
-        For more details see `LabeledDiGraph.nodes`
+        Read also about `LabeledDiGraph.nodes`.
         """
         return self.graph.nodes(*args, **kwargs)
 
