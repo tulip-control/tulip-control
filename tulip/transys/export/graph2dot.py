@@ -306,7 +306,8 @@ def _form_node_label(state, state_data, label_def,
         node_dot_label += r'\\n'
     # add node annotations from
     # action, AP sets etc
-    # other key,values in state attr_dict ignored
+    # other key,values in
+    # `state attr_dict` ignored
     pieces = list()
     for label_type, label_value in state_data.items():
         if label_type not in label_def:
