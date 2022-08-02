@@ -270,10 +270,10 @@ def _get_transition_attr(
 def _get_composed_model_type(
         models:
             list[KS | WKS | MC | MDP]):
-    """Return class of model that corresponds to composition of `models`.
+    """Return class representing composition.
 
-    Return the class of model obtained from taking a composition of
-    those given in `models`.
+    Return the class of model obtained from
+    composing the items in `models`.
     """
     if all(type(m) in [MDP, MC, KS] for m in models):
         if any(type(m) == MDP for m in models):
