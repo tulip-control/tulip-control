@@ -263,8 +263,8 @@ def _get_transition_attr(
     for idx, trans in enumerate(trans_prod):
         for attr_key, attr_value in trans[2].items():
             if attr_key not in trans_attr:
-                trans_attr[attr_key] = [
-                    None for i in range(len(trans_prod))]
+                trans_attr[attr_key
+                    ] = [None] * len(trans_prod)
             trans_attr[attr_key][idx] = attr_value
     for key, value in trans_attr.items():
         operation = transition_attr_operations.get(key, None)
