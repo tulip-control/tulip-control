@@ -221,6 +221,13 @@ class MathSet:
             for y in other]
         return MathSet(cartesian)
 
+    def update(
+            self,
+            iterable:
+                _abc.Iterable
+            ) -> None:
+        self.add_from(iterable)
+
     def __ior__(
             self,
             iterable:
