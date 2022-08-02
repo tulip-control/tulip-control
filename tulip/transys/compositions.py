@@ -133,7 +133,9 @@ def synchronous_parallel(
     # all the atomic propositions.
     composed_type = _get_composed_model_type(models)
     if composed_type is None:
-        raise TypeError("Can only compose [WKS, KS] or [MDP, MC, KS]")
+        raise TypeError(
+            'Can only compose [WKS, KS] or '
+            '[MDP, MC, KS]')
     ts = composed_type()
     for model in models:
         prod_states.append(set(model.states))
