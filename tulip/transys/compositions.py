@@ -267,7 +267,7 @@ def _get_transition_attr(
                     ] = [None] * len(trans_prod)
             trans_attr[attr_key][idx] = attr_value
     for key, value in trans_attr.items():
-        operation = transition_attr_operations.get(key, None)
+        operation = transition_attr_operations.get(key)
         if operation is None:
             trans_attr[key] = tuple(value)
         else:
