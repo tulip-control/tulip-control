@@ -206,9 +206,11 @@ def _filter_filenames(basename, available):
         basename[1:]
             if basename.startswith('-')
             else basename)
-    match = [f for f in available
-             if f.startswith(desired_start) and f.endswith('.py')]
-    return match
+    def matches(name: str) -> bool:
+        return (
+            name.startswith(desired_start) and
+            name.endswith('.py'))
+    return list(filter(matches, available))
 
 
 def _map_basename_to_filename(
