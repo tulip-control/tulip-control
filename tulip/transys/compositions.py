@@ -275,17 +275,31 @@ def _get_composed_model_type(
     Return the class of model obtained from
     composing the items in `models`.
     """
-    if all(type(m) in [MDP, MC, KS] for m in models):
-        if any(type(m) == MDP for m in models):
-            return MDP
-        if any(type(m) == MC for m in models):
-            return MC
-        return KS
-    if all(type(m) in [WKS, KS] for m in models):
-        if any(type(m) == WKS for m in models):
-            return WKS
-        return KS
-    return None
+    def mk(types):
+        def isinstance_(instance):
+            return isinstance(instance, types)
+        return isinstance_
+    type_is_ok = mk(MDP | MC | KS)
+    is_mdp = mk(MDP)
+    is_mc = mk(MC)
+    is_wks = mk(WKS)
+    all_types_ok = all(map(
+        type_is_ok, models))
+    any_is_mdp = any(map(
+        is_mdp, models))
+    any_is_mc = any(map(
+        is_mc, models))
+    any_is_wks = any(map(
+        is_wks, models))
+    if not all_types_ok:
+        return None
+    if any_is_mdp:
+        return MDP
+    if any_is_mc:
+        return MC
+    if any_is_wks:
+        return WKS
+    return KS
 
 
 def _get_apply_policy_model_type(
