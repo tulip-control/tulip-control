@@ -210,6 +210,7 @@ def _filter_filenames(basename, available):
 
 def _map_basename_to_filename(
         basename, testfiles, excludefiles, more_args, tests_dir):
+    base = basename[1:]
     filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
     if os.path.exists(path):
@@ -219,7 +220,6 @@ def _map_basename_to_filename(
     if not neg:
         more_args.append(basename)
         return
-    base = basename[1:]
     filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
     if os.path.exists(path):
