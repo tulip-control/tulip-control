@@ -202,7 +202,10 @@ def _filter_filenames(basename, available):
     If `basename` starts with a hyphen `-`, then the hyphen is
     ignored when testing for matching.
     """
-    desired_start = basename[1:] if basename.startswith('-') else basename
+    desired_start = (
+        basename[1:]
+            if basename.startswith('-')
+            else basename)
     match = [f for f in available
              if f.startswith(desired_start) and f.endswith('.py')]
     return match
