@@ -154,16 +154,17 @@ def _state2tikz(
         is_initial, is_accepting, rankdir,
         rim_color, d, node_dot_label):
     style = 'state'
-    if rankdir == 'LR':
-        init_dir = 'initial left'
-    elif rankdir == 'RL':
-        init_dir = 'initial right'
-    elif rankdir == 'TB':
-        init_dir = 'initial above'
-    elif rankdir == 'BT':
-        init_dir = 'initial below'
-    else:
-        raise ValueError('Unknown rankdir')
+    match rankdir:
+        case 'LR':
+            init_dir = 'initial left'
+        case 'RL':
+            init_dir = 'initial right'
+        case 'TB':
+            init_dir = 'initial above'
+        case 'BT':
+            init_dir = 'initial below'
+        case _:
+            raise ValueError('Unknown rankdir')
     if is_initial:
         style += f', initial by arrow, {init_dir}, initial text='
     if is_accepting:
