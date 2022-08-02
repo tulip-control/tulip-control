@@ -266,12 +266,12 @@ def _get_transition_attr(
                 trans_attr[trans_attr_key] = [
                     None for i in range(len(trans_prod))]
             trans_attr[trans_attr_key][idx] = trans_attr_value
-    for key, val in trans_attr.items():
+    for key, value in trans_attr.items():
         operation = transition_attr_operations.get(key, None)
         if operation is None:
-            trans_attr[key] = tuple(val)
+            trans_attr[key] = tuple(value)
         else:
-            trans_attr[key] = operation(*val)
+            trans_attr[key] = operation(*value)
     return trans_attr
 
 
