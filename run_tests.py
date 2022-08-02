@@ -220,7 +220,6 @@ def _map_basename_to_filename(
     if not neg:
         more_args.append(basename)
         return
-    filename = f'{base}_test.py'
     path = os.path.join(tests_dir, filename)
     if os.path.exists(path):
         excludefiles.append(filename)
