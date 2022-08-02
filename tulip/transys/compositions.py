@@ -320,7 +320,7 @@ def _get_apply_policy_model_type(
     Return the class of model obtained from applying
     a policy on the given `model`.
     """
-    if type(model) == MDP:
+    if isinstance(model, MDP):
         return MC
     raise TypeError(
         f'Cannot apply policy for model of type {type(model)}')
