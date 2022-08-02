@@ -315,10 +315,10 @@ def _get_apply_policy_model_type(
             KS |
             WKS |
             MDP):
-    """Return class of model that corresponds to applying a policy to `model`.
+    """Return class representing policy application.
 
-    Return the class of model obtained from applying
-    a policy on the given `model`.
+    Return the class of model that results when
+    a policy is applied to `model`.
     """
     if isinstance(model, MDP):
         return MC
