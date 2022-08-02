@@ -261,11 +261,11 @@ def _get_transition_attr(
     """
     trans_attr = dict()
     for idx, trans in enumerate(trans_prod):
-        for trans_attr_key, trans_attr_value in trans[2].items():
-            if trans_attr_key not in trans_attr:
-                trans_attr[trans_attr_key] = [
+        for attr_key, attr_value in trans[2].items():
+            if attr_key not in trans_attr:
+                trans_attr[attr_key] = [
                     None for i in range(len(trans_prod))]
-            trans_attr[trans_attr_key][idx] = trans_attr_value
+            trans_attr[attr_key][idx] = attr_value
     for key, value in trans_attr.items():
         operation = transition_attr_operations.get(key, None)
         if operation is None:
