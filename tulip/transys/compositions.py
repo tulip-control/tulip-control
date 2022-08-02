@@ -239,17 +239,23 @@ def _get_transition_attr(
             dict):
     """Return product of transitions in `trans_prod`.
 
-    Return the attribute of a transition constructed by taking the product
-    of transitions in `trans_prod`.
+    Return the attribute of
+    a transition constructed by
+    taking the product of
+    transitions in `trans_prod`.
 
     @param trans_prod:
         `list` of `Transitions` objects
     @param transition_attr_operations:
-        `dict` whose key is the
-        transition attribute key and value is the operation to
-        be performed for this transition attribute.
-        For an attribute whose operation is not specified,
-        a tuple of attribute values from all models will be used.
+        `dict` whose key is the transition
+        attribute key and value is the
+        operation to be performed for
+        this transition attribute.
+
+        For an attribute whose operation
+        is not specified, a tuple of
+        attribute values from all models
+        will be used.
     """
     trans_attr = dict()
     for idx, trans in enumerate(trans_prod):
