@@ -716,14 +716,16 @@ class SwitchedSysDyn:
     @property
     def env_labels(self):
         if self._env_labels is None:
-            return range(self.disc_domain_size[0])
+            return list(range(
+                self.disc_domain_size[0]))
         else:
             return self._env_labels
 
     @property
     def disc_sys_labels(self):
         if self._disc_sys_labels is None:
-            return range(self.disc_domain_size[1])
+            return list(range(
+                self.disc_domain_size[1]))
         else:
             return self._disc_sys_labels
 
