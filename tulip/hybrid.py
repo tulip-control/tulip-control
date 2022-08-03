@@ -715,19 +715,17 @@ class SwitchedSysDyn:
 
     @property
     def env_labels(self):
-        if self._env_labels is None:
-            return list(range(
-                self.disc_domain_size[0]))
-        else:
+        if self._env_labels is not None:
             return self._env_labels
+        return list(range(
+            self.disc_domain_size[0]))
 
     @property
     def disc_sys_labels(self):
-        if self._disc_sys_labels is None:
-            return list(range(
-                self.disc_domain_size[1]))
-        else:
+        if self._disc_sys_labels is not None:
             return self._disc_sys_labels
+        return list(range(
+            self.disc_domain_size[1]))
 
     @classmethod
     def from_pwa(
