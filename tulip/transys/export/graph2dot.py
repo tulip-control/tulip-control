@@ -47,7 +47,7 @@ import numpy as np
 import tulip.graphics as _graphics
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def _states2dot_str(
@@ -189,7 +189,7 @@ def _state2tikz(
         # not gradient
         style += ', fill = ' + _format_color(fill, 'tikz')
     else:
-        logger.debug('fillcolor is None')
+        _logger.debug('fillcolor is None')
     to_dot_graph.add_node(
         state,
         texlbl=node_dot_label,
@@ -233,7 +233,7 @@ def _format_color(
                     webcolors.name_to_rgb(c))
             s = webcolors.rgb_to_hex(result)
         except:
-            logger.warning(
+            _logger.warning(
                 'failed to import webcolors')
             s = ':'.join(
                 f'{k};{v / t}'
@@ -569,18 +569,18 @@ def plot_dot(
     # installed ?
     try:
         from IPython.display import display, Image
-        logger.debug('IPython installed.')
+        _logger.debug('IPython installed.')
         # called by IPython ?
         try:
             cfg = get_ipython().config
-            logger.debug(
+            _logger.debug(
                 'Script called by IPython.')
             # Caution!!! : not ordinary dict,
             # but IPython.config.loader.Config
             #
             # qtconsole ?
             if cfg['IPKernelApp']:
-                logger.debug(
+                _logger.debug(
                     'Within IPython QtConsole.')
                 display(Image(data=png_str))
                 return True
@@ -589,7 +589,7 @@ def plot_dot(
                 'IPython installed, '
                 'but not called from it.')
     except ImportError:
-        logger.warning(
+        _logger.warning(
             'IPython not found.\n'
             'So loaded dot images not inline.')
     # not called from
@@ -600,13 +600,13 @@ def plot_dot(
         import matplotlib.pyplot as plt
         import matplotlib.image as mpimg
     except:
-        logger.debug(
+        _logger.debug(
             'Matplotlib not installed.')
-        logger.warning(
+        _logger.warning(
             'Neither IPython QtConsole nor '
             'Matplotlib available.')
         return None
-    logger.debug(
+    _logger.debug(
         'Matplotlib installed.')
     if ax is None:
         fig = plt.figure()

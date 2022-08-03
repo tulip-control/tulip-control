@@ -54,7 +54,7 @@ SLUGS_COMPILER_PATH = (
     '../tools/StructuredSlugsParser/'
     'compiler.py')
 BDD_FILE = 'strategy_bdd.txt'
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def check_realizable(
@@ -133,7 +133,7 @@ def synthesize(
     for u, v in g.edges():
         h.add_edge(u, v)
     nodes = '\n  '.join(str(x) for x in h.nodes(data=True))
-    logger.debug(
+    _logger.debug(
         f'loaded strategy with vertices:\n  {nodes}\n'
         f'and edges:\n {h.edges()}\n')
     return h
@@ -235,7 +235,7 @@ def _call_slugs(
         # the following error message from `slugs`:
         # > Error: Parameter '--onlyRealizability' is unknown.
         pass
-    logger.debug('Calling: ' + ' '.join(options))
+    _logger.debug('Calling: ' + ' '.join(options))
     try:
         p = subprocess.Popen(
             options,
@@ -253,7 +253,7 @@ def _call_slugs(
         f'\n slugs return code: {p.returncode}\n\n'
         f'\n slugs stderr: {err}\n\n'
         f'\n slugs stdout:\n\n {out}\n\n')
-    logger.debug(msg)
+    _logger.debug(msg)
     # error ?
     if p.returncode != 0:
         raise Exception(msg)

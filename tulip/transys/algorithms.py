@@ -44,7 +44,7 @@ __all__ = []
 
 
 _hl = 40 * '-'
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def _multiply_mutable_states(self, other, prod_graph, prod_sys):

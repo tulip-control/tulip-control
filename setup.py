@@ -31,7 +31,7 @@ VERSION_TEXT = (
     '# This file was generated from setup.py\n'
     "version = '{version}'\n")
 logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 classifiers = [
     'Development Status :: 2 - Pre-Alpha',
     'Intended Audience :: Science/Research',
@@ -80,7 +80,7 @@ def run_setup():
             outputdir=outputdir,
             write_tables=True,
             debug=True,
-            debuglog=logger)
+            debuglog=_logger)
         import tulip.interfaces.ltl2ba
         tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
         outputdir = 'tulip/interfaces'
@@ -90,7 +90,7 @@ def run_setup():
             outputdir=outputdir,
             write_tables=True,
             debug=True,
-            debuglog=logger)
+            debuglog=_logger)
         plytable_build_failed = False
     except Exception as e:
         tb = ''.join(

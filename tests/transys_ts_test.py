@@ -1,7 +1,7 @@
 """Tests for transys.transys (part of transys subpackage)"""
 import logging
 logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 logging.getLogger('tulip.transys.products').setLevel(logging.DEBUG)
 from tulip import transys as trs
 from tulip.transys.mathset import MathSet, PowerSet
@@ -29,7 +29,7 @@ def ts_test():
     assert(ts.states['s0']['ap'] == {'p'})
     for state in {'s1', 's2', 's3'}:
         assert(ts.states[state]['ap'] == set() )
-    logger.debug(ts)
+    _logger.debug(ts)
     return ts
 
 
@@ -50,7 +50,7 @@ def ba_test():
     ba.transitions.add('q1', 'q1', letter={'p'})
     ba.transitions.add('q1', 'q0', letter=set() )
     ba.transitions.add('q0', 'q0', letter=set() )
-    logger.debug(ba)
+    _logger.debug(ba)
     ba.save('ba.pdf')
     return ba
 

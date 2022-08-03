@@ -58,7 +58,7 @@ __all__ = [
     'collect_primed_vars']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 Node = _ast.NodeSpec
 
 
@@ -323,7 +323,7 @@ def sub_constants(
     @param var_str2int:
         {'varname':['const_val0', ...], ...}
     """
-    # logger.info('substitute ints for constants in:\n\t' + str(self))
+    # _logger.info('substitute ints for constants in:\n\t' + str(self))
     old2new = dict()
     for u in tree.nodes():
         if u.type != 'str':
@@ -336,7 +336,7 @@ def sub_constants(
         # replace Const with Num
         old2new[u] = num
     nx.relabel_nodes(tree, old2new, copy=False)
-    # logger.info('result after substitution:\n\t' + str(self) + '\n')
+    # _logger.info('result after substitution:\n\t' + str(self) + '\n')
 
 
 def sub_bool_with_subtree(
@@ -435,7 +435,7 @@ def infer_constants(
             other_vars.pop(var)
             _check_var_conflicts({var}, other_vars)
     else:
-        logger.error('infer constants does not know the variable domains.')
+        _logger.error('infer constants does not know the variable domains.')
         warnings.warn(
             'infer_constants can give an incorrect result '
             'depending on the variable domains.\n'

@@ -40,7 +40,7 @@ import logging
 import typing as _ty
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 OpMap = dict[str, str]

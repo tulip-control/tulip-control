@@ -49,7 +49,7 @@ __all__ = [
     'prepend_with']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def label_is_desired(
@@ -76,13 +76,13 @@ def label_is_desired(
     # any labels have symbolic semantics ?
     label_def = attr_dict.allowed_values
     for type_name, value in attr_dict.items():
-        logger.debug(
+        _logger.debug(
             'Checking label type:\n'
             f'\t{type_name}')
         type_def = label_def[type_name]
         desired_value = desired_dict[type_name]
         if callable(type_def):
-            logger.debug(
+            _logger.debug(
                 'Found label semantics:\n'
                 f'\t{type_def}')
             # value = guard
@@ -103,9 +103,9 @@ def test_common_bug(
         value,
         desired_value
         ) -> None:
-    logger.debug(
+    _logger.debug(
         f'Label value:\n\t{value}')
-    logger.debug(
+    _logger.debug(
         'Desired value:\n'
         f'\t{desired_value}')
     mismatch = (
@@ -390,21 +390,21 @@ class States:
                     ) from error
         found_state_label_pairs = list()
         for state, attr_dict in self.graph.nodes(data=True):
-            logger.debug(
+            _logger.debug(
                 f'Checking state_id = {state}'
                 f', with attr_dict = {attr_dict}')
             if states is not None:
                 if state not in states:
-                    logger.debug(
+                    _logger.debug(
                         f'state_id = {state}, not desired.')
                     continue
-            logger.debug(
+            _logger.debug(
                 'Checking state label:\n'
                 f'\t attr_dict = {attr_dict}\n'
                 ' vs:\n'
                 f'\t desired_label = {with_attr_dict}')
             if not with_attr_dict:
-                logger.debug('Any label acceptable.')
+                _logger.debug('Any label acceptable.')
                 ok = True
             else:
                 typed_attr = _mset.TypedDict()
@@ -412,13 +412,13 @@ class States:
                 typed_attr.update(attr_dict)
                 ok = label_is_desired(typed_attr, with_attr_dict)
             if ok:
-                logger.debug(
+                _logger.debug(
                     f'Label Matched:\n\t{attr_dict}'
                     f' == {with_attr_dict}')
                 state_label_pair = (state, dict(attr_dict))
                 found_state_label_pairs.append(state_label_pair)
             else:
-                logger.debug('No match for label---> state discarded.')
+                _logger.debug('No match for label---> state discarded.')
         return found_state_label_pairs
 
     def is_terminal(
@@ -743,13 +743,13 @@ class Transitions:
         for u, v, attr_dict in u_v_edges:
             ok = True
             if not with_attr_dict:
-                logger.debug(
+                _logger.debug(
                     'Any label is allowed.')
             elif not attr_dict:
-                logger.debug(
+                _logger.debug(
                     'No labels defined.')
             else:
-                logger.debug(
+                _logger.debug(
                     'Checking guard.')
                 typed_attr = _mset.TypedDict()
                 typed_attr.set_types(
@@ -758,7 +758,7 @@ class Transitions:
                 ok = label_is_desired(
                     typed_attr, with_attr_dict)
             if ok:
-                logger.debug(
+                _logger.debug(
                     'Transition label matched desired label.')
                 transition = (u, v, dict(attr_dict))
                 found_transitions.append(transition)
@@ -1008,11 +1008,11 @@ class LabeledDiGraph(nx.MultiDiGraph):
         labeling = dict()
         defaults = dict()
         if label_types is None:
-            logger.debug(
+            _logger.debug(
                 'no label types passed')
             return labeling, defaults
         if not label_types:
-            logger.warning(
+            _logger.warning(
                 f'empty label types: {label_types}')
         # define the labeling
         labeling = {
@@ -1046,13 +1046,13 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 bool):
         untyped_keys = set(typed_attr
             ).difference(type_defs)
-        logger.debug(
+        _logger.debug(
             'checking for untyped keys...\n'
             f'attribute dict: {typed_attr}\n'
             f'type definitions: {type_defs}\n'
             f'untyped_keys: {untyped_keys}')
         if not untyped_keys:
-            logger.debug('no untyped keys.')
+            _logger.debug('no untyped keys.')
             return
         edge_attrs = {
             k: typed_attr[k]
@@ -1066,7 +1066,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             'Currently the allowed attributes are:'
             f'{allowed_attrs}')
         if not check:
-            logger.warning(
+            _logger.warning(
                 f'{msg}\n'
                 'Allowed because you passed: '
                 'check = False')
@@ -1219,7 +1219,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
         """
         # legacy
         if 'check_states' in attr:
-            logger.warning(
+            _logger.warning(
                 'saw keyword argument: check_states '
                 'which is no longer available, '
                 'firstly add the new nodes.')
@@ -1251,7 +1251,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
                 f'and:\t to_state = {v}\n')
         # check if same labeled transition exists
         if attr_dict in existing_u_v.values():
-            logger.warning(
+            _logger.warning(
                 'Same labeled transition:\n'
                 'from_state---[label]---> to_state\n'
                 'already exists, where:\n'
@@ -1266,7 +1266,7 @@ class LabeledDiGraph(nx.MultiDiGraph):
             check)
         # the only change from nx in
         # this clause is using TypedDict
-        logger.debug(f'adding edge: {u} ---> {v}')
+        _logger.debug(f'adding edge: {u} ---> {v}')
         if key is None:
             key = self.new_edge_key(u, v)
         if v in self._succ[u]:

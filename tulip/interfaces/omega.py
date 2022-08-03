@@ -27,7 +27,7 @@ import networkx as nx
 import tulip.spec as _spec
 
 
-log = logging.getLogger(__name__)
+_log = logging.getLogger(__name__)
 
 
 def is_realizable(
@@ -70,7 +70,7 @@ def synthesize_enumerated_streett(
     win = t1 - t0
     sym = t2 - t1
     enu = t3 - t2
-    log.info(
+    _log.info(
         f'Winning set computed in {win} sec.\n'
         f'Symbolic strategy computed in {sym} sec.\n'
         f'Strategy enumerated in {enu} sec.')

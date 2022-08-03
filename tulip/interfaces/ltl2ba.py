@@ -41,7 +41,7 @@ import tulip.transys as _trs
 
 
 TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class Lexer:
@@ -131,7 +131,7 @@ class Lexer:
         t.lexer.lineno += t.value.count('\n')
 
     def t_error(self, t):
-        logger.warning(
+        _logger.warning(
             f'Illegal character `{t.value[0]}`')
         t.lexer.skip(1)
 
@@ -205,7 +205,7 @@ class Parser:
         if tabmodule is None:
             tabmodule = self.tabmodule
         if debug and debuglog is None:
-            debuglog = logger
+            debuglog = _logger
         self.parser = ply.yacc.yacc(
             method='LALR',
             module=self,
@@ -338,7 +338,7 @@ class Parser:
         """empty :"""
 
     def p_error(self, p):
-        logger.error(
+        _logger.error(
             f'Syntax error at {p.value}')
 
 
@@ -363,7 +363,7 @@ def ltl2ba(
     ba.add_edges_from(g.edges(data=True))
     ba.initial_nodes = initial
     ba.accepting_sets = accepting
-    logger.info(f'Resulting automaton:\n\n{ba}\n')
+    _logger.info(f'Resulting automaton:\n\n{ba}\n')
     return ba
 
 
@@ -404,7 +404,7 @@ def call_ltl2ba(
         universal_newlines=True)
     p.wait()
     ltl2ba_output = p.stdout.read()
-    logger.info(
+    _logger.info(
         f'ltl2ba output:\n\n{ltl2ba_output}\n')
     if p.returncode != 0:
         raise Exception(
@@ -414,7 +414,7 @@ def call_ltl2ba(
 
 def _main():
     logging.basicConfig(level=logging.DEBUG)
-    logger.setLevel(level=logging.DEBUG)
+    _logger.setLevel(level=logging.DEBUG)
     parser = Parser()
     f = '[] !s && <> (a || c) && <> (b U c)'
     out = call_ltl2ba(f)

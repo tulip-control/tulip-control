@@ -7,7 +7,7 @@ from tulip.interfaces import slugs
 from tulip.spec import GRSpec
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def bitfields_to_ints_test():
@@ -16,13 +16,13 @@ def bitfields_to_ints_test():
     bits = {'a@0.0.30': 0, 'a@1': 1, 'a@2': 1,
             'a@3': 0, 'a@4': 1, 'a@5': 0}
     n = slugs._bitfields_to_ints(bits, t)
-    logger.debug(n)
+    _logger.debug(n)
     assert n == {'a': 22}
     # test str values
     bits = {'a@0.0.30': '0', 'a@1': '1', 'a@2': '1',
             'a@3': '0', 'a@4': '1', 'a@5': '0'}
     n = slugs._bitfields_to_ints(bits, t)
-    logger.debug(n)
+    _logger.debug(n)
     assert n == {'a': 22}
     # range
     for n in range(30):
@@ -33,7 +33,7 @@ def bitfields_to_ints_test():
         t = {'a': (0, 30)}
         print(d)
         m = slugs._bitfields_to_ints(d, t)
-        logger.debug((n, m))
+        _logger.debug((n, m))
         assert m == {'a': n}
 
 

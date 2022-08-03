@@ -44,7 +44,7 @@ import ply.yacc
 import tulip.spec.ast as _ast
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 TABMODULE = 'tulip.spec.ltl_parsetab'
 LEX_LOGGER = 'tulip.ltl_lex_log'
 YACC_LOGGER = 'tulip.ltl_yacc_log'

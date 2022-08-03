@@ -68,9 +68,9 @@ __all__ = [
     'find_discrete_state']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 if _cvx is None:
-    logger.warning(
+    _logger.warning(
         '`tulip` failed to import `cvxopt`.\n'
         'No quadratic cost for controller computation.')
 
@@ -257,7 +257,7 @@ def get_input(
     conservative = params['conservative']
     closed_loop = params['closed_loop']
     if closed_loop:
-        logger.warning(
+        _logger.warning(
             '`closed_loop = True` for '
             'controller computation. '
             'This option is under '
@@ -364,8 +364,8 @@ def get_input(
                     # This is not a problem unless all polytopes in the end
                     # region are unreachable, in which case it seems likely that
                     # there is something wrong with the abstraction routine.
-                    logger.info(repr(ex))
-                    logger.info(
+                    _logger.info(repr(ex))
+                    _logger.info(
                         'Failed to find control action from continuous '
                         f'state {x0} in discrete state {start} '
                         f'to a target polytope in the discrete state {end}.\n'

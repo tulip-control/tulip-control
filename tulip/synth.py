@@ -64,7 +64,7 @@ __all__ = [
     'determinize_machine_init']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 _hl = '\n' + 60 * '-'
 
 
@@ -232,13 +232,13 @@ def _conj_actions(
     Includes solver expression substitution.
     See also `_conj_action`.
     """
-    logger.debug(
+    _logger.debug(
         f'conjunction of actions: {actions_dict}')
-    logger.debug(
+    _logger.debug(
         'mapping to solver equivalents: '
         f'{solver_expr}')
     if not actions_dict:
-        logger.debug('actions_dict empty, returning empty string\n')
+        _logger.debug('actions_dict empty, returning empty string\n')
         return ''
     if solver_expr is not None:
         actions = [
@@ -249,10 +249,10 @@ def _conj_actions(
                 actions_dict.items()]
     else:
         actions = actions_dict
-    logger.debug(
+    _logger.debug(
         f'after substitution: {actions}')
     conjuncted_actions = _conj(actions)
-    logger.debug(
+    _logger.debug(
         'conjuncted actions: '
         f'{conjuncted_actions}\n')
     if nxt:
@@ -340,9 +340,9 @@ def iter2var(
         - constraints to be added to `trans` and/or `init` in GR(1)
     """
     if not states:
-        logger.debug('empty container, so empty dict for solver expr')
+        _logger.debug('empty container, so empty dict for solver expr')
         return dict(), None
-    logger.debug(
+    _logger.debug(
         f'mapping domain: {states}\n'
         '\tto expression understood by '
         'a GR(1) solver.')
@@ -358,17 +358,17 @@ def iter2var(
         min_one = False
     # no mutex -> cannot use int variable
     if not use_mutex:
-        logger.debug(
+        _logger.debug(
             'not using mutex: '
             'Booleans must model actions')
         bool_states = True
-    logger.debug(
+    _logger.debug(
         'options for modeling actions:\n\t'
         f'mutex: {use_mutex}\n'
         f'\tmin_one: {min_one}')
     all_str = all(isinstance(x, str) for x in states)
     if bool_states:
-        logger.debug(
+        _logger.debug(
             'states modeled as Boolean variables')
         if not all_str:
             raise TypeError(
@@ -388,14 +388,14 @@ def iter2var(
         elif min_one:
             raise Exception('min_one requires mutex')
     else:
-        logger.debug('states not modeled as Booleans')
+        _logger.debug('states not modeled as Booleans')
         if statevar in variables:
             raise ValueError(
                 f'state variable: {statevar}'
                 f' already exists in: {variables}')
         all_int = all(isinstance(x, int) for x in states)
         if all_int:
-            logger.debug('all states are integers')
+            _logger.debug('all states are integers')
             # extra value modeling all False ?
             if min_one:
                 n = max(states)
@@ -403,17 +403,17 @@ def iter2var(
                 n = max(states) + 1
             f = lambda x: f'{statevar} = {x}'
             domain = (min(states), n)
-            logger.debug(
+            _logger.debug(
                 f'created solver variable: {statevar}'
                 f'\n\t with domain: {domain}')
         elif all_str:
-            logger.debug('all states are strings')
+            _logger.debug('all states are strings')
             assert use_mutex
             f = lambda x: f'{statevar} = "{x}"'
             domain = list(states)
             if not min_one:
                 domain += [f'{statevar}none']
-                logger.debug(
+                _logger.debug(
                     'domain has been extended, because all actions\n\t'
                     'could be False (constraint: min_one = False).')
         else:
@@ -425,7 +425,7 @@ def iter2var(
         variables[statevar] = domain
         constraint = None
     tabs = 2 * '\t'
-    logger.debug(
+    _logger.debug(
         f'for tulip variable: {statevar}\n'
         'the map from [tulip action values] ---> '
         '[solver expressions] is:\n'
@@ -598,26 +598,26 @@ def sys_to_spec(
         assert action_type not in aps, action_type
         msg = f'action_type:\n\t{action_type}\n'
         msg += f'with codomain:\n\t{codomain}'
-        logger.debug(msg)
+        _logger.debug(msg)
         if 'sys' in action_type:
-            logger.debug('Found sys action')
+            _logger.debug('Found sys action')
             action_ids, constraint = iter2var(
                 codomain, sys_vars,
                 action_type, bool_actions,
                 ofts.sys_actions_must)
             _add_actions(constraint, sys_init, sys_trans)
-            logger.debug(
+            _logger.debug(
                 'Updating sys_action_ids with:\n'
                 f'\t{action_ids}')
             sys_action_ids[action_type] = action_ids
         elif 'env' in action_type:
-            logger.debug('Found env action')
+            _logger.debug('Found env action')
             action_ids, constraint = iter2var(
                 codomain, env_vars,
                 action_type, bool_actions,
                 ofts.env_actions_must)
             _add_actions(constraint, env_init, env_trans)
-            logger.debug(
+            _logger.debug(
                 'Updating env_action_ids with:\n'
                 f'\t{action_ids}')
             env_action_ids[action_type] = action_ids
@@ -850,7 +850,7 @@ def _sys_trans_from_ts(
     @param env_action_ids:
         same as `sys-action_ids`
     """
-    logger.debug('modeling sys transitions in logic')
+    _logger.debug('modeling sys transitions in logic')
     sys_trans = list()
     # Transitions
     for from_state in states:
@@ -861,10 +861,10 @@ def _sys_trans_from_ts(
             f'from state: {from_state}'
             ', the available transitions are:\n'
             f'\t{cur_trans}')
-        logger.debug(msg)
+        _logger.debug(msg)
         # no successor states ?
         if not cur_trans:
-            logger.debug(
+            _logger.debug(
                 f'state: {from_state} is deadend !')
             sys_trans += [
                 f'{precond} -> X(False)']
@@ -874,13 +874,13 @@ def _sys_trans_from_ts(
             to_state_id = state_ids[to_state]
             postcond = [
                 f'X{_pstr(to_state_id)}']
-            logger.debug(
+            _logger.debug(
                 f'label = {label}')
             if 'previous' in label:
                 previous = label['previous']
             else:
                 previous = set()
-            logger.debug(
+            _logger.debug(
                 f'previous = {previous}')
             env_actions = {
                 k: v
@@ -947,7 +947,7 @@ def _sys_trans_from_ts(
                 f'guard to state: {to_state}'
                 f', with state_id: {to_state_id}'
                 f', has post-conditions: {postcond}')
-            logger.debug(msg)
+            _logger.debug(msg)
         sys_trans += [
             f'{precond} -> ({_disj(cur_str)})']
     return sys_trans
@@ -1000,17 +1000,17 @@ def _env_trans_from_sys_ts(
                 if 'env' in k}
             if not env_actions:
                 continue
-            logger.debug(
+            _logger.debug(
                 f'env_actions: {env_actions}')
-            logger.debug(
+            _logger.debug(
                 f'env_action_ids: {env_action_ids}')
             env_action_comb = _conj_actions(
                 env_actions, env_action_ids)
-            logger.debug(
+            _logger.debug(
                 f'env_action_comb: {env_action_comb}')
             next_env_action_combs.add(env_action_comb)
         next_env_actions = _disj(next_env_action_combs)
-        logger.debug(
+        _logger.debug(
             f'next_env_actions: {next_env_actions}')
         # no next env actions ?
         if not next_env_actions:
@@ -1096,7 +1096,7 @@ def _env_trans_from_env_ts(
             msg = (
                 'no free env outgoing transition found\n' +
                 'instead will take disjunction with negated sys actions')
-            logger.debug(msg)
+            _logger.debug(msg)
             for action_type, codomain in sys_action_ids.items():
                 conj = _conj_neg(codomain.values())
                 cur_list += [conj]
@@ -1104,7 +1104,7 @@ def _env_trans_from_env_ts(
                     f'for action_type: {action_type}\n'
                     f'with codomain: {codomain}\n'
                     f'the negated conjunction is: {conj}')
-                logger.debug(msg)
+                _logger.debug(msg)
         env_trans += [
             f'{_pstr(precond)} -> '
             f'({_disj(cur_list)})']
@@ -1480,7 +1480,7 @@ def _trim_strategy(
     if strategy is None:
         return None
     ctrl = strategy2mealy(strategy, specs)
-    logger.debug(
+    _logger.debug(
         'Mealy machine has: '
         f'n = {len(ctrl.states)} states.')
     if rm_deadends:
@@ -1527,9 +1527,9 @@ def is_realizable(
             'Available options are "gr1c", '
             '"slugs", and "gr1py"')
     if r:
-        logger.debug('is realizable')
+        _logger.debug('is realizable')
     else:
-        logger.debug('is not realizable')
+        _logger.debug('is not realizable')
     return r
 
 
@@ -1549,7 +1549,7 @@ def _spec_plus_sys(
         if hasattr(sys, 'state_varname'):
             statevar = sys.state_varname
         else:
-            logger.info(
+            _logger.info(
                 'sys.state_varname undefined. '
                 'Will use the default '
                 'variable name: "loc".')
@@ -1565,14 +1565,14 @@ def _spec_plus_sys(
             sys_formula.sys_init = list()
         specs = specs | sys_formula
         pp_formula = sys_formula.pretty()
-        logger.debug(
+        _logger.debug(
             'sys TS:\n'
             f'{pp_formula}{_hl}')
     if env is not None:
         if hasattr(env, 'state_varname'):
             statevar = sys.state_varname
         else:
-            logger.info(
+            _logger.info(
                 'env.state_varname undefined. '
                 'Will use the default '
                 'variable name: "eloc".')
@@ -1586,10 +1586,10 @@ def _spec_plus_sys(
             env_formula.sys_init = list()
         _copy_options_from_ts(env_formula, env, specs)
         specs = specs | env_formula
-        logger.debug(
+        _logger.debug(
             'env TS:\n'
             f'{env_formula.pretty()}{_hl}')
-    logger.info(
+    _logger.info(
         'Overall Spec:\n'
         f'{specs.pretty()}{_hl}')
     return specs
@@ -1629,7 +1629,7 @@ def strategy2mealy(
         strategy
     """
     assert len(A) > 0
-    logger.info(
+    _logger.info(
         'converting strategy (compact) '
         'to Mealy machine')
     env_vars = spec.env_vars
@@ -1670,7 +1670,7 @@ def strategy2mealy(
                 attr_dict=None,
                 check=False,
                 **d)
-            logger.info(
+            _logger.info(
                 f'node: {v}, state: {d}')
     # special initial state, for first reaction
     initial_state = 'Sinit'
@@ -1795,9 +1795,9 @@ def _init_edges_using_compile_init(
             # equivalent to multiple choices for
             # initializing the hidden memory.
             init_valuations.add(vals)
-            logger.debug(
+            _logger.debug(
                 f'found initial state: {u}')
-        logger.debug(
+        _logger.debug(
             f'machine vertex: {u}, '
             f'has var values: {var_values}')
 

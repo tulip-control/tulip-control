@@ -60,7 +60,7 @@ __all__ = [
     'translate']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 Node = _ast.NodeSpec
 Nodes = _ast.NodesSpec
 
@@ -381,7 +381,7 @@ def _to_jtlv(
 
     Format is that of JTLV.
     """
-    logger.info('translate to jtlv...')
+    _logger.info('translate to jtlv...')
     f = _jtlv_str
     parts = [f(d['env_init'], 'valid initial env states', ''),
              f(d['env_safety'], 'safety assumption on environment', '[]'),
@@ -407,7 +407,7 @@ def _jtlv_str(
         return ''
     w = list()
     for x in m:
-        logger.debug(f'translate clause: {x}')
+        _logger.debug(f'translate clause: {x}')
         if not x:
             continue
         # collapse any whitespace between any
@@ -443,7 +443,7 @@ def _to_gr1c(
                 raise ValueError(
                     f'Domain "{dom}" not supported by gr1c.')
         return output
-    logger.info('translate to gr1c...')
+    _logger.info('translate to gr1c...')
     output = (
         'ENV:' + _to_gr1c_print_vars(d['env_vars']) + ';\n' +
         'SYS:' + _to_gr1c_print_vars(d['sys_vars']) + ';\n' +

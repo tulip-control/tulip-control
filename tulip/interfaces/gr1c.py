@@ -63,7 +63,7 @@ GR1C_MIN_VERSION = '0.9.0'
 GR1C_BIN_PREFIX = ''
 DEFAULT_NAMESPACE = 'http://tulip-control.sourceforge.net/ns/1'
 _hl = 60 * '-'
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 Tag = (
@@ -357,12 +357,12 @@ def load_aut_xml(
                 'failure of consistency check '
                 'while processing aut XML string.')
         if this_id in id_list:
-            logger.warning(
+            _logger.warning(
                 f'duplicate nodes found: {this_id}; '
                 'ignoring...')
             continue
         id_list.append(this_id)
-        logger.info(
+        _logger.info(
             f'loaded from `gr1c` result:\n\t{this_state}')
         A.add_node(
             this_id,
@@ -471,11 +471,11 @@ def check_syntax(
         stderr=subprocess.STDOUT,
         universal_newlines=True)
     p.wait()
-    logger.debug(f'gr1c returncode: {p.returncode}')
-    logger.debug(f'gr1c stdout: {p.stdout.read()}')
+    _logger.debug(f'gr1c returncode: {p.returncode}')
+    _logger.debug(f'gr1c stdout: {p.stdout.read()}')
     if p.returncode == 0:
         return True
-    logger.info(p.stdout.read())
+    _logger.info(p.stdout.read())
     return False
 
 
@@ -491,14 +491,14 @@ def check_realizable(
         `True` if realizable, `False` if not,
         or an error occurs.
     """
-    logger.info('checking realizability...')
+    _logger.info('checking realizability...')
     _assert_gr1c()
     init_option = select_options(spec)
     s = translate(spec, 'gr1c')
     f = tempfile.TemporaryFile()
     f.write(bytes(s, 'utf-8'))
     f.seek(0)
-    logger.info('starting realizability check')
+    _logger.info('starting realizability check')
     p = subprocess.Popen(
         [f'{GR1C_BIN_PREFIX}gr1c',
          '-n',
@@ -509,11 +509,11 @@ def check_realizable(
         stderr=subprocess.STDOUT,
         universal_newlines=True)
     p.wait()
-    logger.info(f'`gr1c` input:\n{s}{_hl}')
+    _logger.info(f'`gr1c` input:\n{s}{_hl}')
     if p.returncode == 0:
         return True
     else:
-        logger.info(p.stdout.read())
+        _logger.info(p.stdout.read())
         return False
 
 
@@ -556,17 +556,17 @@ def synthesize(
         else:
             raise
     s = translate(spec, 'gr1c')
-    logger.info(f'\n{_hl}\n gr1c input:\n {s}\n{_hl}')
+    _logger.info(f'\n{_hl}\n gr1c input:\n {s}\n{_hl}')
     # to make debugging by manually running gr1c easier
     fname = 'spec.gr1c'
     try:
-        if logger.getEffectiveLevel() < logging.DEBUG:
+        if _logger.getEffectiveLevel() < logging.DEBUG:
             with open(fname, 'w') as f:
                 f.write(s)
-            logger.debug(
+            _logger.debug(
                 f'wrote input to file "{fname}"')
     except:
-        logger.error(
+        _logger.error(
             f'failed to write auxiliary file: "{fname}"')
     stdoutdata, stderrdata = p.communicate(s)
     spaces = 30 * ' '
@@ -574,7 +574,7 @@ def synthesize(
         f'{spaces} gr1c return code: {p.returncode}\n\n'
         f'{spaces} gr1c stdout, stderr:\n {stdoutdata}\n\n')
     if p.returncode == 0:
-        logger.debug(msg)
+        _logger.debug(msg)
         strategy = load_aut_json(stdoutdata)
         return strategy
     else:
@@ -647,7 +647,7 @@ def load_mealy(
         ValueError(
             '`gr1c.load_mealy()`: '
             f'Unrecognized file format, "{fformat}"')
-    logger.debug(
+    _logger.debug(
         'Loaded strategy with nodes: \n'
         f'{strategy.nodes()}\n'
         f'and edges: \n{strategy.edges()}')

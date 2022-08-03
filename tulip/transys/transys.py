@@ -58,7 +58,7 @@ __all__ = [
     'simu_abstract']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
@@ -706,7 +706,7 @@ def tuple2fts(
             state_label_pairs = False
         if state_label_pairs:
             return state_labeling
-        logger.debug(
+        _logger.debug(
             'State labeling `L` not tuples '
             '`(state, ap_label)`,\n'
             'zipping with states `S`...\n')
@@ -729,7 +729,7 @@ def tuple2fts(
     transitions = trans
     # prepending states with given str
     if prepend_str:
-        logger.debug(
+        _logger.debug(
             f'Given string:\n\t{prepend_str}\n'
             'will be prepended to all states.')
     states = _graphs.prepend_with(
@@ -750,7 +750,7 @@ def tuple2fts(
             if ap_label is None:
                 ap_label = set()
             state = prepend_str + str(state)
-            logger.debug(
+            _logger.debug(
                 f'Labeling state:\n\t{state}\n'
                 f'with label:\n\t{ap_label}\n')
             ts.states[state]['ap'] = ap_label
@@ -760,7 +760,7 @@ def tuple2fts(
             from_state, to_state = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
-            logger.debug(
+            _logger.debug(
                 f'Added unlabeled edge:\n'
                 f'\t{from_state} ---> {to_state}\n')
             ts.transitions.add(from_state, to_state)
@@ -770,7 +770,7 @@ def tuple2fts(
             from_state, to_state = _graphs.prepend_with(
                 [from_state, to_state],
                 prepend_str)
-            logger.debug(
+            _logger.debug(
                 'Added labeled edge (=transition):\n\t' +
                 f'{from_state} ---[{act}]---> {to_state}\n')
             ts.transitions.add(

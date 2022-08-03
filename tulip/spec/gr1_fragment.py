@@ -68,7 +68,7 @@ __all__ = [
     'until_to_gr1']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def check(
@@ -125,7 +125,7 @@ def check(
     Q = [(ast, 'gf')]
     while Q:
         s, q = Q.pop()
-        logger.info(f'visiting: {s}, {q}')
+        _logger.info(f'visiting: {s}, {q}')
         if isinstance(s, _ast.Unary):
             op = s.operator
             if op in {'!', 'G', 'F'}:

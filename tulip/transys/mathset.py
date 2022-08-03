@@ -46,7 +46,7 @@ __all__ = [
     'TypedDict']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 def compare_lists(
@@ -291,7 +291,7 @@ class MathSet:
             try:
                 return item in self._set
             except TypeError:
-                logger.error(
+                _logger.error(
                     'UnHashable items within Hashable.')
         return item in self._list
 
@@ -344,12 +344,12 @@ class MathSet:
                 self._set.add(item)
                 return
             except TypeError:
-                logger.error(
+                _logger.error(
                     'UnHashable items within Hashable.')
         if item not in self._list:
             self._list.append(item)
         else:
-            logger.warning(
+            _logger.warning(
                 'item already in MathSet.')
 
     def add_from(
@@ -434,7 +434,7 @@ class MathSet:
                 self._set.remove(item)
                 return
             except:
-                logger.debug(
+                _logger.debug(
                     f'item: {item}, contains unhashables.')
         self._list.remove(item)
 

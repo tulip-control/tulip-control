@@ -59,7 +59,7 @@ __all__ = [
     'solve_feasible']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 Polytope = (
     pc.Polytope |
     pc.Region)
@@ -575,7 +575,7 @@ def createLM(
     for i in range(N + 1):
         Li = list_P[i]
         if not isinstance(Li, pc.Polytope):
-            logger.warning(
+            _logger.warning(
                 f'createLM: Li of type: {type(Li)}')
         # FOR M
         idx = range(
@@ -668,7 +668,7 @@ def createLM(
     # Put together matrices L, M
     L = np.vstack([Lk, LU])
     M = np.vstack([Mk, MU]) - D_hat
-    logger.debug(
+    _logger.debug(
         'Computed S0 polytope: '
         '`L x <= M`, where:\n'
         '\t`L = \n`'

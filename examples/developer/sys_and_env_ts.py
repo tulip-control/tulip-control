@@ -10,7 +10,7 @@ logging.basicConfig(
     filename='sys_and_env_ts.log',
     level=logging.DEBUG,
     filemode='w')
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 # the system's spatial layout:
@@ -52,7 +52,7 @@ env0.transitions.add_from([
     ('e0', 'e0'), ('e0', 'e1'),
     ('e1', 'e0'), ('e1', 'e1')
 ])
-logger.info(env0)
+_logger.info(env0)
 
 # barely realizable: assumption necessary
 env_prog = '!park'
@@ -74,7 +74,7 @@ specs.moore = False
 specs.qinit = r'\A \E'
 ctrl = synth.synthesize(specs, sys=sys, env=env0)
 ctrl.save('sys_and_env_ts0.pdf')
-logger.info(ctrl)
+_logger.info(ctrl)
 
 """Park as an env action
 """
@@ -87,7 +87,7 @@ env1.env_actions.add_from({'park', 'none'})
 
 env1.transitions.add('e0', 'e0', env_actions='park')
 env1.transitions.add('e0', 'e0', env_actions='none')
-logger.info(env1)
+_logger.info(env1)
 
 env_prog = ['! (env_actions = "park")']
 sys_safe = {'(X(mem) <-> lot) || (mem && ! (env_actions = "park"))',
@@ -101,4 +101,4 @@ specs.qinit = r'\A \E'
 ctrl = synth.synthesize('omega', specs, sys=sys, env=env1)
 ctrl.save('sys_and_env_ts1.pdf')
 env1.save('env1.pdf')
-logger.info(ctrl)
+_logger.info(ctrl)

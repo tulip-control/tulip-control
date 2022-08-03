@@ -48,7 +48,7 @@ __all__ = [
     'LtiSysDyn',
     'PwaSysDyn',
     'SwitchedSysDyn']
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 IJ = tuple[int, int]
@@ -270,7 +270,7 @@ class LtiSysDyn:
         try:
             from tulip.graphics import newax, quiver
         except:
-            logger.error(
+            _logger.error(
                 'failed to import `graphics`')
             return
         if color is None:
@@ -460,7 +460,7 @@ class PwaSysDyn:
         try:
             from tulip.graphics import newax
         except:
-            logger.error(
+            _logger.error(
                 'failed to import `tulip.graphics`')
             return
         if ax is None:
@@ -702,7 +702,7 @@ class SwitchedSysDyn:
             (a, b)
             for a in self.env_labels
             for b in self.disc_sys_labels]
-        logger.debug(f'Available modes: {modes}')
+        _logger.debug(f'Available modes: {modes}')
         return modes
 
     @property

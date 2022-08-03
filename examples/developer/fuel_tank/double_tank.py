@@ -35,7 +35,7 @@ reference
 """
 import logging
 # logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 logging.getLogger('tulip').setLevel(logging.ERROR)
 logging.getLogger('omega').setLevel(logging.WARNING)
@@ -195,9 +195,9 @@ ax.figure.savefig(imgpath + 'ppp.pdf')
 ## Discretize to establish transitions
 if os.name == "posix":
     start = os.times()[2]
-    logger.info('start time: ' + str(start))
+    _logger.info('start time: ' + str(start))
 else:
-    logger.info('Timing currently only available for POSIX platforms (not Windows)')
+    _logger.info('Timing currently only available for POSIX platforms (not Windows)')
 
 disc_params = dict()
 disc_params[('normal', 'fly')] = {'N':N, 'trans_length':3}
@@ -209,9 +209,9 @@ sys_ts = abstract.multiproc_discretize_switched(
 
 if os.name == "posix":
     end = os.times()[2]
-    logger.info('end time: ' + str(end))
+    _logger.info('end time: ' + str(end))
     elapsed = (end - start)
-    logger.info('Discretization lasted: ' + str(elapsed))
+    _logger.info('Discretization lasted: ' + str(elapsed))
 
 ## Save abstraction to save debugging time
 fname = './abstract_switched.pickle'
@@ -257,9 +257,9 @@ ctrl = synth.synthesize(
 if os.name == "posix":
     end = os.times()[2]
     elapsed = (end - start)
-    logger.info('Synthesis lasted: ' + str(elapsed))
+    _logger.info('Synthesis lasted: ' + str(elapsed))
 
-logger.info(ctrl)
+_logger.info(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')
 
 ax = plot_strategy(sys_ts, ctrl)

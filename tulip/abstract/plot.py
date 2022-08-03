@@ -63,7 +63,7 @@ __all__ = [
     'plot_trajectory']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 plot_partition = _pplot.plot_partition
 plot_transition_arrow = (
     _pplot.plot_transition_arrow)

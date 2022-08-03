@@ -49,7 +49,7 @@ import tulip.spec.translation as _trsl
 import tulip.transys as _trs
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 LILY = 'lily.pl'
 IO_PARTITION_FILE = 'io_partition.txt'
 DOTFILE = 'ltl2vl-synthesis.dot'

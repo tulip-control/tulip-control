@@ -41,7 +41,7 @@ __all__ = [
     'OnTheFlyProductAutomaton']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
@@ -74,7 +74,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         ba = self.ba
         s0s = set(ts.states.initial)
         q0s = set(ba.states.initial)
-        logger.debug(
+        _logger.debug(
             f'\n{_hl}\n'
             ' Product BA construction:\n'
             f'{_hl}\n')
@@ -84,7 +84,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                 '=> Empty product system.\n'
                 'Did you forget to define initial states ?')
         for s0 in s0s:
-            logger.debug(f'initial state:\t{s0}')
+            _logger.debug(f'initial state:\t{s0}')
             for q0 in q0s:
                 enabled_ba_trans = find_ba_succ(q0, s0, ts, ba)
                 # q0 blocked ?
@@ -112,7 +112,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
         sq = (s, q)
         ts = self.ts
         ba = self.ba
-        logger.debug(
+        _logger.debug(
             'Creating successors from'
             f' product state:\t{sq}')
         # get next states
@@ -129,8 +129,8 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
             self.states.accepting.update(
                 new_accepting)
         # new_sqs = {x for x in next_sqs if x not in self}
-        logger.debug(f'next product states: {next_sqs}')
-        logger.debug(f'new unvisited product states: {new_sqs}')
+        _logger.debug(f'next product states: {next_sqs}')
+        _logger.debug(f'new unvisited product states: {new_sqs}')
         return new_sqs
 
     def add_all_states(self):
@@ -201,7 +201,7 @@ def ts_ba_sync_prod(
     s0s = set(fts.states.initial)
     q0s = set(ba.states.initial)
     accepting_states_preimage = set()
-    logger.debug(
+    _logger.debug(
         f'\n{_hl}\n'
         ' Product TS construction:'
         f'\n{_hl}\n')
@@ -211,7 +211,7 @@ def ts_ba_sync_prod(
             '=> Empty product system.\n'
             'Did you forget to define initial states ?')
     for s0 in s0s:
-        logger.debug(f'initial state:\t{s0}')
+        _logger.debug(f'initial state:\t{s0}')
         for q0 in q0s:
             enabled_ba_trans = find_ba_succ(q0, s0, fts, ba)
             # q0 blocked ?
@@ -234,7 +234,7 @@ def ts_ba_sync_prod(
         sq = queue.pop()
         visited.add(sq)
         s, q = sq
-        logger.debug(f'Current product state:\t{sq}')
+        _logger.debug(f'Current product state:\t{sq}')
         # get next states
         next_ss = fts.states.post([s])
         next_sqs = set()
@@ -247,11 +247,11 @@ def ts_ba_sync_prod(
                 prodts, ba, fts)
             next_sqs.update(new_sqs)
             accepting_states_preimage.update(new_accepting)
-        logger.debug(
+        _logger.debug(
             f'next product states: {next_sqs}')
         # discard visited & push them to queue
         new_sqs = {x for x in next_sqs if x not in visited}
-        logger.debug(
+        _logger.debug(
             f'new unvisited product states: {new_sqs}')
         queue.update(new_sqs)
     return (
@@ -261,7 +261,7 @@ def ts_ba_sync_prod(
 
 def find_ba_succ(prev_q, next_s, fts, ba):
     q = prev_q
-    logger.debug('Next state:\t' + str(next_s))
+    _logger.debug('Next state:\t' + str(next_s))
     try:
         ap = fts.nodes[next_s]['ap']
     except:
@@ -269,18 +269,18 @@ def find_ba_succ(prev_q, next_s, fts, ba):
             f'No AP label for FTS state: {next_s}'
             '\n Did you forget labeing it ?')
     Sigma_dict = {'letter': ap}
-    logger.debug("Next state's label:\t" + str(ap))
+    _logger.debug("Next state's label:\t" + str(ap))
     enabled_ba_trans = ba.transitions.find(
         [q], with_attr_dict=Sigma_dict)
     enabled_ba_trans += ba.transitions.find(
         [q], letter={True})
-    logger.debug(
+    _logger.debug(
         'Enabled BA transitions:\n\t'
         f'{enabled_ba_trans}')
     if not enabled_ba_trans:
-        logger.debug(
+        _logger.debug(
             f'No enabled BA transitions at: {q}')
-    logger.debug('---\n')
+    _logger.debug('---\n')
     return enabled_ba_trans
 
 
@@ -294,16 +294,16 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
         if new_sq not in product:
             next_sqs.add(new_sq)
             product.states.add(new_sq)
-            logger.debug(
+            _logger.debug(
                 f'Adding state:\t{new_sq}')
         if hasattr(product, 'actions'):
             product.states[new_sq]['ap'] = {next_q}
         # accepting state ?
         if next_q in ba.states.accepting:
             new_accepting.add(new_sq)
-            logger.debug(
+            _logger.debug(
                 f'{new_sq} contains an accepting state.')
-        logger.debug(
+        _logger.debug(
             'Adding transitions:\t'
             f'{prev_sq} ---> {new_sq}')
         # is fts transition labeled with an action ?
@@ -313,7 +313,7 @@ def find_prod_succ(prev_sq, next_s, enabled_ba_trans, product, ba, fts):
         for from_s, to_s, sublabel_values in enabled_ts_trans:
             assert from_s == s
             assert to_s == next_s
-            logger.debug('Sublabel value:\n\t' +
+            _logger.debug('Sublabel value:\n\t' +
                          str(sublabel_values))
             # labeled transition ?
             if hasattr(product, 'alphabet'):
@@ -340,7 +340,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     @return:
         `prod_ba`, the product `BuchiAutomaton`.
     """
-    logger.debug(
+    _logger.debug(
         f'\n{_hl}\n'
         'Product: BA * TS'
         f'\n{_hl}\n')
@@ -372,7 +372,7 @@ def ba_ts_sync_prod(buchi_automaton, transition_system):
     for from_state, to_state in prod_ts.transitions():
         # prject prod_TS state to TS state
         ts_to_state = to_state[0]
-        logger.debug(
+        _logger.debug(
             f'prod_TS: to_state =\n\t{to_state}\n'
             f'TS: ts_to_state =\n\t{ts_to_state}')
         state_label_pairs = transition_system.states.find(ts_to_state)

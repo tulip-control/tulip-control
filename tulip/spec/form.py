@@ -64,7 +64,7 @@ QInit = _ty.Literal[
     r'\A \E',
     r'\E \A',
     r'\E \E']
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class LTL:
@@ -819,13 +819,13 @@ class GRSpec(LTL):
             `dict` of ASTs after the substitutions,
             keyed by original clause (before substitution).
         """
-        logger.info('substitute values for variables...')
+        _logger.info('substitute values for variables...')
         a = copy.deepcopy(self._ast)
         for formula, tree in a.items():
             g = tx.Tree.from_recursive_ast(tree)
             tx.sub_values(g, var_values)
             a[formula] = g.to_recursive_ast()
-        logger.info('done with substitutions.\n')
+        _logger.info('done with substitutions.\n')
         return a
 
     def compile_init(
@@ -867,10 +867,10 @@ class GRSpec(LTL):
         for side, clauses in init.items():
             if no_str:
                 clauses = [self._bool_int[x] for x in clauses]
-            logger.info(f'clauses to compile: {clauses}')
+            _logger.info(f'clauses to compile: {clauses}')
             c = [ts.translate_ast(self.ast(x), 'python').flatten()
                  for x in clauses]
-            logger.info(f'after translation to python: {c}')
+            _logger.info(f'after translation to python: {c}')
             s = _conj(c, op='and')
             if not s:
                 s = 'True'
@@ -887,7 +887,7 @@ class GRSpec(LTL):
         Otherwise it returns a copy of spec with all arbitrary
         finite vars replaced by int-valued vars.
         """
-        logger.info('convert string variables to integers...')
+        _logger.info('convert string variables to integers...')
         vars_dict = dict(self.env_vars)
         vars_dict.update(self.sys_vars)
         fvars = {v: d for v, d in vars_dict.items() if isinstance(d, list)}
@@ -895,10 +895,10 @@ class GRSpec(LTL):
         for p in self._parts:
             for x in getattr(self, p):
                 if self._bool_int.get(x) in self._ast:
-                    logger.debug(f'{x} is in _bool_int cache')
+                    _logger.debug(f'{x} is in _bool_int cache')
                     continue
                 else:
-                    logger.debug(f'{x} is not in _bool_int cache')
+                    _logger.debug(f'{x} is not in _bool_int cache')
                 # get AST
                 a = self.ast(x)
                 # create AST copy with int and bool vars only
@@ -910,7 +910,7 @@ class GRSpec(LTL):
                 self._ast[f] = b  # cache
                 # remember map from clauses to int/bool clauses
                 self._bool_int[x] = f
-        logger.info('done converting to integer variables.\n')
+        _logger.info('done converting to integer variables.\n')
 
     def ast(
             self,
@@ -921,14 +921,14 @@ class GRSpec(LTL):
         If AST for formula `x` has already been computed earlier,
         then return cached result.
         """
-        if logger.getEffectiveLevel() <= logging.DEBUG:
-            logger.debug('current cache of ASTs:\n' +
+        if _logger.getEffectiveLevel() <= logging.DEBUG:
+            _logger.debug('current cache of ASTs:\n' +
                          pprint.pformat(self._ast) + 3 * '\n')
-            logger.debug(f'check if: {x}, is in cache.')
+            _logger.debug(f'check if: {x}, is in cache.')
         if x in self._ast:
-            logger.debug(f'{x} is already in cache')
+            _logger.debug(f'{x} is already in cache')
         else:
-            logger.info(f'AST cache does not contain:\n\t{x}'
+            _logger.info(f'AST cache does not contain:\n\t{x}'
                         '\nNeed to parse.')
             self.parse()
         return self._ast[x]
@@ -939,7 +939,7 @@ class GRSpec(LTL):
         The AST resulting from each clause is stored
         in the `dict` attribute `ast`.
         """
-        logger.info('parsing ASTs to cache them...')
+        _logger.info('parsing ASTs to cache them...')
         vardoms = dict(self.env_vars)
         vardoms.update(self.sys_vars)
         # parse new clauses and cache the resulting ASTs
@@ -947,23 +947,23 @@ class GRSpec(LTL):
             s = getattr(self, p)
             for x in s:
                 if x in self._ast:
-                    logger.debug(f'{x} is already in cache')
+                    _logger.debug(f'{x} is already in cache')
                     continue
-                logger.debug(f'parse: {x}')
+                _logger.debug(f'parse: {x}')
                 tree = self.parser.parse(x)
                 g = tx.Tree.from_recursive_ast(tree)
                 tx.check_for_undefined_identifiers(g, vardoms)
                 self._ast[x] = tree
         # rm cached ASTs that correspond to deleted clauses
         self._collect_cache_garbage(self._ast)
-        logger.info('done parsing ASTs.\n')
+        _logger.info('done parsing ASTs.\n')
 
     def _collect_cache_garbage(
             self,
             cache:
                 dict
             ) -> None:
-        logger.info('collecting garbage from GRSpec cache...')
+        _logger.info('collecting garbage from GRSpec cache...')
         # rm cached ASTs that correspond to deleted clauses
         s = set(cache)
         for p in self._parts:
@@ -977,7 +977,7 @@ class GRSpec(LTL):
             s.difference_update({self._bool_int.get(x) for x in w})
         for x in s:
             cache.pop(x)
-        logger.info(f'cleaned {len(s)} cached elements.\n')
+        _logger.info(f'cleaned {len(s)} cached elements.\n')
 
 
 def replace_dependent_vars(
@@ -986,21 +986,21 @@ def replace_dependent_vars(
         bool2form:
             dict[str, str]
         ) -> None:
-    logger.debug(
+    _logger.debug(
         'replacing dependent variables '
         f'using the map:\n\t{bool2form}')
     vs = dict(spec.env_vars)
     vs.update(spec.sys_vars)
-    logger.debug(f'variables:\n\t{vs}')
+    _logger.debug(f'variables:\n\t{vs}')
     bool2subtree = dict()
     for boolvar, formula in bool2form.items():
-        logger.debug(f'checking var: {boolvar}')
+        _logger.debug(f'checking var: {boolvar}')
         if boolvar in vs:
             assert vs[boolvar] == 'boolean'
-            logger.debug(
+            _logger.debug(
                 f'{boolvar} is indeed Boolean')
         else:
-            logger.debug(
+            _logger.debug(
                 f'spec does not contain var: {boolvar}')
         tree = parser.parse(formula)
         bool2subtree[boolvar] = tx.Tree.from_recursive_ast(tree)
@@ -1009,14 +1009,14 @@ def replace_dependent_vars(
         part = getattr(spec, s)
         new = list()
         for clause in part:
-            logger.debug(
+            _logger.debug(
                 f'replacing in clause:\n\t{clause}')
             tree = spec.ast(clause)
             g = tx.Tree.from_recursive_ast(tree)
             tx.sub_bool_with_subtree(g, bool2subtree)
             f = g.to_recursive_ast().flatten()
             new.append(f)
-            logger.debug(
+            _logger.debug(
                 f'caluse tree after replacement:\n\t{f}')
         setattr(spec, s, new)
 

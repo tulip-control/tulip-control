@@ -47,7 +47,7 @@ except ImportError:
     gr1py = None
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 _hl = 60 * '-'
 
 
@@ -99,7 +99,7 @@ def _spec_to_gr1py(
             'Import of gr1py interface failed.\n'
             'Please verify installation of `gr1py`.')
     s = _spec.translate(spec, 'gr1c')
-    logger.info(
+    _logger.info(
         f'\n{_hl}\n gr1py input:\n {s}\n{_hl}')
     tsys, exprtab = gr1py.cli.loads(s)
     return tsys, exprtab

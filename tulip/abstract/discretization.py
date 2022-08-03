@@ -66,7 +66,7 @@ __all__ = [
     'multiproc_discretize_switched']
 
 
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 debug = False
 SystemDynamics = (
     _hyb.LtiSysDyn |
@@ -457,7 +457,7 @@ class AbstractPwa:
         return ax
 
     def verify_transitions(self) -> None:
-        logger.info('verifying transitions...')
+        _logger.info('verifying transitions...')
         for from_state, to_state in self.ts.transitions():
             i, from_region = self.ts2ppp(from_state)
             j, to_region = self.ts2ppp(to_state)
@@ -473,14 +473,14 @@ class AbstractPwa:
                 **disc_params)
             msg = f'{i} ---> {j}'
             if not from_region <= s0:
-                logger.error(
+                _logger.error(
                     f'incorrect transition: {msg}')
                 isect = from_region.intersect(s0)
                 ratio = isect.volume /from_region.volume
-                logger.error(
+                _logger.error(
                     f'intersection volume: {ratio} %')
             else:
-                logger.info(
+                _logger.info(
                     f'correct transition: {msg}')
 
 
@@ -758,7 +758,7 @@ def _discretize_bi(
             rd = 0.
     # Initialize matrix for pairs to check
     IJ = part.adj.copy().toarray()
-    logger.debug(
+    _logger.debug(
         f'\n Starting IJ: \n{IJ}')
     # next line omitted in discretize_overlap
     IJ = reachable_within(
@@ -820,7 +820,7 @@ def _discretize_bi(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set,
             max_num_poly)
-        logger.info(
+        _logger.info(
             f'\n Working with partition cells: {i}, {j}')
         msg = (
             f'\t{i} (#polytopes = {len(si)}), and:\n'
@@ -832,12 +832,12 @@ def _discretize_bi(
         msg += (
             '\t Computed reachable set S0 with volume: '
             f'{S0.volume}\n')
-        logger.debug(msg)
-        #logger.debug(r'si \cap s0')
+        _logger.debug(msg)
+        # _logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        #logger.debug(r'si \ s0')
+        # _logger.debug(r'si \ s0')
         diff = si.diff(S0)
         vol2 = diff.volume
         rdiff, xd = pc.cheby_ball(diff)
@@ -865,19 +865,19 @@ def _discretize_bi(
         #     ax.axis([0.0, 1.0, 0.0, 2.0])
         #     ax.figure.savefig('./img/diff_cap_isect.pdf')
         #
-        #     logger.error(r'Intersection \cap Difference != \emptyset')
+        #     _logger.error(r'Intersection \cap Difference != \emptyset')
         #
         #     assert(False)
         if vol1 <= min_cell_volume:
-            logger.warning(
+            _logger.warning(
                 '\t too small: si \\cap Pre(sj), '
                 'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning(
+            _logger.warning(
                 '\t discarded non-empty intersection: '
                 'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning(
+            _logger.warning(
                 '\t too small: si \\ Pre(sj), so not reached it')
         # We don't want our partitions to
         # be smaller than the disturbance set
@@ -968,12 +968,12 @@ def _discretize_bi(
                         adj[r, k] = 1
                         adj[k, r] = 1
             msg = ''
-            if logger.getEffectiveLevel() <= logging.DEBUG:
+            if _logger.getEffectiveLevel() <= logging.DEBUG:
                 msg += f'\t\n Adding states {i} and '
                 for r in new_idx:
                     msg += f'{r} and '
                 msg += '\n'
-                logger.debug(msg)
+                _logger.debug(msg)
             for k in np.setdiff1d(old_adj, [i,n_cells - 1]):
                 # Every "old" neighbor must be the neighbor
                 # of at least one of the new
@@ -1004,23 +1004,23 @@ def _discretize_bi(
             sym_adj_change(IJ, adj_k, transitions, i)
             for r in new_idx:
                 sym_adj_change(IJ, adj_k, transitions, r)
-            if logger.getEffectiveLevel() <= logging.DEBUG:
-                logger.debug(
+            if _logger.getEffectiveLevel() <= logging.DEBUG:
+                _logger.debug(
                     f'\n\n Updated adj: \n{adj}'
                     f'\n\n Updated trans: \n{transitions}'
                     f'\n\n Updated IJ: \n{IJ}')
-            logger.info(f'Divided region: {i}\n')
+            _logger.info(f'Divided region: {i}\n')
         elif vol2 < abs_tol:
-            logger.info(f'Found: {i} ---> {j}\n')
+            _logger.info(f'Found: {i} ---> {j}\n')
             transitions[j, i] = 1
         else:
-            if logger.level <= logging.DEBUG:
-                logger.debug(
+            if _logger.level <= logging.DEBUG:
+                _logger.debug(
                     f'\t Unreachable: {i} --X--> {j}\n'
                     f'\t\t diff vol: {vol2}\n'
                     f'\t\t intersect vol: {vol1}\n')
             else:
-                logger.info('\t unreachable\n')
+                _logger.info('\t unreachable\n')
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
@@ -1036,7 +1036,7 @@ def _discretize_bi(
         msg = (
             f'\t total # polytopes: {n_cells}\n'
             f'\t progress ratio: {progress_ratio}\n')
-        logger.info(msg)
+        _logger.info(msg)
         iter_count += 1
         # no plotting ?
         if not plotit:
@@ -1115,7 +1115,7 @@ def _discretize_bi(
     time = end_time - start_time
     msg = f'Total abstraction time: {time}[sec]'
     print(msg)
-    logger.info(msg)
+    _logger.info(msg)
     if save_img and plt is not None:
         fig, ax = plt.subplots(1, 1)
         plt.plot(progress)
@@ -1263,7 +1263,7 @@ def _discretize_dual(
             rd = 0.
     # Initialize matrix for pairs to check
     IJ = part.adj.copy().toarray()
-    logger.debug(f'\n Starting IJ: \n{IJ}')
+    _logger.debug(f'\n Starting IJ: \n{IJ}')
     # next line omitted in discretize_overlap
     IJ = reachable_within(
         trans_length, IJ, part.adj.toarray())
@@ -1325,7 +1325,7 @@ def _discretize_dual(
         S0 = _fsb.solve_feasible(
             si, sj, ss, N, closed_loop,
             use_all_horizon, trans_set, max_num_poly)
-        logger.info(
+        _logger.info(
             f'\n Working with partition cells: {i}, {j}')
         msg = (
             f'\t{i} (#polytopes = {len(si)}), and:\n'
@@ -1337,26 +1337,26 @@ def _discretize_dual(
         msg += (
             '\t Computed reachable set S0 with volume: '
             f'{S0.volume}\n')
-        logger.debug(msg)
-        # logger.debug(r'si \cap s0')
+        _logger.debug(msg)
+        # _logger.debug(r'si \cap s0')
         isect = si.intersect(S0)
         vol1 = isect.volume
         risect, xi = pc.cheby_ball(isect)
-        # logger.debug(r'si \ s0')
+        # _logger.debug(r'si \ s0')
         rsi, xd = pc.cheby_ball(si)
         vol2 = si.volume - vol1
             # not accurate.
             # need to check polytope class
         if vol1 <= min_cell_volume:
-            logger.warning(
+            _logger.warning(
                 '\t too small: si \\cap Pre(sj), '
                 'so discard intersection')
         if vol1 <= min_cell_volume and isect:
-            logger.warning(
+            _logger.warning(
                 '\t discarded non-empty intersection: '
                 'consider reducing min_cell_volume')
         if vol2 <= min_cell_volume:
-            logger.warning(
+            _logger.warning(
                 '\t too small: si \\ Pre(sj), '
                 'so not reached it')
         # indicate if S0 has exists in sol
@@ -1376,7 +1376,7 @@ def _discretize_dual(
             # existed in current partitions
             for idx in range(len(sol)):
                 if(sol[idx] == isect):
-                    logger.info(
+                    _logger.info(
                         f'Found: {idx} ---> {j} '
                         'intersection exists.\n')
                     transitions[j, idx] = 1
@@ -1403,8 +1403,8 @@ def _discretize_dual(
                 adj[new_idx, new_idx] = 1
                 if not conservative:
                     orig = np.hstack([orig, orig[i]])
-                if logger.getEffectiveLevel() <= logging.DEBUG:
-                    logger.debug(
+                if _logger.getEffectiveLevel() <= logging.DEBUG:
+                    _logger.debug(
                         f'\t\n Adding states {new_idx}\n')
                 for k in np.setdiff1d(old_adj, [i,n_cells-1]):
                     # Every "old" neighbor must be the neighbor
@@ -1439,23 +1439,23 @@ def _discretize_dual(
                 IJ = np.pad(IJ, (0, 1), 'constant')
                 sym_adj_change(IJ, adj_k, transitions, i)
                 sym_adj_change(IJ, adj_k, transitions, new_idx)
-                if logger.getEffectiveLevel() <= logging.DEBUG:
-                    logger.debug(
+                if _logger.getEffectiveLevel() <= logging.DEBUG:
+                    _logger.debug(
                         f'\n\n Updated adj: \n{adj}'
                         f'\n\n Updated trans: \n{transitions}'
                         f'\n\n Updated IJ: \n{IJ}')
-                logger.info(f'Divided region: {i}\n')
+                _logger.info(f'Divided region: {i}\n')
         elif vol2 < abs_tol:
-            logger.info(f'Found: {i} ---> {j}\n')
+            _logger.info(f'Found: {i} ---> {j}\n')
             transitions[j, i] = 1
         else:
-            if logger.level <= logging.DEBUG:
-                logger.debug(
+            if _logger.level <= logging.DEBUG:
+                _logger.debug(
                     f'\t Unreachable: {i} --X--> {j}\n'
                     f'\t\t diff vol: {vol2}\n'
                     f'\t\t intersect vol: {vol1}\n')
             else:
-                logger.info('\t unreachable\n')
+                _logger.info('\t unreachable\n')
             transitions[j, i] = 0
         # check to avoid overlapping Regions
         if debug:
@@ -1467,7 +1467,7 @@ def _discretize_dual(
         n_cells = len(sol)
         progress_ratio = 1 - float(np.sum(IJ)) / n_cells**2
         progress.append(progress_ratio)
-        logger.info(
+        _logger.info(
             f'\t total # polytopes: {n_cells}\n'
             f'\t progress ratio: {progress_ratio}\n')
         iter_count += 1
@@ -1551,7 +1551,7 @@ def _discretize_dual(
     dt = end_time - start_time
     msg = f'Total abstraction time: {dt} [sec]'
     print(msg)
-    logger.info(msg)
+    _logger.info(msg)
     if save_img and plt is not None:
         fig, ax = plt.subplots(1, 1)
         plt.plot(progress)
@@ -1609,7 +1609,7 @@ def discretize_overlap(
     raise NotImplementedError
 #
 #         if rdiff < abs_tol:
-#             logger.info("Transition found")
+#             _logger.info("Transition found")
 #             transitions[i,j] = 1
 #
 #         elif ((vol1 > min_cell_volume) & (risect > rd) &
@@ -1660,7 +1660,7 @@ def discretize_overlap(
 #             num_new_reg = np.hstack([num_new_reg, 0])
 #             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
 #
-#             logger.info("\n Adding state " + str(size-1) + "\n")
+#             _logger.info("\n Adding state " + str(size-1) + "\n")
 #
 #             # Just add adjacent cells for checking,
 #             # unless transition already found
@@ -1671,7 +1671,7 @@ def discretize_overlap(
 #             IJ[size-1,:] = horiz2.astype(int)
 #             IJ[:,size-1] = verti2.astype(int)
 #         else:
-#             logger.info("No transition found, intersect vol: " + str(vol1) )
+#             _logger.info("No transition found, intersect vol: " + str(vol1) )
 #             transitions[i,j] = 0
 #
 #     new_part = PPP(
@@ -1694,8 +1694,8 @@ def multiproc_discretize(
         disc_params:
             dict
         ) -> None:
-    global logger
-    logger = mp.log_to_stderr()
+    global _logger
+    _logger = mp.log_to_stderr()
     name = mp.current_process().name
     print(
         f'Abstracting mode: {mode}, on: {name}')
@@ -1714,8 +1714,8 @@ def multiproc_get_transitions(
         params:
             dict
         ) -> None:
-    global logger
-    logger = mp.log_to_stderr()
+    global _logger
+    _logger = mp.log_to_stderr()
     name = mp.current_process().name
     print(
         'Merged transitions for '
@@ -1745,7 +1745,7 @@ def multiproc_discretize_switched(
 
     Uses the multiprocessing package.
     """
-    logger.info('parallel `discretize_switched` started')
+    _logger.info('parallel `discretize_switched` started')
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
     q = mp.Queue()
@@ -1773,7 +1773,7 @@ def multiproc_discretize_switched(
     # merge their domains
     merged_abstr, ap_labeling = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
-    logger.info(f'Merged partition has: {n}, states')
+    _logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition
     for mode in modes:
         cont_dyn = hybrid_sys.dynamics[mode]
@@ -1834,25 +1834,25 @@ def discretize_switched(
     """
     if disc_params is None:
         disc_params = dict(N=1, trans_length=1)
-    logger.info('discretizing hybrid system')
+    _logger.info('discretizing hybrid system')
     modes = list(hybrid_sys.modes)
     mode_nums = hybrid_sys.disc_domain_size
     # discretize each abstraction separately
     abstractions = dict()
     for mode in modes:
-        logger.debug(30 * '-' + '\n')
-        logger.info(f'Abstracting mode: {mode}')
+        _logger.debug(30 * '-' + '\n')
+        _logger.info(f'Abstracting mode: {mode}')
         cont_dyn = hybrid_sys.dynamics[mode]
         absys = discretize(
             ppp, cont_dyn,
             **disc_params[mode])
-        logger.debug(
+        _logger.debug(
             f'Mode Abstraction:\n{absys}\n')
         abstractions[mode] = absys
     # merge their domains
     merged_abstr, ap_labeling = merge_partitions(abstractions)
     n = len(merged_abstr.ppp)
-    logger.info(f'Merged partition has: {n}, states')
+    _logger.info(f'Merged partition has: {n}, states')
     # find feasible transitions over merged partition
     trans = dict()
     for mode in modes:
@@ -1883,7 +1883,7 @@ def plot_mode_partitions(
     """Save each mode's partition and final merged partition."""
     axs = swab.plot(show_ts, only_adjacent)
     if not axs:
-        logger.error('failed to plot the partitions.')
+        _logger.error('failed to plot the partitions.')
         return
     n = len(swab.modes)
     assert len(axs) == 2*n
@@ -1926,7 +1926,7 @@ def merge_abstractions(
     """Construct merged transitions."""
     # TODO: check equality of atomic proposition sets
     aps = abstr[modes[0]].ts.atomic_propositions
-    logger.info(f'APs: {aps}')
+    _logger.info(f'APs: {aps}')
     sys_ts = trs.FTS()
     # create stats
     n = len(merged_abstr.ppp)
@@ -1988,7 +1988,7 @@ def get_transitions(
 
     Used for the candidate transitions of the merged partition.
     """
-    logger.info(
+    _logger.info(
         'checking which transitions remain '
         'feasible after merging')
     part = abstract_sys.ppp
@@ -2014,7 +2014,7 @@ def get_transitions(
         i = ind[1][0]
         j = ind[0][0]
         IJ[j,i] = 0
-        logger.debug(f'checking transition: {i} -> {j}')
+        _logger.debug(f'checking transition: {i} -> {j}')
         si = part[i]
         sj = part[j]
         # Use original cell as trans_set
@@ -2031,11 +2031,11 @@ def get_transitions(
         else:
             transitions[i, j] = 0
             msg = '\t Not feasible transition.'
-        logger.debug(msg)
-    logger.info(f'Checked: {n_checked}')
-    logger.info(f'Found: {n_found}')
+        _logger.debug(msg)
+    _logger.info(f'Checked: {n_checked}')
+    _logger.info(f'Found: {n_found}')
     assert n_checked != 0, 'would divide '
-    logger.info(
+    _logger.info(
         f'Survived merging: {float(n_found) / n_checked} % ')
     return transitions
 
@@ -2088,7 +2088,7 @@ def merge_partitions(
                     'different domains')
             # check equality of original PPP partitions
             if ab1.orig_ppp == ab2.orig_ppp:
-                logger.info(
+                _logger.info(
                     'original partitions happen to be equal')
     init_mode = list(abstractions.keys())[0]
     all_modes = set(abstractions)
@@ -2198,7 +2198,7 @@ def merge_partition_pair(
         - `ap_labeling`, same as input param `old_ap_labeling`, except that it
           includes the mode that was just merged.
     """
-    logger.info('merging partitions')
+    _logger.info('merging partitions')
     part2 = ab2.ppp
     modes = prev_modes + [cur_mode]
     new_list = list()
@@ -2213,7 +2213,7 @@ def merge_partition_pair(
             # no intersection ?
             if rc < 1e-5:
                 continue
-            logger.info(
+            _logger.info(
                 f'merging region: A{i}, with: B{j}')
             # if Polytope, make it Region
             if len(isect) == 0:
@@ -2229,8 +2229,8 @@ def merge_partition_pair(
             # union of AP labels from parent states
             ap_label_1 = old_ap_labeling[i]
             ap_label_2 = ab2.ts.states[j]['ap']
-            logger.debug(f'AP label 1: {ap_label_1}')
-            logger.debug(f'AP label 2: {ap_label_2}')
+            _logger.debug(f'AP label 1: {ap_label_1}')
+            _logger.debug(f'AP label 2: {ap_label_2}')
             # original partitions may be
             # different if `_p2p.pwa_partition` used
             # but must originate from same

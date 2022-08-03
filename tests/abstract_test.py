@@ -3,9 +3,9 @@ Tests for the abstraction from continuous dynamics to logic
 """
 import logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 # logging.getLogger('tulip').setLevel(logging.ERROR)
-logger.setLevel(logging.DEBUG)
+_logger.setLevel(logging.DEBUG)
 
 import pytest
 
@@ -135,12 +135,12 @@ def test_transient_regions():
         return sys
     ppp = cont_predicates()
     sys = drifting_dynamics()
-    logger.info(sys)
+    _logger.info(sys)
     ab = abstract.discretize(ppp, sys, N=1, use_all_horizon=True,
                              trans_length=1)
-    logger.debug(ab.ts)
+    _logger.debug(ab.ts)
     self_loops = {i for i, j in ab.ts.transitions() if i == j}
-    logger.debug('self loops at states: ' + str(self_loops))
+    _logger.debug('self loops at states: ' + str(self_loops))
     assert(not self_loops)
     # ax = ab.plot(show_ts=True)
     # ax.figure.savefig('./very_simple.pdf')
@@ -212,7 +212,7 @@ def test_abstract_the_dynamics():
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
     ppp = define_partition(dom)
     sys = define_dynamics(dom)
-    logger.info(sys)
+    _logger.info(sys)
     disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, **disc_options)
@@ -231,7 +231,7 @@ def test_abstract_the_dynamics_dual():
     dom = pc.box2poly([[0.0, 10.0], [0.0, 20.0]])
     ppp = define_partition(dom)
     sys = define_dynamics(dom)
-    logger.info(sys)
+    _logger.info(sys)
     disc_options = {'N': 3, 'trans_length': 2, 'min_cell_volume': 1.5}
     ab = abstract.discretize(ppp, sys, plotit=False,
                              save_img=False, simu_type='dual', **disc_options)
