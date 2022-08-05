@@ -1215,7 +1215,10 @@ def simu_abstract(
         ) -> tuple[
             FTS,
             dict]:
-    """Create a bi/dual-simulation abstraction for a Finite Transition System.
+    """Abstract `ts`, using bi/dual-simulation.
+
+    Create a bi/dual-simulation abstraction for
+    the finite transition system `ts`.
 
     @param ts:
         input finite transition system,
