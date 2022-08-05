@@ -1460,7 +1460,7 @@ def _synthesize(
         strategy = omega_int.synthesize_enumerated_streett(specs)
     else:
         options = {'gr1c', 'gr1py', 'omega', 'slugs'}
-        raise Exception(
+        raise ValueError(
             f'Unknown solver: "{solver}". '
             f'Available options are: {options}')
     return _trim_strategy(
