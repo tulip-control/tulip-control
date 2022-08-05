@@ -644,7 +644,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
                 EnvSys):
         if x not in {'env', 'sys'}:
             raise ValueError(
-                "The owner can be either `'sys'` or `'env'`.")
+                "The owner can be either "
+                "`'sys'` or `'env'`.")
         self._owner = x
 
     def _save(
@@ -752,7 +753,8 @@ def tuple2fts(
             return
         if not isinstance(state_labeling, _abc.Iterable):
             raise TypeError(
-                'The state-labeling function: `L -> 2^AP` must be '
+                'The state-labeling function: '
+                '`L -> 2^AP` must be '
                 'defined using an `Iterable`.')
         state_label_pairs = True
         # cannot be caught by try below
