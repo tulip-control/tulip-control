@@ -579,7 +579,7 @@ class SwitchedSysDyn:
                     cts_ss,
                     pc.Polytope |
                     pc.Region):
-                raise Exception(
+                raise TypeError(
                    '`cts_ss` must be '
                    'a `Polytope` or `Region`')
         self.disc_domain_size = disc_domain_size
