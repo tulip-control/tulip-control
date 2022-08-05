@@ -374,16 +374,16 @@ class PwaSysDyn:
                     m != subsys.B.shape[1] or
                     p != subsys.E.shape[1])
                 if dims_differ:
-                    raise Exception(
+                    raise ValueError(
                         'state, input, disturbance '
                         'dimensions have to be the '
                         'same for all subsystems')
             if not pc.is_empty(uncovered_dom):
-                raise Exception(
+                raise ValueError(
                     'subdomains must cover the domain')
             for x in itertools.combinations(list_subsys, 2):
                 if pc.is_fulldim(x[0].domain.intersect(x[1].domain)):
-                    raise Exception(
+                    raise ValueError(
                         'subdomains have to be mutually '
                         'exclusive')
         self.list_subsys = list_subsys
