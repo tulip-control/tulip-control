@@ -134,16 +134,15 @@ def _conj_neg_diff(
         parenth:
             bool=True
         ) -> str:
+    items = filter(
+        lambda x:
+            x not in set1,
+        set0)
     if parenth:
-        return ' && '.join([
-            '!(' + str(x) + ')'
-            for x in set0
-            if x not in set1])
-    else:
-        return ' && '.join([
-            '!' + str(x)
-            for x in set0
-            if x not in set1])
+        items = map(_pstr, items)
+    return ' && '.join(
+        f'!{x}'
+        for x in items)
 
 
 def mutex(iterable) -> list[str]:
