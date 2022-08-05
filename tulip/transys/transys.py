@@ -1118,15 +1118,16 @@ def _pre(
         list_n:
             list
         ) -> set:
-    """Find union of predecessors of nodes in graph defined by `MultiDiGraph`.
+    """Predecessors of `graph` nodes in `list_n`.
 
     @param graph:
-        a graph structure corresponding to a FTS.
+        corresponds to an `FTS`.
     @param list_n:
         list of nodes (in `graph`)
         whose predecessors need to be returned
     @return:
-        set of predecessors of `list_n`
+        set of predecessors of
+        nodes in `list_n`
     """
     pre_set = set()
     for n in list_n:
