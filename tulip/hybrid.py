@@ -135,6 +135,7 @@ class LtiSysDyn:
     `SwitchedSysDyn`,
     `polytope.Polytope`
     """
+
     def __init__(
             self,
             A:
@@ -317,6 +318,7 @@ class PwaSysDyn:
     `SwitchedSysDyn`,
     `polytope.Polytope`
     """
+
     def __init__(
             self,
             list_subsys:
@@ -528,6 +530,7 @@ class SwitchedSysDyn:
     `PwaSysDyn`,
     `polytope.Region`
     """
+
     def __init__(
             self,
             disc_domain_size:
