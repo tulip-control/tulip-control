@@ -586,10 +586,18 @@ def sys_to_spec(
     sys_action_ids = dict()
     env_action_ids = dict()
     for action_type, codomain in actions.items():
-        assert not set(codomain).intersection(aps), (codomain, aps)
-        assert not set(codomain).intersection(states), (codomain, states)
-        assert action_type not in states, action_type
-        assert action_type not in aps, action_type
+        if set(codomain).intersection(aps):
+            raise AssertionError(
+                codomain, aps)
+        if set(codomain).intersection(states):
+            raise AssertionError(
+                codomain, states)
+        if action_type in states:
+            raise AssertionError(
+                action_type)
+        if action_type in aps:
+            raise AssertionError(
+                action_type)
         msg = f'action_type:\n\t{action_type}\n'
         msg += f'with codomain:\n\t{codomain}'
         _logger.debug(msg)
@@ -696,10 +704,18 @@ def env_to_spec(
     sys_action_ids = dict()
     env_action_ids = dict()
     for action_type, codomain in actions.items():
-        assert not set(codomain).intersection(aps), (codomain, aps)
-        assert not set(codomain).intersection(states), (codomain, states)
-        assert action_type not in states, action_type
-        assert action_type not in aps, action_type
+        if set(codomain).intersection(aps):
+            raise AssertionError(
+                codomain, aps)
+        if set(codomain).intersection(states):
+            raise AssertionError(
+                codomain, states)
+        if action_type in states:
+            raise AssertionError(
+                action_type)
+        if action_type in aps:
+            raise AssertionError(
+                action_type)
         if 'sys' in action_type:
             action_ids, constraint = iter2var(
                 codomain, sys_vars,
@@ -1297,7 +1313,8 @@ def synthesize_many(
     """
     assert isinstance(ts, dict), ts
     for name, t in ts.items():
-        assert isinstance(t, transys.FiniteTransitionSystem), t
+        if not isinstance(t, transys.FiniteTransitionSystem):
+            raise AssertionError(t)
         ignore = name in ignore_init
         statevar = name
         if t.owner == 'sys':
