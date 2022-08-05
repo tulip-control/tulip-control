@@ -539,7 +539,7 @@ class RabinPairs:
             self._pairs[pair_index][0].add_from(good_states)
             self._pairs[pair_index][1].add_from(bad_states)
         except IndexError:
-            raise Exception(
+            raise IndexError(
                 'A pair with `pair_index` does not exist.\n'
                 'Create a new one by calling `.add`.')
 
