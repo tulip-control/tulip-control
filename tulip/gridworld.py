@@ -813,9 +813,9 @@ class GridWorld:
     def dump_ppartition(
             self,
             side_lengths:
-                XY=(1., 1.),
+                XY=(1.0, 1.0),
             offset:
-                XY=(0., 0.),
+                XY=(0.0, 0.0),
             nonbool:
                 bool=True
             ) -> 'PropPreservingPartition':
