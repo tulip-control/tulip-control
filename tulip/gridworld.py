@@ -1158,7 +1158,9 @@ def random_world(
     num_blocks = int(np.round(wall_density * num_cells))
     for i in range(num_goals):
         avail_inds = np.array(range(num_cells))[W == 0]
-        avail_inds = [k for k in avail_inds if k not in goal_list]
+        avail_inds = list(_itr.filterfalse(
+            goal_list.__contains__,
+            avail_inds))
         goal_list.append(
             avail_inds[np.random.randint(low=0, high=len(avail_inds))])
     for i in range(num_init):
