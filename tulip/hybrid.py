@@ -856,8 +856,9 @@ def _check_time_consistency(
             None):
     """Assert that all items of `system_list` have same semantics.
 
-    Checks that all the dynamical systems in `system_list`
-    have the same time semantics and timestep.
+    Checks that all the dynamical systems
+    in `system_list` have the same
+    time semantics and timestep.
     Raises `ValueError` if not.
     """
     # Check that time semantics

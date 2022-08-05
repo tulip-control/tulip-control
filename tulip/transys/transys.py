@@ -454,8 +454,10 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
 
     Reference
     =========
-    For closed systems this corresponds to Def. 2.1, p.20 [BK08](
-        https://tulip-control.sourceforge.io/doc/bibliography.html#bk08):
+    For closed systems this corresponds to
+    Def. 2.1, p.20 [BK08](
+        https://tulip-control.sourceforge.io/
+        doc/bibliography.html#bk08):
     - `states` (instance of `States`) = S
     - `states.initial` = S_0 \subseteq S
     - `atomic_propositions` = AP
@@ -864,13 +866,17 @@ def line_labeled_with(
         [{'p', '!p', 'q',...]
         ```
 
-        Single strings are identified with singleton Atomic Propositions,
-        so [..., 'p',...] and [...,{'p'},...] are equivalent.
+        Single strings are identified with
+        singleton Atomic Propositions, so
+        [..., 'p',...] and
+        [...,{'p'},...]
+        are equivalent.
     @param m:
         starting index
     @return:
         `FTS` with:
-        - states `['s0', ..., 'sN']`, where `N = len(L) - 1`
+        - states `['s0', ..., 'sN']`,
+          where `N = len(L) - 1`
         - state labels defined by `L`,
           so `s0` is labeled with `L[0]`, etc.
         - transitions forming a sequence:
@@ -1137,7 +1143,8 @@ def _output_fts(
             dict]:
     """Convert the Part from `MultiDiGraph` to FTS.
 
-    The returned FTS does not contain any edge attribute in the original FTS.
+    The returned FTS does not contain
+    any edge attribute in the original FTS.
     All the transitions are assumed to be controllable.
 
     @param ts:
@@ -1211,20 +1218,24 @@ def simu_abstract(
     """Create a bi/dual-simulation abstraction for a Finite Transition System.
 
     @param ts:
-        input finite transition system, the one you want to get
+        input finite transition system,
+        the one you want to get
         its bi/dual-simulation abstraction.
     @param simu_type:
         string 'bi'/'dual', flag used to switch b.w.
-        bisimulation algorithm and dual-simulation algorithm.
+        bisimulation algorithm and
+        dual-simulation algorithm.
     @return:
-        the bi/dual simulation, and the corresponding partition.
+        the bi/dual simulation, and
+        the corresponding partition.
 
 
     References
     ==========
 
     1. Wagenmaker, A. J.; Ozay, N.
-       "A Bisimulation-like Algorithm for Abstracting Control Systems."
+       "A Bisimulation-like Algorithm for
+        Abstracting Control Systems."
        54th Annual Allerton Conference on CCC 2016
     """
     # create MultiDiGraph instance from the input FTS

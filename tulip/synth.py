@@ -194,7 +194,8 @@ def _conj_action(
         - conjunct (includes `&&` operator) if:
 
             - `action_type` in `actions_dict`, and
-            - `action_value` is not the empty string (modeling "no constrain")
+            - `action_value` is not
+              the empty string (modeling "no constrain")
 
           includes next operator (`X`) if `nxt = True`.
         - empty string otherwise
@@ -511,7 +512,8 @@ def sys_to_spec(
       - the atomic propositions annotating states
       - the system actions annotating edges
 
-    The following are represented by variables controlled by the other player:
+    The following are represented by
+    variables controlled by the other player:
 
       - the environment actions annotating edges
 
@@ -822,7 +824,8 @@ def _sys_trans_from_ts(
         dict of dicts
         outer dict keyed by action_type
         each inner dict keyed by action_value
-        each inner dict value is the solver expression for that action value
+        each inner dict value is the
+        solver expression for that action value
 
         for example an action type with an
         arbitrary finite discrete codomain can be modeled either:
