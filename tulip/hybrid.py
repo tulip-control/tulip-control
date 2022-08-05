@@ -823,9 +823,9 @@ def _check_time_data(
         timestep:
             int |
             float):
-    """Check whether time semantics and timestep are correct.
+    """Assert time semantics, timestep are correct.
 
-    If not, then raise `ValueError`.
+    Raise `ValueError` if not.
 
     @param timestep:
         any positive number
