@@ -674,26 +674,17 @@ class SwitchedSysDyn:
             ) -> (
                 list |
                 None):
-        # default
-        if labels is None:
-            return None
-        # `len` exists ?
-        try:
-            # is length correct ?
-            if len(labels) != n:
-                _warn.warn(
-                    'number of environment labels '
-                    'is inconsistent with discrete '
-                    'domain size.\n'
-                    'Ignoring given environment labels.\n'
-                    'Defaulting to integer labels.')
-                return None
-        except:
-            _warn.warn(
-                'Environment labels of type: '
-                f'{labels} have no `len()`')
-            return None
-        return labels
+        ok = (
+            labels is None or
+            len(labels) == n)
+        if ok:
+            return labels
+        raise ValueError(
+            'number of environment labels '
+            'is inconsistent with discrete '
+            'domain size.\n'
+            'Ignoring given environment labels.\n'
+            'Defaulting to integer labels.')
 
     @property
     def all_mode_combs(self):
