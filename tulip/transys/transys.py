@@ -956,7 +956,7 @@ def add_initial_states(
         ) -> None:
     """Make initial any state of ts labeled with any label in ap_labels.
 
-    For example if isinstance(ofts, FTS):
+    For example if `isinstance(ofts, FTS)`:
 
     ```python
     import tulip.transys.transys as _trs
