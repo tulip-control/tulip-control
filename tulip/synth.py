@@ -1317,14 +1317,15 @@ def synthesize_many(
             raise AssertionError(t)
         ignore = name in ignore_init
         statevar = name
-        if t.owner == 'sys':
-            sys_spec = sys_to_spec(t, ignore, statevar)
-            _copy_options_from_ts(sys_spec, t, specs)
-            specs |= sys_spec
-        elif t.owner == 'env':
-            env_spec = env_to_spec(t, ignore, statevar)
-            _copy_options_from_ts(env_spec, t, specs)
-            specs |= env_spec
+        match t.owner:
+            case 'sys':
+                sys_spec = sys_to_spec(t, ignore, statevar)
+                _copy_options_from_ts(sys_spec, t, specs)
+                specs |= sys_spec
+            case 'env':
+                env_spec = env_to_spec(t, ignore, statevar)
+                _copy_options_from_ts(env_spec, t, specs)
+                specs |= env_spec
     return _synthesize(
         specs, solver,
         rm_deadends=True)
@@ -1446,23 +1447,24 @@ def _synthesize(
             bool
         ) -> maybe_mealy:
     """Return `MealyMachine` that implements `specs`."""
-    if solver == 'gr1c':
-        strategy = gr1c.synthesize(specs)
-    elif solver == 'slugs':
-        if slugs is None:
+    match solver:
+        case 'gr1c':
+            strategy = gr1c.synthesize(specs)
+        case 'slugs':
+            if slugs is None:
+                raise ValueError(
+                    'Import of slugs interface failed. '
+                    'Please verify installation of "slugs".')
+            strategy = slugs.synthesize(specs)
+        case 'gr1py':
+            strategy = gr1py.synthesize(specs)
+        case 'omega':
+            strategy = omega_int.synthesize_enumerated_streett(specs)
+        case _:
+            options = {'gr1c', 'gr1py', 'omega', 'slugs'}
             raise ValueError(
-                'Import of slugs interface failed. '
-                'Please verify installation of "slugs".')
-        strategy = slugs.synthesize(specs)
-    elif solver == 'gr1py':
-        strategy = gr1py.synthesize(specs)
-    elif solver == 'omega':
-        strategy = omega_int.synthesize_enumerated_streett(specs)
-    else:
-        options = {'gr1c', 'gr1py', 'omega', 'slugs'}
-        raise ValueError(
-            f'Unknown solver: "{solver}". '
-            f'Available options are: {options}')
+                f'Unknown solver: "{solver}". '
+                f'Available options are: {options}')
     return _trim_strategy(
         strategy, specs,
         rm_deadends=rm_deadends)
@@ -1522,24 +1524,25 @@ def is_realizable(
     specs = _spec_plus_sys(
         specs, env, sys,
         ignore_env_init, ignore_sys_init)
-    if solver == 'gr1c':
-        r = gr1c.check_realizable(specs)
-    elif solver == 'slugs':
-        if slugs is None:
+    match solver:
+        case 'gr1c':
+            r = gr1c.check_realizable(specs)
+        case 'slugs':
+            if slugs is None:
+                raise ValueError(
+                    'Import of slugs interface failed. '
+                    'Please verify installation of "slugs".')
+            r = slugs.check_realizable(specs)
+        case 'gr1py':
+            r = gr1py.check_realizable(specs)
+        case 'omega':
+            r = omega_int.is_realizable(specs)
+        case _:
             raise ValueError(
-                'Import of slugs interface failed. '
-                'Please verify installation of "slugs".')
-        r = slugs.check_realizable(specs)
-    elif solver == 'gr1py':
-        r = gr1py.check_realizable(specs)
-    elif solver == 'omega':
-        r = omega_int.is_realizable(specs)
-    else:
-        raise ValueError(
-            'Undefined synthesis solver: '
-            f'{solver = }'
-            'Available options are "gr1c", '
-            '"slugs", and "gr1py"')
+                'Undefined synthesis solver: '
+                f'{solver = }'
+                'Available options are "gr1c", '
+                '"slugs", and "gr1py"')
     if r:
         _logger.debug('is realizable')
     else:
