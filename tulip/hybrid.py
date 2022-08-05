@@ -179,7 +179,7 @@ class LtiSysDyn:
         # check dimensions agree
         try:
             nA, mA = A.shape
-        except:
+        except AttributeError:
             raise TypeError(
                 'A matrix must be 2d array')
         if nA != mA:
