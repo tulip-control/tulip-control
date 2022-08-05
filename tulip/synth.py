@@ -93,10 +93,9 @@ def _disj(set0) -> str:
 
 
 def _conj(set0) -> str:
-    return ' && '.join([
-        '(' + str(x) + ')'
-        for x in set0
-        if x != ''])
+    nonempty = filter(None, set0)
+    return ' && '.join(map(
+        _pstr, nonempty))
 
 
 def _conj_intersection(
