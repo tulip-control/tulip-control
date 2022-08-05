@@ -717,7 +717,8 @@ class GridWorld:
         if self.W is None:
             raise ValueError(
                 "Gridworld does not exist.")
-        out_str = line_prefix + " ".join([str(i) for i in self.W.shape]) + "\n"
+        out_str = line_prefix + " ".join(map(
+            str, self.W.shape)) + "\n"
         for i in range(self.W.shape[0]):
             out_str += line_prefix
             for j in range(self.W.shape[1]):
