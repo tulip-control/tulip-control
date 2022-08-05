@@ -465,7 +465,7 @@ class RabinPairs:
             self
             ) -> list[
                 _utl.n_tuple(2)]:
-        """Get list of 2-`tuple`s `(L, U)` of good-bad sets of states."""
+        """Return acceptance pairs `(L, U)`."""
         return list(self._pairs)
 
     def add(
