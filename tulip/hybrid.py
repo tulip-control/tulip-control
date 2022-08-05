@@ -34,6 +34,7 @@
 import itertools
 import logging
 import pprint as _pp
+import textwrap as _tw
 import typing as _ty
 import warnings as _warn
 
@@ -72,9 +73,11 @@ def _indent(
         n:
             int
         ) -> str:
-    s = s.split('\n')
-    w = n * ' '
-    return w + ('\n' + w).join(s)
+    space = ' '
+    prefix = n * space
+    return _tw.indent(
+        s,
+        prefix=prefix)
 
 
 class LtiSysDyn:
