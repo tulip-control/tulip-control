@@ -545,8 +545,10 @@ class GridWorld:
                 # c1 == c2
                 return "."
         if show_grid:
-            out_str += "  " + "".join([str(k).rjust(2)
-                                       for k in range(self.W.shape[1])]) + "\n"
+            out_str += "  " + "".join(
+                str(k).rjust(2)
+                for k in
+                    range(self.W.shape[1])) + "\n"
         else:
             out_str += "-" * (self.W.shape[1] + 2) + "\n"
         # if path:
