@@ -1948,6 +1948,7 @@ def determinize_machine_init(
             possible_inputs.add(in_values)
             continue
         else:
-            rm_edges.add((i, j, key))
+            edge = (i, j, key)
+            rm_edges.add(edge)
     mach.remove_edges_from(rm_edges)
     return mach
