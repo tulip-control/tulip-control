@@ -253,12 +253,7 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 
-class OmegaAutomaton(FiniteStateAutomaton):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class BuchiAutomaton(OmegaAutomaton):
+class BuchiAutomaton(FiniteStateAutomaton):
     """A device for pattern-matching infinite sequences."""
 
     def __init__(
@@ -595,7 +590,7 @@ class RabinPairs:
         return superset is self._states
 
 
-class RabinAutomaton(OmegaAutomaton):
+class RabinAutomaton(FiniteStateAutomaton):
     """Rabin automaton.
 
     See Also
