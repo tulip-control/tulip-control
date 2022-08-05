@@ -295,7 +295,7 @@ def tuple2ba(
         atomic_proposition_based:
             bool=True
         ) -> BuchiAutomaton:
-    """Create a Buchi Automaton from a tuple of fields.
+    r"""Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by
     a tuple `(S, S0, Sa, \\Sigma, trans)`
