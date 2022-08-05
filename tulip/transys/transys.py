@@ -457,7 +457,8 @@ class FiniteTransitionSystem(LabeledDiGraph):
                 {'name': 'sys_actions',
                  'values': MathSet(),
                  'setter': True}]
-        # note: "sys_actions" used to be "actions"
+        # NOTE:
+        # "sys_actions" used to be "actions"
         # in closed systems (old FTS)
         action_types = env_actions + sys_actions
         edge_label_types = action_types
