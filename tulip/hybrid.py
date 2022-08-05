@@ -612,8 +612,8 @@ class SwitchedSysDyn:
                     'forget any modes,\n'
                     'otherwise this is fine.')
             if not all(
-                    [isinstance(sys, PwaSysDyn)
-                    for sys in dynamics.values()]):
+                    isinstance(sys, PwaSysDyn)
+                    for sys in dynamics.values()):
                 raise TypeError(
                     'For each mode, the dynamics '
                     'must be `PwaSysDyn`.\n'
