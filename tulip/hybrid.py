@@ -167,12 +167,13 @@ class LtiSysDyn:
             raise TypeError('`Uset` has to be a Polytope')
         if domain is None:
             _warn.warn('Domain not given to `LtiSysDyn()`')
-        if ((domain is not None) and
-            (not (isinstance(domain, pc.Polytope) or
-                isinstance(domain, pc.Region))
-            )
-        ):
-            raise Exception(
+        type_error = (
+            domain is not None and
+            not isinstance(
+                domain,
+                pc.Polytope | pc.Region))
+        if type_error:
+            raise TypeError(
                 '`domain` has to be '
                 'a `Polytope` or `Region`')
         # check dimensions agree
@@ -352,12 +353,13 @@ class PwaSysDyn:
         if domain is None:
             _warn.warn(
                 'requires argument `domain`')
-        if (domain is not None and
-            (not (isinstance(domain, pc.Polytope) or
-                isinstance(domain, pc.Region))
-            )
-        ):
-            raise Exception(
+        type_error = (
+            domain is not None and
+            not isinstance(
+                domain,
+                pc.Polytope | pc.Region))
+        if type_error:
+            raise TypeError(
                 '`domain` has to be '
                 'a `Polytope` or `Region`')
         if len(list_subsys) > 0:
