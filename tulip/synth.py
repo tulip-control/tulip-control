@@ -208,8 +208,7 @@ def _conj_action(
         return ''
     if nxt:
         return f' X{_pstr(action)}'
-    else:
-        return _pstr(action)
+    return _pstr(action)
 
 
 def _conj_actions(
@@ -251,8 +250,7 @@ def _conj_actions(
         f'{conjuncted_actions}\n')
     if nxt:
         return f' X{_pstr(conjuncted_actions)}'
-    else:
-        return _pstr(conjuncted_actions)
+    return _pstr(conjuncted_actions)
 
 # duplicate states are impossible,
 # because each networkx vertex is unique

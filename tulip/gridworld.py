@@ -292,8 +292,7 @@ class GridWorld:
             return False
         if self.W[coord[0]][coord[1]] == 0:
             return True
-        else:
-            return False
+        return False
 
     def mark_occupied(
             self,
@@ -594,8 +593,7 @@ class GridWorld:
         """Return size of gridworld as a tuple in row-major order."""
         if self.W is None:
             return (0, 0)
-        else:
-            return self.W.shape
+        return self.W.shape
 
     def loads(
             self,
@@ -1222,8 +1220,7 @@ def random_world(
     world.init_list = init_list
     if num_trolls > 0:
         return world, troll_list
-    else:
-        return world
+    return world
 
 
 def narrow_passage(
