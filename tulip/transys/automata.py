@@ -571,7 +571,7 @@ class RabinPairs:
             self,
             superset
             ) -> bool:
-        """Return `True` if the given argument is the superset."""
+        """Return `True` if `superset` is indeed so."""
         return superset is self._states
 
 
