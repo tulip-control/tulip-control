@@ -851,17 +851,21 @@ class GridWorld:
         if self.W is None:
             raise ValueError(
                 "Gridworld does not exist.")
-        domain = Polytope(A=np.array([[0, -1],
-                                      [0, 1],
-                                      [-1, 0],
-                                      [1, 0]], dtype=np.float64),
-                          b=np.array([-offset[1],
-                                      offset[1] + self.W.shape[0] *
-                                      side_lengths[1],
-                                      -offset[0],
-                                      offset[0] +
-                                      self.W.shape[1] * side_lengths[0]],
-                                     dtype=np.float64))
+        a = np.array([
+            [0, -1],
+            [0, 1],
+            [-1, 0],
+            [1, 0]],
+            dtype=np.float64)
+        b = np.array([
+            - offset[1],
+            offset[1] +
+                self.W.shape[0] * side_lengths[1],
+            - offset[0],
+            offset[0] +
+                self.W.shape[1] * side_lengths[0]],
+            dtype=np.float64)
+        domain = Polytope(A=a, b=b)
         cells = dict()
         for i in range(self.W.shape[0]):
             for j in range(self.W.shape[1]):
