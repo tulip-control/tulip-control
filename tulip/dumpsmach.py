@@ -153,7 +153,7 @@ def python_case(
                 f'{4 * tab}self._error({input_args})\n')
         elif not edges:
             edges.append(
-                f'{3 * tab}raise Exception('
+                f'{3 * tab}raise RuntimeError('
                 '"Reached dead-end state !")\n')
         # each state
         c.append((
