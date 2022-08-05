@@ -259,6 +259,8 @@ class OmegaAutomaton(FiniteStateAutomaton):
 
 
 class BuchiAutomaton(OmegaAutomaton):
+    """A device for pattern-matching infinite sequences."""
+
     def __init__(
             self,
             deterministic:
