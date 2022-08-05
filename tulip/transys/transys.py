@@ -666,7 +666,9 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         ========
         `save`, `plot`
         """
-        if fileformat not in {'promela', 'Promela', 'pml'}:
+        file_formats = {
+            'promela', 'Promela', 'pml'}
+        if fileformat not in file_formats:
             return False
         # closed ?
         if self.env_vars:
