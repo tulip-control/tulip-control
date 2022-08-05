@@ -856,8 +856,9 @@ def _check_time_consistency(
             TimeSemantics,
         timestep:
             float |
-            None):
-    """Assert that all items of `system_list` have same semantics.
+            None
+        ) -> None:
+    """Assert homogeneous semantics in `system_list`.
 
     Checks that all the dynamical systems
     in `system_list` have the same
