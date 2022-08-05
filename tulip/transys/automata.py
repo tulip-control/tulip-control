@@ -353,7 +353,8 @@ def tuple2ba(
     # prepending states with given str
     if prepend_str:
         _logger.debug(
-            f'Given string:\n\t{prepend_str}\n'
+            'Given string:\n'
+            f'\t{prepend_str}\n'
             'will be prepended to all states.')
     states = _graphs.prepend_with(
         states, prepend_str)
