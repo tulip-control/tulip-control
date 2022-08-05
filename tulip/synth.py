@@ -1933,7 +1933,10 @@ def determinize_machine_init(
                 rm_edges.add((i, j, key))
                 break
     mach.remove_edges_from(rm_edges)
-    '''determinize arbitrarily any remnant non-determinism'''
+    #
+    # determinize arbitrarily any
+    # remnant non-determinism
+    #
     # input valuations already seen
     # tuples of values used for
     # efficiency (have __hash__)
