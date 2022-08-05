@@ -668,7 +668,7 @@ class GridWorld:
                         goal_list.append((row_index, j))
                     else:
                         raise ValueError(
-                            'unrecognized row symbol "' +
+                            'unrecognized row symbol "'
                             f'{line[j]}".')
                 row_index += 1
             else:
