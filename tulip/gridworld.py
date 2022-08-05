@@ -156,7 +156,9 @@ class GridWorld:
             If True, then use variables with integer domains.
         """
         if self.W is None:
-            raise ValueError("Gridworld is empty; no names available.")
+            raise ValueError(
+                "Gridworld is empty; "
+                "no names available.")
         if len(key) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld key.")
@@ -229,7 +231,9 @@ class GridWorld:
             If True, then use variables with integer domains.
         """
         if self.W is None:
-            raise ValueError("Gridworld is empty; no cells exist.")
+            raise ValueError(
+                "Gridworld is empty; "
+                "no cells exist.")
         if len(key) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld key.")
@@ -276,7 +280,9 @@ class GridWorld:
             cell outside the grid as being occupied.
         """
         if self.W is None:
-            raise ValueError("Gridworld is empty; no cells exist.")
+            raise ValueError(
+                "Gridworld is empty; "
+                "no cells exist.")
         if len(coord) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld coord.")
@@ -329,7 +335,9 @@ class GridWorld:
         # Check input values and
         # handle negative coordinates
         if self.W is None:
-            raise ValueError("Gridworld is empty; no names available.")
+            raise ValueError(
+                "Gridworld is empty; "
+                "no names available.")
         if len(start) != len(self.W.shape):
             raise ValueError(
                 "malformed gridworld start coordinate.")
@@ -338,7 +346,9 @@ class GridWorld:
                 start[1] < -self.W.shape[1] or
                 start[0] >= self.W.shape[0] or
                 start[1] >= self.W.shape[1]):
-            raise ValueError("gridworld start coordinate is out of bounds.")
+            raise ValueError(
+                "gridworld start coordinate "
+                "is out of bounds.")
         if start[0] < 0:
             start = (self.W.shape[0] + start[0], start[1])
         if start[1] < 0:
@@ -419,7 +429,9 @@ class GridWorld:
             import matplotlib.patches
             import matplotlib.pyplot as plt
         except ImportError:
-            print('matplotlib not available, so skipping GridWorld.plot()')
+            print(
+                'matplotlib not available, '
+                'so skipping GridWorld.plot()')
             return
         W = self.W.copy()
         W = np.ones(shape=W.shape) - W
@@ -670,7 +682,8 @@ class GridWorld:
                              dtype=np.int32)
                 row_index = 0
         if W is None:
-            raise ValueError("malformed gridworld description.")
+            raise ValueError(
+                "malformed gridworld description.")
         # Arrived here without errors,
         # so actually reincarnate
         self.W = W
@@ -1251,7 +1264,9 @@ def narrow_passage(
     """
     w, h = size
     if w < 3 or h < 3:
-        raise ValueError("Gridworld too small: minimum dimension 3")
+        raise ValueError(
+            "Gridworld too small: "
+            "minimum dimension 3")
     Z = unoccupied(size, prefix)
     # Zone width is 30% of
     # world width by default
@@ -1438,7 +1453,8 @@ def extract_coord(
     """
     if not isinstance(var_name, str):
         raise TypeError(
-            "extract_coord: invalid argument type; must be string.")
+            "extract_coord: invalid argument type; "
+            "must be string.")
     name_frags = var_name.split("_")
     if len(name_frags) < 3:
         return None

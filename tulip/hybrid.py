@@ -566,7 +566,9 @@ class SwitchedSysDyn:
         # check that the continuous
         # domain is specified
         if cts_ss is None:
-            _warn.warn('requires continuous state-space `cts_ss`')
+            _warn.warn(
+                'requires continuous '
+                'state-space `cts_ss`')
         else:
             if not isinstance(
                     cts_ss,
