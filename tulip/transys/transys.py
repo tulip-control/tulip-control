@@ -1129,10 +1129,9 @@ def _pre(
         set of predecessors of
         nodes in `list_n`
     """
-    pre_set = set()
-    for n in list_n:
-        pre_set = pre_set.union(graph.predecessors(n))
-    return pre_set
+    return set().union(*map(
+        graph.predecessors,
+        list_n))
 
 
 def _output_fts(
