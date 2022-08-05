@@ -1576,7 +1576,7 @@ def _spec_plus_sys(
         env_formula = env_to_spec(
             env, ignore_env_init,
             statevar=statevar)
-        if specs.qinit == '\A \A':
+        if specs.qinit == r'\A \A':
             env_formula.env_init.extend(
                 env_formula.sys_init)
             env_formula.sys_init = list()

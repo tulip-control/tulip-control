@@ -536,7 +536,7 @@ class MathSet:
 
 
 class SubSet(MathSet):
-    """Subset of selected MathSet, or other Iterable.
+    r"""Subset of selected MathSet, or other Iterable.
 
     Prior to adding new elements,
     it checks that they are in its superset.
