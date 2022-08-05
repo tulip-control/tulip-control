@@ -1276,7 +1276,10 @@ def narrow_passage(
         # boundary of left zone
     gzone = size[1] - int(max(1, zone_width))
         # boundary of right zone
-    if izone * size[0] < num_init or gzone * size[0] < num_goals:
+    too_many_init_or_goals = (
+        izone * size[0] < num_init or
+        gzone * size[0] < num_goals)
+    if too_many_init_or_goals:
         raise ValueError(
             "Too many initials/goals for grid size")
     if ptop is None:
