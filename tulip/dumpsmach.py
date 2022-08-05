@@ -165,7 +165,7 @@ def python_case(
                 edges=''.join(edges)))
     code += ''.join(c) + (
             '{t2}else:\n'
-            '{t3}raise Exception("Unrecognized internal state: " + '
+            '{t3}raise AssertionError("Unrecognized internal state: " + '
             'str(self.state))\n'
             '{t2}return output\n'
             '\n'
