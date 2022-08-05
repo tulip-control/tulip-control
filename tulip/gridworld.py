@@ -513,8 +513,12 @@ class GridWorld:
         """
         if path is None:
             path = list()
-        compress = lambda p: [p[n]
-                              for n in range(len(p) - 1) if p[n] != p[n + 1]]
+        def compress(p):
+            return [
+                p[n]
+                for n in
+                    range(len(p) - 1)
+                if p[n] != p[n + 1]]
         # See comments in code for
         # the method loads regarding values in W
         if self.W is None:
