@@ -622,7 +622,8 @@ class DRA(RabinAutomaton):
         super().__init__(
             deterministic=True,
             atomic_proposition_based=atomic_proposition_based)
-        self.automaton_type = 'Deterministic Rabin Automaton'
+        self.automaton_type = (
+            'Deterministic Rabin Automaton')
 
 
 class ParityGame(_trs.GameGraph):
