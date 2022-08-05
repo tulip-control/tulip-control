@@ -954,7 +954,10 @@ def add_initial_states(
         ap_labels:
             _abc.Iterable
         ) -> None:
-    """Make initial any state of ts labeled with any label in ap_labels.
+    """Make initial states that match labeling.
+
+    Make initial any state of `ts` labeled with
+    any label in `ap_labels`.
 
     For example if `isinstance(ofts, FTS)`:
 
