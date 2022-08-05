@@ -181,7 +181,7 @@ class LtiSysDyn:
             raise ValueError('A must be square')
         if domain is not None:
             if domain.dim != mA:
-                raise Exception(
+                raise ValueError(
                     '`domain.dim != A.size[1]`')
         if B is not None:
             try:
@@ -194,7 +194,7 @@ class LtiSysDyn:
                     '`A` and `B` must have same number of rows')
             if Uset is not None:
                 if Uset.dim != mB and Uset.dim != mB + nA:
-                    raise Exception(
+                    raise ValueError(
                         '`Uset.dim != B.size[1]`'
                         ' and `!= B.size[1] + A.size[1]`')
         if E is not None:
@@ -209,7 +209,7 @@ class LtiSysDyn:
                     'same number of rows')
             if Wset is not None:
                 if Wset.dim != mE:
-                    raise Exception(
+                    raise ValueError(
                         '`Wset.dim != E.size[1]`')
         if K is not None:
             try:
