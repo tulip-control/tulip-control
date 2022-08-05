@@ -160,7 +160,7 @@ class LtiSysDyn:
         if Uset is None:
             _warn.warn('Uset not given to `LtiSysDyn()`')
         elif not isinstance(Uset, pc.Polytope):
-            raise Exception('`Uset` has to be a Polytope')
+            raise TypeError('`Uset` has to be a Polytope')
         if domain is None:
             _warn.warn('Domain not given to `LtiSysDyn()`')
         if ((domain is not None) and
