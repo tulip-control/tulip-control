@@ -1060,7 +1060,7 @@ class GameGraph(_graphs.LabeledDiGraph):
             e:
                 tuple
             ) -> _ty.Literal[0, 1]:
-        """Return the index of the player controlling edge `e`.
+        """Return index of player controlling edge `e`.
 
         @param e:
             2-tuple of nodes `(n1, n2)`
