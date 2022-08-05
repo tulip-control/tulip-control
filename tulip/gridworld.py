@@ -1465,12 +1465,14 @@ def extract_coord(
     try:
         if name_frags[-1] == "n" and name_frags[-2] == "n":
             # Special "nowhere" case
-            return ("_".join(name_frags[:-2]), -1, -1)
+            prefix = "_".join(name_frags[:-2])
+            return (prefix, -1, -1)
         col = int(name_frags[-1])
         row = int(name_frags[-2])
     except ValueError:
         return None
-    return ("_".join(name_frags[:-2]), row, col)
+    prefix = "_".join(name_frags[:-2])
+    return (prefix, row, col)
 
 
 def animate_paths(
