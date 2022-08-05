@@ -776,7 +776,7 @@ def tuple2fts(
             'States `S` must be iterable, '
             'even for single state.')
     # convention
-    if not isinstance(S0, _abc.Iterable) or isinstance(S0, str):
+    if not isinstance(S0, _abc.Iterable | str):
         S0 = [S0]
     # comprehensive names
     states = S
