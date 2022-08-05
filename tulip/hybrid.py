@@ -614,11 +614,10 @@ class SwitchedSysDyn:
             if not all(
                     [isinstance(sys, PwaSysDyn)
                     for sys in dynamics.values()]):
-                raise Exception(
+                raise TypeError(
                     'For each mode, the dynamics '
                     'must be `PwaSysDyn`.\n'
                     f'Got instead: {type(sys)}')
-                raise Exception(msg)
         self.dynamics = dynamics
         self.cts_ss = cts_ss
         _check_time_data(time_semantics, timestep)
