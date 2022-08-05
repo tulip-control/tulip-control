@@ -104,16 +104,13 @@ def _conj_intersection(
         parenth:
             bool=True
         ) -> str:
+    conjuncts = filter(
+        set1.__contains__,
+        set0)
     if parenth:
-        return ' && '.join([
-            '(' + str(x) + ')'
-            for x in set0
-            if x in set1])
-    else:
-        return ' && '.join([
-            str(x)
-            for x in set0
-            if x in set1])
+        conjuncts = map(
+            _pstr, conjuncts)
+    return ' && '.join(conjuncts)
 
 
 def _conj_neg(
