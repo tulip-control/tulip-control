@@ -493,7 +493,10 @@ class RabinPairs:
         good_set.update(good_states)
         bad_set = _mset.SubSet(self._states)
         bad_set.update(bad_states)
-        self._pairs.append((good_set, bad_set))
+        pair = (
+            good_set,
+            bad_set)
+        self._pairs.append(pair)
 
     def remove(
             self,
@@ -529,7 +532,10 @@ class RabinPairs:
         good_set.update(good_states)
         bad_set = _mset.SubSet(self._states)
         bad_set.update(bad_states)
-        self._pairs.remove((good_set, bad_set))
+        pair = (
+            good_set,
+            bad_set)
+        self._pairs.remove(pair)
 
     def add_states(
             self,
