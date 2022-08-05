@@ -414,14 +414,21 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     ts.transitions.add('s0', 's3')
     ```
 
-    is considered as different from a labeled one and to avoid
-    unintended duplication, after adding an unlabeled transition,
-    any attempt to add a labeled transition between the same states
-    will raise an exception, unless the unlabeled transition is
-    removed before adding the labeled transition.
+    is considered as different from
+    a labeled one and to avoid
+    unintended duplication,
+    after adding an unlabeled transition,
+    any attempt to add a labeled transition
+    between the same states
+    will raise an exception,
+    unless the unlabeled transition is
+    removed before adding the
+    labeled transition.
 
-    The user can still invoke `networkx` functions to set custom node
-    and edge labels, in addition to the above ones.
+    The user can still invoke
+    `networkx` functions to
+    set custom node and edge labels,
+    in addition to the above ones.
     For example:
 
     ```python
@@ -712,14 +719,18 @@ def tuple2fts(
     ====
     To remember the arg order:
 
-    1) it starts with states (S0 requires S before it is defined)
+    1) it starts with states
+    (S0 requires S before it is defined)
 
-    2) continues with the pair (AP, L), because states are more
+    2) continues with the pair (AP, L),
+    because states are more
     fundamental than transitions
     (transitions require states to be defined)
-    and because the state labeling L requires AP to be defined.
+    and because the state labeling L
+    requires AP to be defined.
 
-    3) ends with the pair (Act, trans), because transitions in trans
+    3) ends with the pair (Act, trans),
+    because transitions in trans
     require actions in Act to be defined.
 
     See Also
