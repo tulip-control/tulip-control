@@ -66,7 +66,11 @@ XY = tuple[float, float]
 
 
 class GridWorld:
-    """4-connected grids with primitives like obstacles and goals."""
+    """4-connected grids with primitives.
+
+    Obstacles and goals are examples of
+    primitives.
+    """
 
     def __init__(
             self,
