@@ -1295,9 +1295,10 @@ def narrow_passage(
         ptop = np.random.randint(0, size[0] - passage_width)
     passage = range(ptop, ptop + passage_width)
     for y in range(0, size[0]):
-        if y not in passage:
-            for x in range(izone, gzone):
-                Z.W[y][x] = 1
+        if y in passage:
+            continue
+        for x in range(izone, gzone):
+            Z.W[y][x] = 1
     avail_cells = [(y, x) for y in range(size[0]) for x in range(izone)]
     Z.init_list = random.sample(avail_cells, num_init)
     avail_cells = [(y, x) for y in range(size[0])
