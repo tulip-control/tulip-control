@@ -665,6 +665,11 @@ class ParityGame(_trs.GameGraph):
 
     @property
     def max_color(self) -> int:
+        """Return maximum node color.
+
+        Maximization is over all nodes.
+        In absence of nodes, return `-1`.
+        """
         max_c = -1
         for x in self:
             if self.nodes[x]['color'] > max_c:
