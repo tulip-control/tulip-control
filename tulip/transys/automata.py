@@ -674,10 +674,10 @@ class ParityGame(_trs.GameGraph):
             node_label_types, list())
 
     def __str__(self):
-        s = (
-            'Parity Game\n'
-            '-----------\n'
-            'n: node, p: player, c: color\n\n')
+        s = '\n'.join([
+            'Parity Game',
+            '-----------',
+            'n: node, p: player, c: color\n'])
         for node, attr in self.states(data=True):
             player = attr['player']
             color = attr['color']
