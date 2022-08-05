@@ -196,13 +196,13 @@ class MarkovDecisionProcess(MarkovChain):
     action_label = "action"
 
     def __init__(self):
-        edge_label_types = [{
-            'name':
+        edge_label_types = [dict(
+            name=
                 self.action_label,
-            'values':
+            values=
                 _mset.MathSet(),
-            'setter':
-                True}]
+            setter=
+                True)]
         super().__init__()
         super().add_label_types(
             edge_label_types, True)
@@ -516,21 +516,21 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
         """
         self._owner = 'sys'
         if env_actions is None:
-            env_actions = [{
-                'name':
+            env_actions = [dict(
+                name=
                     'env_actions',
-                'values':
+                values=
                     _mset.MathSet(),
-                'setter':
-                    True}]
+                setter=
+                    True)]
         if sys_actions is None:
-            sys_actions = [{
-                'name':
+            sys_actions = [dict(
+                name=
                     'sys_actions',
-                'values':
+                values=
                     _mset.MathSet(),
-                'setter':
-                    True}]
+                setter=
+                    True)]
         # NOTE:
         # "sys_actions" used to be "actions"
         # in closed systems (old FTS)
@@ -1016,13 +1016,13 @@ class GameGraph(_graphs.LabeledDiGraph):
             edge_label_types:
                 list[
                     dict[str, ...]]):
-        node_label_types.append({
-            'name':
+        node_label_types.append(dict(
+            name=
                 'player',
-            'values':
+            values=
                 {0, 1},
-            'default':
-                0})
+            default=
+                0))
         super().__init__(
             node_label_types,
             edge_label_types)
@@ -1078,15 +1078,15 @@ class LabeledGameGraph(GameGraph):
 
     def __init__(self):
         ap_labels = _mset.PowerSet()
-        node_label_types = [{
-            'name':
+        node_label_types = [dict(
+            name=
                 'ap',
-            'values':
+            values=
                 ap_labels,
-            'setter':
+            setter=
                 ap_labels.math_set,
-            'default':
-                set()}]
+            default=
+                set())]
         super().__init__(node_label_types)
         self.atomic_propositions = self.ap
         # dot formatting

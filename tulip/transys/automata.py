@@ -118,7 +118,6 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
             else:
                 alphabet = set()
         self.alphabet = alphabet
-
         edge_label_types = [dict(
             name=
                 'letter',
