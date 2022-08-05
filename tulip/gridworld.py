@@ -79,7 +79,10 @@ class GridWorld:
                 None=None,
             prefix:
                 str="Y"):
-        """Load gridworld described in given string, or make empty instance.
+        """Load gridworld from `gw_desc`.
+
+        If `gw_desc is None`,
+        make empty instance.
 
         @param gw_desc:
             Gridworld description, or
