@@ -515,7 +515,8 @@ class MealyMachine(Transducer):
 
     def __init__(self):
         Transducer.__init__(self)
-        # will point to selected values of self._transition_label_def
+        # will point to selected values of
+        # self._transition_label_def
         self.dot_node_shape = dict(
             normal='ellipse')
         self.default_export_fname = 'mealy'

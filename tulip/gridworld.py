@@ -326,7 +326,8 @@ class GridWorld:
         @return:
             True if there is a path, False otherwise.
         """
-        # Check input values and handle negative coordinates
+        # Check input values and
+        # handle negative coordinates
         if self.W is None:
             raise ValueError("Gridworld is empty; no names available.")
         if len(start) != len(self.W.shape):
@@ -503,11 +504,14 @@ class GridWorld:
             path = list()
         compress = lambda p: [p[n]
                               for n in range(len(p) - 1) if p[n] != p[n + 1]]
-        # See comments in code for the method loads regarding values in W
+        # See comments in code for
+        # the method loads regarding values in W
         if self.W is None:
             return ""
         # LEGEND:
-        #  * - wall (as used in original world matrix definition);
+        #  * - wall
+        #      (as used in original world
+        #       matrix definition);
         #  G - goal location;
         #  I - possible initial location.
         out_str = line_prefix
@@ -618,9 +622,12 @@ class GridWorld:
         ###################################################
         # Internal format notes:
         #
-        # W is a matrix of integers with the same shape as the
-        # gridworld.  Each element has value indicating properties of
-        # the corresponding cell, according the following key.
+        # W is a matrix of integers with
+        # the same shape as the
+        # gridworld.  Each element has
+        # value indicating properties of
+        # the corresponding cell,
+        # according the following key.
         #
         # 0 - empty,
         # 1 - statically (permanently) occupied.
@@ -631,7 +638,9 @@ class GridWorld:
         row_index = -1
         for line in gw_desc.splitlines():
             if row_index != -1:
-                # Size has been read, so we are processing row definitions
+                # Size has been read,
+                # so we are processing
+                # row definitions
                 if row_index >= W.shape[0]:
                     break
                 for j in range(min(len(line), W.shape[1])):
@@ -649,7 +658,9 @@ class GridWorld:
                             f'{line[j]}".')
                 row_index += 1
             else:
-                # Still looking for gridworld size in the given string
+                # Still looking for
+                # gridworld size in
+                # the given string
                 if len(line.strip()) == 0 or line.lstrip()[0] == "#":
                     continue
                         # Ignore blank and
@@ -660,7 +671,8 @@ class GridWorld:
                 row_index = 0
         if W is None:
             raise ValueError("malformed gridworld description.")
-        # Arrived here without errors, so actually reincarnate
+        # Arrived here without errors,
+        # so actually reincarnate
         self.W = W
         self.init_list = init_list
         self.goal_list = goal_list
@@ -948,7 +960,9 @@ class GridWorld:
                     spec_trans.append(
                         "!(" + self.__getitem__((i, j), use_next=True,
                                                 nonbool=nonbool) + ")")
-        # Safety, mutex; only needed when using boolean variables for cells
+        # Safety, mutex;
+        # only needed when using
+        # boolean variables for cells
         if not nonbool:
             pos_indices = [k for k in itertools.product(
                 range(row_low, row_high), range(col_low, col_high))]
@@ -1161,8 +1175,10 @@ def random_world(
         if ensure_feasible:
             if (timeout is not None) and (time.time() - st > timeout):
                 return None
-            # If feasibility must be guaranteed, then check whether
-            # the newly unreachable cell is permissible.
+            # If feasibility must be guaranteed,
+            # then check whether
+            # the newly unreachable cell
+            # is permissible.
             W_tmp = W.reshape(size)
             goal_list_tmp = [(k // size[1], k % size[1]) for k in goal_list]
             init_list_tmp = [(k // size[1], k % size[1]) for k in init_list]
@@ -1181,7 +1197,8 @@ def random_world(
             if not is_feasible:
                 W[avail_inds[changed_index]] = 0
                 bcounter -= 1
-    # Reshape the gridworld to final form; build and return the result.
+    # Reshape the gridworld to final form;
+    # build and return the result.
     W = W.reshape(size)
     goal_list = [(k // size[1], k % size[1]) for k in goal_list]
     init_list = [(k // size[1], k % size[1]) for k in init_list]
@@ -1236,7 +1253,8 @@ def narrow_passage(
     if w < 3 or h < 3:
         raise ValueError("Gridworld too small: minimum dimension 3")
     Z = unoccupied(size, prefix)
-    # Zone width is 30% of world width by default
+    # Zone width is 30% of
+    # world width by default
     zone_width = ((1.0 - passage_length) / 2.0) * size[1]
     izone = int(max(1, zone_width))
         # boundary of left zone

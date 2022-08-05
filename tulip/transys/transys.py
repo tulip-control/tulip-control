@@ -545,7 +545,8 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
                 default=set())]
         super().__init__(
             node_label_types, edge_label_types)
-        # make them available also via an "actions" dicts
+        # make them available also
+        # via an "actions" dicts
         # name, codomain, *rest = x
         actions = {
             x['name']:
@@ -797,7 +798,8 @@ def tuple2fts(
     ts.states.initial |= initial_states
     ts.atomic_propositions |= ap
     # note: verbosity before actions below
-    # to avoid screening by possible error caused by action
+    # to avoid screening by
+    # possible error caused by action
     #
     # state labeling assigned ?
     if state_labeling is not None:
@@ -1230,7 +1232,8 @@ def simu_abstract(
     # build coarsest partition
     S0 = dict()
     Part = _nx.MultiDiGraph()
-        # a graph associated with the new partition
+        # a graph associated with
+        # the new partition
     n_cells = 0
     hash_ap = dict()
         # map ap to cells in Part

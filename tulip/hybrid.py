@@ -560,7 +560,8 @@ class SwitchedSysDyn:
             objects in `list_subsys` are consistent with
             `time_semantics` and `timestep`.
         """
-        # check that the continuous domain is specified
+        # check that the continuous
+        # domain is specified
         if cts_ss is None:
             _warn.warn('requires continuous state-space `cts_ss`')
         else:
@@ -854,7 +855,8 @@ def _check_time_consistency(
     have the same time semantics and timestep.
     Raises `ValueError` if not.
     """
-    # Check that time semantics for all subsystems match
+    # Check that time semantics
+    # for all subsystems match
     for ind in range(len(system_list) - 1):
         timesteps_differ = (
             system_list[ind].timestep !=
