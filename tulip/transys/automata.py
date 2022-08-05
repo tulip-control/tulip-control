@@ -298,8 +298,8 @@ def tuple2ba(
     r"""Create a Buchi Automaton from a tuple of fields.
 
     defines Buchi Automaton by
-    a tuple `(S, S0, Sa, \\Sigma, trans)`
-    (maybe replacing `\\Sigma` by AP,
+    a tuple `(S, S0, Sa, \Sigma, trans)`
+    (maybe replacing `\Sigma` by AP,
     since it is an AP-based BA ?)
 
     Relevant
@@ -309,7 +309,7 @@ def tuple2ba(
     @param S:
         set of states
     @param S0:
-        set of initial states, must be `\\subset S`
+        set of initial states, must be `\subset S`
     @param Sa:
         set of accepting states
     @param Sigma_or_AP:
@@ -321,7 +321,7 @@ def tuple2ba(
         ```python
         [(from_state, to_state, guard), ...]
         ```
-    where `guard \in \Sigma`.
+        where `guard \in \Sigma`.
 
     @param name:
         used for file export
