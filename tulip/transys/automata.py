@@ -452,14 +452,14 @@ class RabinPairs:
 
     def __str__(self):
         dashes = 30 * '-'
-        s = (
-            'L = Good states, U = Bad states\n'
-            f'{dashes}\n')
+        strings = [
+            'L = Good states, U = Bad states',
+            f'{dashes}']
         for index, (good, bad) in enumerate(self._pairs):
-            s += (
-                f'Pair: {index}, L = {good}' +
-                f', U = {bad}\n')
-        return s
+            strings.append(
+                f'Pair: {index}, L = {good}'
+                f', U = {bad}')
+        return '\n'.join(strings)
 
     def __getitem__(
             self,
@@ -674,16 +674,21 @@ class ParityGame(_trs.GameGraph):
             node_label_types, list())
 
     def __str__(self):
-        s = '\n'.join([
+        header = '\n'.join([
             'Parity Game',
             '-----------',
             'n: node, p: player, c: color\n'])
+        strings = [header]
         for node, attr in self.states(data=True):
             player = attr['player']
             color = attr['color']
-            s += f'nd = {node}, p = {player}, c = {color}\n'
-        s += f'\n{self.transitions}'
-        return s
+            strings.append(
+                f'nd = {node}, '
+                f'p = {player}, '
+                f'c = {color}')
+        strings.append(
+            f'\n{self.transitions}')
+        return '\n'.join(strings)
 
     @property
     def max_color(self) -> int:
