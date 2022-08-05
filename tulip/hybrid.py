@@ -39,9 +39,8 @@ import warnings as _warn
 
 import numpy as np
 import polytope as pc
-# inline imports:
-#
-# from tulip.graphics import newax, quiver
+
+import tulip.graphics as _graphics
 
 
 __all__ = [
@@ -267,12 +266,6 @@ class LtiSysDyn:
             res:
                 IJ=(5, 5),
             **kwargs):
-        try:
-            from tulip.graphics import newax, quiver
-        except:
-            _logger.error(
-                'failed to import `graphics`')
-            return
         if color is None:
             color = np.random.rand(3)
         x, res = pc.grid_region(
@@ -282,10 +275,12 @@ class LtiSysDyn:
         DA = self.A - np.eye(n)
         v = DA.dot(x) + self.K
         if ax is None:
-            ax, fig = newax()
+            ax, fig = _graphics.newax()
         if show_domain:
             self.domain.plot(ax, color)
-        quiver(x, v, ax, **kwargs)
+        _graphics.quiver(
+            x, v, ax,
+            **kwargs)
         return ax
 
 
@@ -457,14 +452,8 @@ class PwaSysDyn:
             show_domain:
                 bool=True,
             **kwargs):
-        try:
-            from tulip.graphics import newax
-        except:
-            _logger.error(
-                'failed to import `tulip.graphics`')
-            return
         if ax is None:
-            ax, fig = newax()
+            ax, fig = _graphics.newax()
         for subsystem in self.list_subsys:
             subsystem.plot(
                 ax,
