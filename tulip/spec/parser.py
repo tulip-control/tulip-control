@@ -38,6 +38,7 @@ Recognizes formulas in the syntax of:
 - SMV
 - gr1c
 """
+import functools as _ft
 import re
 
 import tulip.spec.ast as _ast
@@ -46,10 +47,6 @@ import tulip.spec.lexyacc as lexyacc
 
 __all__ = [
     'parse']
-
-
-# cache
-parsers = dict()
 
 
 def parse(
@@ -71,15 +68,23 @@ def parse(
     """
     if full_operators:
         formula = _replace_full_name_operators(formula)
-    if 'ply' not in parsers:
-        parsers['ply'] = lexyacc.Parser()
-    spec = parsers['ply'].parse(formula)
+    parser = _make_parser()
+    spec = parser.parse(formula)
     if spec is not None:
         return spec
     raise Exception(
         'Parsing formula:\n'
         f'{formula}\n'
         'failed')
+
+
+@_ft.cache
+def _make_parser() -> lexyacc.Parser:
+    """Return parser.
+
+    Memoizes the parser.
+    """
+    return lexyacc.Parser()
 
 
 def _replace_full_name_operators(
