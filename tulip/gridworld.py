@@ -35,7 +35,7 @@ Note (24 June 2012): Several pieces of source code are taken or
 derived from btsynth; see <http://scottman.net/2012/btsynth>
 """
 import copy
-import itertools
+import itertools as _itr
 import random
 import time
 import typing as _ty
@@ -979,7 +979,7 @@ class GridWorld:
         # only needed when using
         # boolean variables for cells
         if not nonbool:
-            pos_indices = [k for k in itertools.product(
+            pos_indices = [k for k in _itr.product(
                 range(row_low, row_high), range(col_low, col_high))]
             disj = list()
             for outer_ind in pos_indices:
