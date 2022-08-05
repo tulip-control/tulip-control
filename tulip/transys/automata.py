@@ -246,8 +246,10 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
             atomic_proposition_based:
                 bool=True):
         super().__init__(
-            deterministic=deterministic,
-            atomic_proposition_based=atomic_proposition_based)
+            deterministic=
+                deterministic,
+            atomic_proposition_based=
+                atomic_proposition_based)
         self.automaton_type = 'Finite-Word Automaton'
 
 
@@ -266,9 +268,12 @@ class BuchiAutomaton(OmegaAutomaton):
             symbolic:
                 bool=False):
         super().__init__(
-            deterministic=deterministic,
-            atomic_proposition_based=atomic_proposition_based,
-            symbolic=symbolic)
+            deterministic=
+                deterministic,
+            atomic_proposition_based=
+                atomic_proposition_based,
+            symbolic=
+                symbolic)
         self.automaton_type = 'Buchi Automaton'
 
 
@@ -357,7 +362,8 @@ def tuple2ba(
     accepting_states = _graphs.prepend_with(
         accepting_states, prepend_str)
     ba = BuchiAutomaton(
-        atomic_proposition_based=atomic_proposition_based)
+        atomic_proposition_based=
+            atomic_proposition_based)
     ba.name = name
     ba.states.add_from(states)
     ba.states.initial.update(
@@ -601,9 +607,12 @@ class RabinAutomaton(OmegaAutomaton):
             atomic_proposition_based:
                 bool=False):
         super().__init__(
-            deterministic=deterministic,
-            accepting_states_type=RabinPairs,
-            atomic_proposition_based=atomic_proposition_based)
+            deterministic=
+                deterministic,
+            accepting_states_type=
+                RabinPairs,
+            atomic_proposition_based=
+                atomic_proposition_based)
         self.automaton_type = 'Rabin Automaton'
 
 
@@ -621,7 +630,8 @@ class DRA(RabinAutomaton):
                 bool=True):
         super().__init__(
             deterministic=True,
-            atomic_proposition_based=atomic_proposition_based)
+            atomic_proposition_based=
+                atomic_proposition_based)
         self.automaton_type = (
             'Deterministic Rabin Automaton')
 
