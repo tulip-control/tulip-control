@@ -263,9 +263,11 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     "Labeled Transition System"
     found in the literature.
 
-    Also, it differs from the definition in Baier-Katoen
+    Also, it differs from
+    the definition in Baier-Katoen
     in that actions are not mere reading aid,
-    but are interpreted as propositions as explained above.
+    but are interpreted as
+    propositions as explained above.
 
     Besides, edge labeling usually allows for
     graphs with fewer vertices than the corresponding
@@ -287,33 +289,45 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
 
     System and environment actions
     ==============================
-    The only significant difference is in transition labeling.
-    For closed systems, each transition is labeled with a system action.
-    So each transition label comprises of a single sublabel,
+    The only significant difference is
+    in transition labeling.
+    For closed systems,
+    each transition is labeled with
+    a system action.
+    So each transition label
+    comprises of a single sublabel,
     the system action.
 
-    For open systems, each transition is labeled with 2 sublabels:
+    For open systems, each transition is
+    labeled with 2 sublabels:
         - The first sublabel is a system action,
         - the second an environment action.
 
     Mutual exclusion of actions
     ===========================
     Constraints on actions can be defined
-    similarly to `FTS` actions by setting the fields:
+    similarly to `FTS` actions by
+    setting the fields:
 
     - `ofts.env_actions_must`
     - `ofts.sys_actions_must`
 
     The default constraint is 'xor'.
 
-    sys.sys_actions_must: select constraint on actions. Options:
+    sys.sys_actions_must:
+    select constraint on actions.
+    Options:
 
-    - `'mutex'`: at most 1 action True each time
-    - `'xor'`: exactly 1 action True each time
-    - `'none'`: no constraint on action values
+    - `'mutex'`:
+      at most 1 action True each time
+    - `'xor'`:
+      exactly 1 action True each time
+    - `'none'`:
+      no constraint on action values
 
-    The xor constraint can prevent the environment from
-    blocking the system by setting all its actions to False.
+    The xor constraint can prevent
+    the environment from blocking the
+    system by setting all its actions to False.
 
     The action are taken when traversing an edge.
     Each edge is annotated by a single action.
@@ -324,14 +338,18 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     That action set is defined as a set instance.
     This description is a (closed) `FTS`.
 
-    The system and environment actions are associated with an edge
-    of a reactive system. To store these, mutliple labels are used
-    and their sets are encapsulated within the same `FTS`.
+    The system and environment actions are
+    associated with an edge of a reactive system.
+    To store these, mutliple labels are used
+    and their sets are encapsulated within
+    the same `FTS`.
 
     Example
     =======
-    In the following `None` represents the empty set, subset of AP.
-    First create an empty transition system and add some states to it:
+    In the following `None` represents
+    the empty set, subset of AP.
+    First create an empty transition
+    system and add some states to it:
 
     ```python
     import tulip.transys as trs
@@ -342,19 +360,22 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     ts.states.add_from(['s1', 's3', 'end', 5])
     ```
 
-    Set an initial state, which must already be in states:
+    Set an initial state,
+    which must already be in states:
 
     ```python
     ts.states.initial.add('s0')
     ```
 
-    There can be more than one possible initial states:
+    There can be more than
+    one possible initial states:
 
     ```python
     ts.states.initial.add_from(['s0', 's3'])
     ```
 
-    To label the states, we need at least one atomic proposition,
+    To label the states,
+    we need at least one atomic proposition,
     here `'p'`:
 
     ```python
@@ -365,14 +386,16 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
                         ('s3', {'ap': {}})])
     ```
 
-    If a state has already been added, its label of atomic
-    propositions can be defined directly:
+    If a state has already been added,
+    its label of atomic propositions
+    can be defined directly:
 
     ```python
     ts.states['s0']['ap'] = {'p'}
     ```
 
-    Having added states, we can also add some labeled transitions:
+    Having added states,
+    we can also add some labeled transitions:
 
     ```python
     ts.actions.update(
@@ -406,20 +429,28 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     ts.nodes['s0']['my_cost'] = 5
     ```
 
-    The difference is that atomic proposition and action labels
-    are checked to make sure they are elements of the system's
+    The difference is that atomic
+    proposition and action labels
+    are checked to make sure they
+    are elements of the system's
     AP and Action sets.
 
-    It is not advisable to use `MultiDiGraph.add_node` and
+    It is not advisable to use
+    `MultiDiGraph.add_node` and
     `MultiDiGraph.add_edge` directly,
-    because that can result in an inconsistent system,
-    since it skips all checks performed by `transys`.
+    because that can result in
+    an inconsistent system,
+    since it skips all checks
+    performed by `transys`.
 
     Note
     ====
-    The attributes atomic_propositions and aps are equal.
-    When you want to produce readable code, use atomic_propositions.
-    Otherwise, aps offers shorthand access to the APs.
+    The attributes atomic_propositions
+    and aps are equal.
+    When you want to produce readable code,
+    use atomic_propositions.
+    Otherwise, aps offers shorthand
+    access to the APs.
 
     Reference
     =========
@@ -476,10 +507,12 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
 
         @param env_actions:
             environment (uncontrolled) actions,
-            defined as `edge_label_types` in `LabeledDiGraph.__init__`
+            defined as `edge_label_types` in
+            `LabeledDiGraph.__init__`
         @param sys_actions:
             system (controlled) actions, defined as
-            `edge_label_types` in `LabeledDiGraph.__init__`
+            `edge_label_types` in
+            `LabeledDiGraph.__init__`
         """
         self._owner = 'sys'
         if env_actions is None:
