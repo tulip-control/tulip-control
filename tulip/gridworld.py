@@ -1299,10 +1299,15 @@ def narrow_passage(
             continue
         for x in range(izone, gzone):
             Z.W[y][x] = 1
-    avail_cells = [(y, x) for y in range(size[0]) for x in range(izone)]
+    avail_cells = [
+        (y, x)
+        for y in range(size[0])
+        for x in range(izone)]
     Z.init_list = random.sample(avail_cells, num_init)
-    avail_cells = [(y, x) for y in range(size[0])
-                   for x in range(gzone, size[1])]
+    avail_cells = [
+        (y, x)
+        for y in range(size[0])
+        for x in range(gzone, size[1])]
     Z.goal_list = random.sample(avail_cells, num_goals)
     return Z
 
