@@ -332,9 +332,13 @@ def tuple2ba(
             'States S must be iterable, '
             'even for single state.')
     if not isinstance(S0, _abc.Iterable):
-        S0 = [S0]
+        raise TypeError(
+            'Expected iterable as `S0`, '
+            f'got instead: {S0 = }')
     if not isinstance(Sa, _abc.Iterable):
-        Sa = [Sa]
+        raise TypeError(
+            'Expected iterable as `Sa`, '
+            f'got instead: {Sa = }')
     # comprehensive names
     states = S
     initial_states = S0
