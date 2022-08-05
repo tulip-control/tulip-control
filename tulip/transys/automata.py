@@ -251,17 +251,6 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 
-def dfa2nfa(
-        dfa:
-            FiniteStateAutomaton
-        ) -> FiniteStateAutomaton:
-    """Copy DFA to an NFA, so remove determinism restriction."""
-    nfa = copy.deepcopy(dfa)
-    nfa.transitions._deterministic = False
-    nfa.automaton_type = 'Non-Deterministic Finite Automaton'
-    return nfa
-
-
 class OmegaAutomaton(FiniteStateAutomaton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
