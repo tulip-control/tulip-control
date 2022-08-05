@@ -62,12 +62,24 @@ except ImportError as error:
 # inline
 # from mayavi.mlab import quiver3d
 
+import tulip._utils as _utl
+
 
 __all__ = [
     'dimension',
     'newax',
     'dom2vec',
     'quiver']
+
+
+if _ty.TYPE_CHECKING:
+    _Digraph: _ty.TypeAlias = _gv.Digraph
+    _Axes: _ty.TypeAlias = _mpl.axes.Axes
+    _Figure: _ty.TypeAlias = _mpl.figure.Figure
+else:
+    _Digraph = _utl.get_type(_gv, 'Digraph')
+    _Axes = _utl.get_type(_mpl, 'axes.Axes')
+    _Figure = _utl.get_type(_mpl, 'figure.Figure')
 
 
 def dimension(ndarray):
@@ -99,8 +111,8 @@ def newax(
             _abc.Iterable[PlotDimension]
             =2
         ) -> tuple[
-            '_mpl.axes.Axes',
-            '_mpl.figure.Figure']:
+            _Axes,
+            _Figure]:
     """Create (possibly multiple) new axes handles.  (DEPRECATED)
 
     @param fig:
@@ -243,7 +255,10 @@ def quiver(
             np.ndarray,
         v:
             np.ndarray,
-        ax=None,
+        ax:
+            _Axes |
+            _abc.Iterable[_Axes] |
+            None=None,
         **kwargs):
     """Multi-dimensional quiver.  (DEPRECATED)
 
@@ -346,7 +361,7 @@ def _grouper(
     return _itr.zip_longest(fillvalue=fillvalue, *args)
 
 
-def networkx_to_graphviz(graph) -> '_gv.Digraph':
+def networkx_to_graphviz(graph) -> _Digraph:
     """Convert `networkx` `graph` to `graphviz.Digraph`."""
     _assert_graphviz()
     if graph.is_directed():

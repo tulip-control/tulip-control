@@ -50,7 +50,9 @@ try:
 except ImportError:
     _mpl = None
 
+import tulip.abstract as _abs
 import tulip.spec.form as _form
+import tulip._utils as _utl
 
 # inline:
 #
@@ -70,6 +72,11 @@ __all__ = [
 
 IJ = tuple[int, int]
 XY = tuple[float, float]
+if _ty.TYPE_CHECKING:
+    FuncAnimation = _mpl.animation.FuncAnimation
+else:
+    FuncAnimation = _utl.get_type(
+        _mpl, 'animation.FuncAnimation')
 
 
 class GridWorld:
@@ -212,7 +219,7 @@ class GridWorld:
             self.dumps(),
             prefix=self.prefix)
 
-    def copy(self):
+    def copy(self) -> 'GridWorld':
         """Deep-copy GridWorld instance.
 
         The copy has no dependence on the original.
@@ -227,7 +234,8 @@ class GridWorld:
                 IJ
                 =(0, 0),
             nonbool:
-                bool=True):
+                bool=True
+            ) -> dict[str, int]:
         """Return dictionary form of state with keys of variable names.
 
         Supports negative indices for key, e.g., as in __getitem__.
@@ -280,7 +288,8 @@ class GridWorld:
             coord:
                 IJ,
             extend:
-                bool=False):
+                bool=False
+            ) -> bool:
         """Is cell at coord empty?
 
         @param coord:
@@ -412,7 +421,8 @@ class GridWorld:
             troll_list:
                 list |
                 None=None,
-            axes=None):
+            axes=None
+            ) -> None:
         """Draw figure depicting this gridworld.
 
         Figure legend (symbolic form in parenthesis):
@@ -601,7 +611,7 @@ class GridWorld:
             out_str += "-" * (self.W.shape[1] + 2) + "\n"
         return out_str
 
-    def size(self):
+    def size(self) -> tuple[int, ...]:
         """Return size of gridworld as a tuple in row-major order."""
         if self.W is None:
             return (0, 0)
@@ -832,7 +842,7 @@ class GridWorld:
                 XY=(0.0, 0.0),
             nonbool:
                 bool=True
-            ) -> 'PropPreservingPartition':
+            ) -> _abs.PropPreservingPartition:
         """Return proposition-preserving partition from this gridworld.
 
         Adjacency of cells is as returned by prop2partition.prop2part().
@@ -1128,6 +1138,9 @@ def random_world(
             int=0
         ) -> _ty.Union[
             'GridWorld',
+            tuple[
+                'GridWorld',
+                list],
             None]:
     """Generate random gridworld of given size.
 
@@ -1352,7 +1365,7 @@ def unoccupied(
 
 def add_trolls(
         Y:
-            'GridWorld',
+            GridWorld,
         troll_list:
             list,
         prefix:
@@ -1363,7 +1376,9 @@ def add_trolls(
             bool=True,
         get_moves_lists:
             bool=True
-        ) -> tuple[_form.GRSpec, list]:
+        ) -> (
+            _form.GRSpec |
+            tuple[_form.GRSpec, list]):
     """Create GR(1) specification with troll-like obstacles.
 
     Trolls are introduced into the specification with names derived
@@ -1476,10 +1491,12 @@ def add_trolls(
 def extract_coord(
         var_name:
             str
-        ) -> tuple[
-            str,
-            int,
-            int]:
+        ) -> (
+            None |
+            tuple[
+                str,
+                int,
+                int]):
     """Assuming prefix_R_C format, return `(prefix, row, column)`.
 
     The "nowhere" coordinate has form prefix_n_n. To indicate this,
@@ -1517,7 +1534,9 @@ def animate_paths(
         save_prefix:
             str |
             None=None
-        ) -> None:
+        ) -> (
+            None |
+            FuncAnimation):
     """Animate a list of paths simultaneously in world Z.
 
     The animation is with `matplotlib`.
@@ -1579,7 +1598,7 @@ def animate_paths(
             zorder=1)
         lines.append((l, l_trail))
     if not save_prefix:
-        anim = _mpl.animation.FuncAnimation(
+        anim = FuncAnimation(
             fig, update_line, len(paths[0]),
             init_func=init,
             fargs=(data, lines),

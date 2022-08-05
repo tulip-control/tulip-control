@@ -48,6 +48,9 @@ import tulip.graphics as _graphics
 import tulip.transys as _trs
 
 
+_mpl = _graphics._mpl
+
+
 _logger = logging.getLogger(__name__)
 DotRankdir = _ty.Literal[
     'BT',

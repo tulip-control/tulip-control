@@ -800,14 +800,14 @@ class SwitchedSysDyn:
         return self.dynamics.keys()
 
     @property
-    def env_labels(self):
+    def env_labels(self) -> list:
         if self._env_labels is not None:
             return self._env_labels
         return list(range(
             self.disc_domain_size[0]))
 
     @property
-    def disc_sys_labels(self):
+    def disc_sys_labels(self) -> list:
         if self._disc_sys_labels is not None:
             return self._disc_sys_labels
         return list(range(
@@ -874,7 +874,8 @@ def _push_time_data(
             None,
         timestep:
             float |
-            None):
+            None
+        ) -> None:
     """Overwrite the time data in `system_list`.
 
     Emits warnings if overwriting existing data.
@@ -910,7 +911,8 @@ def _check_time_data(
             str,
         timestep:
             int |
-            float):
+            float
+        ) -> None:
     """Assert time semantics, timestep are correct.
 
     Raise `ValueError` if not.

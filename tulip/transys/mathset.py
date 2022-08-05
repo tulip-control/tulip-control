@@ -285,8 +285,7 @@ class MathSet:
 
     def __eq__(
             self,
-            other:
-                'MathSet'
+            other
             ) -> bool:
         if not isinstance(other, MathSet):
             raise TypeError(

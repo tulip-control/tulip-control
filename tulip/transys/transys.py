@@ -578,8 +578,12 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
             # shortcut
         # action constraint used in
         # synth.synthesize
-        self.env_actions_must = 'xor'
-        self.sys_actions_must = 'xor'
+        Constraint = _ty.Literal[
+            'mutex',
+            'xor',
+            None]
+        self.env_actions_must: Constraint = 'xor'
+        self.sys_actions_must: Constraint = 'xor'
         # dot formatting
         self._state_dot_label_format = {
             'ap':

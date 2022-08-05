@@ -280,7 +280,7 @@ def iter2var(
                 None]
         ) -> tuple[
             dict,
-            list | None]:
+            list[str] | None]:
     """Represent finite domain in GR(1).
 
     An integer or string variable can be used,
@@ -434,7 +434,8 @@ def iter2var(
 
 
 def _add_actions(
-        constraint,
+        constraint:
+            list[str],
         init:
             list,
         trans:
@@ -1258,7 +1259,7 @@ def synthesize_many(
             _spec.GRSpec,
         ts:
             dict[
-                ...,
+                str,
                 transys.FiniteTransitionSystem] |
             None=None,
         ignore_init:

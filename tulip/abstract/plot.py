@@ -181,7 +181,7 @@ def project_strategy_on_partition(
             PPP,
         mealy:
             _trs.MealyMachine
-        ) -> sp.lil:
+        ) -> sp.lil_array:
     """Project transitions of `ppp` on `mealy`.
 
     @return:

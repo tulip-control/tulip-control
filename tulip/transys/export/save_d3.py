@@ -39,6 +39,8 @@ import os
 
 import networkx.readwrite as _nxrw
 
+import tulip.transys.labeled_graphs as _graphs
+
 
 def _format_label(
         label_def:
@@ -60,7 +62,7 @@ def _format_label(
 
 def labeled_digraph2d3(
         graph:
-            'LabeledDiGraph',
+            '_graphs.LabeledDiGraph',
         html_file_name:
             str='index.html'
         ) -> bool:

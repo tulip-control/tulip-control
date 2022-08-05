@@ -369,7 +369,9 @@ def model_checking(
             str,
         extract_policy:
             bool=False
-        ) -> dict:
+        ) -> (
+            dict |
+            tuple[dict, dict]):
     """Model check `tulip_transys` against `formula`.
 
     @param formula:

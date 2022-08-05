@@ -30,6 +30,7 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 """Convert state graphs to Promela."""
+import collections.abc as _abc
 import time
 
 import tulip.transys as _trs
