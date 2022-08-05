@@ -88,9 +88,8 @@ def _pstr(s) -> str:
 
 
 def _disj(set0) -> str:
-    return ' || '.join([
-        '(' + str(x) + ')'
-        for x in set0])
+    return ' || '.join(map(
+        _pstr, set0))
 
 
 def _conj(set0) -> str:
