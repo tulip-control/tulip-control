@@ -382,8 +382,9 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     ts.atomic_propositions.update(
         ['p', None])
     ts.states.add('s0', ap={'p'})
-    ts.states.add_from([('s1', {'ap': {'p'}}),
-                        ('s3', {'ap': {}})])
+    ts.states.add_from([
+        ('s1', {'ap': {'p'}}),
+        ('s3', {'ap': {}})])
     ```
 
     If a state has already been added,
