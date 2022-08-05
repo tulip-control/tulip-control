@@ -1477,7 +1477,9 @@ def animate_paths(
             str |
             None=None
         ) -> None:
-    """Animate a list of paths simultaneously in world Z using matplotlib.
+    """Animate a list of paths simultaneously in world Z.
+
+    The animation is with `matplotlib`.
 
     @param Z:
         Gridworld for which paths were generated.
