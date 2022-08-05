@@ -857,17 +857,17 @@ def _check_time_consistency(
     """
     # Check that time semantics
     # for all subsystems match
-    for ind in range(len(system_list) - 1):
+    for index in range(len(system_list) - 1):
         timesteps_differ = (
-            system_list[ind].timestep !=
-            system_list[ind + 1].timestep)
+            system_list[index].timestep !=
+            system_list[index + 1].timestep)
         if timesteps_differ:
             raise ValueError(
                 'Not all timesteps in given '
                 'systems are the same.')
         time_semantics_differ = (
-            system_list[ind].time_semantics !=
-            system_list[ind + 1].time_semantics)
+            system_list[index].time_semantics !=
+            system_list[index + 1].time_semantics)
         if time_semantics_differ:
             raise ValueError(
                 'Not all time-semantics are the same.')
