@@ -66,7 +66,7 @@ EnvSys = _ty.Literal[
 
 
 class KripkeStructure(_graphs.LabeledDiGraph):
-    """Directed graph with labeled vertices and initial vertices.
+    """Directed graph with labeled and initial vertices.
 
     References
     ==========
@@ -142,7 +142,7 @@ class KripkeStructure(_graphs.LabeledDiGraph):
 
 
 class WeightedKripkeStructure(KripkeStructure):
-    """KripkeStructure with weight/cost on the transitions."""
+    """KripkeStructure with weight/cost on transitions."""
 
     cost_label = "cost"
 
@@ -158,7 +158,7 @@ class WeightedKripkeStructure(KripkeStructure):
 
 
 class MarkovChain(KripkeStructure):
-    """KripkeStructure with probability on the transitions."""
+    """`KripkeStructure` with probability on transitions."""
 
     probability_label = "probability"
 
