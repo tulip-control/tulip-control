@@ -274,7 +274,7 @@ def quiver(
         ax = _plt.gca()
     dim = dimension(x)
     if dim < 2:
-        raise Exception('ndim < 2')
+        raise ValueError('ndim < 2')
     elif dim < 3:
         h = ax.quiver(
             x[0, :], x[1, :],
