@@ -705,7 +705,7 @@ def tuple2fts(
             str |
             None=None
         ) -> FTS:
-    """Create a Finite Transition System from a tuple of fields.
+    """Create transition system from tuple of fields.
 
     Hint
     ====
