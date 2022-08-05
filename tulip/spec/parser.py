@@ -30,7 +30,14 @@
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-"""LTL parser supporting JTLV, SPIN, SMV, and gr1c syntax"""
+"""LTL parser.
+
+Recognizes formulas in the syntax of:
+- JTLV
+- SPIN
+- SMV
+- gr1c
+"""
 import re
 
 import tulip.spec.ast as _ast
