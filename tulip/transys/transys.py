@@ -420,7 +420,7 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
     will raise an exception, unless the unlabeled transition is
     removed before adding the labeled transition.
 
-    The user can still invoke NetworkX functions to set custom node
+    The user can still invoke `networkx` functions to set custom node
     and edge labels, in addition to the above ones.
     For example:
 
