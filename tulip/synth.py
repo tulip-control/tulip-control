@@ -1830,7 +1830,7 @@ def mask_outputs(
             transys.MealyMachine
         ) -> None:
     """Erase outputs from each edge where they are zero."""
-    for u, v, d in machine.edges(data=True):
+    for _, _, d in machine.edges(data=True):
         for k in d:
             if k in machine.outputs and d[k] == 0:
                 d.pop(k)
