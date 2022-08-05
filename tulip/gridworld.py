@@ -839,13 +839,15 @@ class GridWorld:
         except ImportError as error:
             raise ImportError(
                 'GridWorld.dump_ppartition() requires '
-                'the Python package polytope.')
+                'the Python package polytope.'
+                ) from error
         try:
             from tulip.abstract import prop2partition
-        except ImportError:
+        except ImportError as error:
             raise ImportError(
                 '`GridWorld.dump_ppartition()` requires '
-                'the module `tulip.abstract`.')
+                'the module `tulip.abstract`.'
+                ) from error
         if self.W is None:
             raise ValueError(
                 "Gridworld does not exist.")
