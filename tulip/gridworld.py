@@ -1188,7 +1188,7 @@ def random_world(
         W[avail_inds[changed_index]] = 1
         bcounter += 1
         if ensure_feasible:
-            if (timeout is not None) and (time.time() - st > timeout):
+            if timeout is not None and time.time() - st > timeout:
                 return None
             # If feasibility must be guaranteed,
             # then check whether
