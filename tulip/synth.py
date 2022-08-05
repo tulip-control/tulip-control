@@ -147,7 +147,7 @@ def _conj_neg_diff(
 
 def mutex(iterable) -> list[str]:
     """Mutual exclusion for all time."""
-    iterable = list(filter(lambda x: x != '', iterable))
+    iterable = list(filter(None, iterable))
     if not iterable or len(iterable) <= 1:
         return list()
     return [_conj([
