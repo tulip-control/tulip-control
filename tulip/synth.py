@@ -1535,7 +1535,7 @@ def is_realizable(
     elif solver == 'omega':
         r = omega_int.is_realizable(specs)
     else:
-        raise Exception(
+        raise ValueError(
             'Undefined synthesis solver. '
             'Available options are "gr1c", '
             '"slugs", and "gr1py"')
