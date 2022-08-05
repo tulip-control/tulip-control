@@ -670,8 +670,9 @@ class ParityGame(_trs.GameGraph):
         Maximization is over all nodes.
         In absence of nodes, return `-1`.
         """
-        max_c = -1
-        for x in self:
-            if self.nodes[x]['color'] > max_c:
-                max_c = self.nodes[x]['color']
-        return max_c
+        def key(node):
+            return self.nodes[node]['color']
+        return max(
+            self,
+            key=key,
+            default=-1)
