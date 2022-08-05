@@ -362,7 +362,7 @@ class PwaSysDyn:
             raise TypeError(
                 '`domain` has to be '
                 'a `Polytope` or `Region`')
-        if len(list_subsys) > 0:
+        if list_subsys:
             uncovered_dom = domain.copy()
             n = list_subsys[0].A.shape[1]
                 # State-space dimension
