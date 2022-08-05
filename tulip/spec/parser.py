@@ -58,7 +58,11 @@ def parse(
         full_operators:
             bool=False
         ) -> _ast.NodeSpec:
-    """Parse formula string and create abstract syntax tree (AST).
+    """Return syntax tree for `formula`.
+
+    The returned tree is "abstract",
+    in that blankspace of `formula`
+    cannot be reproduced from that `tree`.
 
     @param full_operators:
         replace full names of operators
