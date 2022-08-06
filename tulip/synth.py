@@ -1981,7 +1981,11 @@ def determinize_machine_init(
         init_out_values.__contains__,
         mach.outputs))
     rm_edges = set()
-    for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
+    edges = mach.edges(
+        ['Sinit'],
+        data=True,
+        keys=True)
+    for i, j, key, d in edges:
         for k in given_ports:
             if d[k] != init_out_values[k]:
                 rm_edges.add((i, j, key))
@@ -1998,7 +2002,11 @@ def determinize_machine_init(
     # fix a key order
     inputs = tuple(k for k in mach.inputs)
     rm_edges = set()
-    for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
+    edges = mach.edges(
+        ['Sinit'],
+        data=True,
+        keys=True)
+    for i, j, key, d in edges:
         in_values = tuple(d[k] for k in inputs)
         # newly encountered input valuation ?
         if in_values not in possible_inputs:
