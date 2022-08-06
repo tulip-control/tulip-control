@@ -2000,7 +2000,7 @@ def determinize_machine_init(
     # efficiency (have __hash__)
     possible_inputs = set()
     # fix a key order
-    inputs = tuple(k for k in mach.inputs)
+    inputs = tuple(mach.inputs)
     rm_edges = set()
     edges = mach.edges(
         ['Sinit'],
