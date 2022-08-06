@@ -1113,7 +1113,7 @@ def _env_trans_from_env_ts(
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
             msg = (
-                'no free env outgoing transition found\n' +
+                'no free env outgoing transition found\n'
                 'instead will take disjunction with negated sys actions')
             _logger.debug(msg)
             for action_type, codomain in sys_action_ids.items():
