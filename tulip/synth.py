@@ -1191,7 +1191,7 @@ def build_dependent_var_table(
         statevar:
             str
         ) -> dict[str, str]:
-    """Return a `dict` of substitution rules for dependent variables.
+    """Return substitution rules for dependent variables.
 
     The dependent variables in a transition system are the
     atomic propositions that are used to label states.
