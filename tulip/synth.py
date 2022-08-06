@@ -825,7 +825,7 @@ def _env_trans_from_env_ts(
             if not sys_actions:
                 found_free = True
             cur_list += [_conj(postcond)]
-        # can sys kill env by setting all previous sys outputs to False ?
+        # can sys block env by setting all previous sys outputs to False ?
         # then env assumption becomes False,
         # so the spec trivially True: avoid this
         if not found_free and sys_action_ids:
