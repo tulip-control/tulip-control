@@ -796,12 +796,12 @@ def _sys_init_from_ts(
             ' - assumption if this is an environment TS,\n'
             '   so the spec becomes trivially True.')
         raise Exception(msg)
-        init += ['False']
+        init.append('False')
         return init
-    init += [
+    init.append(
         _disj(map(
             state_ids.__getitem__,
-            states.initial))]
+            states.initial)))
     return init
 
 
@@ -885,8 +885,8 @@ def _sys_trans_from_ts(
         if not cur_trans:
             _logger.debug(
                 f'state: {from_state} is deadend !')
-            sys_trans += [
-                f'{precond} -> X(False)']
+            sys_trans.append(
+                f'{precond} -> X(False)')
             continue
         cur_str = list()
         for from_state, to_state, label in cur_trans:
