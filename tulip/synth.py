@@ -1880,7 +1880,10 @@ def mask_outputs(
     """Erase outputs from each edge where they are zero."""
     for _, _, d in machine.edges(data=True):
         for k in d:
-            if k in machine.outputs and d[k] == 0:
+            pop = (
+                k in machine.outputs and
+                d[k] == 0)
+            if pop:
                 d.pop(k)
 
 
