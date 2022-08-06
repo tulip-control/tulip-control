@@ -512,7 +512,8 @@ def sys_to_spec(
     The attribute `FTS.owner` defines who controls the system,
     as described next. It can take values `'env'` or `'sys'`.
 
-    The following are represented by variables controlled by `ofts.owner`:
+    The following are represented by
+    variables controlled by `ofts.owner`:
 
       - the current state
       - the atomic propositions annotating states
@@ -1214,9 +1215,11 @@ def build_dependent_var_table(
         `{'p': '((loc = "s1") | (loc = "s2") | ...)', ...}`
         where:
 
-          - `'p'` is a proposition in `fts.atomic_propositions`
+          - `'p'` is a proposition in
+            `fts.atomic_propositions`
           - the states "s1", "s2" are labeled with `'p'`
-          - `loc` is the string variable used for the state of `fts`.
+          - `loc` is the string variable used for
+            the state of `fts`.
     """
     state_ids, __ = iter2var(
         fts.states,
@@ -1277,7 +1280,8 @@ def synthesize_many(
 
     In either case the transition system state will be
     represented in logic with a single variable,
-    that ranges over a finite set of integers or strings, respectively.
+    that ranges over a finite set of
+    integers or strings, respectively.
 
     The keys of `ts` are used to name each state variable.
     So the logic formula for `ts['name']` will be `'name'`.
@@ -1358,20 +1362,27 @@ def synthesize(
     There are three attributes of `specs` that define what
     kind of controller you are looking for:
 
-    1. `moore`: What information the controller knows when deciding the next
+    1. `moore`:
+       What information the controller knows
+       when deciding the next
        values of controlled variables:
         - Moore: can read current state,
           but not next environment variable values, or
-        - Mealy: can read current state and next environment variable values.
+        - Mealy: can read current state and
+          next environment variable values.
 
-    2. `qinit`: Quantification of initial variable values:
-        Whether all states that satisfy a predicate should be winning,
-        or the initial values of some (or all) the variables is
+    2. `qinit`:
+        Quantification of initial variable values:
+        Whether all states that satisfy
+        a predicate should be winning,
+        or the initial values of
+        some (or all) the variables is
         subject to the synthesizer's choice.
 
-    3. `plus_one`: The form of assume-guarantee specification,
-        i.e., how the system guarantees relate to assumptions about the
-        environment.
+    3. `plus_one`:
+        The form of assume-guarantee specification,
+        i.e., how the system guarantees relate to
+        assumptions about the environment.
 
     For more details about these attributes, see `GRSpec`.
 
@@ -1380,7 +1391,8 @@ def synthesize(
       - all integers, or
       - all strings
 
-    For more details of how the transition system is represented in
+    For more details of how
+    the transition system is represented in
     logic look at `synthesize_many`.
 
     Beware!
@@ -1421,16 +1433,20 @@ def synthesize(
 
         For GR(1) synthesis:
 
-          - `"gr1c"`: use gr1c via `interfaces.gr1c`.
+          - `"gr1c"`:
+            use gr1c via `interfaces.gr1c`.
             written in C using CUDD, symbolic
 
-          - `"gr1py"`: use gr1py via `interfaces.gr1py`.
+          - `"gr1py"`:
+            use gr1py via `interfaces.gr1py`.
             Python, enumerative
 
-          - `"omega"`: use omega via `interfaces.omega`.
+          - `"omega"`:
+            use omega via `interfaces.omega`.
             Python using `dd` or Cython using CUDD, symbolic
 
-          - `"slugs"`: use slugs via `interfaces.slugs`.
+          - `"slugs"`:
+            use slugs via `interfaces.slugs`.
             C++ using CUDD, symbolic
     @return:
         If spec is realizable,
@@ -1944,7 +1960,8 @@ def determinize_machine_init(
     @param init_out_values:
         mapping from output ports that
         the system cannot control initially,
-        to the initial values they take in this instance of the game.
+        to the initial values they take in
+        this instance of the game.
     """
     mach = copy.deepcopy(mach)
     if init_out_values is None:
