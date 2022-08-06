@@ -85,7 +85,7 @@ class ArgParser(argparse.ArgumentParser):
         sys.exit(1)
 
 
-def main() -> None:
+def _main() -> None:
     """Entry point."""
     args, unknown_args = _parse_args()
     if (not args.testfiles) and len(args.testfamily) > 1:
@@ -320,4 +320,4 @@ def _parse_args() -> tuple:
 
 
 if __name__ == "__main__":
-    main()
+    _main()
