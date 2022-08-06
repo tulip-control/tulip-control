@@ -821,7 +821,7 @@ def _env_trans_from_env_ts(
             postcond += [_conj_actions(sys_actions, sys_action_ids)]
             postcond += [_conj_action(label, 'actions', nxt=True,
                                       ids=action_ids)]
-            # todo: test this claus
+            # todo: test this clause
             if not sys_actions:
                 found_free = True
             cur_list += [_conj(postcond)]
