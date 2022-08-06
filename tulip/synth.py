@@ -1741,7 +1741,7 @@ def strategy2mealy(
         newlines = 2 * '\n'
         nodes = pprint.pformat(
             A.nodes(data=True))
-        raise Exception(
+        raise AssertionError(
             'The machine obtained from the strategy '
             'does not have any initial states !\n'
             'The strategy is:\n'
