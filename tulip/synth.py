@@ -1598,7 +1598,7 @@ def _spec_plus_sys(
             statevar=statevar)
         _copy_options_from_ts(
             sys_formula, sys, specs)
-        if specs.qinit == '\A \A':
+        if specs.qinit == r'\A \A':
             sys_formula.env_init.extend(
                 sys_formula.sys_init)
             sys_formula.sys_init = list()
