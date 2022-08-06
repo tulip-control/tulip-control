@@ -881,7 +881,7 @@ def _sprint_aps(label, aps):
         tmp1 = _conj_neg_diff(aps, label['ap'], parenth=False)
     else:
         tmp1 = _conj_neg(aps, parenth=False)
-    if len(tmp0) > 0 and len(tmp1) > 0:
+    if tmp0 and tmp1:
         tmp = tmp0 + ' && ' + tmp1
     else:
         tmp = tmp0 + tmp1
