@@ -161,10 +161,14 @@ def exactly_one(iterable) -> list[str]:
     Contrast with pure mutual exclusion.
     """
     if len(iterable) <= 1:
-        return [_pstr(x) for x in iterable]
-    return ['(' + _disj([
-        '(' + str(x) + ') && ' + _conj_neg_diff(iterable, [x])
-        for x in iterable]) + ')']
+        return list(map(
+            _pstr, iterable))
+    def conjoin(x):
+        return _conj_neg_diff(iterable, [x])
+    def formula(x):
+        return f'({x}) && {conjoin(x)}'
+    disjunction = _disj(map(formula, iterable))
+    return [f'({disjunction})']
 
 
 def _conj_action(
