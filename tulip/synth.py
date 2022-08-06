@@ -1969,7 +1969,9 @@ def determinize_machine_init(
     '''determinize given outputs (uncontrolled)'''
     # restrict attention to
     # given output ports only
-    given_ports = tuple(k for k in mach.outputs if k in init_out_values)
+    given_ports = tuple(filter(
+        init_out_values.__contains__,
+        mach.outputs))
     rm_edges = set()
     for i, j, key, d in mach.edges(['Sinit'], data=True, keys=True):
         for k in given_ports:
