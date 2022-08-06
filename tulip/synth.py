@@ -363,7 +363,9 @@ def iter2var(
         'options for modeling actions:\n\t'
         f'mutex: {use_mutex}\n'
         f'\tmin_one: {min_one}')
-    all_str = all(isinstance(x, str) for x in states)
+    all_str = all(
+        isinstance(x, str)
+        for x in states)
     if bool_states:
         _logger.debug(
             'states modeled as Boolean variables')
