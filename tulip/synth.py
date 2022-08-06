@@ -1667,7 +1667,10 @@ def strategy2mealy(
     @param A:
         strategy
     """
-    assert len(A) > 0
+    if not A:
+        raise AssertionError(
+            'graph `A` has no nodes, '
+            f'{A = }')
     _logger.info(
         'converting strategy (compact) '
         'to Mealy machine')
@@ -1731,7 +1734,9 @@ def strategy2mealy(
             initial_state)
     n = len(A)
     m = len(mach)
-    assert m == n + 1, (n, m)
+    if m != n + 1:
+        raise AssertionError(
+            n, m)
     if not mach.successors('Sinit'):
         newlines = 2 * '\n'
         nodes = pprint.pformat(
