@@ -1357,7 +1357,7 @@ def synthesize(
         solver:
             Solver='omega'
         ) -> maybe_mealy:
-    """Function to call the appropriate synthesis tool on the specification.
+    """Call synthesis tool `solver` on the specification.
 
     There are three attributes of `specs` that define what
     kind of controller you are looking for:
