@@ -231,13 +231,11 @@ class LtiSysDyn:
                     '`K` must be a column vector')
         self.A = A
         self.B = B
-        if K is None:
-            if len(A) != 0:
-                self.K = np.zeros([mA, 1])
-            else:
-                self.K = K
-        else:
-            self.K = K.reshape(K.size, 1)
+        if K is None and len(A) != 0:
+            K = np.zeros([mA, 1])
+        if K is not None:
+            K = K.reshape(K.size, 1)
+        self.K = K
         if E is None and len(A) != 0:
             self.E = np.zeros([mA, 1])
             self.Wset = pc.Polytope()
