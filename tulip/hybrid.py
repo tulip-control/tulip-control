@@ -662,6 +662,8 @@ class SwitchedSysDyn:
             objects in `list_subsys` are consistent with
             `time_semantics` and `timestep`.
         """
+        if dynamics is None:
+            dynamics = dict()
         # check that the continuous
         # domain is specified
         if cts_ss is None:
@@ -688,31 +690,30 @@ class SwitchedSysDyn:
         # Check that each dynamics key is a valid mode,
         # i.e., a valid combination of
         # environment and system labels.
-        if dynamics is not None:
-            modes = self.all_mode_combs
-            undefined_modes = set(
-                dynamics.keys()).difference(modes)
-            if undefined_modes:
-                raise ValueError(
-                    '`dynamics` keys are inconsistent'
-                    ' with discrete-mode labels.\n'
-                    f'Undefined modes:\n{undefined_modes}')
-            missing_modes = set(modes).difference(
-                dynamics.keys())
-            if missing_modes:
-                _warn.warn(
-                    f'Missing the modes:\n{missing_modes}'
-                    '\n Make sure you did not '
-                    'forget any modes,\n'
-                    'otherwise this is fine.')
-            if not all(
-                    isinstance(sys, PwaSysDyn)
-                    for sys in dynamics.values()):
-                raise TypeError(
-                    'For each mode, the dynamics '
-                    'must be `PwaSysDyn`.\n'
-                    'Got instead: '
-                    f'{dynamics.values()}')
+        modes = self.all_mode_combs
+        undefined_modes = set(
+            dynamics.keys()).difference(modes)
+        if undefined_modes:
+            raise ValueError(
+                '`dynamics` keys are inconsistent'
+                ' with discrete-mode labels.\n'
+                f'Undefined modes:\n{undefined_modes}')
+        missing_modes = set(modes).difference(
+            dynamics.keys())
+        if missing_modes:
+            _warn.warn(
+                f'Missing the modes:\n{missing_modes}'
+                '\n Make sure you did not '
+                'forget any modes,\n'
+                'otherwise this is fine.')
+        if not all(
+                isinstance(sys, PwaSysDyn)
+                for sys in dynamics.values()):
+            raise TypeError(
+                'For each mode, the dynamics '
+                'must be `PwaSysDyn`.\n'
+                'Got instead: '
+                f'{dynamics.values()}')
         self.dynamics = dynamics
         self.cts_ss = cts_ss
         _check_time_data(time_semantics, timestep)
