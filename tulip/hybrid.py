@@ -177,58 +177,17 @@ class LtiSysDyn:
                 '`domain` has to be '
                 'a `Polytope` or `Region`')
         # check dimensions agree
-        try:
-            nA, mA = A.shape
-        except ValueError:
-            raise TypeError(
-                'A matrix must be 2d array')
-        if nA != mA:
-            raise ValueError('A must be square')
-        if domain is not None:
-            if domain.dim != mA:
-                raise ValueError(
-                    '`domain.dim != A.size[1]`')
+        if A is not None:
+            _assert_square_array(A)
+            _, mA = A.shape
+            self._check_domain(domain, mA)
         if B is not None:
-            try:
-                nB, mB = B.shape
-            except ValueError:
-                raise TypeError(
-                    '`B` matrix must be 2d array')
-            if nA != nB:
-                raise ValueError(
-                    '`A` and `B` must have same number of rows')
-            if Uset is not None:
-                if Uset.dim != mB and Uset.dim != mB + nA:
-                    raise ValueError(
-                        '`Uset.dim != B.size[1]`'
-                        ' and `!= B.size[1] + A.size[1]`')
+            self._check_b_array(A, B)
+            self._check_uset(A, B, Uset)
         if E is not None:
-            try:
-                nE, mE = E.shape
-            except ValueError:
-                raise TypeError(
-                    '`E` matrix must be 2d array')
-            if nA != nE:
-                raise ValueError(
-                    '`A` and `E` must have '
-                    'same number of rows')
-            if Wset is not None:
-                if Wset.dim != mE:
-                    raise ValueError(
-                        '`Wset.dim != E.size[1]`')
+            self._check_e_array(A, E, Wset)
         if K is not None:
-            try:
-                nK, mK = K.shape
-            except ValueError:
-                raise TypeError(
-                    '`K` column vector must be 2d array')
-            if nA != nK:
-                raise ValueError(
-                    '`A` and `K` must have '
-                    'same number of rows')
-            if mK != 1:
-                raise ValueError(
-                    '`K` must be a column vector')
+            self._check_k_array(A, K)
         self.A = A
         self.B = B
         if K is None and len(A) != 0:
@@ -248,6 +207,126 @@ class LtiSysDyn:
         _check_time_data(time_semantics, timestep)
         self.time_semantics = time_semantics
         self.timestep = timestep
+
+    @staticmethod
+    def _check_domain(
+            domain:
+                Polytope |
+                None,
+            a_columns:
+                int
+            ) -> None:
+        """Raise `ValueError` if unexpected."""
+        if domain is None:
+            return
+        domain_ok = (
+            domain.dim == a_columns)
+        if domain_ok:
+            return
+        raise ValueError(
+            '`domain.dim != A.shape[1]`')
+
+    @staticmethod
+    def _check_b_array(
+            a_array:
+                np.ndarray,
+            b_array:
+                np.ndarray
+            ) -> None:
+        """Raise `ValueError` if unexpected."""
+        _assert_2d_array(b_array)
+        a_n_rows, _ = a_array.shape
+        b_n_rows, _ = b_array.shape
+        if a_n_rows == b_n_rows:
+            return
+        raise ValueError(
+            'The arrays `A` and `B` '
+            'must have the same '
+            'number of rows. Got: '
+            f'{a_array.shape = } and '
+            f'{b_array.shape = }')
+
+    @staticmethod
+    def _check_uset(
+            a_array:
+                np.ndarray,
+            b_array:
+                np.ndarray,
+            u_set:
+                Polytope |
+                None
+            ) -> None:
+        """Raise `ValueError` if unexpected."""
+        _assert_square_array(a_array)
+        _, a_n_columns = a_array.shape
+        _, b_n_columns = b_array.shape
+        if u_set is None:
+            return
+        u_set_ok = (
+            u_set.dim in
+                (b_n_columns,
+                 b_n_columns + a_n_columns))
+        if u_set_ok:
+            return
+        raise ValueError(
+            '`Uset.dim != B.shape[1]`'
+            ' and `!= B.shape[1] + A.shape[1]`.'
+            f'{u_set.dim = }, '
+            f'{b_array.shape = }'
+            f'{a_array.shape = }')
+
+    @staticmethod
+    def _check_e_array(
+            a_array:
+                np.ndarray,
+            e_array:
+                np.ndarray,
+            wset:
+                Polytope |
+                None
+            ) -> None:
+        """Raise `ValueError` if unexpected."""
+        _assert_2d_array(e_array)
+        a_n_rows, _ = a_array.shape
+        e_n_rows, e_n_columns = e_array.shape
+        if a_n_rows != e_n_rows:
+            raise ValueError(
+                '`A` and `E` must have '
+                'same number of rows. '
+                'Got instead: '
+                f'{a_array.shape = } and'
+                f'{e_array.shape = }')
+        wset_ok = (
+            wset is None or
+            wset.dim == e_n_columns)
+        if wset_ok:
+            return
+        raise ValueError(
+            '`Wset.dim != E.size[1]`')
+
+    @staticmethod
+    def _check_k_array(
+            a:
+                np.ndarray,
+            k:
+                np.ndarray
+            ) -> None:
+        """Raise `ValueError` if unexpected."""
+        _assert_2d_array(k)
+        a_n_rows, _ = a.shape
+        k_n_rows, k_n_columns = k.shape
+        if a_n_rows != k_n_rows:
+            raise ValueError(
+                '`A` and `K` must have '
+                'same number of rows. '
+                f'Got: A = {a.shape} '
+                f'and K = {k.shape}')
+        if k_n_columns == 1:
+            return
+        raise ValueError(
+            '`K` must be a column vector. '
+            'Got instead: '
+            f'K.shape = {k.shape}')
 
     def __str__(self):
         n = 3
@@ -882,3 +961,29 @@ def _check_time_consistency(
         raise ValueError(
             'Time semantics of subsystems do not match '
             'specified time semantics.')
+
+
+def _assert_square_array(
+        array:
+            np.ndarray
+        ) -> None:
+    _assert_2d_array(array)
+    n_rows, n_columns = array.shape
+    if n_rows == n_columns:
+        return
+    raise ValueError(
+        'Expected square array, '
+        f'got instead {n_rows = } and '
+        f'{n_columns = }')
+
+
+def _assert_2d_array(
+        array:
+            np.ndarray
+        ) -> None:
+    if array.ndim == 2:
+        return
+    raise ValueError(
+        'Expected 2-dimensional (2d) array, '
+        'but got instead '
+        f'{array.ndim}-dimensional array.')
