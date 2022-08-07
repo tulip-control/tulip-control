@@ -280,7 +280,7 @@ class LtiSysDyn:
         DA = self.A - np.eye(n)
         v = DA.dot(x) + self.K
         if ax is None:
-            ax, fig = _graphics.newax()
+            ax, _ = _graphics.newax()
         if show_domain:
             self.domain.plot(ax, color)
         _graphics.quiver(
@@ -460,7 +460,7 @@ class PwaSysDyn:
                 bool=True,
             **kwargs):
         if ax is None:
-            ax, fig = _graphics.newax()
+            ax, _ = _graphics.newax()
         for subsystem in self.list_subsys:
             subsystem.plot(
                 ax,
