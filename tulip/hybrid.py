@@ -179,7 +179,7 @@ class LtiSysDyn:
         # check dimensions agree
         try:
             nA, mA = A.shape
-        except AttributeError:
+        except ValueError:
             raise TypeError(
                 'A matrix must be 2d array')
         if nA != mA:
@@ -191,7 +191,7 @@ class LtiSysDyn:
         if B is not None:
             try:
                 nB, mB = B.shape
-            except:
+            except ValueError:
                 raise TypeError(
                     '`B` matrix must be 2d array')
             if nA != nB:
@@ -205,7 +205,7 @@ class LtiSysDyn:
         if E is not None:
             try:
                 nE, mE = E.shape
-            except:
+            except ValueError:
                 raise TypeError(
                     '`E` matrix must be 2d array')
             if nA != nE:
@@ -219,7 +219,7 @@ class LtiSysDyn:
         if K is not None:
             try:
                 nK, mK = K.shape
-            except:
+            except ValueError:
                 raise TypeError(
                     '`K` column vector must be 2d array')
             if nA != nK:
