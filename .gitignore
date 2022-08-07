@@ -32,5 +32,6 @@ __pycache__
 /tests/cover/
 /tests/ltl2vl-verilog.v
 /tests/uct.uct
+/tests/*.spc
 
 .ipynb_checkpoints/
