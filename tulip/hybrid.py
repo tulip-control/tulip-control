@@ -329,14 +329,26 @@ class LtiSysDyn:
             f'K.shape = {k.shape}')
 
     def __str__(self):
-        n = 3
-        return (
-            f'A =\n{_indent(str(self.A), n)}'
-            f'\nB =\n{_indent(str(self.B), n)}'
-            f'\nE =\n{_indent(str(self.E), n)}'
-            f'\nK =\n{_indent(str(self.K), n)}'
-            f'\nUset =\n{_indent(str(self.Uset), n)}'
-            f'\nWset =\n{_indent(str(self.Wset), n)}')
+        indent_size = 3
+        def format_(
+                name:
+                    str,
+                value
+                ) -> str:
+            formatted_value = _indent(
+                str(value), indent_size)
+            return (
+                f'{name} =\n'
+                f'{formatted_value}')
+        names = [
+            'A', 'B', 'E', 'K',
+            'Uset', 'Wset']
+        values = [
+            self.A, self.B, self.E, self.K,
+            self.Uset, self.Wset]
+        pairs = zip(names, values)
+        return '\n'.join(_itr.starmap(
+            format_, pairs))
 
     def plot(
             self,
