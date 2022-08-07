@@ -31,7 +31,7 @@
 # SUCH DAMAGE.
 #
 """Classes representing hybrid dynamical systems."""
-import itertools
+import itertools as _itr
 import logging
 import pprint as _pp
 import textwrap as _tw
@@ -383,7 +383,7 @@ class PwaSysDyn:
             if not pc.is_empty(uncovered_dom):
                 raise ValueError(
                     'subdomains must cover the domain')
-            for x in itertools.combinations(list_subsys, 2):
+            for x in _itr.combinations(list_subsys, 2):
                 if pc.is_fulldim(x[0].domain.intersect(x[1].domain)):
                     raise ValueError(
                         'subdomains have to be mutually '
