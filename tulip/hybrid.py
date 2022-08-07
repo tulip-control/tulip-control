@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 #
 """Classes representing hybrid dynamical systems."""
+import collections.abc as _abc
 import itertools as _itr
 import logging
 import pprint as _pp
@@ -867,8 +868,8 @@ class SwitchedSysDyn:
 
 
 def _push_time_data(
-        system_list:
-            list,
+        systems:
+            _abc.Iterable,
         time_semantics:
             TimeSemantics |
             None,
@@ -876,11 +877,11 @@ def _push_time_data(
             float |
             None
         ) -> None:
-    """Overwrite the time data in `system_list`.
+    """Overwrite the time data in `systems`.
 
     Emits warnings if overwriting existing data.
     """
-    for system in system_list:
+    for system in systems:
         overwriting_time_semantics = (
             system.time_semantics != time_semantics and
             system.time_semantics is not None)
