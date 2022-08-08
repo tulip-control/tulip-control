@@ -178,6 +178,52 @@ jobs:
                 # run all tests, including slow hybrid tests, and
                 # alternative game solvers
                 ./run_tests.py --outofsource full
+    static_analysis:
+        name: Static analysis of Python code
+        runs-on: ubuntu-20.04
+        strategy:
+            matrix:
+                python-version: [
+                    '3.10',
+                    ]
+        steps:
+            - uses: actions/checkout@v2
+            - name: Set up Python ${{ matrix.python-version }}
+              uses: actions/setup-python@v2
+              with:
+                  python-version: ${{ matrix.python-version }}
+            - name: Install dependencies from PyPI
+              run: |
+                pip install \
+                    --ignore-installed \
+                    --upgrade \
+                        pip \
+                        setuptools \
+                        wheel
+            - name: Create sdist for `tulip`
+              run: |
+                python setup.py sdist
+            - name: Install only `tulip` dependencies
+              run: |
+                pip install dist/tulip-*.tar.gz
+                pip uninstall --yes tulip
+            - name: Install analysis tools
+              run: |
+                pip install \
+                    --upgrade \
+                        pytype
+            - name: Statically analyze `tulip`
+              run: |
+                pytype --tree tulip
+                pytype --unresolved tulip
+                pytype \
+                    -v 1 \
+                    -k \
+                    -j 'auto' \
+                        tulip \
+                        setup.py \
+                        run_tests.py \
+                    -x tulip/interfaces/stormpy.py
     docs:
         name: Build documentation
         runs-on: ubuntu-20.04
