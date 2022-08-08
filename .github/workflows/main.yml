@@ -49,9 +49,19 @@ jobs:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies from PyPI
               run: |
-                pip install --ignore-installed --upgrade pip setuptools wheel
-                pip install --upgrade --only-binary=numpy,scipy numpy scipy
-                pip install dd --no-binary dd
+                pip install \
+                    --ignore-installed \
+                    --upgrade \
+                        pip \
+                        setuptools \
+                        wheel
+                pip install \
+                    --upgrade \
+                    --only-binary=numpy,scipy \
+                        numpy \
+                        scipy
+                pip install dd \
+                    --no-binary dd
             - name: Create sdist for `tulip`
               run: |
                 python setup.py sdist
