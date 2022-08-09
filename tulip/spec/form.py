@@ -522,8 +522,6 @@ class GRSpec(LTL):
                     return [part]
                 case str():
                     return list()
-                case list():
-                    return copy.deepcopy(part)
                 case _:
                     return list(part)
         parts = [
