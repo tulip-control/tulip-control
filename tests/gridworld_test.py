@@ -70,11 +70,11 @@ class GridWorld_test:
 
     def test_getitem(self):
         assert self.X.__getitem__(
-            (0,0), nonbool=False) == self.prefix+"_"+str(0)+"_"+str(0)
+            (0,0), nonbool=False) == self.prefix+"_0_0"
         assert self.X.__getitem__(
-            (-1,0), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(0)
+            (-1,0), nonbool=False) == self.prefix+"_5_0"
         assert self.X.__getitem__(
-            (-1,-2), nonbool=False) == self.prefix+"_"+str(5)+"_"+str(8)
+            (-1,-2), nonbool=False) == self.prefix+"_5_8"
 
     def test_state(self):
         assert self.X.state((2,3), nonbool=False) == {
