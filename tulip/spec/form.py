@@ -513,23 +513,34 @@ class GRSpec(LTL):
                 for v in sys_vars)
         self.env_vars = copy.deepcopy(env_vars)
         self.sys_vars = copy.deepcopy(sys_vars)
+        def mapper(
+                part:
+                    Conjuncts
+                ) -> list[str]:
+            match part:
+                case str() if part:
+                    return [part]
+                case str():
+                    return list()
+                case list():
+                    return copy.deepcopy(part)
+                case _:
+                    return list(part)
+        parts = [
+            env_init, sys_init,
+            env_safety, sys_safety,
+            env_prog, sys_prog]
+        (env_init, sys_init,
+         env_safety, sys_safety,
+         env_prog, sys_prog
+            ) = map(
+                mapper, parts)
         self.env_init = env_init
         self.sys_init = sys_init
         self.env_safety = env_safety
         self.sys_safety = sys_safety
         self.env_prog = env_prog
         self.sys_prog = sys_prog
-        for formula_component in self._parts:
-            x = getattr(self, formula_component)
-            if isinstance(x, str):
-                if not x:
-                    setattr(self, formula_component, [])
-                else:
-                    setattr(self, formula_component, [x])
-            elif not isinstance(x, list):
-                setattr(self, formula_component, list(x))
-            setattr(self, formula_component,
-                    copy.deepcopy(getattr(self, formula_component)))
         LTL.__init__(
             self,
             formula=self.to_canon(),
