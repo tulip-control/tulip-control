@@ -92,7 +92,10 @@ class GridWorld:
             gridworld cell variables.
         """
         if gw_desc is not None:
-            self.loads(gw_desc)
+            gw = self.loads(gw_desc)
+            self.W = gw.W
+            self.init_list = gw.init_list
+            self.goal_list = gw.goal_list
         else:
             self.W = None
             self.init_list = list()
@@ -601,11 +604,12 @@ class GridWorld:
             return (0, 0)
         return self.W.shape
 
+    @classmethod
     def loads(
-            self,
+            cls,
             gw_desc:
                 str
-            ) -> None:
+            ) -> 'GridWorld':
         """Reincarnate using given gridworld description string.
 
         @param gw_desc:
@@ -690,22 +694,25 @@ class GridWorld:
                 "malformed gridworld description.")
         # Arrived here without errors,
         # so actually reincarnate
-        self.W = W
-        self.init_list = init_list
-        self.goal_list = goal_list
+        gw = GridWorld()
+        gw.W = W
+        gw.init_list = init_list
+        gw.goal_list = goal_list
+        return gw
 
+    @classmethod
     def load(
-            self,
+            cls,
             gw_file:
                 str
-            ) -> None:
+            ) -> 'GridWorld':
         """Read description from given file.
 
         Merely a convenience wrapper for the `loads` method.
         """
         with open(gw_file, "r") as f:
             text = f.read()
-        return self.loads(text)
+        return cls.loads(text)
 
     def dumps(
             self,
