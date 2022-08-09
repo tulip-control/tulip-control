@@ -641,11 +641,12 @@ class SubSet(MathSet):
         ========
         `add`, `__ior__`
         """
-        if is_subset(new_elements, self._superset):
-            super().add_from(new_elements)
+        items = list(new_elements)
+        if is_subset(items, self._superset):
+            super().add_from(items)
             return
         raise ValueError(
-            f'All new_elements:\n\t{new_elements}'
+            f'All new_elements:\n\t{items}'
             '\nshould already be \\in '
             f'self.superset = {self._superset}')
 
