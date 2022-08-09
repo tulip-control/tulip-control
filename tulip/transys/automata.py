@@ -125,11 +125,8 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
         super().__init__(
             edge_label_types=edge_label_types)
         # accepting states
-        if accepting_states_type is None:
-            self._accepting = _mset.SubSet(self.states)
-        else:
-            self._accepting = accepting_states_type(self)
-        self.states.accepting = self._accepting
+        self.accepting = _mset.SubSet(self.states)
+        self.states.accepting = self.accepting
         # used before label value
         self._transition_dot_label_format = {
             'letter':
@@ -146,10 +143,6 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
                 'doublecircle'}
         self.default_export_fname = 'fsa'
         self.automaton_type = 'Finite State Automaton'
-
-    @property
-    def accepting(self):
-        return self._accepting
 
     def __str__(self):
         states = _pp.pformat(
