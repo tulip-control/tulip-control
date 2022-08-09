@@ -84,7 +84,7 @@ class Tree(nx.MultiDiGraph):
         # need to override networkx.DiGraph.__str__
         return ('Abstract syntax tree as graph with edges:\n' +
                 str([(str(u), str(v))
-                    for u, v, k in self.edges(keys=True)]))
+                    for u, v, _ in self.edges(keys=True)]))
 
     @property
     def variables(self) -> set[Node]:

@@ -2004,8 +2004,9 @@ def merge_abstractions(
         props =  merged_abstr.ppp[i].props
         sys_ts.states[state]['ap'] = props
     # create mode actions
-    sys_actions = [str(s) for _, s in modes]
-    env_actions = [str(e) for _, s in modes]
+    env_actions, sys_actions = zip(*modes)
+    env_actions = list(map(str, env_actions))
+    sys_actions = list(map(str, sys_actions))
     # no env actions ?
     if mode_nums[0] == 0:
         actions_per_mode = {
@@ -2024,8 +2025,9 @@ def merge_abstractions(
                 env_actions=str(e),
                 sys_actions=str(s))
             for e, s in modes}
-        sys_ts.env_actions.add_from(str(e) for e, _ in modes)
-        sys_ts.sys_actions.add_from(str(s) for e, _ in modes)
+        env_actions, sys_actions = zip(*modes)
+        sys_ts.env_actions.add_from(env_actions)
+        sys_ts.sys_actions.add_from(sys_actions)
     for mode in modes:
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]
