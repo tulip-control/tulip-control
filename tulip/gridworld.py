@@ -1557,7 +1557,7 @@ def animate_paths(
             t.set_data(d[..., :num + 1])
             p.set_data(d[..., num])
         if save_prefix:
-            num_str = str(num).fill(
+            num_str = str(num).zfill(
                 numberic_str_width)
             fig.savefig(
                 f'{save_prefix}{num_str}.png')
@@ -1585,11 +1585,10 @@ def animate_paths(
             fargs=(data, lines),
             interval=500)
         return anim
-    else:
-        zeros = '0' * numberic_str_width
-        print(
-            f'Writing {save_prefix}{zeros}.png - '
-            f'{save_prefix}{last}.png')
-        for n in range(len(paths[0])):
-            update_line(n, data, lines)
-        return None
+    zeros = '0' * numberic_str_width
+    print(
+        f'Writing {save_prefix}{zeros}.png - '
+        f'{save_prefix}{last}.png')
+    for n in range(len(paths[0])):
+        update_line(n, data, lines)
+    return None
