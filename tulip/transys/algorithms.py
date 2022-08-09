@@ -270,9 +270,9 @@ def sync_prod(ts, ba):
         `FiniteTransitionSystem`
     """
     if not isinstance(ba, _aut.BuchiAutomaton):
-        raise Exception
+        raise TypeError
     if not isinstance(ts, _trs.FiniteTransitionSystem):
-        raise Exception
+        raise TypeError
 
 
 def add(
