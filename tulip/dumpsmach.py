@@ -120,7 +120,7 @@ def python_case(
             sinit=node_to_int[start],
             input_args_str=input_args_str,
             input_args=input_args,
-            outputs=[str(v) for v in M.outputs])
+            outputs=list(map(str, M.outputs)))
     # cached generator
     ifs = lambda: _itr.chain(['if'], _itr.repeat('elif'))
     proj = lambda d, keys: ((k, d[k]) for k in d if k in keys)

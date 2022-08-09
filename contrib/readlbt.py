@@ -76,7 +76,7 @@ class GBAutomaton(nx.DiGraph):
             output += (
                 f'{node} [label="{node}\\n'
                 'acceptance sets: {' +
-                ','.join([str(ac) for ac in ndata['acceptance_sets']]) +
+                ','.join(map(str, ndata['acceptance_sets'])) +
                 '}"]\n')
         for u, v, edata in self.edges(data=True):
             label = edata['gate']

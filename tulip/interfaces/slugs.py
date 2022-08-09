@@ -132,7 +132,8 @@ def synthesize(
         h.add_node(u, state=int_state)
     for u, v in g.edges():
         h.add_edge(u, v)
-    nodes = '\n  '.join(str(x) for x in h.nodes(data=True))
+    nodes = h.nodes(data=True)
+    nodes = '\n  '.join(map(str, nodes))
     _logger.debug(
         f'loaded strategy with vertices:\n  {nodes}\n'
         f'and edges:\n {h.edges()}\n')
