@@ -39,10 +39,9 @@ import warnings
 
 import networkx as nx
 
+import tulip.graphics as _graphics
 import tulip.spec.ast as _ast
 import tulip.spec.parser as parser
-# inline:
-# import tulip.graphics as _graphics
 
 
 __all__ = [
@@ -173,7 +172,6 @@ class Tree(nx.MultiDiGraph):
             ) -> str:
         """Create GraphViz dot string from given AST."""
         g = ast_to_labeled_graph(self, detailed)
-        import tulip.graphics as _graphics
         return _graphics.networkx_to_graphviz(g)
 
     def write(
