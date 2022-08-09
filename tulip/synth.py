@@ -386,6 +386,7 @@ def iter2var(
             constraint = exactly_one(state_ids.values())[0]
         elif min_one:
             raise Exception('min_one requires mutex')
+        constraint = [constraint]
     else:
         _logger.debug('states not modeled as Booleans')
         if statevar in variables:
