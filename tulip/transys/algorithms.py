@@ -62,11 +62,11 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
                 "or the state sublabel types don't match.")
         try:
             return v1 | v2
-        except:
+        except TypeError:
             pass
         try:
             return v2 + v2
-        except:
+        except TypeError:
             raise TypeError(
                 'The state sublabel types should support '
                 'either | or + for labeled system products.')
