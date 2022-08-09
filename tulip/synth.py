@@ -378,7 +378,7 @@ def iter2var(
             for s in states})
         # single action ?
         if len(mutex(state_ids.values())) == 0:
-            return state_ids
+            return state_ids, None
         # handle multiple actions
         if use_mutex and not min_one:
             constraint = mutex(state_ids.values())[0]
