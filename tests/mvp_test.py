@@ -275,7 +275,7 @@ def _construct_wfa(all_propositions, false_propositions):
     fa.atomic_propositions.add_from(all_propositions)
     fa.states.add_from({"q0"})
     fa.states.initial.add("q0")
-    fa.states.accepting.add("q0")
+    fa.accepting.add("q0")
     transition_letters = set()
     for propositions in false_propositions:
         props_without_false = copy.deepcopy(fa.atomic_propositions)

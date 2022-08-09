@@ -229,13 +229,13 @@ def ba_maximal_example():
     ba.transitions.add('q1', 'q3', letter={'drink'})
     ba.plot()
     # accepting states
-    ba.states.accepting.add('q1')
-    ba.states.accepting |= {'q2', 'q3'}
-    ba.states.accepting.remove('q2')
-    ba.states.accepting.remove('q3')
+    ba.accepting.add('q1')
+    ba.accepting |= {'q2', 'q3'}
+    ba.accepting.remove('q2')
+    ba.accepting.remove('q3')
     print('Number of accepting states:\n\t' +
-          str(len(ba.states.accepting) ) +'\n')
-    print('Accepting states:\n\t' +str(ba.states.accepting) +'\n')
+          str(len(ba.accepting) ) +'\n')
+    print('Accepting states:\n\t' +str(ba.accepting) +'\n')
     print(ba)
     path = './test_ba'
     dot_fname = path +'.dot'

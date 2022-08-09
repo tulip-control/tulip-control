@@ -198,7 +198,7 @@ class PrioritizedSpecification:
     def get_accepting_states(self) -> _abc.Iterator:
         """Get product of the accepting states of all the finite automata."""
         return _itr.product(*(
-            phi.automaton().states.accepting
+            phi.automaton().accepting
             for phi in self))
 
     def get_num_levels(self) -> int:

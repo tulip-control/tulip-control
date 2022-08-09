@@ -64,7 +64,7 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
     It has:
     - `states`
     - `states.initial`
-    - `states.accepting` (types have names, and classes)
+    - `accepting` (types have names, and classes)
     - `alphabet` = set of symbols that label edges.
 
 
@@ -126,7 +126,6 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
             edge_label_types=edge_label_types)
         # accepting states
         self.accepting = _mset.SubSet(self.states)
-        self.states.accepting = self.accepting
         # used before label value
         self._transition_dot_label_format = {
             'letter':
@@ -152,7 +151,7 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
             self.states.initial,
             indent=3)
         accepting_states = _pp.pformat(
-            self.states.accepting,
+            self.accepting,
             indent=3)
         newlines = 2 * '\n'
         s = (
@@ -350,7 +349,7 @@ def tuple2ba(
     ba.states.add_from(states)
     ba.states.initial.update(
         initial_states)
-    ba.states.accepting.update(
+    ba.accepting.update(
         accepting_states)
     if atomic_proposition_based:
         ba.alphabet.math_set.update(
@@ -411,10 +410,10 @@ class RabinPairs:
     ```python
     dra = RabinAutomaton()
     dra.states.add_from([1, 2, 3])
-    dra.states.accepting.add([1], [2])
-    dra.states.accepting
-    dra.states.accepting.good(1)
-    dra.states.accepting.bad(1)
+    dra.accepting.add([1], [2])
+    dra.accepting
+    dra.accepting.good(1)
+    dra.accepting.bad(1)
     ```
 
     See Also
@@ -594,7 +593,6 @@ class RabinAutomaton(FiniteStateAutomaton):
             atomic_proposition_based=
                 atomic_proposition_based)
         self.accepting = RabinPairs(self.states)
-        self.states.accepting = self.accepting
         self.automaton_type = 'Rabin Automaton'
 
 

@@ -173,7 +173,7 @@ def _construct_weighted_product_automaton(
     fa.states.add_from(_itr.product([null_state], spec.get_states()))
     fa.states.initial.add_from(
         _itr.product([null_state], spec.get_initial_states()))
-    fa.states.accepting.add_from(
+    fa.accepting.add_from(
         _itr.product(ks.states, spec.get_accepting_states()))
     fa.atomic_propositions.add_from(ks.atomic_propositions)
     for transition in ks.transitions.find():
@@ -232,7 +232,7 @@ def solve(
         state
         for state in ks.states
         if goal_label in ks.states[state]["ap"]]
-    accepting_goal_states = _trs.SubSet(wpa.states.accepting)
+    accepting_goal_states = _trs.SubSet(wpa.accepting)
     accepting_goal_states.add_from(
         _itr.product(goal_states, spec.get_states()))
     cost, product_path = _gralgo.dijkstra_multiple_sources_multiple_targets(

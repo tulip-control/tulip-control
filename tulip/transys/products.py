@@ -105,8 +105,8 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                     self.states.add(new_sq0)
                     self.states.initial.add(new_sq0)
                     # accepting state ?
-                    if q in ba.states.accepting:
-                        self.states.accepting.add(new_sq0)
+                    if q in ba.accepting:
+                        self.accepting.add(new_sq0)
 
     def add_successors(
             self,
@@ -139,7 +139,7 @@ class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
                 sq, next_s, enabled_ba_trans,
                 self, ba, ts)
             next_sqs.update(new_sqs)
-            self.states.accepting.update(
+            self.accepting.update(
                 new_accepting)
         # new_sqs = {x for x in next_sqs if x not in self}
         _logger.debug(f'next product states: {next_sqs}')
@@ -239,7 +239,7 @@ def ts_ba_sync_prod(
                 prodts.states.initial.add(new_sq0)
                 prodts.states[new_sq0]['ap'] = {q}
                 # accepting state ?
-                if q in ba.states.accepting:
+                if q in ba.accepting:
                     accepting_states_preimage.add(new_sq0)
     # start visiting reachable in DFS or BFS way
     # (doesn't matter if we are going to store the result)
@@ -336,7 +336,7 @@ def find_prod_succ(
         if hasattr(product, 'actions'):
             product.states[new_sq]['ap'] = {next_q}
         # accepting state ?
-        if next_q in ba.states.accepting:
+        if next_q in ba.accepting:
             new_accepting.add(new_sq)
             _logger.debug(
                 f'{new_sq} contains an accepting state.')
@@ -399,7 +399,7 @@ def ba_ts_sync_prod(
     prod_ba.states.initial.update(
         prod_ts.states.initial)
     # accepting states = persistent set
-    prod_ba.states.accepting.update(persistent)
+    prod_ba.accepting.update(persistent)
     # copy edges, translating transitions,
     # i.e., changing transition labels
     if not buchi_automaton.atomic_proposition_based:

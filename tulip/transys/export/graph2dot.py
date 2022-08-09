@@ -419,7 +419,7 @@ def _is_accepting(
     # no accepting states defined ?
     if not hasattr(graph.states, 'accepting'):
         return False
-    return state in graph.states.accepting
+    return state in graph.accepting
 
 
 def _transitions2dot_str(
