@@ -286,7 +286,7 @@ def find_ba_succ(
     _logger.debug(f'Next state:\t{next_s}')
     try:
         ap = fts.nodes[next_s]['ap']
-    except:
+    except TypeError:
         raise Exception(
             f'No AP label for FTS state: {next_s}'
             '\n Did you forget labeing it ?')
