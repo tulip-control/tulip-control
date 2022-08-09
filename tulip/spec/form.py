@@ -522,8 +522,6 @@ class GRSpec(LTL):
             match part:
                 case str() if part:
                     return [part]
-                case str():
-                    return list()
                 case _abc.Iterable():
                     return list(part)
                 case _:
