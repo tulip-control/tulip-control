@@ -704,7 +704,8 @@ class GridWorld:
         Merely a convenience wrapper for the `loads` method.
         """
         with open(gw_file, "r") as f:
-            self.loads(f.read())
+            text = f.read()
+        return self.loads(text)
 
     def dumps(
             self,
