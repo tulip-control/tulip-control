@@ -209,7 +209,7 @@ def solve(
     if not isinstance(spec, PrioSpec):
         raise TypeError(spec)
     if ks.atomic_propositions != spec.atomic_propositions:
-        raise AssertionError(ks, spec)
+        raise ValueError(ks, spec)
     wpa, null_state = _construct_weighted_product_automaton(ks, spec)
     goal_states = [
         state
