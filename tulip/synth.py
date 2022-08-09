@@ -1610,7 +1610,7 @@ def _spec_plus_sys(
             f'{pp_formula}{_hl}')
     if env is not None:
         if hasattr(env, 'state_varname'):
-            statevar = sys.state_varname
+            statevar = env.state_varname
         else:
             _logger.info(
                 'env.state_varname undefined. '
