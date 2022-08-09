@@ -57,7 +57,7 @@ def _multiply_mutable_states(self, other, prod_graph, prod_sys):
     def label_union(nx_label):
         v1, v2 = nx_label
         if v1 is None or v2 is None:
-            raise Exception(
+            raise ValueError(
                 'At least one factor has unlabeled state, '
                 "or the state sublabel types don't match.")
         try:
