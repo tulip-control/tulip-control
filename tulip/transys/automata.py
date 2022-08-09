@@ -87,9 +87,6 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
             self,
             deterministic:
                 bool=False,
-            accepting_states_type:
-                _abc.Callable |
-                None=None,
             atomic_proposition_based:
                 bool=True,
             symbolic:
@@ -130,10 +127,8 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
         # accepting states
         if accepting_states_type is None:
             self._accepting = _mset.SubSet(self.states)
-            self._accepting_type = _mset.SubSet
         else:
             self._accepting = accepting_states_type(self)
-            self._accepting_type = accepting_states_type
         self.states.accepting = self._accepting
         # used before label value
         self._transition_dot_label_format = {
@@ -206,9 +201,6 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
             self,
             deterministic:
                 bool=False,
-            accepting_states_type:
-                _abc.Callable |
-                None=None,
             atomic_proposition_based:
                 bool=True,
             symbolic:
@@ -222,7 +214,6 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
                 True}]
         super().__init__(
             deterministic,
-            accepting_states_type,
             atomic_proposition_based,
             symbolic)
         super().add_label_types(
@@ -607,10 +598,10 @@ class RabinAutomaton(FiniteStateAutomaton):
         super().__init__(
             deterministic=
                 deterministic,
-            accepting_states_type=
-                RabinPairs,
             atomic_proposition_based=
                 atomic_proposition_based)
+        self.accepting = RabinPairs(self.states)
+        self.states.accepting = self.accepting
         self.automaton_type = 'Rabin Automaton'
 
 
