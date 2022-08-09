@@ -150,11 +150,14 @@ def newax(
     # create subplot(s)
     nv, nh = subplot_layout
     n = np.prod(subplot_layout)
-    try:
-        dim = tuple(dim)
-    except TypeError:
-        # all same dim
-        dim = [dim] * n
+    match dim:
+        case _abc.Iterable():
+            dim = tuple(dim)
+        case _:
+            # all subplots have the
+            # same number of
+            # spatial dimensions
+            dim = n * [dim]
     dim_ok = all(
         x in (2, 3)
         for x in dim)
