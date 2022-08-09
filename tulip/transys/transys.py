@@ -322,7 +322,7 @@ class FiniteTransitionSystem(_graphs.LabeledDiGraph):
       at most 1 action True each time
     - `'xor'`:
       exactly 1 action True each time
-    - `'none'`:
+    - `None`:
       no constraint on action values
 
     The xor constraint can prevent
