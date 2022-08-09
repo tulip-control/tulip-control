@@ -108,9 +108,9 @@ class Automaton(nx.DiGraph):
         elif self.aut_type == "DSA":
             output += "deterministic Streett\n"
         output += "AP = "+str(self.ap)+"\n"
-        output += "Transitions:"+"\n"
+        output += "Transitions:\n"
         output += "\n".join(["\t("+str(u)+", "+str(v)+") :\n\t\tformula: "+str(d["formula"])+"\n\t\tsubsets of AP: "+str(d["subsets of AP"]) for (u,v,d) in self.edges(data=True)])+"\n"
-        output += "Acceptance Pairs (each line is of the form (L, U)):"+"\n"
+        output += "Acceptance Pairs (each line is of the form (L, U)):\n"
         output += "\n".join(["\t("+str(Fi.L)+", "+str(Fi.U)+")" for Fi in self.F])
         return output
 
