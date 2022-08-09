@@ -209,7 +209,9 @@ def dom2vec(
         `meshgrid2vec`
     """
     domain = _grouper(2, domain)
-    lambda_linspace = lambda dom, res: np.linspace(dom[0], dom[1], res)
+    def lambda_linspace(dom, res):
+        return np.linspace(
+            dom[0], dom[1], res)
     axis_grids = map(
         lambda_linspace,
         domain, resolution)
