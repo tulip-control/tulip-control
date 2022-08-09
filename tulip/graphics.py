@@ -144,7 +144,7 @@ def newax(
     n = np.prod(subplot_layout)
     try:
         dim = tuple(dim)
-    except:
+    except TypeError:
         # all same dim
         dim = [dim] * n
     # matplotlib (2D) or mayavi (3D) ?
