@@ -1543,6 +1543,7 @@ def animate_paths(
               'so skipping gridworld.animate_paths()')
         return
     last = len(paths[0]) - 1
+    numberic_str_width = len(str(last))
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -1556,8 +1557,10 @@ def animate_paths(
             t.set_data(d[..., :num + 1])
             p.set_data(d[..., num])
         if save_prefix:
+            num_str = str(num).fill(
+                numberic_str_width)
             fig.savefig(
-                f'{save_prefix}{num:03d}.png')
+                f'{save_prefix}{num_str}.png')
         return lines,
     data = list()
     lines = list()
@@ -1583,9 +1586,10 @@ def animate_paths(
             interval=500)
         return anim
     else:
+        zeros = '0' * numberic_str_width
         print(
-            f'Writing {save_prefix}000.png - '
-            f'{save_prefix}{last:03d}.png')
+            f'Writing {save_prefix}{zeros}.png - '
+            f'{save_prefix}{last}.png')
         for n in range(len(paths[0])):
             update_line(n, data, lines)
         return None
