@@ -78,7 +78,7 @@ def _get_rule_violation_cost(
     """
     from_spec_state = from_prod_state[1]
     to_spec_state = to_prod_state[1]
-    cost = [0 for i in range(spec.get_num_levels())]
+    cost = [0] * spec.get_num_levels()
     for idx, rule in enumerate(spec):
         rule_transitions = rule.automaton().transitions.find(
             from_spec_state[idx], to_spec_state[idx])
