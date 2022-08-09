@@ -138,7 +138,7 @@ class States:
                 'LabeledDiGraph'):
         """Initialize `States`."""
         self.graph = graph
-        self.initial = list()
+        self.initial = _mset.SubSet(self)
 
     def __getitem__(self, state):
         return self.graph.nodes[state]
@@ -169,17 +169,6 @@ class States:
     def __contains__(self, state):
         """Return True if state in states."""
         return state in self.graph
-
-    @property
-    def initial(self) -> _mset.SubSet:
-        """ Return `SubSet` of initial states."""
-        return self._initial
-
-    @initial.setter
-    def initial(self, states):
-        s = _mset.SubSet(self)
-        s.update(states)
-        self._initial = s
 
     def add(
             self,
