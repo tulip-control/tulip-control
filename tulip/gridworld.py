@@ -41,6 +41,14 @@ import time
 import typing as _ty
 
 import numpy as np
+try:
+    import matplotlib as _mpl
+    import matplotlib.animation
+    import matplotlib.cm as mpl_cm
+    import matplotlib.patches
+    import matplotlib.pyplot as plt
+except ImportError:
+    _mpl = None
 
 import tulip.spec.form as _form
 
@@ -48,7 +56,6 @@ import tulip.spec.form as _form
 #
 # import polytope
 # import tulip.abstract.prop2part
-# import matplotlib
 
 
 __all__ = [
@@ -426,11 +433,7 @@ class GridWorld:
         """
         if troll_list is None:
             troll_list = list()
-        try:
-            import matplotlib.cm as mpl_cm
-            import matplotlib.patches
-            import matplotlib.pyplot as plt
-        except ImportError:
+        if _mpl is None:
             print(
                 'matplotlib not available, '
                 'so skipping GridWorld.plot()')
@@ -1535,10 +1538,7 @@ def animate_paths(
         produce a series of images "<save_prefix>nnn.png" which
         can be compiled into an animated GIF.
     """
-    try:
-        import matplotlib.animation
-        import matplotlib.pyplot as plt
-    except ImportError:
+    if _mpl is None:
         print('matplotlib not available, '
               'so skipping gridworld.animate_paths()')
         return
@@ -1576,7 +1576,7 @@ def animate_paths(
             zorder=1)
         lines.append((l, l_trail))
     if not save_prefix:
-        anim = matplotlib.animation.FuncAnimation(
+        anim = _mpl.animation.FuncAnimation(
             fig, update_line, len(paths[0]),
             init_func=init,
             fargs=(data, lines),
