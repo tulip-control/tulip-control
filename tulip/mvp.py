@@ -205,9 +205,9 @@ def solve(
           automaton ks times spec
     """
     if not isinstance(ks, KS):
-        raise AssertionError(ks)
+        raise TypeError(ks)
     if not isinstance(spec, PrioSpec):
-        raise AssertionError(spec)
+        raise TypeError(spec)
     if ks.atomic_propositions != spec.atomic_propositions:
         raise AssertionError(ks, spec)
     wpa, null_state = _construct_weighted_product_automaton(ks, spec)
