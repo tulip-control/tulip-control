@@ -132,7 +132,7 @@ def gen_apsubset(AP, intrep):
     set(['q'])
     ```
     """
-    return set([AP[i] for i in range(len(AP)) if ((intrep >> i) & 1) != 0])
+    return set(AP[i] for i in range(len(AP)) if ((intrep >> i) & 1) != 0)
 
 
 def readdstar(getline):

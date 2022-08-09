@@ -2024,8 +2024,8 @@ def merge_abstractions(
                 env_actions=str(e),
                 sys_actions=str(s))
             for e, s in modes}
-        sys_ts.env_actions.add_from([str(e) for e,s in modes])
-        sys_ts.sys_actions.add_from([str(s) for e,s in modes])
+        sys_ts.env_actions.add_from(str(e) for e, s in modes)
+        sys_ts.sys_actions.add_from(str(s) for e, s in modes)
     for mode in modes:
         env_sys_actions = actions_per_mode[mode]
         adj = trans[mode]

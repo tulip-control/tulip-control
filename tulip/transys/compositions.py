@@ -175,7 +175,7 @@ def synchronous_parallel(
         if len(prod_actions) == 1:
             ts.actions.add_from(prod_actions[0])
         else:
-            ts.actions.add_from(list(_itr.product(*prod_actions)))
+            ts.actions.add_from(_itr.product(*prod_actions))
     if WKS.cost_label not in transition_attr_operations:
         transition_attr_operations[WKS.cost_label] = sum_values
     if MC.probability_label not in transition_attr_operations:
