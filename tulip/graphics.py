@@ -155,6 +155,13 @@ def newax(
     except TypeError:
         # all same dim
         dim = [dim] * n
+    dim_ok = all(
+        x in (2, 3)
+        for x in dim)
+    if not dim_ok:
+        raise ValueError(
+            'Expected dimension 2 or 3, '
+            f'but: {dim = }')
     # matplotlib (2D) or mayavi (3D) ?
     ax = list()
     for i, curdim in enumerate(dim):
