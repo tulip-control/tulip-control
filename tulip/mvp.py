@@ -123,14 +123,31 @@ def _add_transition(
     """
     for from_prod_state in from_prod_states:
         for to_prod_state in to_prod_states:
-            to_ap = ks.states[to_prod_state[0]]["ap"]
-            cost = _get_rule_violation_cost(
-                from_prod_state, to_prod_state, spec, to_ap)
-            cost.append(trans_ks_cost)
-            fa.transitions.add(
-                from_prod_state,
-                to_prod_state,
-                {"cost": _cost.VectorCost(cost)})
+            _add_transition_edge(
+                from_prod_state, to_prod_state,
+                ks, spec, trans_ks_cost, fa)
+
+
+def _add_transition_edge(
+        from_prod_state,
+        to_prod_state,
+        ks:
+            KS,
+        spec:
+            PrioSpec,
+        trans_ks_cost,
+        fa:
+            WFA
+        ) -> None:
+    """Add to `fa` transition between states."""
+    to_ap = ks.states[to_prod_state[0]]["ap"]
+    cost = _get_rule_violation_cost(
+        from_prod_state, to_prod_state, spec, to_ap)
+    cost.append(trans_ks_cost)
+    fa.transitions.add(
+        from_prod_state,
+        to_prod_state,
+        {"cost": _cost.VectorCost(cost)})
 
 
 def _construct_weighted_product_automaton(
