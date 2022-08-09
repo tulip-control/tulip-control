@@ -83,6 +83,9 @@ def dimension(ndarray):
     return ndarray.shape[0]
 
 
+PlotDimension = _ty.Literal[2, 3]
+
+
 def newax(
         subplots:
             int |
@@ -92,7 +95,8 @@ def newax(
             _ty.Literal[
                 'list', 'matrix']='list',
         dim:
-            _ty.Literal[2, 3]
+            PlotDimension |
+            _abc.Iterable[PlotDimension]
             =2
         ) -> tuple[
             '_mpl.axes.Axes',
@@ -117,6 +121,10 @@ def newax(
         - if `dim == 2`, then use `matplotlib`
         - if `dim == 3`, then use `mayavi`
         So the figure type depends on `dim`.
+
+        If `dim` is an iterable,
+        the each item specifies the dimension of
+        the corresponding subplot.
     @return:
         `(ax, fig)` where:
         - `ax`: axes created
