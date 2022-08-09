@@ -515,15 +515,23 @@ class GRSpec(LTL):
         self.sys_vars = copy.deepcopy(sys_vars)
         def mapper(
                 part:
-                    Conjuncts
+                    Conjuncts,
+                name:
+                    str
                 ) -> list[str]:
             match part:
                 case str() if part:
                     return [part]
                 case str():
                     return list()
-                case _:
+                case _abc.Iterable():
                     return list(part)
+                case _:
+                    raise TypeError(
+                        'Expected `Iterable` '
+                        f'as `{name}`, but '
+                        'instead got: '
+                        f'{part}')
         parts = [
             env_init, sys_init,
             env_safety, sys_safety,
@@ -532,7 +540,7 @@ class GRSpec(LTL):
          env_safety, sys_safety,
          env_prog, sys_prog
             ) = map(
-                mapper, parts)
+                mapper, parts, self._parts)
         self.env_init = env_init
         self.sys_init = sys_init
         self.env_safety = env_safety
