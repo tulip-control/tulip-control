@@ -33,9 +33,9 @@ def integrate(sys_dyn, x0, u_seq):
         u = u_seq[i, :].reshape(m, 1)
         x = A.dot(x) + B.dot(u) + K
 
-        print('Discrete time: k = ' +str(i) )
-        print('\t u[' +str(i) +"]' = " +str(u.T) )
-        print('\t x[' +str(i) +"]' = " +str(x.T) +'\n')
+        print(f'Discrete time: k = {i}')
+        print(f'\t u[{i}] = {u.T}')
+        print(f'\t x[{i}] = {x.T}\n')
 
     print('completed continuous transition iteration')
     return x

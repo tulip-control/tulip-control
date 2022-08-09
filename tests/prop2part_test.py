@@ -21,7 +21,7 @@ def prop2part_test():
                        [0., -1.]]))
     b.append(np.array([[2., -1.5, 2., -1.5]]).T)
     cont_props.append(pc.Polytope(A[1], b[1]))
-    cont_props_dict = {"C"+str(i) : pc.Polytope(A[i], b[i]) for i in range(2)}
+    cont_props_dict = {f"C{i}": pc.Polytope(A[i], b[i]) for i in range(2)}
     mypartition = prop2part(state_space, cont_props_dict)
     print(mypartition)
     ref_adjacency = np.array([[1,0,1],[0,1,1],[1,1,1]])

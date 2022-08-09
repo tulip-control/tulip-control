@@ -140,7 +140,7 @@ def test_transient_regions():
                              trans_length=1)
     _logger.debug(ab.ts)
     self_loops = {i for i, j in ab.ts.transitions() if i == j}
-    _logger.debug('self loops at states: ' + str(self_loops))
+    _logger.debug(f'self loops at states: {self_loops}')
     assert(not self_loops)
     # ax = ab.plot(show_ts=True)
     # ax.figure.savefig('./very_simple.pdf')
@@ -222,7 +222,7 @@ def test_abstract_the_dynamics():
     # sys.plot(ax, show_domain=False)
     # print(ab.ts)
     # self_loops = {i for i,j in ab.ts.transitions() if i==j}
-    # print('self loops at states: ' + str(self_loops))
+    # print(f'self loops at states: {self_loops}')
 
 
 @pytest.mark.slow
@@ -320,7 +320,7 @@ def test_find_controller_non_convex():
         end=d_end_state,
         ord=1,
         mid_weight=5)
-    assert 0.5 <= u <= 1.0, "u was " + str(u)
+    assert 0.5 <= u <= 1.0, f"u was {u}"
     # Try to find a control policy in the other direction and ascertain
     # an error is thrown
     with pytest.raises(Exception):

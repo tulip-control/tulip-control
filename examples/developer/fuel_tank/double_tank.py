@@ -195,7 +195,7 @@ ax.figure.savefig(imgpath + 'ppp.pdf')
 ## Discretize to establish transitions
 if os.name == "posix":
     start = os.times()[2]
-    _logger.info('start time: ' + str(start))
+    _logger.info(f'start time: {start}')
 else:
     _logger.info('Timing currently only available for POSIX platforms (not Windows)')
 
@@ -209,9 +209,9 @@ sys_ts = abstract.multiproc_discretize_switched(
 
 if os.name == "posix":
     end = os.times()[2]
-    _logger.info('end time: ' + str(end))
+    _logger.info(f'end time: {end}')
     elapsed = (end - start)
-    _logger.info('Discretization lasted: ' + str(elapsed))
+    _logger.info(f'Discretization lasted: {elapsed}')
 
 ## Save abstraction to save debugging time
 fname = './abstract_switched.pickle'
@@ -257,7 +257,7 @@ ctrl = synth.synthesize(
 if os.name == "posix":
     end = os.times()[2]
     elapsed = (end - start)
-    _logger.info('Synthesis lasted: ' + str(elapsed))
+    _logger.info(f'Synthesis lasted: {elapsed}')
 
 _logger.info(ctrl)
 ctrl.save(imgpath + 'double_tank.pdf')

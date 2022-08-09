@@ -217,7 +217,7 @@ def ast_to_labeled_graph(
                 f', of type: {type(u)}')
         # show both repr and AST node class in each vertex
         if detailed:
-            label += '\n' + str(type(u).__name__)
+            label += f'\n{type(u).__name__}'
         g.add_node(id(u), label=label)
     for u, v, k in tree.edges(keys=True):
         g.add_edge(id(u), id(v), label=k)
@@ -323,7 +323,7 @@ def sub_constants(
     @param var_str2int:
         {'varname':['const_val0', ...], ...}
     """
-    # _logger.info('substitute ints for constants in:\n\t' + str(self))
+    # _logger.info(f'substitute ints for constants in:\n\t{self}')
     old2new = dict()
     for u in tree.nodes():
         if u.type != 'str':
@@ -336,7 +336,7 @@ def sub_constants(
         # replace Const with Num
         old2new[u] = num
     nx.relabel_nodes(tree, old2new, copy=False)
-    # _logger.info('result after substitution:\n\t' + str(self) + '\n')
+    # _logger.info(f'result after substitution:\n\t{self}\n')
 
 
 def sub_bool_with_subtree(
@@ -355,9 +355,9 @@ def sub_bool_with_subtree(
     """
     for u in list(tree.nodes()):
         if u.type == 'var' and u.value in bool2subtree:
-            # tree.write(str(id(tree)) + '_before.png')
+            # tree.write(f'{id(tree)}_before.png')
             tree.add_subtree(u, bool2subtree[u.value])
-            # tree.write(str(id(tree)) + '_after.png')
+            # tree.write(f'id(tree)}_after.png')
 
 
 def pair_node_to_var(

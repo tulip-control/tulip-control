@@ -22,7 +22,7 @@ def write_envgen(genlist):
 
     """
     for i in genlist:
-        f.write('env_vars['"'"'g'+str(i)+"'"+'] = [0,1]')
+        f.write(f"env_vars['g{i}'] = [0,1]")
         f.write('\n')
 
 
@@ -35,7 +35,7 @@ def write_envru(rulist):
 
     """
     for i in rulist:
-        f.write('env_vars['"'"'ru'+str(i)+"'"+'] = [0,1]')
+        f.write(f"env_vars[ru{i}'] = [0,1]")
         f.write('\n')
 
 
@@ -51,11 +51,11 @@ def write_essbusspec(essbuslist,time):
 
     """
     for i in essbuslist:
-        f.write('guarantees += '"'"'&\\n\\t[]((b'+str(i)+'=0) -> (next(countb'+str(i)+') = countb'+str(i)+'+1))'"'")
+        f.write(f"guarantees += '&\\n\\t[]((b{i}=0) -> (next(countb{i}) = countb{i}+1))'")
         f.write('\n')
-        f.write('guarantees += '"'"'&\\n\\t[]((b'+str(i)+'=1) -> (next(countb'+str(i)+') = 0))'"'")
+        f.write(f"guarantees += '&\\n\\t[]((b{i}=1) -> (next(countb{i}) = 0))'")
         f.write('\n')
-        f.write('guarantees += '"'"'&\\n\\t[](countb'+str(i)+' <= '+str(time)+')'"'")
+        f.write(f"guarantees += '&\\n\\t[](countb{i} <= {time})'")
         f.write('\n')
 
 
@@ -71,7 +71,7 @@ def write_essbusdisc(essbuslist,time):
 
     """
     for i in essbuslist:
-        f.write('disc_sys_vars['"'"'countb'+str(i)+"'"+'] = [x for x in range(0,'+str(time+1)+')]')
+        f.write(f"disc_sys_vars['countb{i}'] = [x for x in range(0,{time + 1})]")
         f.write('\n')
 
 
@@ -84,7 +84,7 @@ def write_discbus(buslist):
 
     """
     for i in buslist:
-        f.write('disc_sys_vars['"'"'b'+str(i)+"'"+'] = [0,1]')
+        f.write(f"disc_sys_vars['b{i}'] = [0,1]")
         f.write('\n')
 
 
@@ -97,7 +97,7 @@ def write_discnull(nullist):
 
     """
     for i in nullist:
-        f.write('disc_sys_vars['"'"'b'+str(i)+"'"+'] = [1]')
+        f.write(f"disc_sys_vars['b{i}'] = [1]")
         f.write('\n')
 
 
@@ -127,9 +127,9 @@ def write_discdc_con(G,rulist,dcbuslist,nullist):
     for i in range(0,len(edges)):
         # print(edges[i][0])
         # print(edges[i][1])
-        f.write('disc_sys_vars['"'"'c'+str(edges[i][0])+str(edges[i][1])+"'"'] = [0,1]\n')
+        f.write(f"disc_sys_vars['c{edges[i][0]}{edges[i][1]}'] = [0,1]\n")
     for j in range(0,len(remove2)):
-        f.write('disc_sys_vars['"'"'c'+str(remove2[j][0])+str(remove2[j][1])+"'"'] = [1]\n')
+        f.write(f"disc_sys_vars['c{remove2[j][0]}{remove2[j][1]}'] = [1]\n")
 
 
 def write_discac_con(G,nullist):
@@ -152,9 +152,9 @@ def write_discac_con(G,nullist):
     edges = H.edges()
     for i in range(0,len(edges)):
         if edges[i][0] < edges[i][1]:
-            f.write('disc_sys_vars['"'"'c'+str(edges[i][0])+str(edges[i][1])+"'"'] = [0,1]\n')
+            f.write(f"disc_sys_vars['c{edges[i][0]}{edges[i][1]}'] = [0,1]\n")
         else:
-            f.write('disc_sys_vars['"'"'c'+str(edges[i][1])+str(edges[i][0])+"'"'] = [0,1]\n')
+            f.write(f"disc_sys_vars['c{edges[i][1]}{edges[i][0]}'] = [0,1]\n")
 
 
 def g_disconnect(G,genlist,buslist):
@@ -174,9 +174,9 @@ def g_disconnect(G,genlist,buslist):
             for e in G.edges():
                 if i in e and j in e:
                     if i < j:
-                        f.write('guarantees += '"'"'&\\n\\t[]((g'+str(i)+'=0) -> (c'+str(i)+str(j)+'=0))'"'")
+                        f.write(f"guarantees += '&\\n\\t[]((g{i}=0) -> (c{i}{j}=0))'")
                     else:
-                        f.write('guarantees += '"'"'&\\n\\t[]((g'+str(i)+'=0) -> (c'+str(j)+str(i)+'=0))'"'")
+                        f.write(f"guarantees += '&\\n\\t[]((g{i}=0) -> (c{j}{i}=0))'")
                     f.write('\n')
 
 
@@ -197,9 +197,9 @@ def ru_disconnect(G,rulist,buslist):
             for e in G.edges():
                 if i in e and j in e:
                     if i < j:
-                        f.write('guarantees += '"'"'&\\n\\t[]((ru'+str(i)+'=0) -> (c'+str(i)+str(j)+'=0))'"'")
+                        f.write(f"guarantees += '&\\n\\t[]((ru{i}=0) -> (c{i}{j}=0))'")
                     else:
-                        f.write('guarantees += '"'"'&\\n\\t[]((ru'+str(i)+'=0) -> (c'+str(j)+str(i)+'=0))'"'")
+                        f.write(f"guarantees += '&\\n\\t[]((ru{i}=0) -> (c{j}{i}=0))'")
                     f.write('\n')
 
 
@@ -258,12 +258,12 @@ def ppaths(i,j,G):
     guarantees = 'guarantees += '"'"'&\\n\\t[](!('
     for k in range(0,len(result)-1):
         if result[k] < result[k+1]:
-            C[k] = 'c'+str(result[k])+str(result[k+1])
+            C[k] = f'c{result[k]}{result[k + 1]}'
         else:
-            C[k] = 'c'+str(result[k+1])+str(result[k])
-    guarantees = guarantees + '('+str(C[0])+'=1)'
+            C[k] = f'c{result[k + 1]}{result[k]}'
+    guarantees = guarantees + f'({C[0]}=1)'
     for m in range(1,len(C)):
-        guarantees = guarantees+ ' & ('+str(C[m])+'=1)'
+        guarantees = guarantees+ f' & ({C[m]}=1)'
     guarantees = guarantees + '))'"'"
     return guarantees
 
@@ -326,10 +326,10 @@ def write_genassump(genfail,genlist):
     genlist : list of all generators
 
     """
-    f.write('assumptions += '"'"'&\\n\\t[]((g'+str(genlist[0]))
+    f.write(f"assumptions += '&\\n\\t[]((g{genlist[0]}")
     for i in range(1,len(genlist)):
-        f.write(' + g'+str(genlist[i]))
-    f.write(') >= '+str(len(genlist)-genfail)+')'"'")
+        f.write(f' + g{genlist[i]}')
+    f.write(f") >= {len(genlist)-genfail})'")
     f.write('\n')
 
 
@@ -345,10 +345,10 @@ def write_ruassump(rufail,rulist):
 
     """
     if len(rulist) > 0:
-        f.write('assumptions += '"'"'&\\n\\t[]((ru'+str(rulist[0]))
+        f.write(f"assumptions += '&\\n\\t[]((ru{rulist[0]}")
         for i in range(1,len(rulist)):
-            f.write(' + ru'+str(rulist[i]))
-        f.write(') >= '+str(len(rulist)-rufail)+')'"'")
+            f.write(f' + ru{rulist[i]}')
+        f.write(f') >= {len(rulist) - rufail)})'")
         f.write('\n')
 
 
@@ -411,30 +411,30 @@ def acbusprop(G,source,target):
         for p in range(0,len(paths)):
             for i in range(0,len(paths[p])-1):
                 C.append((paths[p][i],paths[p][i+1]))
-            f.write('disc_props['"'"'B'+str(source)+str(target)+str(p)+"'"'] = '"'")
+            f.write(f"disc_props['B{source}{target}{p}'] = '")
             if paths[p][1] in gens:
-                f.write('(g'+str(paths[p][1])+'=1)')
+                f.write(f'(g{paths[p][1]}=1)')
             elif paths[p][1] in busac:
-                f.write('(b'+str(paths[p][1])+'=1)')
+                f.write(f'(b{paths[p][1]}=1)')
             elif paths[p][1] in null:
-                f.write('(b'+str(paths[p][1])+'=1)')
+                f.write(f'(b{paths[p][1]}=1)')
             else:
                 pass
             if len(paths[p]) > 2:
                 for j in range(2,len(paths[p])):
                     if paths[p][j] in gens:
-                        f.write(' & (g'+str(paths[p][j])+'=1)')
+                        f.write(f' & (g{paths[p][j]}=1)')
                     elif paths[p][j] in busac:
-                        f.write(' & (b'+str(paths[p][j])+'=1)')
+                        f.write(f' & (b{paths[p][j]}=1)')
                     elif paths[p][j] in null:
-                        f.write(' & (b'+str(paths[p][j])+'=1)')
+                        f.write(f' & (b{paths[p][j]}=1)')
                     else:
                         pass
             for k in range(0,len(C)):
                 if C[k][0] < C[k][1]:
-                    f.write(' & (c'+str(C[k][0])+str(C[k][1])+'=1)')
+                    f.write(f' & (c{C[k][0]}{C[k][1]}=1)')
                 else:
-                    f.write(' & (c'+str(C[k][1])+str(C[k][0])+'=1)')
+                    f.write(f' & (c{C[k][1]}{C[k][0]}=1)')
             f.write("'"'\n')
             C = list()
 
@@ -471,7 +471,7 @@ def acbusspec(G,busno,gen):
     for path in nx.all_simple_paths(D,busno,gen,cutoff=None):
         paths.append(path)
     for j in range(0,len(paths)):
-        f.write('guarantees += '"'"'&\\n\\t[]((B'+str(busno)+str(gen)+str(j)+') -> (b'+str(busno)+'=1))'"'"'\n')
+        f.write(f"guarantees += '&\\n\\t[]((B{busno}{gen}{j}) -> (b{busno}=1))'\n")
 
 
 def write_acbusspec(G,buslist,genlist):
@@ -517,11 +517,11 @@ def write_acbusspec2(G,buslist,genlist):
             D.remove_nodes_from(gens2)
             for path in nx.all_simple_paths(D,i,j):
                 paths.append(path)
-                f.write(' | (B' + str(i) + str(j) + str(len(paths)-1)+')')
+                f.write(f' | (B{i}{j}{len(paths) - 1})')
             paths = list()
             gens2 = copy.deepcopy(gens)
             D = copy.deepcopy(G)
-        f.write(') -> (b'+str(i)+'=0))'"'"'\n')
+        f.write(f") -> (b{i}=0))'\n")
 
 
 def write_dcbusalways(buslist):
@@ -533,7 +533,7 @@ def write_dcbusalways(buslist):
 
     """
     for i in buslist:
-        f.write('guarantees += '"'"'&\\n\\t[](b'+str(i)+' = 1)'"'"+'\n')
+        f.write(f"guarantees += '&\\n\\t[](b{i} = 1)'\n")
 
 
 def dcbusprop(G,source,target):
@@ -568,37 +568,37 @@ def dcbusprop(G,source,target):
                 pass
             else:
                 C.append((paths[p][i],paths[p][i+1]))
-        f.write('disc_props['"'"'B'+str(source)+str(target)+str(p)+"'"'] = '"'")
+        f.write(f"disc_props['B{source}{target}{p}'] = '")
         if paths[p][1] in gens:
-            f.write('(g'+str(paths[p][1])+'=1)')
+            f.write(f'(g{paths[p][1]}=1)')
         elif paths[p][1] in busac:
-            f.write('(b'+str(paths[p][1])+'=1)')
+            f.write(f'(b{paths[p][1]}=1)')
         elif paths[p][1] in rus:
-            f.write('(ru'+str(paths[p][1])+'=1)')
+            f.write(f'(ru{paths[p][1]}=1)')
         elif paths[p][1] in busdc:
-            f.write('(b'+str(paths[p][1])+'=1)')
+            f.write(f'(b{paths[p][1]}=1)')
         elif paths[p][1] in null:
-            f.write('(b'+str(paths[p][1])+'=1)')
+            f.write(f'(b{paths[p][1]}=1)')
         else:
             pass
         for j in range(2,len(paths[p])):
             if paths[p][j] in gens:
-                f.write(' & (g'+str(paths[p][j])+'=1)')
+                f.write(f' & (g{paths[p][j]}=1)')
             elif paths[p][j] in busac:
-                f.write(' & (b'+str(paths[p][j])+'=1)')
+                f.write(f' & (b{paths[p][j]}=1)')
             elif paths[p][j] in rus:
-                f.write(' & (ru'+str(paths[p][j])+'=1)')
+                f.write(f' & (ru{paths[p][j]}=1)')
             elif paths[p][1] in busdc:
-                f.write(' & (b'+str(paths[p][1])+'=1)')
+                f.write(f' & (b{paths[p][1]}=1)')
             elif paths[p][1] in null:
-                f.write(' & (b'+str(paths[p][1])+'=1)')
+                f.write(f' & (b{paths[p][1]}=1)')
             else:
                 pass
         for k in range(0,len(C)):
             if C[k][0] < C[k][1]:
-                f.write(' & (c'+str(C[k][0])+str(C[k][1])+'=1)')
+                f.write(f' & (c{C[k][0]}{C[k][1]}=1)')
             else:
-                f.write(' & (c'+str(C[k][1])+str(C[k][0])+'=1)')
+                f.write(f' & (c{C[k][1]}{C[k][0]}=1)')
         f.write("'"'\n')
         C = list()
 
@@ -645,7 +645,7 @@ def dcbusspec(G,busno,gen):
     for path in nx.all_simple_paths(D,busno,gen,cutoff=None):
         paths.append(path)
     for j in range(0,len(paths)):
-        f.write('guarantees += '"'"'&\\n\\t[]((B'+str(busno)+str(gen)+str(j)+') -> (b'+str(busno)+'=1))'"'"'\n')
+        f.write(f"guarantees += '&\\n\\t[]((B{busno}{gen}{j}) -> (b{busno}=1))'\n")
 
 
 def write_dcbusspec(G,buslist,genlist):
@@ -690,11 +690,11 @@ def write_dcbusspec2(G,buslist,genlist):
             D.remove_nodes_from(gens2)
             for path in nx.all_simple_paths(D,i,j):
                 paths.append(path)
-                f.write(' | (B' + str(i) + str(j) + str(len(paths)-1)+')')
+                f.write(f' | (B{i}{j{len(paths) - 1})')
             paths = list()
             gens2 = copy.deepcopy(gens)
             D = copy.deepcopy(G)
-        f.write(') -> (b'+str(i)+'=0))'"'"'\n')
+        f.write(f") -> (b{i}=0))'\n")
 
 
 def write_sat_bool(complist):
@@ -707,15 +707,15 @@ def write_sat_bool(complist):
     """
     for i in complist:
         if i in gens:
-            f.write('(define g'+str(i)+'::bool)\n')
+            f.write(f'(define g{i}::bool)\n')
         elif i in busac:
-            f.write('(define b'+str(i)+'::bool)\n')
+            f.write(f'(define b{i}::bool)\n')
         elif i in busdc:
-            f.write('(define b'+str(i)+'::bool)\n')
+            f.write(f'(define b{i}::bool)\n')
         elif i in null:
-            f.write('(define b'+str(i)+'::bool)\n')
+            f.write(f'(define b{i}::bool)\n')
         elif i in rus:
-            f.write('(define r'+str(i)+'::bool)\n')
+            f.write(f'(define r{i}::bool)\n')
 
 
 def write_sat_con(G,rulist,dcbuslist,nullist):
@@ -741,7 +741,7 @@ def write_sat_con(G,rulist,dcbuslist,nullist):
     L.remove_edges_from(remove2)
     edges = L.edges()
     for i in range(0,len(edges)):
-        f.write('(define c'+str(edges[i][0])+str(edges[i][1])+'::bool)\n')
+        f.write(f'(define c{edges[i][0]}{edges[i][1]}::bool)\n')
 
 
 def write_sat_always(complist):
@@ -755,16 +755,16 @@ def write_sat_always(complist):
     remove2 = list()
     for i in complist:
         if i in busac:
-            f.write('(assert (= b'+str(i)+' true))\n')
+            f.write(f'(assert (= b{i} true))\n')
         elif i in busdc:
-            f.write('(assert (= b'+str(i)+' true))\n')
+            f.write(f'(assert (= b{i} true))\n')
         elif i in null:
-            f.write('(assert (= b'+str(i)+' true))\n')
+            f.write(f'(assert (= b{i} true))\n')
     remove2 = all_pairs(null)
     edges = G.edges()
     for j in range(0,len(remove2)):
         if remove2[j] in edges:
-            f.write('(assert (= c'+str(remove2[j][0])+str(remove2[j][1])+' true))\n')
+            f.write(f'(assert (= c{remove2[j][0]}{remove2[j][1]} true))\n')
 
 
 def write_sat_disconnectgen(G,genlist):
@@ -781,9 +781,9 @@ def write_sat_disconnectgen(G,genlist):
         neighbor = G.neighbors(i)
         for j in range(0, len(neighbor)):
             if i < neighbor[j]:
-                f.write('(assert (=> (= g'+str(i)+' false) (= c'+str(i)+str(neighbor[j])+' false)))\n')
+                f.write(f'(assert (=> (= g{i} false) (= c{i}{neighbor[j]} false)))\n')
             elif i > neighbor[j]:
-                f.write('(assert (=> (= g'+str(i)+' false) (= c'+str(neighbor[j])+str(i)+' false)))\n')
+                f.write(f'(assert (=> (= g{i} false) (= c{neighbor[j]}{i} false)))\n')
         neighbor = list()
 
 
@@ -803,9 +803,9 @@ def write_sat_disconnectru(G,rulist):
         neighbor = H.neighbors(i)
         for j in range(0, len(neighbor)):
             if i < neighbor[j]:
-                f.write('(assert (=> (= r'+str(i)+' false) (= c'+str(i)+str(neighbor[j])+' false)))\n')
+                f.write(f'(assert (=> (= r{i} false) (= c{i}{neighbor[j]} false)))\n')
             elif i > neighbor[j]:
-                f.write('(assert (=> (= r'+str(i)+' false) (= c'+str(neighbor[j])+str(i)+' false)))\n')
+                f.write(f'(assert (=> (= r{i} false) (= c{neighbor[j]}{i} false)))\n')
         neighbor = list()
 
 
@@ -818,9 +818,9 @@ def write_sat_noparallel(G,genlist):
             f.write('(assert (not (and ')
             for j in range(0,len(path)-1):
                 if path[j] < path[j+1]:
-                    f.write('(= c'+str(path[j])+str(path[j+1])+' true) ')
+                    f.write(f'(= c{path[j]}{path[j + 1]} true) ')
                 else:
-                    f.write('(= c'+str(path[j+1])+str(path[j])+' true) ')
+                    f.write(f'(= c{path[j + 1]}{path[j]} true) ')
             f.write(')))\n')
 
 
@@ -837,17 +837,17 @@ def write_sat_acbusprop1(G,buslist, genlist):
                 f.write('(assert (=> (and ')
                 for k in range(1,len(path)):
                     if path[k] in gens:
-                        f.write(' (= g'+str(path[k])+' true)')
+                        f.write(f' (= g{path[k]} true)')
                     elif path[k] in busac:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                     elif path[k] in null:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                 for m in range(0,len(path)-1):
                     if path[m] < path[m+1]:
-                        f.write(' (= c'+str(path[m])+str(path[m+1])+' true)')
+                        f.write(f' (= c{path[m]}{path[m + 1]} true)')
                     else:
-                        f.write(' (= c'+str(path[m+1])+str(path[m])+' true)')
-                f.write(') (= b'+str(i)+' true)))\n')
+                        f.write(f' (= c{path[m + 1]}{path[m]} true)')
+                f.write(f') (= b{i} true)))\n')
             H = copy.deepcopy(G)
             H.remove_nodes_from(rus)
 
@@ -868,20 +868,20 @@ def write_sat_acbusprop2(G,buslist, genlist):
                 f.write(' (and')
                 for k in range(1,len(path)):
                         if path[k] in gens:
-                            f.write(' (= g'+str(path[k])+' true)')
+                            f.write(f' (= g{path[k]} true)')
                         elif path[k] in busac:
-                            f.write(' (= b'+str(path[k])+' true)')
+                            f.write(f' (= b{path[k]} true)')
                         elif path[k] in null:
-                            f.write(' (= b'+str(path[k])+' true)')
+                            f.write(f' (= b{path[k]} true)')
                 for m in range(0,len(path)-1):
                     if path[m] < path[m+1]:
-                        f.write(' (= c'+str(path[m])+str(path[m+1])+' true)')
+                        f.write(f' (= c{path[m]}{path[m + 1]} true)')
                     else:
-                        f.write(' (= c'+str(path[m+1])+str(path[m])+' true)')
+                        f.write(f' (= c{path[m + 1]}{path[m]} true)')
                 f.write(')')
             H = copy.deepcopy(G)
             H.remove_nodes_from(rus)
-        f.write(')) (= b'+str(i)+ ' false)))\n')
+        f.write(f')) (= b{i} false)))\n')
 
 
 def write_sat_dcbusprop1(G,buslist, genlist):
@@ -895,23 +895,23 @@ def write_sat_dcbusprop1(G,buslist, genlist):
                 f.write('(assert (=> (and ')
                 for k in range(1,len(path)):
                     if path[k] in gens:
-                        f.write(' (= g'+str(path[k])+' true)')
+                        f.write(f' (= g{path[k]} true)')
                     elif path[k] in busac:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                     elif path[k] in null:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                     elif path[k] in rus:
-                        f.write(' (= r'+str(path[k])+' true)')
+                        f.write(f' (= r{path[k]} true)')
                 for m in range(0,len(path)-1):
                     if path[m] in busdc and path[m+1] in rus:
                         pass
                     elif path[m] in rus and path[m+1] in busdc:
                         pass
                     elif path[m] < path[m+1]:
-                        f.write(' (= c'+str(path[m])+str(path[m+1])+' true)')
+                        f.write(f' (= c{path[m]}{path[m + 1]} true)')
                     elif path[m+1] < path[m]:
-                        f.write(' (= c'+str(path[m+1])+str(path[m])+' true)')
-                f.write(') (= b'+str(i)+' true)))\n')
+                        f.write(f' (= c{path[m + 1]}{path[m]} true)')
+                f.write(f') (= b{i} true)))\n')
             H = copy.deepcopy(G)
 
 
@@ -927,25 +927,25 @@ def write_sat_dcbusprop2(G,buslist, genlist):
                 f.write(' (and')
                 for k in range(1,len(path)):
                     if path[k] in gens:
-                        f.write(' (= g'+str(path[k])+' true)')
+                        f.write(f' (= g{path[k]} true)')
                     elif path[k] in busac:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                     elif path[k] in null:
-                        f.write(' (= b'+str(path[k])+' true)')
+                        f.write(f' (= b{path[k]} true)')
                     elif path[k] in rus:
-                        f.write(' (= r'+str(path[k])+' true)')
+                        f.write(f' (= r{path[k]} true)')
                 for m in range(0,len(path)-1):
                     if path[m] in busdc and path[m+1] in rus:
                         pass
                     elif path[m] in rus and path[m+1] in busdc:
                         pass
                     elif path[m] < path[m+1]:
-                        f.write(' (= c'+str(path[m])+str(path[m+1])+' true)')
+                        f.write(f' (= c{path[m]}{path[m + 1]} true)')
                     elif path[m+1] < path[m]:
-                        f.write(' (= c'+str(path[m+1])+str(path[m])+' true)')
+                        f.write(f' (= c{path[m + 1]}{path[m]} true)')
                 f.write(')')
             H = copy.deepcopy(G)
-        f.write(')) (= b'+str(i)+' false)))\n')
+        f.write(f')) (= b{i} false)))\n')
 
 
 def write_sat_env(gfail,rfail):
@@ -976,28 +976,28 @@ def write_sat_env(gfail,rfail):
     allrus = list(set(allrus))
     for i in range(0,len(allgens)):
         for j in range(0,len(allrus)):
-            env_filename = 'env'+str(count)+'.ys'
+            env_filename = f'env{count}.ys'
             f2 = open(env_filename,"w")
             for k in gens:
                 if isinstance(allgens[i],int):
                     if k == allgens[i]:
-                        f2.write('(assert (= g'+str(k)+' true))\n')
+                        f2.write(f'(assert (= g{k} true))\n')
                     else:
-                        f2.write('(assert (= g'+str(k)+' false))\n')
+                        f2.write(f'(assert (= g{k} false))\n')
                 elif k in allgens[i]:
-                    f2.write('(assert (= g'+str(k)+' true))\n')
+                    f2.write(f'(assert (= g{k} true))\n')
                 else:
-                    f2.write('(assert (= g'+str(k)+' false))\n')
+                    f2.write(f'(assert (= g{k} false))\n')
             for m in rus:
                 if isinstance(allrus[j],int):
                     if m == allrus[j]:
-                        f2.write('(assert (= r'+str(m)+' true))\n')
+                        f2.write(f'(assert (= r{m} true))\n')
                     else:
-                        f2.write('(assert (= r'+str(m)+' false))\n')
+                        f2.write(f'(assert (= r{m} false))\n')
                 elif m in allrus[j]:
-                    f2.write('(assert (= r'+str(m)+' true))\n')
+                    f2.write(f'(assert (= r{m} true))\n')
                 else:
-                    f2.write('(assert (= r'+str(m)+' false))\n')
+                    f2.write(f'(assert (= r{m} false))\n')
             count = count+1
             f2.write('(check)\n')
             f2.close()
@@ -1023,8 +1023,8 @@ gens = [0,1]
 nptime = 0
 #Create networkx graph from adjacency matrix
 G = nx.from_numpy_array(datatemp)
-print('number of edges ' + str(len(G.edges())))
-print('number of nodes ' + str(len(G.nodes())))
+print(f'number of edges {len(G.edges())}')
+print(f'number of nodes {len(G.nodes())}')
 #sets of failure states
 # fails = faulttol(10,gens,genfail)
 

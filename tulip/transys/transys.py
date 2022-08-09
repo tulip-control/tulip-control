@@ -828,7 +828,7 @@ def tuple2fts(
         for state, ap_label in state_labeling:
             if ap_label is None:
                 ap_label = set()
-            state = prepend_str + str(state)
+            state = f'{prepend_str}{state}'
             _logger.debug(
                 f'Labeling state:\n\t{state}\n'
                 f'with label:\n\t{ap_label}\n')

@@ -195,7 +195,7 @@ class States_labeling_test:
         assert a == b, (a, b)
 
     def test_find(self):
-        state_list = ["state"+str(i) for i in range(4)]
+        state_list = [f"state{i}" for i in range(4)]
         state_list = zip(state_list,
                          [{"ap": L} for L in [{'p'}, {'q'}, {'p'}, {'q'}]])
         self.S_ap.add_from(state_list, check=False)

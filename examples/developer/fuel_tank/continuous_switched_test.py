@@ -73,8 +73,8 @@ for mode, h in zip(modes, allh):
 # collect env, sys_modes
 env_modes, sys_modes = zip(*modes)
 msg = 'Found:\n'
-msg += '\t Environment modes: ' + str(env_modes)
-msg += '\t System modes: ' + str(sys_modes)
+msg += f'\t Environment modes: {env_modes}'
+msg += f'\t System modes: {sys_modes}'
 
 switched_dynamics = hybrid.SwitchedSysDyn(
     disc_domain_size=(len(env_modes), len(sys_modes)),
@@ -106,9 +106,9 @@ swab = abstract.multiproc_discretize_switched(
 print(swab)
 axs = swab.plot(show_ts=True)
 for i, ax in enumerate(axs):
-    ax.figure.savefig('swab_' + str(i) + '.pdf')
+    ax.figure.savefig(f'swab_{i}.pdf')
 
 #ax = sys_ts.ts.plot()
 
 elapsed = (time.time() - start)
-print('Discretization lasted: ' + str(elapsed))
+print(f'Discretization lasted: {elapsed}')

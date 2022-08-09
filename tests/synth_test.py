@@ -290,7 +290,7 @@ def test_only_mode_control():
     # label TS with APs
     ap_labels = [set(), set(), {'home'}, {'lot'}]
     for i, label in enumerate(ap_labels):
-        state = 's' + str(i)
+        state = f's{i}'
         env_sws.states.add(state, ap=label)
     # mode1 transitions
     transmat1 = np.array([[0, 1, 0, 1],

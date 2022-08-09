@@ -283,7 +283,7 @@ def find_ba_succ(
             automata.BuchiAutomaton
         ) -> list[tuple]:
     q = prev_q
-    _logger.debug('Next state:\t' + str(next_s))
+    _logger.debug(f'Next state:\t{next_s}')
     try:
         ap = fts.nodes[next_s]['ap']
     except:
@@ -291,7 +291,7 @@ def find_ba_succ(
             f'No AP label for FTS state: {next_s}'
             '\n Did you forget labeing it ?')
     Sigma_dict = {'letter': ap}
-    _logger.debug("Next state's label:\t" + str(ap))
+    _logger.debug(f"Next state's label:\t{ap}")
     enabled_ba_trans = ba.transitions.find(
         [q], with_attr_dict=Sigma_dict)
     enabled_ba_trans += ba.transitions.find(

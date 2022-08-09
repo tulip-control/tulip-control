@@ -43,7 +43,7 @@ save_fig = False
 
 def fts_maximal_example():
     """Finite-Transition System demo."""
-    print(hl +'\nClosed FTS   -    Example 2.2, p.21 [Baier]\n' +hl)
+    print(f'{hl}\nClosed FTS   -    Example 2.2, p.21 [Baier]\n{hl}')
     fts = trs.FiniteTransitionSystem()
     fts.name = 'Beverage vending machine'
     # add state info
@@ -63,22 +63,25 @@ def fts_maximal_example():
     # no transitions yet...
     pre = fts.states.pre({'pay'})
     post = fts.states.post({'pay'})
-    print("Pre('pay') = " +str(pre) )
-    print("Post('pay') = " +str(post) )
+    print(f"Pre('pay') = {pre}")
+    print(f"Post('pay') = {post}")
     try:
         fts.states.initial.add('not pay')
     except:
         warnings.warn(
             'You cannot add an initial state \\notin states.')
     # get state info
-    print('States:\n\t' +str(fts.states() ) )
-    print('Number of states:\n\t' +str(len(fts.states) ) )
-    print('Initial states:\n\t' +str(fts.states.initial) )
-    print('Number of initial states:\n\t' +str(len(fts.states.initial) ) )
-    print('Current state:\n\t' +str(fts.states.current) )
-    print("Is 'pay' a state ?\n\t" +str('pay' in fts.states) )
-    print("Is 'not pay' a state ?\n\t" +str('not pay' in fts.states() ) )
-    print("Is 'bla' a state ?\n\t" +str('bla' in fts) )
+    print(f'States:\n\t{fts.states()}')
+    print(f'Number of states:\n\t{len(fts.states)}')
+    print(f'Initial states:\n\t{fts.states.initial}')
+    print(f'Number of initial states:\n\t{len(fts.states.initial)}')
+    print(f'Current state:\n\t{fts.states.current}')
+    yes = 'pay' in fts.states
+    print(f"Is 'pay' a state ?\n\t{yes}")
+    yes = 'not pay' in fts.states()
+    print(f"Is 'not pay' a state ?\n\t{yes}")
+    yes = 'bla' in fts
+    print(f"Is 'bla' a state ?\n\t{yes}")
     print('')
     fts.plot()
     # add transition info (unlabeled)
@@ -91,8 +94,8 @@ def fts_maximal_example():
     fts.transitions.remove('pay', 'soda')
     pre = fts.states.pre({'pay'} )
     post = fts.states.post({'pay'} )
-    print("Pre('pay') =\n\t" +str(pre) )
-    print("Post('pay') =\n\t" +str(post) +'\n')
+    print(f"Pre('pay') =\n\t{pre}")
+    print(f"Post('pay') =\n\t{post}\n")
     # another way
     fts['pay'] # post of 'pay', note the edge ids returned, due to MultiDiGraph
     fts['select']
@@ -110,11 +113,11 @@ def fts_maximal_example():
         post = fts.states.post({state} )
         # same as:
         # post = fts.states.post_signle(state)
-        print('\tof state: ' +str(state) +', the states: ' +str(post) )
+        print(f'\tof state: {state}, the states: {post}')
     print(10*'-' +'\n')
     # same thing
     post_all = fts.states.post(fts.states() )
-    print('Same thing as above:\n\t' +str(post_all) +'\n' +10*'-' +'\n')
+    print(f'Same thing as above:\n\t{post_all}\n' +10*'-' +'\n')
     try:
         fts.transitions.add('pay', 'not yet a state')
     except:
@@ -124,8 +127,8 @@ def fts_maximal_example():
     except:
         print('Same state check as above.\n')
     # get transition info (unlabeled)
-    print('Transitions:\n\t' +str(fts.transitions() ) )
-    print('Number of transitions:\n\t' +str(len(fts.transitions) ) +'\n')
+    print(f'Transitions:\n\t{fts.transitions()}')
+    print(f'Number of transitions:\n\t{len(fts.transitions)}\n')
     fts.plot()
     print(fts) # pretty
     # ----------------------------------------
@@ -178,10 +181,10 @@ def fts_maximal_example():
     fts.transitions.remove('soda', 'pay')
     fts.transitions.add('soda', 'pay', sys_actions='get_soda')
     fts.plot()
-    print('Types of actions: ' +str(list(fts._transition_label_def.keys()) ) )
-    print('Number of actions: ' +str(len(fts.sys_actions) ) )
-    print('Actions: ' +str(fts.sys_actions ) )
-    print('Labeled transitions: ' +str(fts.transitions() ) )
+    print(f'Types of actions: {list(fts._transition_label_def.keys())}')
+    print(f'Number of actions: {len(fts.sys_actions)}')
+    print(f'Actions: {fts.sys_actions}')
+    print(f'Labeled transitions: {fts.transitions()}')
     fts.plot()
     # fast way to get all edges with value of actions
     nx.get_edge_attributes(fts, 'sys_actions')
@@ -196,10 +199,10 @@ def fts_maximal_example():
     fts.states.add('select', ap={'paid'})
     fts.plot()
     # export
-    print(hl +'\n CAUTION: Saving DOT, PDF files\n' +hl +'\n')
+    print(f'{hl}\n CAUTION: Saving DOT, PDF files\n{hl}\n')
     path = './test_fts'
-    dot_fname = path +'.dot'
-    pdf_fname = path +'.pdf'
+    dot_fname = f'{path}.dot'
+    pdf_fname = f'{path}.pdf'
     if not fts.plot() and save_fig:
         fts.save(pdf_fname)
         #fts.save(dot_fname, 'dot')
@@ -216,8 +219,8 @@ def ba_maximal_example():
     # alternatives to add props
     ba.alphabet.math_set.add(['paid'] )
     ba.atomic_propositions |= {'drink', 'paid'}
-    print('Number of letters: ' +str(len(ba.alphabet) ) +'\n')
-    print('Alphabet: ' +str(ba.alphabet) +'\n')
+    print(f'Number of letters: {len(ba.alphabet)}\n')
+    print(f'Alphabet: {ba.alphabet}\n')
     try:
         ba.transitions.add_labeled('q1', 'q10', {'paid'} )
     except:
@@ -233,13 +236,13 @@ def ba_maximal_example():
     ba.accepting |= {'q2', 'q3'}
     ba.accepting.remove('q2')
     ba.accepting.remove('q3')
-    print('Number of accepting states:\n\t' +
-          str(len(ba.accepting) ) +'\n')
-    print('Accepting states:\n\t' +str(ba.accepting) +'\n')
+    print('Number of accepting states:\n\t'
+          f'{len(ba.accepting)}\n')
+    print(f'Accepting states:\n\t{ba.accepting}\n')
     print(ba)
     path = './test_ba'
-    dot_fname = path +'.dot'
-    pdf_fname = path +'.pdf'
+    dot_fname = f'{path}.dot'
+    pdf_fname = f'{path}.pdf'
     if not ba.plot() and save_fig:
         ba.save(pdf_fname)
         #ba.save(dot_fname, 'dot')

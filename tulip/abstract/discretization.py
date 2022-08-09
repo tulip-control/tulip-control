@@ -1723,7 +1723,7 @@ def discretize_overlap(
 #             num_new_reg = np.hstack([num_new_reg, 0])
 #             num_orig_neigh = np.hstack([num_orig_neigh, np.sum(adj[size-1,:])-1])
 #
-#             _logger.info("\n Adding state " + str(size-1) + "\n")
+#             _logger.info(f"\n Adding state {size - 1}\n")
 #
 #             # Just add adjacent cells for checking,
 #             # unless transition already found
@@ -1734,7 +1734,7 @@ def discretize_overlap(
 #             IJ[size-1,:] = horiz2.astype(int)
 #             IJ[:,size-1] = verti2.astype(int)
 #         else:
-#             _logger.info("No transition found, intersect vol: " + str(vol1) )
+#             _logger.info(f"No transition found, intersect vol: {vol1}")
 #             transitions[i,j] = 0
 #
 #     new_part = PPP(

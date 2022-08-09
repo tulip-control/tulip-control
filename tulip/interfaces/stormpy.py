@@ -299,7 +299,7 @@ def to_prism_file(
         state_str = state_var
         if is_prime:
             state_str += "'"
-        state_str += '=' + str(state_index)
+        state_str += f'={state_index}'
         return state_str
     # Return the description of transitions in prism file
     def get_transition_str(transitions):

@@ -1411,7 +1411,7 @@ def add_trolls(
         t_size = (t_size[0], t_size[1])
         X_ID += 1
         X.append((t_offset, Y.dump_subworld(
-            t_size, offset=t_offset, prefix=prefix + "_" + str(X_ID))))
+            t_size, offset=t_offset, prefix=f'{prefix}_{X_ID}')))
         X[-1][1].goal_list = [(center[0] - t_offset[0],
                                center[1] - t_offset[1])]
         if start_anywhere:
@@ -1534,6 +1534,7 @@ def animate_paths(
         print('matplotlib not available, '
               'so skipping gridworld.animate_paths()')
         return
+    last = len(paths[0]) - 1
     colors = 'rgbcmyk'
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -1547,7 +1548,8 @@ def animate_paths(
             t.set_data(d[..., :num + 1])
             p.set_data(d[..., num])
         if save_prefix:
-            fig.savefig(save_prefix + "%03d.png" % num)
+            fig.savefig(
+                f'{save_prefix}{num:03d}.png')
         return lines,
     data = list()
     lines = list()
@@ -1575,8 +1577,7 @@ def animate_paths(
     else:
         print(
             f'Writing {save_prefix}000.png - '
-            f'{save_prefix}%03d.png' %
-              len(paths[0]) - 1)
+            f'{save_prefix}{last:03d}.png')
         for n in range(len(paths[0])):
             update_line(n, data, lines)
         return None

@@ -105,11 +105,11 @@ class Automaton(nx.DiGraph):
             output += "deterministic Rabin\n"
         elif self.aut_type == "DSA":
             output += "deterministic Streett\n"
-        output += "AP = "+str(self.ap)+"\n"
+        output += f"AP = {self.ap}\n"
         output += "Transitions:\n"
-        output += "\n".join(["\t("+str(u)+", "+str(v)+") :\n\t\tformula: "+str(d["formula"])+"\n\t\tsubsets of AP: "+str(d["subsets of AP"]) for (u,v,d) in self.edges(data=True)])+"\n"
+        output += "\n".join([f"\t({u}, {v}) :\n\t\tformula: {d["formula"]}\n\t\tsubsets of AP: {d["subsets of AP"]}") for (u,v,d) in self.edges(data=True)])+"\n"
         output += "Acceptance Pairs (each line is of the form (L, U)):\n"
-        output += "\n".join(["\t("+str(Fi.L)+", "+str(Fi.U)+")" for Fi in self.F])
+        output += "\n".join([f"\t({Fi.L}, {Fi.U})" for Fi in self.F])
         return output
 
 
@@ -121,7 +121,7 @@ def gen_apformula(AP, intrep):
     '!p & q'
     ```
     """
-    return " & ".join([AP[i] if ((intrep >> i) & 1) != 0 else "!"+AP[i] for i in range(len(AP))])
+    return " & ".join([AP[i] if ((intrep >> i) & 1) != 0 else f"!{AP[i]}" for i in range(len(AP))])
 
 
 def gen_apsubset(AP, intrep):
@@ -193,10 +193,10 @@ def readdstar(getline):
                 to_state = int(parts[0])
                 if not A.has_edge(last_state, to_state):
                     A.add_edge(last_state, to_state)
-                    A.edge[last_state][to_state]["formula"] = "("+gen_apformula(A.ap, apsubset_counter)+")"
+                    A.edge[last_state][to_state]["formula"] = f"({gen_apformula(A.ap, apsubset_counter)})"
                     A.edge[last_state][to_state]["subsets of AP"] = [gen_apsubset(A.ap, apsubset_counter)]
                 else:
-                    A.edge[last_state][to_state]["formula"] += " | ("+gen_apformula(A.ap, apsubset_counter)+")"
+                    A.edge[last_state][to_state]["formula"] += f" | ({gen_apformula(A.ap, apsubset_counter)})"
                     A.edge[last_state][to_state]["subsets of AP"].append(gen_apsubset(A.ap, apsubset_counter))
                 apsubset_counter += 1
     except EOFError:
@@ -207,7 +207,7 @@ def readdstar(getline):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or "-h" in sys.argv:
-        print("Usage: "+sys.argv[0]+" FILE")
+        print(f"Usage: {sys.argv[0]} FILE")
         exit(1)
     if sys.argv[1] == "-":
         # Read from stdin

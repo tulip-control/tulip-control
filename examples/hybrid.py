@@ -48,7 +48,7 @@ sys_hyb.env_actions.add_from({'slippery','normal'})
 
 # str states
 n = 6
-states = ['s'+str(i) for i in range(n) ]
+states = [f's{i}' for i in range(n)]
 
 sys_hyb.atomic_propositions.add_from(['home','lot'])
 state_labels = [{'home'}, set(), set(), set(), set(), {'lot'}]
