@@ -31,6 +31,7 @@
 # SUCH DAMAGE.
 #
 """Minimum violation planning module"""
+import collections.abc as _abc
 import itertools as _itr
 import typing as _ty
 
@@ -92,9 +93,9 @@ def _get_rule_violation_cost(
 
 def _add_transition(
         from_prod_states:
-            ProductState,
+            _abc.Iterable[ProductState],
         to_prod_states:
-            ProductState,
+            _abc.Iterable[ProductState],
         ks:
             KS,
         spec:
@@ -109,12 +110,6 @@ def _add_transition(
     J. Tumova, G.C Hall, S. Karaman, E. Frazzoli and D. Rus.
     Least-violating Control Strategy Synthesis with Safety Rules, HSCC 2013.
 
-    @param from_prod_state, to_prod_state:
-        tuple (ks_state, aut_state)
-        where ks_state is the state of the Kripke struture
-        and aut_state is a tuple,
-        representing the state of the finite automaton.
-        aut_state[i] corresponds to spec[i].
     @param spec:
         the prioritized safety specification
     @param trans_ks_cost:
@@ -129,8 +124,10 @@ def _add_transition(
 
 
 def _add_transition_edge(
-        from_prod_state,
-        to_prod_state,
+        from_prod_state:
+            ProductState,
+        to_prod_state:
+            ProductState,
         ks:
             KS,
         spec:
