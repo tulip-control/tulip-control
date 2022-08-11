@@ -18,7 +18,8 @@ RUN apt-get update && apt-get -y install \
     curl \
     build-essential \
     git \
-    python-yaml
+    python-is-python3 \
+    python3-yaml
 
 WORKDIR /root
 RUN git clone https://github.com/tulip-control/tulip-control.git
