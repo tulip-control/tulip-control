@@ -31,7 +31,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 # OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
-"""Bootstrap into a TuLiP installation using Travis CI configuration.
+"""Bootstrap into a TuLiP installation using CI configuration.
 
 Requirements: `pyyaml`
 
@@ -61,23 +61,23 @@ import tempfile
 import yaml
 
 
-_TRAVIS_PATH = '.travis.yml'
+_CI_CONFIG_PATH = '.travis.yml'
 
 
 def _main():
-    sudo_prefix, travis_yml_path = _parse_args()
-    with open(travis_yml_path) as fp:
-        travis_config = yaml.load(
+    sudo_prefix, ci_yml_path = _parse_args()
+    with open(ci_yml_path) as fp:
+        ci_config = yaml.load(
             fp.read(),
             Loader=yaml.Loader)
-    _arrange_base_env(sudo_prefix, travis_config)
-    _run_travis_commands(travis_config)
+    _arrange_base_env(sudo_prefix, ci_config)
+    _run_ci_commands(ci_config)
 
 
 def _arrange_base_env(
         sudo_prefix:
             str,
-        travis_config:
+        ci_config:
             dict
         ) -> None:
     subprocess.check_call(
@@ -95,7 +95,7 @@ def _arrange_base_env(
             pip
         '''.split())
     packages = ' '.join(
-        travis_config['addons']['apt']['packages'])
+        ci_config['addons']['apt']['packages'])
     subprocess.check_call(
         f'''
         {sudo_prefix}apt-get -y install
@@ -105,8 +105,8 @@ def _arrange_base_env(
         ['virtualenv', '-p', 'python3', 'PYt'])
 
 
-def _run_travis_commands(
-        travis_config:
+def _run_ci_commands(
+        ci_config:
             dict
         ) -> None:
     section_names = [
@@ -118,7 +118,7 @@ def _run_travis_commands(
     with os.fdopen(fd, 'w') as fp:
         fp.write('source PYt/bin/activate\n')
         for section in section_names:
-            fp.write('\n'.join(travis_config[section]))
+            fp.write('\n'.join(ci_config[section]))
             fp.write('\n')
     subprocess.check_call(
         ['/bin/bash', '-e', path])
@@ -142,10 +142,10 @@ def _parse_args() -> tuple[
     else:
         sudo_prefix = 'sudo '
     if args.travis_yml_path is None:
-        travis_yml_path = _TRAVIS_PATH
+        ci_yml_path = _CI_CONFIG_PATH
     else:
-        travis_yml_path = args.travis_yml_path
-    return sudo_prefix, travis_yml_path
+        ci_yml_path = args.travis_yml_path
+    return sudo_prefix, ci_yml_path
 
 
 if __name__ == '__main__':
