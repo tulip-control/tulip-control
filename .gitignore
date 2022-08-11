@@ -1,6 +1,8 @@
 tulip/_version.py
 .pytest_cache/
 htmlcov/
+.mypy_cache/
+.pytype/
 *~
 *.log
 *.out
