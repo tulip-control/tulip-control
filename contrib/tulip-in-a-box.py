@@ -71,7 +71,9 @@ _TRAVIS_PATH = '.travis.yml'
 def _main():
     sudo_prefix, travis_yml_path = _parse_args()
     with open(travis_yml_path) as fp:
-        travis_config = yaml.load(fp.read())
+        travis_config = yaml.load(
+            fp.read(),
+            Loader=yaml.Loader)
     _arrange_base_env(sudo_prefix, travis_config)
     _run_travis_commands(travis_config)
 

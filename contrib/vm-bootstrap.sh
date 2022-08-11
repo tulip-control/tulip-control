@@ -39,7 +39,8 @@
 sudo apt-get -y update && sudo apt-get -y install \
     git \
     python-is-python3 \
-    python3-yaml
+    python3-pip
+sudo pip install pyyaml>=6.0
 git clone https://github.com/tulip-control/tulip-control.git
 cd tulip-control
 python contrib/tulip-in-a-box.py
