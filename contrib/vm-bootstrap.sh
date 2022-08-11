@@ -36,7 +36,9 @@
 # N.B., this script requires `sudo` capabilities. It should run
 # without interruption if `sudo` escalation can occur with asking for
 # a password on the terminal, e.g., as typical in virtual machines.
-sudo apt-get -y update && sudo apt-get -y install git python-yaml
+sudo apt-get -y update && sudo apt-get -y install \
+    git \
+    python-yaml
 git clone https://github.com/tulip-control/tulip-control.git
 cd tulip-control
 python contrib/tulip-in-a-box.py
