@@ -83,16 +83,26 @@ def _arrange_base_env(
             dict
         ) -> None:
     subprocess.check_call(
-        (sudo_prefix +
-         'apt-get -y install python-pip libpython-dev ' +
-         'libpython3-dev python-virtualenv'
-         ).split())
+        f'''
+        {sudo_prefix}apt-get -y install
+            python-pip
+            libpython-dev
+            libpython3-dev
+            python-virtualenv
+        '''.split())
     subprocess.check_call(
-        (sudo_prefix + 'pip install -I -U pip').split())
+        f'''
+        {sudo_prefix}pip install
+            -I -U
+            pip
+        '''.split())
+    packages = ' '.join(
+        travis_config['addons']['apt']['packages'])
     subprocess.check_call(
-        (sudo_prefix + 'apt-get -y install ' +
-         ' '.join(travis_config['addons']['apt']['packages'])
-         ).split())
+        f'''
+        {sudo_prefix}apt-get -y install
+            {packages}
+        '''.split())
     subprocess.check_call(
         ['virtualenv', '-p', 'python3', 'PYt'])
 
