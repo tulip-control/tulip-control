@@ -247,7 +247,8 @@ def dom2vec(
         lambda_linspace,
         domain, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
-    q = np.vstack(map(np.ravel, pnt_coor))
+    q = np.vstack(list(map(
+        np.ravel, pnt_coor)))
     return q
 
 
