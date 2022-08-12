@@ -190,7 +190,8 @@ def newax(
                 projection='3d')
             ax.append(curax)
         if curdim > 3:
-            _warn.warn('`ndim > 3`, but plot limited to 3.')
+            raise ValueError(
+                '`ndim > 3`, but plot limited to 3.')
     if mode == 'matrix':
         ax = list(_grouper(nh, ax))
     # single axes ?
@@ -318,7 +319,7 @@ def quiver(
             v[0, :], v[1, :], v[2, :],
             **kwargs)
     if dim > 3:
-        _warn.warn(
+        raise ValueError(
             'ndim #dimensions > 3,'
             'plotting only 3D component.')
     return h
