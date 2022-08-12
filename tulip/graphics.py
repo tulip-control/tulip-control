@@ -147,21 +147,16 @@ def newax(
     _assert_pyplot()
     # layout or number of axes ?
     match subplots:
-        case tuple():
+        case (_, _):
             subplot_layout = tuple(subplots)
         case int():
             subplot_layout = (1, subplots)
         case _:
             raise TypeError(
-                'Expected `tuple` or `int` '
+                'Expected 2-`tuple` or `int` '
                 'as value for parameter '
                 '`subplots`. Got instead: '
                 f'{subplots = }')
-    # reasonable layout ?
-    if len(subplot_layout) != 2:
-        raise ValueError(
-            'subplot layout should be '
-            '2-`tuple` or `int`.')
     # which figure ?
     if fig is None:
         fig = _plt.figure()
