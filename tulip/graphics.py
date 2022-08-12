@@ -319,7 +319,7 @@ def quiver(
             **kwargs)
     if dim > 3:
         _warn.warn(
-            'quiver:ndim #dimensions > 3,' +
+            'ndim #dimensions > 3,'
             'plotting only 3D component.')
     return h
 
