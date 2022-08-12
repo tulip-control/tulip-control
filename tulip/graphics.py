@@ -59,8 +59,6 @@ except ImportError as error:
     _mpl = None
     _plt = None
     mpl_error = error
-# inline
-# from mayavi.mlab import quiver3d
 
 import tulip._utils as _utl
 
@@ -131,7 +129,6 @@ def newax(
     @param dim:
         plot dimension:
         - if `dim == 2`, then use `matplotlib`
-        - if `dim == 3`, then use `mayavi`
         So the figure type depends on `dim`.
 
         If `dim` is an iterable,
@@ -178,20 +175,15 @@ def newax(
         raise ValueError(
             'Expected dimension 2 or 3, '
             f'but: {dim = }')
-    # matplotlib (2D) or mayavi (3D) ?
+    # matplotlib (2D)
     ax = list()
     for i, curdim in enumerate(dim):
         if curdim == 2:
             curax = fig.add_subplot(nv, nh, i + 1)
             ax.append(curax)
         else:
-            curax = fig.add_subplot(
-                nv, nh, i + 1,
-                projection='3d')
-            ax.append(curax)
-        if curdim > 3:
             raise ValueError(
-                '`ndim > 3`, but plot limited to 3.')
+                '`ndim >= 3`, but plot limited to 2.')
     if mode == 'matrix':
         ax = list(_grouper(nh, ax))
     # single axes ?
@@ -278,8 +270,7 @@ def quiver(
     ```
 
     see also
-        `matplotlib.quiver`,
-        `mayavi.quiver3`
+        `matplotlib.quiver`
 
     @param x:
         points where vectors are based
@@ -302,23 +293,12 @@ def quiver(
     if not ax:
         ax = _plt.gca()
     dim = dimension(x)
-    if dim < 2:
-        raise ValueError('ndim < 2')
-    elif dim < 3:
+    if dim == 2:
         h = ax.quiver(
             x[0, :], x[1, :],
             v[0, :], v[1, :],
             **kwargs)
     else:
-        raise NotImplementedError
-        from mayavi.mlab import quiver3d
-        if ax:
-            print('axes arg ignored, mayavi used')
-        h = quiver3d(
-            x[0, :], x[1, :], x[2, :],
-            v[0, :], v[1, :], v[2, :],
-            **kwargs)
-    if dim > 3:
         raise ValueError(
             'ndim #dimensions > 3,'
             'plotting only 3D component.')
