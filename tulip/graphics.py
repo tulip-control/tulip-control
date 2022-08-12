@@ -35,8 +35,6 @@ WARNING: The public functions:
     `dimension`, `newax`, `dom2vec`, `quiver`
 will eventually be removed.
 Their use in new applications is discouraged.
-
-They come from <https://github.com/johnyf/pyvectorized>.
 """
 import collections.abc as _abc
 import itertools as _itr
@@ -262,7 +260,6 @@ def quiver(
     ```python
     import numpy as np
     import matplotlib as mpl
-    from pyvectorized import quiver, dom2vec
 
     x = dom2vec([0, 10, 0, 11], [20, 20])
     v = np.vstack(np.sin(x[1, :] ), np.cos(x[2, :]))
