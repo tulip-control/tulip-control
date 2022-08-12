@@ -160,7 +160,6 @@ def newax(
     # reasonable layout ?
     if len(subplot_layout) != 2:
         raise ValueError(
-            'newax:'
             'subplot layout should be '
             '2-`tuple` or `int`.')
     # which figure ?
