@@ -259,7 +259,6 @@ def quiver(
             np.ndarray,
         ax:
             _Axes |
-            _abc.Iterable[_Axes] |
             None=None,
         **kwargs):
     """Multi-dimensional quiver.  (DEPRECATED)
@@ -299,14 +298,6 @@ def quiver(
         handle to plotted object(s)
     """
     _assert_pyplot()
-    # multiple axes ?
-    try:
-        fields = [
-            quiver(x, v, i, **kwargs)
-            for i in ax]
-        return fields
-    except:
-        pass
     if not ax:
         ax = _plt.gca()
     dim = dimension(x)
