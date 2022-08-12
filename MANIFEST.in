@@ -6,6 +6,7 @@ include README.rst
 include LICENSE
 include doc/*
 exclude doc/*.sh
+include tulip/py.typed
 recursive-include contrib *
 include extern/README
 include extern/*.sh
