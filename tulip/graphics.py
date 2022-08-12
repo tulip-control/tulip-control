@@ -146,10 +146,17 @@ def newax(
     """
     _assert_pyplot()
     # layout or number of axes ?
-    try:
-        subplot_layout = tuple(subplots)
-    except TypeError:
-        subplot_layout = (1, subplots)
+    match subplots:
+        case tuple():
+            subplot_layout = tuple(subplots)
+        case int():
+            subplot_layout = (1, subplots)
+        case _:
+            raise TypeError(
+                'Expected `tuple` or `int` '
+                'as value for parameter '
+                '`subplots`. Got instead: '
+                f'{subplots = }')
     # reasonable layout ?
     if len(subplot_layout) != 2:
         raise ValueError(
