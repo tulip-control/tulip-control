@@ -239,13 +239,13 @@ def dom2vec(
         `domain2meshgrid`,
         `meshgrid2vec`
     """
-    domain = _grouper(2, domain)
+    domain_grouped = _grouper(2, domain)
     def lambda_linspace(dom, res):
         return np.linspace(
             dom[0], dom[1], res)
     axis_grids = map(
         lambda_linspace,
-        domain, resolution)
+        domain_grouped, resolution)
     pnt_coor = np.meshgrid(*axis_grids)
     q = np.vstack(list(map(
         np.ravel, pnt_coor)))
