@@ -5,7 +5,8 @@ on:
     push:
     pull_request:
     schedule:
-        # the start of every hour is a high-load time for GitHub Actions
+        # the start of every hour is
+        # a high-load time for GitHub Actions
         # <https://docs.github.com/en/actions/reference/
         #     events-that-trigger-workflows#scheduled-events>
         - cron: '37 5 5 * *'
@@ -45,7 +46,9 @@ jobs:
                 set -o posix
                 echo "Exported environment variables:"
                 export -p
-                ./run_tests.py --outofsource --fast hybrid
+                ./run_tests.py \
+                    --outofsource \
+                    --fast hybrid
             - name: Prepare for "full" tests
               run: |
                 ./$CI_DIR/setup_full_testing.sh
@@ -54,7 +57,8 @@ jobs:
                 set -o posix
                 echo "Exported environment variables:"
                 export -p
-                # run all tests, including slow hybrid tests, and
+                # run all tests, including
+                # slow hybrid tests, and
                 # alternative game solvers
                 ./run_tests.py --outofsource full
     static_analysis:
