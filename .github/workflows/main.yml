@@ -50,9 +50,11 @@ jobs:
                     --outofsource \
                     --fast hybrid
             - name: Prepare for "full" tests
+              if: endsWith(github.ref, '_fast_ci') == false
               run: |
                 ./$CI_DIR/setup_full_testing.sh
             - name: Run "full" tests
+              if: endsWith(github.ref, '_fast_ci') == false
               run: |
                 set -o posix
                 echo "Exported environment variables:"
