@@ -21,155 +21,34 @@ jobs:
                     ]
         steps:
             - uses: actions/checkout@v2
-            - name: Install APT packages
-              run: |
-                sudo apt update
-                sudo apt install \
-                    gfortran \
-                    libatlas-base-dev \
-                    liblapack-dev \
-                    libgmp-dev \
-                    libmpfr-dev \
-                    graphviz \
-                    libglpk-dev \
-                    libboost-dev \
-                    libboost-filesystem-dev \
-                    libboost-program-options-dev \
-                    libboost-regex-dev \
-                    libboost-test-dev \
-                    libeigen3-dev \
-                    libginac-dev \
-                    z3 \
-                    libz3-dev \
-                    python3-z3 \
-                    libhwloc-dev
             - name: Set up Python ${{ matrix.python-version }}
               uses: actions/setup-python@v2
               with:
                   python-version: ${{ matrix.python-version }}
-            - name: Install dependencies from PyPI
+            - name: Define CI directory
               run: |
-                pip install \
-                    --ignore-installed \
-                    --upgrade \
-                        pip \
-                        setuptools \
-                        wheel
-                pip install \
-                    --upgrade \
-                    --only-binary=numpy,scipy \
-                        numpy \
-                        scipy
-                pip install dd \
-                    --no-binary dd
-            - name: Create sdist for `tulip`
+                echo "CI_DIR=.github/workflows" >> $GITHUB_ENV
+            - name: Setup testing environment
               run: |
-                python setup.py sdist
-            - name: Install from sdist of `tulip`
-              run: |
-                pip install dist/tulip-*.tar.gz
-            - name: Install test dependencies
-              run: |
-                pip install pytest
-            - name: Display version of GraphViz `dot`
-              run: |
-                dot -V
+                ./$CI_DIR/setup_basic_testing.sh
             - name: Run "base" tests
               run: |
                 set -o posix
                 echo "Exported environment variables:"
                 export -p
                 ./run_tests.py --outofsource base
-            - name: Install dependencies for running "hybrid" tests
+            - name: Prepare for "hybrid" tests
               run: |
-                pip install matplotlib
+                ./$CI_DIR/setup_hybrid_testing.sh
             - name: Run "hybrid" tests
               run: |
                 set -o posix
                 echo "Exported environment variables:"
                 export -p
                 ./run_tests.py --outofsource --fast hybrid
-            - name: Install `cvxopt.glpk`
+            - name: Prepare for "full" tests
               run: |
-                export CVXOPT_BUILD_GLPK=1
-                python -c "import setup; setup.install_cvxopt()"
-                python -c "import cvxopt.glpk"
-            - name: Install `dd.cudd`
-              run: |
-                pip uninstall --yes dd
-                pip download --no-dependencies dd --no-binary dd
-                tar xzf dd-*.tar.gz
-                cd dd-*/
-                export CUDD_VERSION=3.0.0
-                export CUDD_GZ=cudd-${CUDD_VERSION}.tar.gz
-                # download
-                curl -sSL https://sourceforge.net/projects/\
-                cudd-mirror/files/${CUDD_GZ}/download > ${CUDD_GZ}
-                # checksum
-                echo "b8e966b4562c96a03e7fbea23972958\
-                7d7b395d53cadcc39a7203b49cf7eeb69  ${CUDD_GZ}" | \
-                    shasum -a 256 -c -
-                # unpack
-                tar -xzf ${CUDD_GZ}
-                python -c 'from download import make_cudd; make_cudd()'
-                python setup.py install --cudd
-                cd tests/
-                python -c 'import dd.cudd'
-            - name: Install optional Python packages
-              run: |
-                pip install gr1py
-            - name: Install `gr1c`
-              run: |
-                export GR1C_VERSION=0.13.0
-                export GR1C_GZ=gr1c-${GR1C_VERSION}-Linux_x86-64.tar.gz
-                # download
-                curl -sSLO https://github.com/\
-                tulip-control/gr1c/releases/download/\
-                v${GR1C_VERSION}/${GR1C_GZ}
-                # checksum
-                echo "1d45ca69d6acbf84ae6170de60b6c69\
-                073dffd3a6130c6213419e401d9d5c470  ${GR1C_GZ}" | \
-                    shasum -a 256 -c -
-                # unpack
-                tar -xzf ${GR1C_GZ}
-                export PATH=`pwd`/gr1c-${GR1C_VERSION}-Linux_x86-64:$PATH
-                # store values to use in later steps for environment variables
-                # <https://docs.github.com/en/actions/reference/
-                #     workflow-commands-for-github-actions#
-                #     setting-an-environment-variable>
-                echo "`pwd`/gr1c-${GR1C_VERSION}-Linux_x86-64" >> $GITHUB_PATH
-                # diagnostic information
-                which gr1c
-            - name: Install `lily`
-              run: |
-                ./extern/get-lily.sh
-                which perl
-                perl --version
-                pwd
-                export PERL5LIB=`pwd`/Lily-1.0.2
-                export PATH=`pwd`/Lily-1.0.2:$PATH
-                # store values to use in later steps for environment variables
-                echo "PERL5LIB=`pwd`/Lily-1.0.2" >> $GITHUB_ENV
-                # <https://docs.github.com/en/actions/reference/
-                #     workflow-commands-for-github-actions#adding-a-system-path>
-                echo "`pwd`/Lily-1.0.2" >> $GITHUB_PATH
-                # diagnostic information
-                echo $PATH
-                which lily.pl
-            - name: Install `slugs`
-              run: |
-                ./extern/get-slugs.sh
-                export PATH=`pwd`/slugs-repo/src:$PATH
-                # store values to use in later steps for environment variables
-                echo "`pwd`/slugs-repo/src" >> $GITHUB_PATH
-                # diagnostic information
-                which slugs
-            - name: Install Python requirements for development testing
-              run: |
-                pip install gitpython
-            - name: Install `stormpy` and its dependencies
-              run: |
-                ./extern/get-stormpy.sh
+                ./$CI_DIR/setup_full_testing.sh
             - name: Run "full" tests
               run: |
                 set -o posix
