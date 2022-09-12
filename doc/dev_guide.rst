@@ -240,6 +240,7 @@ entirely ignored.
   - REV: revert an earlier commit
   - STY: style correction
   - TST: testing
+  - TYP: type hints
   - UI: user interface, e.g., command-line options,
     printing messages, logging, and similar changes
   - WEB: changes to website; mostly relevant to branch `gh-pages`
