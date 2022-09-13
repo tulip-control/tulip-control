@@ -414,8 +414,7 @@ def _export_xml(
     @param parent:
     @type parent:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     @type tag:
         `None` or
         `str`
@@ -424,8 +423,7 @@ def _export_xml(
         an xml tree
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     """
     if tag_list is None:
         tag_list = list()
@@ -609,8 +607,7 @@ def _export_ppp(ppp, parent, tag):
         an xml tree
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'PropPreservingPartition'
@@ -638,8 +635,7 @@ def _export_ltisys(ltisys, parent, tag=None):
         an xml tree
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'LtiSysDyn'
@@ -670,8 +666,8 @@ def _export_pwasys(pwasys, parent, tag=None):
         XML tree (if `parent is None`),
         `None` otherwise.
     @rtype:
-        None or xml.etree.ElementTree.Element or
-        `xml.etree.ElementTree.SubElement`
+        `None` or
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'PwaSysDyn'
@@ -694,8 +690,8 @@ def _export_hybridsys(hybridsys, parent, tag=None):
     @return:
         None (if parent is not `None`), or an xml tree
     @rtype:
-        None or xml.etree.ElementTree.Element or
-        `xml.etree.ElementTree.SubElement`
+        `None` or
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'SwitchedSysDyn'
@@ -742,8 +738,7 @@ def _export_polytope(poly, parent, tag=None):
         an xml tree
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'polytope'
@@ -792,8 +787,7 @@ def _export_region(reg, parent, tag=None):
         an xml tree
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     """
     if tag is None:
         tag = 'region'
@@ -847,8 +841,7 @@ def _export_adj(matrix, parent, tag=None):
         `scipy.sparse.lil.lil_matrix`
     @type parent:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
     @type tag:
         `str`
     @return:
@@ -856,8 +849,7 @@ def _export_adj(matrix, parent, tag=None):
         `None` otherwise.
     @rtype:
         `None` or
-        `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
+        `xml.etree.ElementTree.Element`
 	"""
     if tag is None:
         tag = 'adj'
@@ -888,7 +880,6 @@ def _export_dict(dictionary, parent, tag=None):
     @type dictionary: `dict`
     @type parent: `None` or
         `xml.etree.ElementTree.Element` or
-        `xml.etree.ElementTree.SubElement`
     @type tag: `str`
 
     @return:
