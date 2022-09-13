@@ -888,8 +888,11 @@ def _export_dict(
         ) -> (
             ET.Element |
             None):
-    """Converts a dictionary into an XML tree. The key and value can be any
-    supported type because the function calls `_export_xml()` on the key and
+    """Converts a dictionary into an XML tree.
+
+    The key and value can be any
+    supported type because the
+    function calls `_export_xml()` on the key and
     value to form the document tree.
 
     @return:
