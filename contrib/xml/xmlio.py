@@ -95,11 +95,15 @@ def _make_pretty(tree, indent=1):
     Modifies the tail attributes of nodes in an XML tree so that the resulting
     printed XML file looks like an indented tree (and not one long line).
 
-    @type tree: `xml.etree.ElementTree.Element`
-    @type indent: `int`
+    @type tree:
+        `xml.etree.ElementTree.Element`
+    @type indent:
+        `int`
 
-    @return: `None`, just modifies tree by reference
-    @rtype: `None`
+    @return:
+        `None`, just modifies tree by reference
+    @rtype:
+        `None`
     """
     tab_string = '\n' + '\t' * indent
     # If a tree has children,
@@ -186,7 +190,8 @@ def importXML(filename):
 def _import_xml(node):
     """Returns the Tulip data structure contained in a parsed XML file.
 
-    @type tree: `xml.etree.ElementTree.Element`
+    @type tree:
+        `xml.etree.ElementTree.Element`
     @rtype:
         `Polytope`,
         `Region`,
@@ -599,8 +604,10 @@ def _export_fts(fts, parent, tag, type_str=T_OFTS):
 
 def _export_ppp(ppp, parent, tag):
     """
-    @return: `None` (if `parent` is `None`), or an xml tree
-    @rtype: `None` or
+    @return:
+        `None` (if `parent` is `None`), or an xml tree
+    @rtype:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
     """
@@ -625,8 +632,10 @@ def _export_ppp(ppp, parent, tag):
 
 def _export_ltisys(ltisys, parent, tag=None):
     """
-    @return: `None` (if `parent` is `None`), or an xml tree
-    @rtype: `None` or
+    @return:
+        `None` (if `parent` is `None`), or an xml tree
+    @rtype:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
     """
@@ -655,8 +664,10 @@ def _export_ltisys(ltisys, parent, tag=None):
 
 def _export_pwasys(pwasys, parent, tag=None):
     """
-    @return: None (if parent is None), or an xml tree
-    @rtype: None or xml.etree.ElementTree.Element or
+    @return:
+        None (if parent is None), or an xml tree
+    @rtype:
+        None or xml.etree.ElementTree.Element or
         `xml.etree.ElementTree.SubElement`
     """
     if tag is None:
@@ -677,8 +688,10 @@ def _export_pwasys(pwasys, parent, tag=None):
 
 def _export_hybridsys(hybridsys, parent, tag=None):
     """
-    @return: None (if parent is None), or an xml tree
-    @rtype: None or xml.etree.ElementTree.Element or
+    @return:
+        None (if parent is None), or an xml tree
+    @rtype:
+        None or xml.etree.ElementTree.Element or
         `xml.etree.ElementTree.SubElement`
     """
     if tag is None:
@@ -771,9 +784,11 @@ def _export_polytope(poly, parent, tag=None):
 
 def _export_region(reg, parent, tag=None):
     """
-    @return: `None` (if `parent` is `None`), or
+    @return:
+        `None` (if `parent` is `None`), or
         an xml tree
-    @rtype: `None` or
+    @rtype:
+        `None` or
         `xml.etree.ElementTree.Element` or
         `xml.etree.ElementTree.SubElement`
     """
@@ -873,7 +888,8 @@ def _export_dict(dictionary, parent, tag=None):
         `xml.etree.ElementTree.SubElement`
     @type tag: `str`
 
-    @return: An XML tree if parent is `None`.
+    @return:
+        An XML tree if parent is `None`.
         Otherwise, modifies the tree parent
         is contained in without returning.
     @rtype: `xml.etree.ElementTree.Element` or `None`
