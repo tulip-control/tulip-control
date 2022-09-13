@@ -420,7 +420,7 @@ def _export_xml(
         `None` or
         `str`
     @return:
-        `None` (if parent is `None`), or
+        `None` (if parent is not `None`), or
         an xml tree
     @rtype:
         `None` or
@@ -605,7 +605,8 @@ def _export_fts(fts, parent, tag, type_str=T_OFTS):
 def _export_ppp(ppp, parent, tag):
     """
     @return:
-        `None` (if `parent` is `None`), or an xml tree
+        `None` (if `parent` is not `None`), or
+        an xml tree
     @rtype:
         `None` or
         `xml.etree.ElementTree.Element` or
@@ -633,7 +634,8 @@ def _export_ppp(ppp, parent, tag):
 def _export_ltisys(ltisys, parent, tag=None):
     """
     @return:
-        `None` (if `parent` is `None`), or an xml tree
+        `None` (if `parent` is not `None`), or
+        an xml tree
     @rtype:
         `None` or
         `xml.etree.ElementTree.Element` or
@@ -665,7 +667,8 @@ def _export_ltisys(ltisys, parent, tag=None):
 def _export_pwasys(pwasys, parent, tag=None):
     """
     @return:
-        None (if parent is None), or an xml tree
+        XML tree (if `parent is None`),
+        `None` otherwise.
     @rtype:
         None or xml.etree.ElementTree.Element or
         `xml.etree.ElementTree.SubElement`
@@ -689,7 +692,7 @@ def _export_pwasys(pwasys, parent, tag=None):
 def _export_hybridsys(hybridsys, parent, tag=None):
     """
     @return:
-        None (if parent is None), or an xml tree
+        None (if parent is not `None`), or an xml tree
     @rtype:
         None or xml.etree.ElementTree.Element or
         `xml.etree.ElementTree.SubElement`
@@ -735,7 +738,7 @@ def _export_polytope(poly, parent, tag=None):
     @type poly:
         `Polytope`
     @return:
-        `None` (if parent is `None`), or
+        `None` (if parent is not `None`), or
         an xml tree
     @rtype:
         `None` or
@@ -785,7 +788,7 @@ def _export_polytope(poly, parent, tag=None):
 def _export_region(reg, parent, tag=None):
     """
     @return:
-        `None` (if `parent` is `None`), or
+        `None` (if `parent` is not `None`), or
         an xml tree
     @rtype:
         `None` or
@@ -849,8 +852,8 @@ def _export_adj(matrix, parent, tag=None):
     @type tag:
         `str`
     @return:
-        `None` (if `parent` is `None`), or
-        an xml tree
+        XML tree if `parent is None`,
+        `None` otherwise.
     @rtype:
         `None` or
         `xml.etree.ElementTree.Element` or
