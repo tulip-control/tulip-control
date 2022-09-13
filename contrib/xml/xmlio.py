@@ -190,7 +190,7 @@ def importXML(filename):
 def _import_xml(node):
     """Returns the Tulip data structure contained in a parsed XML file.
 
-    @type tree:
+    @type node:
         `xml.etree.ElementTree.Element`
     @rtype:
         `Polytope`,
