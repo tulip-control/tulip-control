@@ -411,7 +411,6 @@ def _export_xml(
         `PropPreservingPartition` or
         `AbstractSysDyn` or
         `dict`
-    @param parent:
     @type parent:
         `None` or
         `xml.etree.ElementTree.Element`
