@@ -38,7 +38,7 @@ TuLiP data structures.
 """
 import numpy
 import polytope
-import scipy.sparse
+import scipy.sparse as _sp
 from tulip import transys
 from tulip import hybrid
 from tulip import abstract
@@ -243,7 +243,7 @@ def _import_adj(node):
     # Get number of rows and columns
     N = _import_xml(node.findall('num_states')[0])
     # Make matrix
-    sparse_matrix = scipy.sparse.lil_matrix((N,N))
+    sparse_matrix = _sp.lil_matrix((N,N))
     # Get entries and fill them in with ones
     entries = _import_xml(node.findall('index_list')[0])
     for entry in entries:
@@ -516,7 +516,7 @@ def _export_xml(
             data, parent, tag,
             type_str=T_LIST,
             tag_list=tag_list)
-    elif isinstance(data, scipy.sparse.lil.lil_matrix):
+    elif isinstance(data, _sp.lil.lil_matrix):
         _export_adj(data, parent, tag)
     elif isinstance(data, set):
         #_export_set(data, parent, tag)
