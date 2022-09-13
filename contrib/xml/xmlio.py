@@ -521,7 +521,7 @@ def _export_xml(
             data, parent, tag,
             type_str=T_LIST,
             tag_list=tag_list)
-    elif isinstance(data, _sp.lil.lil_matrix):
+    elif isinstance(data, _sp.lil_matrix):
         _export_adj(data, parent, tag)
     elif isinstance(data, set):
         #_export_set(data, parent, tag)
