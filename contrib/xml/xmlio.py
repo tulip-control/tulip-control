@@ -908,8 +908,10 @@ def _export_list(
         lst, parent,
         tag=None,
         type_str=T_LIST,
-        tag_list=[]):
+        tag_list=None):
     # Tag list is either a list of labels or a list of lists
+    if tag_list is None:
+        tag_list = list()
     if tag is None:
         tag = 'list'
     if parent is None:
