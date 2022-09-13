@@ -620,6 +620,7 @@ def _export_ppp(ppp, parent, tag):
     _export_xml(ppp.prop_regions, tree, N_PROPREG)
     if parent is None:
         return tree
+    return None
 
 
 def _export_ltisys(ltisys, parent, tag=None):
@@ -649,6 +650,7 @@ def _export_ltisys(ltisys, parent, tag=None):
         _export_polytope(ltisys.domain, tree, 'domain')
     if parent is None:
         return tree
+    return None
 
 
 def _export_pwasys(pwasys, parent, tag=None):
@@ -670,6 +672,7 @@ def _export_pwasys(pwasys, parent, tag=None):
     _export_list(pwasys.list_subsys, tree, 'ltilist')
     if parent is None:
         return tree
+    return None
 
 
 def _export_hybridsys(hybridsys, parent, tag=None):
@@ -708,6 +711,7 @@ def _export_hybridsys(hybridsys, parent, tag=None):
         tag='dynamics')
     if parent is None:
         return tree
+    return None
 
 
 def _export_polytope(poly, parent, tag=None):
@@ -762,6 +766,7 @@ def _export_polytope(poly, parent, tag=None):
     # Return if there is no parent
     if parent is None:
         return tree
+    return None
 
 
 def _export_region(reg, parent, tag=None):
@@ -811,6 +816,7 @@ def _export_region(reg, parent, tag=None):
         _export_xml(reg.props, tree, N_PROPS)
     if parent is None:
         return tree
+    return None
 
 
 def _export_adj(matrix, parent, tag=None):
@@ -853,6 +859,7 @@ def _export_adj(matrix, parent, tag=None):
     _export_list(indices, tree, 'index_list')
     if parent is None:
         return tree
+    return None
 
 
 def _export_dict(dictionary, parent, tag=None):
@@ -884,6 +891,7 @@ def _export_dict(dictionary, parent, tag=None):
         _export_xml(value, parent=pair_node, tag=N_VALUE)
     if parent is None:
         return tree
+    return None
 
 
 def _export_list(
@@ -906,3 +914,4 @@ def _export_list(
         _export_xml(item, parent=tree, tag=tag_list[ind])
     if parent is None:
         return tree
+    return None
