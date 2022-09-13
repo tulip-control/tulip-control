@@ -196,7 +196,7 @@ def _import_xml(node):
         `Polytope`,
         `Region`,
         `PropPreservingPartition`,
-        `HybridSysDyn`,
+        `SwitchedSysDyn`,
         `PwaSysDyn`,
         `LtiSysDyn`,
         `FiniteTransitionSystem`,
