@@ -814,7 +814,7 @@ def _export_region(reg, parent, tag=None):
 
 
 def _export_adj(matrix, parent, tag=None):
-    """Converts an adjacency matrix (`scipy.sparse.lil.lil_matrix`) into an xml
+    """Converts an adjacency matrix (`lil_matrix`) into an xml
     tree.
 
     @param matrix:
