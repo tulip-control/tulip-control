@@ -1068,7 +1068,7 @@ def _discretize_bi(
             tmp_part = PPP(
                 domain=part.domain,
                 regions=sol,
-                adj=sp.lil_matrix(adj),
+                adj=sp.lil_array(adj),
                 prop_regions=part.prop_regions)
             assert(tmp_part.is_partition())
         n_cells = len(sol)
@@ -1088,7 +1088,7 @@ def _discretize_bi(
             continue
         tmp_part = PPP(
             domain=part.domain,
-            regions=sol, adj=sp.lil_matrix(adj),
+            regions=sol, adj=sp.lil_array(adj),
             prop_regions=part.prop_regions)
         # plot pair under reachability check
         ax2.clear()
@@ -1124,7 +1124,7 @@ def _discretize_bi(
         plt.pause(1)
     new_part = PPP(
         domain=part.domain,
-        regions=sol, adj=sp.lil_matrix(adj),
+        regions=sol, adj=sp.lil_array(adj),
         prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
@@ -1132,7 +1132,7 @@ def _discretize_bi(
         tmp_part.compute_adj()
     # Generate transition system and add transitions
     ofts = trs.FTS()
-    adj = sp.lil_matrix(transitions.T)
+    adj = sp.lil_array(transitions.T)
     n = adj.shape[0]
     ofts_states = list(range(n))
     ofts.states.add_from(ofts_states)
@@ -1512,7 +1512,7 @@ def _discretize_dual(
         if debug:
             tmp_part = PPP(
                 domain=part.domain,
-                regions=sol, adj=sp.lil_matrix(adj),
+                regions=sol, adj=sp.lil_array(adj),
                 prop_regions=part.prop_regions)
             assert(tmp_part.is_partition())
         n_cells = len(sol)
@@ -1534,7 +1534,7 @@ def _discretize_dual(
             continue
         tmp_part = PPP(
             domain=part.domain,
-            regions=sol, adj=sp.lil_matrix(adj),
+            regions=sol, adj=sp.lil_array(adj),
             prop_regions=part.prop_regions)
         # plot pair under reachability check
         ax2.clear()
@@ -1570,7 +1570,7 @@ def _discretize_dual(
         plt.pause(1)
     new_part = PPP(
         domain=part.domain,
-        regions=sol, adj=sp.lil_matrix(adj),
+        regions=sol, adj=sp.lil_array(adj),
         prop_regions=part.prop_regions)
     # check completeness of adjacency matrix
     if debug:
@@ -1578,7 +1578,7 @@ def _discretize_dual(
         tmp_part.compute_adj()
     # Generate transition system and add transitions
     ofts = trs.FTS()
-    adj = sp.lil_matrix(transitions.T)
+    adj = sp.lil_array(transitions.T)
     n = adj.shape[0]
     ofts_states = list(range(n))
     ofts.states.add_from(ofts_states)
@@ -2050,7 +2050,7 @@ def get_transitions(
             bool=True,
         trans_length:
             int=1
-        ) -> sp.lil_matrix:
+        ) -> sp.lil_array:
     """Find which transitions are feasible in given mode.
 
     Used for the candidate transitions of the merged partition.
@@ -2069,7 +2069,7 @@ def get_transitions(
         IJ = (IJ > 0).astype(int)
     # Initialize output
     n = len(part)
-    transitions = sp.lil_matrix(
+    transitions = sp.lil_array(
         (n, n),
         dtype=int)
     # Do the abstraction

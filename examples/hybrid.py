@@ -66,16 +66,16 @@ for state, label in zip(states, state_labels):
 trans1 = np.eye(6)
 
 sys_hyb.transitions.add_adj(
-    sp.lil_matrix(trans1), states,
+    sp.lil_array(trans1), states,
     sys_actions='gear0', env_actions='normal'
 )
 sys_hyb.transitions.add_adj(
-    sp.lil_matrix(trans1), states,
+    sp.lil_array(trans1), states,
     sys_actions='gear0', env_actions='slippery'
 )
 
 # gear1 dynamics are similar to the environment switching example.
-transmat1 = sp.lil_matrix(np.array(
+transmat1 = sp.lil_array(np.array(
                 [[1,1,0,1,0,0],
                  [1,1,1,0,1,0],
                  [0,1,1,0,1,1],
@@ -88,7 +88,7 @@ sys_hyb.transitions.add_adj(
     transmat1, states, sys_actions='gear1', env_actions='normal'
 )
 
-transmat2 = sp.lil_matrix(np.array(
+transmat2 = sp.lil_array(np.array(
                 [[0,0,1,1,0,0],
                  [1,0,1,0,1,0],
                  [1,0,0,0,1,1],

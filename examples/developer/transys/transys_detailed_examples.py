@@ -32,7 +32,7 @@
 """Transition System module developer examples."""
 import networkx as nx
 from numpy.random import rand
-from scipy.sparse import lil_matrix
+from scipy.sparse import lil_array
 import tulip.transys as trs
 import warnings
 
@@ -251,7 +251,7 @@ def ba_maximal_example():
 
 def scipy_sparse_labeled_adj():
     n = 10
-    A = lil_matrix((n, n))
+    A = lil_array((n, n))
     A[0, :3] = rand(3)
     adj2states = list(range(n))
     print(A)
@@ -266,7 +266,7 @@ def scipy_sparse_labeled_adj():
     ofts.plot()
     """same thing as above, using A as a submatrix instead
     """
-    A = lil_matrix((3, 3))
+    A = lil_array((3, 3))
     A[0, :3] = rand(3)
     adj2states = [0, 1, 2]
     print(A)

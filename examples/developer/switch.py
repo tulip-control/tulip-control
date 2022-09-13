@@ -23,14 +23,14 @@ sys_swe.states.add_from(states)
 sys_swe.states.initial |= ['s0']
 
 # different transitions possible, depending on weather
-transmat1 = sp.lil_matrix(np.array(
+transmat1 = sp.lil_array(np.array(
                 [[0,1],
                  [1,0]]
             ))
 sys_swe.transitions.add_adj(transmat1, states, env_actions='sun')
 
 # avoid being killed by environment
-transmat2 = sp.lil_matrix(np.array(
+transmat2 = sp.lil_array(np.array(
                 [[1,0],
                  [0,1]]
             ))

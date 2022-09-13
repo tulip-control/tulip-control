@@ -298,14 +298,14 @@ def test_only_mode_control():
                           [0, 1, 0, 1],
                           [0, 0, 0, 1]])
     env_sws.transitions.add_adj(
-        sp.lil_matrix(transmat1), states, {'sys_actions': 'right'})
+        sp.lil_array(transmat1), states, {'sys_actions': 'right'})
     # mode2 transitions
     transmat2 = np.array([[1, 0, 0, 0],
                           [1, 0, 1, 0],
                           [0, 0, 1, 0],
                           [1, 0, 1, 0]])
     env_sws.transitions.add_adj(
-        sp.lil_matrix(transmat2), states, {'sys_actions': 'left'})
+        sp.lil_array(transmat2), states, {'sys_actions': 'left'})
     env_vars = {'park'}
     env_init = {'eloc = "s0"', 'park'}
     env_prog = {'!park'}

@@ -48,7 +48,7 @@ for state, label in zip(states, state_labels):
 
 # Within each mode the transitions can be deterministically chosen, environment
 # chooses the mode (the surface can be slippery or normal).
-transmat1 = sp.lil_matrix(np.array(
+transmat1 = sp.lil_array(np.array(
                 [[1,1,0,1,0,0],
                  [1,1,1,0,1,0],
                  [0,1,1,0,1,1],
@@ -60,7 +60,7 @@ transmat1 = sp.lil_matrix(np.array(
 sys_swe.transitions.add_adj(transmat1, states, env_actions='normal')
 
 # In slippery mode, the robot can't stay still and makes larger jumps.
-transmat2 = sp.lil_matrix(np.array(
+transmat2 = sp.lil_array(np.array(
                 [[0,0,1,1,0,0],
                  [1,0,1,0,1,0],
                  [1,0,0,0,1,1],

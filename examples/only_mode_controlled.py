@@ -58,7 +58,7 @@ transmat1 = np.array([[0,1,0,0,1,0],
                       [0,0,1,0,0,1],
                       [0,0,0,0,0,1]])
 env_sws.transitions.add_adj(
-    sp.lil_matrix(transmat1), states, sys_actions='right'
+    sp.lil_array(transmat1), states, sys_actions='right'
 )
 
 # mode2 transitions
@@ -69,7 +69,7 @@ transmat2 = np.array([[0,0,0,1,0,0],
                       [0,0,0,0,1,0],
                       [0,0,0,0,0,1]])
 env_sws.transitions.add_adj(
-    sp.lil_matrix(transmat2), states, sys_actions='up'
+    sp.lil_array(transmat2), states, sys_actions='up'
 )
 
 # mode3 transitions
@@ -80,7 +80,7 @@ transmat3 = np.array([[1,0,0,0,0,0],
                       [1,0,0,1,0,0],
                       [0,1,0,0,1,0]])
 env_sws.transitions.add_adj(
-    sp.lil_matrix(transmat3), states, sys_actions='left'
+    sp.lil_array(transmat3), states, sys_actions='left'
 )
 
 # mode4 transitions
@@ -91,7 +91,7 @@ transmat4 = np.array([[1,0,0,0,0,0],
                       [0,1,1,0,0,0],
                       [0,0,1,0,0,0]])
 env_sws.transitions.add_adj(
-    sp.lil_matrix(transmat4), states, sys_actions='down'
+    sp.lil_array(transmat4), states, sys_actions='down'
 )
 
 # This is what is visible to the outside world (and will go into synthesis method)

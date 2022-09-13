@@ -239,7 +239,7 @@ def _import_adj(node):
     # Get number of rows and columns
     N = _import_xml(node.findall('num_states')[0])
     # Make matrix
-    sparse_matrix = _sp.lil_matrix((N,N))
+    sparse_matrix = _sp.lil_array((N,N))
     # Get entries and fill them in with ones
     entries = _import_xml(node.findall('index_list')[0])
     for entry in entries:
@@ -506,7 +506,7 @@ def _export_xml(
             data, parent, tag,
             type_str=T_LIST,
             tag_list=tag_list)
-    elif isinstance(data, _sp.lil_matrix):
+    elif isinstance(data, _sp.lil_array):
         _export_adj(data, parent, tag)
     elif isinstance(data, set):
         #_export_set(data, parent, tag)
@@ -837,7 +837,7 @@ def _export_region(
 
 def _export_adj(
         matrix:
-            _sp.lil_matrix,
+            _sp.lil_array,
         parent:
             ET.Element |
             None,

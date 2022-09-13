@@ -190,7 +190,7 @@ def project_strategy_on_partition(
         the Mealy strategy `mealy`.
     """
     n = len(ppp)
-    proj_adj = sp.lil_matrix((n, n))
+    proj_adj = sp.lil_array((n, n))
     edges = mealy.transitions.find()
     for from_state, to_state, label in edges:
         from_label = mealy.states[from_state]

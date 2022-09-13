@@ -97,7 +97,7 @@ class PropPreservingPartition(pc.MetricPartition):
                 list[Polytope] |
                 None=None,
             adj:
-                sp.lil_matrix |
+                sp.lil_array |
                 None=None,
             prop_regions:
                 dict[..., Polytope] |
@@ -483,7 +483,7 @@ def pwa_partition(
                 subsys_list.append(i)
     # compute spatial adjacency matrix
     n = len(new_list)
-    adj = sp.lil_matrix((n, n), dtype=np.int8)
+    adj = sp.lil_array((n, n), dtype=np.int8)
     for i, ri in enumerate(new_list):
         pi = parents[i]
         for j, rj in enumerate(new_list[0:i]):
@@ -640,7 +640,7 @@ def add_grid(
                 isect.props = ppp.regions[j].props.copy()
                 new_list.append(isect)
                 parent.append(j)
-    adj = sp.lil_matrix(
+    adj = sp.lil_array(
         (len(new_list), len(new_list)),
         dtype=np.int8)
     for i in range(len(new_list)):
@@ -723,7 +723,7 @@ def ppp2ts(
     """
     # generate transition system and add transitions
     ofts = trs.FTS()
-    adj = part.adj  # `sp.lil_matrix`
+    adj = part.adj  # `sp.lil_array`
     n = adj.shape[0]
     ofts_states = range(n)
     ofts_states = trs.prepend_with(ofts_states, 's')
