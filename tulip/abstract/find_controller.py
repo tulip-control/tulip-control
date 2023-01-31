@@ -568,11 +568,13 @@ def get_input_helper(
     return u.reshape(N, m), cost
 
 
-class _InputHelperLPException(Exception):
+class _InputHelperLPException(
+        RuntimeError):
     pass
 
 
-class _InputHelperQPException(Exception):
+class _InputHelperQPException(
+        RuntimeError):
     pass
 
 
