@@ -65,7 +65,8 @@ import sys
 import networkx as nx
 
 
-class GBAutomaton(nx.DiGraph):
+class GBAutomaton(
+        nx.DiGraph):
     def __init__(self, number_of_acceptance_sets):
         nx.DiGraph.__init__(self, number_of_acceptance_sets=0)
         self.number_of_acceptance_sets = number_of_acceptance_sets

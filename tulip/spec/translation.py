@@ -102,10 +102,12 @@ def make_jtlv_nodes() -> Nodes:
         '!=':
             '!='}
     nodes = _ast.make_fol_nodes(opmap)
-    class Str(nodes.Str):
+    class Str(
+            nodes.Str):
         def flatten(self, **kw):
             return f'({self})'
-    class Var(nodes.Var):
+    class Var(
+            nodes.Var):
         def flatten(self, env_vars=None, sys_vars=None, **kw):
             v = self.value
             if v in env_vars:
@@ -161,11 +163,13 @@ def make_gr1c_nodes(
             '!=':
                 '!='}
     nodes = _ast.make_fol_nodes(opmap)
-    class Var(nodes.Var):
+    class Var(
+            nodes.Var):
         def flatten(self, prime=None, **kw):
             prm = "'" if prime else ''
             return f'{self.value}{prm}'
-    class Unary(nodes.Unary):
+    class Unary(
+            nodes.Unary):
         def flatten(self, *arg, **kw):
             if self.operator == 'X':
                 kw.update(prime=True)
@@ -285,7 +289,8 @@ def make_wring_nodes() -> Nodes:
         'V':
             'V'}
     nodes = _ast.make_fol_nodes(opmap)
-    class Var(nodes.Var):
+    class Var(
+            nodes.Var):
         def flatten(self, *arg, **kw):
             if ('env_vars' in kw) or ('sys_vars' in kw):
                 env_vars = kw['env_vars']
@@ -339,12 +344,14 @@ def make_python_nodes() -> Nodes:
         '-':
             '-'}
     nodes = _ast.make_fol_nodes(opmap)
-    class Imp(nodes.Binary):
+    class Imp(
+            nodes.Binary):
         def flatten(self, *arg, **kw):
             l = self.operands[0].flatten()
             r = self.operands[1].flatten()
             return f'((not ({l})) or {r})'
-    class BiImp(nodes.Binary):
+    class BiImp(
+            nodes.Binary):
         def flatten(self, *arg, **kw):
             l = self.operands[0].flatten()
             r = self.operands[1].flatten()

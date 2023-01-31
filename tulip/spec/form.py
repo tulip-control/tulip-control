@@ -307,7 +307,8 @@ Conjuncts = (
     _abc.Iterable[str])
 
 
-class GRSpec(LTL):
+class GRSpec(
+        LTL):
     r"""GR(1) specification.
 
     The basic form is:

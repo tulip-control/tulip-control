@@ -58,7 +58,8 @@ _logger = logging.getLogger(__name__)
 _hl = 40 * '-'
 
 
-class FiniteStateAutomaton(_graphs.LabeledDiGraph):
+class FiniteStateAutomaton(
+        _graphs.LabeledDiGraph):
     """Set of sequences described with a graph and a condition.
 
     It has:
@@ -186,7 +187,8 @@ class FiniteStateAutomaton(_graphs.LabeledDiGraph):
         super().remove_node(node)
 
 
-class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
+class WeightedFiniteStateAutomaton(
+        FiniteStateAutomaton):
     """FiniteStateAutomaton with weight/cost on the transitions."""
 
     def __init__(
@@ -212,7 +214,8 @@ class WeightedFiniteStateAutomaton(FiniteStateAutomaton):
             edge_label_types, True)
 
 
-class FiniteWordAutomaton(FiniteStateAutomaton):
+class FiniteWordAutomaton(
+        FiniteStateAutomaton):
     """Finite-word finite-state automaton.
 
     By default non-deterministic (NFA).
@@ -236,7 +239,8 @@ class FiniteWordAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Finite-Word Automaton'
 
 
-class BuchiAutomaton(FiniteStateAutomaton):
+class BuchiAutomaton(
+        FiniteStateAutomaton):
     """A device for pattern-matching infinite sequences."""
 
     def __init__(
@@ -573,7 +577,8 @@ class RabinPairs:
         return superset is self._states
 
 
-class RabinAutomaton(FiniteStateAutomaton):
+class RabinAutomaton(
+        FiniteStateAutomaton):
     """Rabin automaton.
 
     See Also
@@ -596,7 +601,8 @@ class RabinAutomaton(FiniteStateAutomaton):
         self.automaton_type = 'Rabin Automaton'
 
 
-class DRA(RabinAutomaton):
+class DRA(
+        RabinAutomaton):
     """Deterministic Rabin Automaton.
 
     See Also
@@ -616,7 +622,8 @@ class DRA(RabinAutomaton):
             'Deterministic Rabin Automaton')
 
 
-class ParityGame(_trs.GameGraph):
+class ParityGame(
+        _trs.GameGraph):
     """GameGraph equipped with coloring.
 
     Define as `k` the highest color that

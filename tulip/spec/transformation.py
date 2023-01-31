@@ -61,7 +61,8 @@ _logger = logging.getLogger(__name__)
 Node = _ast.NodeSpec
 
 
-class Tree(nx.MultiDiGraph):
+class Tree(
+        nx.MultiDiGraph):
     """Abstract syntax tree as a graph data structure.
 
     Use this as a scaffold for syntactic manipulation.

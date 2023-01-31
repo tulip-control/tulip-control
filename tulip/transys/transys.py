@@ -65,7 +65,8 @@ EnvSys = _ty.Literal[
     'sys']
 
 
-class KripkeStructure(_graphs.LabeledDiGraph):
+class KripkeStructure(
+        _graphs.LabeledDiGraph):
     """Directed graph with labeled and initial vertices.
 
     References
@@ -141,7 +142,8 @@ class KripkeStructure(_graphs.LabeledDiGraph):
             f'{_hl}\n')
 
 
-class WeightedKripkeStructure(KripkeStructure):
+class WeightedKripkeStructure(
+        KripkeStructure):
     """KripkeStructure with weight/cost on transitions."""
 
     cost_label = "cost"
@@ -157,7 +159,8 @@ class WeightedKripkeStructure(KripkeStructure):
             edge_label_types, True)
 
 
-class MarkovChain(KripkeStructure):
+class MarkovChain(
+        KripkeStructure):
     """`KripkeStructure` with probability on transitions."""
 
     probability_label = "probability"
@@ -186,7 +189,8 @@ class MarkovChain(KripkeStructure):
             edge_label_types, True)
 
 
-class MarkovDecisionProcess(MarkovChain):
+class MarkovDecisionProcess(
+        MarkovChain):
     """Markov chain with "action" label.
 
     A Markov chain with an additional label
@@ -209,7 +213,8 @@ class MarkovDecisionProcess(MarkovChain):
         self.actions = self.action
 
 
-class FiniteTransitionSystem(_graphs.LabeledDiGraph):
+class FiniteTransitionSystem(
+        _graphs.LabeledDiGraph):
     r"""Kripke structure with labeled states and edges.
 
     Who controls the state
@@ -1020,7 +1025,8 @@ def _dumps_states(
     return ''.join(a)
 
 
-class GameGraph(_graphs.LabeledDiGraph):
+class GameGraph(
+        _graphs.LabeledDiGraph):
     """Store a game graph.
 
     When adding states, you have to say
@@ -1096,7 +1102,8 @@ class GameGraph(_graphs.LabeledDiGraph):
         return self.nodes[from_state]['player']
 
 
-class LabeledGameGraph(GameGraph):
+class LabeledGameGraph(
+        GameGraph):
     """Game graph with labeled states.
 
     Its contraction is a Kripke structure.

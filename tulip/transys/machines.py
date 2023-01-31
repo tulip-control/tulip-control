@@ -104,7 +104,8 @@ def create_machine_ports(
     return ports
 
 
-class Transducer(_graphs.LabeledDiGraph):
+class Transducer(
+        _graphs.LabeledDiGraph):
     r"""Sequential Transducer, i.e., a letter-to-letter function.
 
     Inputs
@@ -326,7 +327,8 @@ class Transducer(_graphs.LabeledDiGraph):
             self._state_dot_label_format[var_name] = str(var_name)
 
 
-class MooreMachine(Transducer):
+class MooreMachine(
+        Transducer):
     """Moore machine.
 
     A Moore machine implements the discrete dynamics:
@@ -426,7 +428,8 @@ class MooreMachine(Transducer):
                 self._state_dot_mask[port_name] = mask_func
 
 
-class MealyMachine(Transducer):
+class MealyMachine(
+        Transducer):
     """Mealy machine.
 
     Examples

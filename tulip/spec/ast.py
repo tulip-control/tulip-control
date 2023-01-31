@@ -133,7 +133,8 @@ FULL_OPERATOR_NAMES = {
     }
 
 
-class NodeSpec(_ty.Protocol):
+class NodeSpec(
+        _ty.Protocol):
     """Base class for AST nodes."""
 
     opmap: (
@@ -151,7 +152,8 @@ class NodeSpec(_ty.Protocol):
         raise NotImplementedError
 
 
-class TerminalSpec(NodeSpec):
+class TerminalSpec(
+        NodeSpec):
     """Terminal symbols of grammar.
 
     Include:
@@ -201,7 +203,8 @@ class TerminalSpec(NodeSpec):
         return self.value
 
 
-class OperatorSpec(NodeSpec):
+class OperatorSpec(
+        NodeSpec):
     """Takes a non-zero number of operands and returns a result.
 
     Cases:
@@ -256,7 +259,8 @@ class OperatorSpec(NodeSpec):
         return f'( {op} {args} )'
 
 
-class BinarySpec(OperatorSpec):
+class BinarySpec(
+        OperatorSpec):
     def flatten(self, *arg, **kw):
         """Infix flattener for consistency with parser.
 
@@ -269,7 +273,8 @@ class BinarySpec(OperatorSpec):
         return f'( {first} {op} {second} )'
 
 
-class NodesSpec(_ty.Protocol):
+class NodesSpec(
+        _ty.Protocol):
     """AST nodes for a generic grammar."""
 
     Node: NodeSpec
@@ -279,7 +284,8 @@ class NodesSpec(_ty.Protocol):
     Binary: BinarySpec
 
 
-class VarSpec(TerminalSpec):
+class VarSpec(
+        TerminalSpec):
     """A 0-ary variable.
 
     Two cases:
@@ -293,7 +299,8 @@ class VarSpec(TerminalSpec):
         self.type = 'var'
 
 
-class BoolSpec(TerminalSpec):
+class BoolSpec(
+        TerminalSpec):
     """A 0-ary connective."""
 
     def __init__(self, value):
@@ -313,7 +320,8 @@ class BoolSpec(TerminalSpec):
         return self.opmap[self.value]
 
 
-class NumSpec(TerminalSpec):
+class NumSpec(
+        TerminalSpec):
     """A 0-ary function."""
 
     def __init__(self, value):
@@ -321,7 +329,8 @@ class NumSpec(TerminalSpec):
         self.type = 'num'
 
 
-class StrSpec(TerminalSpec):
+class StrSpec(
+        TerminalSpec):
     """A 0-ary function."""
     # parser ensures that value has no quotes
 
@@ -330,11 +339,13 @@ class StrSpec(TerminalSpec):
         self.type = 'str'
 
 
-class ComparatorSpec(BinarySpec):
+class ComparatorSpec(
+        BinarySpec):
     """Binary relational operator (2-ary predicate)."""
 
 
-class ArithmeticSpec(BinarySpec):
+class ArithmeticSpec(
+        BinarySpec):
     """Binary function.
 
     Maps terms to terms.
@@ -356,15 +367,23 @@ def make_nodes(
         _opmap = OPMAP
     else:
         _opmap = opmap
-    class Node(NodeSpec):
+    class Node(
+            NodeSpec):
         opmap = _opmap
-    class Terminal(TerminalSpec, Node):
+    class Terminal(
+            TerminalSpec,
+            Node):
         pass
-    class Operator(OperatorSpec, Node):
+    class Operator(
+            OperatorSpec,
+            Node):
         pass
-    class Unary(Operator):
+    class Unary(
+            Operator):
         pass
-    class Binary(BinarySpec, Operator):
+    class Binary(
+            BinarySpec,
+            Operator):
         pass
     class Nodes(
             NodesSpec):
@@ -385,17 +404,29 @@ def make_fol_nodes(
         ) -> NodesSpec:
     """AST classes for fragment of first-order logic."""
     nodes = make_nodes(opmap)
-    class Var(VarSpec, nodes.Terminal):
+    class Var(
+            VarSpec,
+            nodes.Terminal):
         pass
-    class Bool(BoolSpec, nodes.Terminal):
+    class Bool(
+            BoolSpec,
+            nodes.Terminal):
         pass
-    class Num(NumSpec, nodes.Terminal):
+    class Num(
+            NumSpec,
+            nodes.Terminal):
         pass
-    class Str(StrSpec, nodes.Terminal):
+    class Str(
+            StrSpec,
+            nodes.Terminal):
         pass
-    class Comparator(ComparatorSpec, nodes.Binary):
+    class Comparator(
+            ComparatorSpec,
+            nodes.Binary):
         pass
-    class Arithmetic(ArithmeticSpec, nodes.Binary):
+    class Arithmetic(
+            ArithmeticSpec,
+            nodes.Binary):
         pass
     nodes.Var = Var
     nodes.Bool = Bool

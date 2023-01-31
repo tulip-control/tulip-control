@@ -534,7 +534,8 @@ class MathSet:
             self.__contains__, iterable))
 
 
-class SubSet(MathSet):
+class SubSet(
+        MathSet):
     r"""Subset of selected MathSet, or other Iterable.
 
     Prior to adding new elements,
@@ -909,7 +910,8 @@ class PowerSet:
             f'\nof class:\nt\t{type(value)}')
 
 
-class TypedDict(dict):
+class TypedDict(
+        dict):
     """dict subclass where values can be constrained by key.
 
     For each key, a domain can optionally be defined,

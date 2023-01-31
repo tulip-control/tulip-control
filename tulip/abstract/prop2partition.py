@@ -63,7 +63,8 @@ Polytope = (
     pc.Region)
 
 
-class PropPreservingPartition(pc.MetricPartition):
+class PropPreservingPartition(
+        pc.MetricPartition):
     """Partition class with following fields:
 
     Attributes:

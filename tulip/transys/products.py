@@ -49,7 +49,8 @@ _hl = 40 * '-'
 FTS = transys.FTS
 
 
-class OnTheFlyProductAutomaton(automata.BuchiAutomaton):
+class OnTheFlyProductAutomaton(
+        automata.BuchiAutomaton):
     """Dynamically extends itself by adding successors.
 
     Note that performs on-the-fly BA * TS.

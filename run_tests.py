@@ -74,7 +74,8 @@ Besides what is below, OPTIONS... are passed on to `pytest`.
 '''
 
 
-class ArgParser(argparse.ArgumentParser):
+class ArgParser(
+        argparse.ArgumentParser):
     def error(
             self,
             message:

@@ -761,7 +761,8 @@ class Transitions:
         return found_transitions
 
 
-class LabeledDiGraph(nx.MultiDiGraph):
+class LabeledDiGraph(
+        nx.MultiDiGraph):
     """Directed multi-graph with constrained labeling.
 
     Provides facilities to define labeling functions on

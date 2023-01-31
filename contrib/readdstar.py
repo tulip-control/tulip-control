@@ -94,7 +94,8 @@ class AcceptancePair:
             self.U = set(U)
 
 
-class Automaton(nx.DiGraph):
+class Automaton(
+        nx.DiGraph):
     def __init__(self, aut_type=None):
         nx.DiGraph.__init__(self)
         self.aut_type = aut_type
