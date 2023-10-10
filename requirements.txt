@@ -16,4 +16,4 @@ gr1py>=0.2.0
 mock
 
 # dev
-gitpython==2.1.0
+gitpython==3.1.37
