@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+url: "https://github.com/tulip-control/tulip-control"
+preferred-citation:
+  type: conference-paper
+  title: "Control design for hybrid systems with TuLiP: The Temporal Logic Planning toolbox"
+  collection-title: "Proc. of IEEE Conference on Control Applications (CCA)"
+  year: 2016
+  start: 1030
+  end: 1041
+  authors:
+    - family-names: "Filippidis"
+      given-names: "Ioannis"
+    - family-names: "Dathathri"
+      given-names: "Sumanth"
+    - family-names: "Livingston"
+      given-names: "Scott C."
+    - family-names: "Ozay"
+      given-names: "Necmiye"
+    - family-names: "Murray"
+      given-names: "Richard M."
+  doi: 10.1109/CCA.2016.7587949

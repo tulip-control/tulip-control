@@ -88,3 +88,10 @@ copying conditions.
 
 When code is modified or re-distributed, the LICENSE file should accompany the code or any subset of it, however small.
 As an alternative, the LICENSE text can be copied within files, if so desired.
+
+If this software is useful to you, we kindly ask that you cite us::
+
+  I. Filippidis, S. Dathathri, S. C. Livingston, N. Ozay and R. M. Murray,
+  "Control design for hybrid systems with TuLiP: The Temporal Logic Planning
+  toolbox," 2016 IEEE Conference on Control Applications (CCA), Buenos Aires,
+  Argentina, 2016, pp. 1030-1041, doi: 10.1109/CCA.2016.7587949.
