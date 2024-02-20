@@ -574,7 +574,7 @@ class SubSet(
             elements to add to subset
         """
         self._superset = superset
-        super().__init__([])
+        super().__init__(iterable)
         if not isinstance(superset, _abc.Container):
             raise TypeError(
                 'superset must be Iterable,\n'
