@@ -355,11 +355,14 @@ def tuple2ba(
         initial_states)
     ba.accepting.update(
         accepting_states)
-    if atomic_proposition_based:
+    if isinstance(ba.alphabet, _mset.PowerSet):
         ba.alphabet.math_set.update(
             alphabet_or_ap)
-    else:
+    elif isinstance(ba.alphabet, set):
         ba.alphabet.add(alphabet_or_ap)
+    else:
+        raise AssertionError(
+            f'unexpected case: {ba.alphabet = }')
     for transition in transitions:
         from_state, to_state, guard = transition
         [from_state, to_state] = _graphs.prepend_with(
