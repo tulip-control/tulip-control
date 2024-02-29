@@ -611,7 +611,7 @@ class GridWorld:
             out_str += "-" * (self.W.shape[1] + 2) + "\n"
         return out_str
 
-    def size(self) -> tuple[int, ...]:
+    def size(self) -> tuple[int, int]:
         """Return size of gridworld as a tuple in row-major order."""
         if self.W is None:
             return (0, 0)
