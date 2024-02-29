@@ -439,7 +439,8 @@ def infer_constants(
             'depending on the variable domains.\n'
             'If you give the variable domain definitions as dict, '
             'then infer_constants will check for ambiguities.')
-    tree = parser.parse(formula)
+    rec_ast = parser.parse(formula)
+    tree = Tree.from_recursive_ast(rec_ast)
     old2new = dict()
     for u in tree:
         if u.type != 'var':
@@ -448,9 +449,9 @@ def infer_constants(
             continue
         # Var (so NAME token) but not a variable
         # turn it into a string constant
-        old2new[u] = _ast.nodes.Const(str(u))
+        old2new[u] = _ast.nodes.Str(f'"{u}"')
     nx.relabel_nodes(tree, old2new, copy=False)
-    return str(tree)
+    return tree.to_recursive_ast().flatten()
 
 
 def _check_var_conflicts(
