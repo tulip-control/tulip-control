@@ -117,7 +117,7 @@ def load_file(aut_file):
         # parse states
         if (line.find('State ') >= 0):
             stateid = re.search(
-                r' State [\x20] (\d+) ',
+                r' State \x20 (\d+) ',
                 line,
                 flags=re.VERBOSE)
             stateid = int(stateid.group(1))
@@ -152,33 +152,33 @@ def read_variables(smv_file):
         f = smv_file
     for line in f:
         if re.search(
-                r' MODULE [\x20] env ',
+                r' MODULE \x20 env ',
                 line,
                 flags=re.VERBOSE):
             for line in f:
                 if re.search(
-                        r' [\x20] : [\x20] ',
+                        r' \x20 : \x20 ',
                         line,
                         flags=re.VERBOSE):
                     env = str(re.findall(r'(\w+)\ :', line))
                     env = env[2:len(env)-2]
                     enviroment.put(env)
                 if re.search(
-                        r' MODULE [\x20] sys ',
+                        r' MODULE \x20 sys ',
                         line,
                         flags=re.VERBOSE):
                     break
         if re.search(
-                r'MODULE [\x20] sys',
+                r'MODULE \x20 sys',
                 line,
                 flags=re.VERBOSE):
             for line in f:
                 if re.search(
-                        r' [\x20] : [\x20] ',
+                        r' \x20 : \x20 ',
                         line,
                         flags=re.VERBOSE):
                     sys = str(re.findall(
-                        r' (\w+) [\x20] : ',
+                        r' (\w+) \x20 : ',
                         line,
                         flags=re.VERBOSE))
                     sys = sys[2:len(sys)-2]
