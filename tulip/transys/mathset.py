@@ -670,7 +670,7 @@ class CartesianProduct:
                 'Argument element must be `Iterable`, otherwise cannot '
                 'recover which item in it belongs to which set in the '
                 'Cartesian product.')
-        pairs = zip(self.mathsets, elements)
+        pairs = zip(self.mathsets, element)
         return all(map(
             _op.contains, pairs))
 
@@ -863,7 +863,7 @@ class PowerSet:
         self.math_set = MathSet(iterable)
 
     def __get__(self, instance, value):
-        return self()
+        return self
 
     def __repr__(self):
         return f'PowerSet({self.math_set} )'
