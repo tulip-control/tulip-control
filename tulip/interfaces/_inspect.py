@@ -127,7 +127,8 @@ def _format_python_package_message(
         name:
             str,
         package:
-            str,
+            str |
+            None,
         url:
             str
         ) -> str:
