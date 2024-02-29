@@ -65,8 +65,8 @@ def test_nx():
         dumpsmach.python_case(
             g, classname='Machine', start='Sinit'),
         exe_globals)
-    m = exe_globals['Machine']()
         # previous line creates the class `Machine`
+    m = exe_globals['Machine']()
     # Sinit -> 0
     out = m.move(a=0, b=0)
     assert out == dict(c=0, d=0)
