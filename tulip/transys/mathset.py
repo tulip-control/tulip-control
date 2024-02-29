@@ -133,7 +133,8 @@ class MathSet:
     def __init__(
             self,
             iterable:
-                _abc.Iterable=None):
+                _abc.Iterable |
+                None=None):
         """Initialize by adding elements from iterable.
 
         Example
@@ -331,7 +332,7 @@ class MathSet:
             self,
             iterable:
                 _abc.Iterable
-            ) -> _abc.Iterable:
+            ) -> list:
         return list(filter(
             lambda x:
                 not isinstance(x, _abc.Hashable),
@@ -562,7 +563,7 @@ class SubSet(
     def __init__(
             self,
             superset:
-                _abc.Container,
+                _abc.Collection,
             iterable:
                 _abc.Iterable |
                 None=None):
@@ -591,7 +592,7 @@ class SubSet(
         return f'SubSet({{{set_str}}} +{self._list})'
 
     @property
-    def superset(self) -> _abc.Iterable:
+    def superset(self) -> _abc.Collection:
         return self._superset
 
     def add(
@@ -745,7 +746,7 @@ def is_subset(
         small_iterable:
             _abc.Iterable,
         big_iterable:
-            _abc.Iterable
+            _abc.Collection
         ) -> bool:
     """Comparison for handling list <= set, and lists with unhashable items."""
     # asserts removed when compiling with optimization on...
@@ -987,8 +988,7 @@ class TypedDict(
     def setdefault(
             self,
             key,
-            value:
-                _ty.Optional=None):
+            value=None):
         if key not in self:
             self[key] = value
         return self[key]

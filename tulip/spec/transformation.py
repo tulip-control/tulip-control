@@ -170,7 +170,7 @@ class Tree(
             self,
             detailed:
                 bool=False
-            ) -> str:
+            ) -> _graphics._Digraph:
         """Create GraphViz dot string from given AST."""
         g = ast_to_labeled_graph(self, detailed)
         return _graphics.networkx_to_graphviz(g)
@@ -283,12 +283,11 @@ def sub_values(
             Tree,
         var_values:
             dict
-        ) -> Tree:
+        ) -> None:
     """Substitute given values for variables.
 
-    @return:
-        AST with `Var` nodes replaced by
-        `Num`, `Const`, or `Bool`
+    Modifies AST, with `Var` nodes replaced by
+    `Num`, `Const`, or `Bool`.
     """
     old2new = dict()
     for u in tree.nodes():

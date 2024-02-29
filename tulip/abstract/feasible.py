@@ -263,7 +263,7 @@ def _solve_closed_loop_fixed_horizon(
 
 def _solve_closed_loop_bounded_horizon(
         P1:
-            _hyb.LtiSysDyn,
+            Polytope,
         P2:
             Polytope,
         ssys:

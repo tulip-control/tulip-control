@@ -9,7 +9,7 @@ def n_tuple(
         item_type:
             type |
             None=None
-        ) -> type[tuple]:
+        ) -> types.GenericAlias:
     """Return type of `length`-long tuples."""
     if item_type is None:
         item_type = _ty.Any
