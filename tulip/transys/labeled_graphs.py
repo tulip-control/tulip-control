@@ -1060,7 +1060,7 @@ class LabeledDiGraph(
             'The following edge attributes:\n'
             f'{edge_attrs}\n'
             'are not allowed.\n'
-            'Currently the allowed attributes are:'
+            'Currently the allowed attributes are: '
             f'{allowed_attrs}')
         if not check:
             _logger.warning(
