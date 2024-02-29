@@ -6,7 +6,7 @@ Reference
 
 Robert McNaughton (1993). Infinite games played on finite graphs.
 Annals of Pure and Applied Logic 65(2): 149--184.
-<doi:10.1016/0168-0072(93)90036-D>
+<https://doi.org/10.1016/0168-0072(93)90036-D>
 """
 import copy
 from tulip import transys as trs
