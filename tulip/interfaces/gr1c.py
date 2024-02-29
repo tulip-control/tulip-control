@@ -211,7 +211,7 @@ def _untagdict(
     @return:
         Two cases, depending on argument given
         for the parameter `get_order`.
-        - if `get_order is True`:
+        - if `get_order is False`:
           `(tag_name, dict_obtained_from_tag)`
         - else a triple is returned,
           which extends the previous case with
