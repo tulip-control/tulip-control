@@ -552,7 +552,7 @@ class SubSet(
     >>> print(s)
     SubSet([[1, 2]])
     >>> s.add(3)
-    # raises exception because 3 \\notin [1,2]
+    # raises exception because 3 \notin [1,2]
     ```
 
     See Also
@@ -869,7 +869,7 @@ class PowerSet:
         return f'PowerSet({self.math_set} )'
 
     def __contains__(self, item):
-        r"""Is item \\in 2^iterable = this powerset(iterable)."""
+        r"""Is item \in 2^iterable = this powerset(iterable)."""
         if not isinstance(item, _abc.Iterable):
             raise Exception(
                 f'Not iterable:\n\t{item},\n'
