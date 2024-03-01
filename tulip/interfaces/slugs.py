@@ -83,8 +83,7 @@ def check_realizable(
 
 def synthesize(
         spec:
-            _spec.GRSpec |
-            str,
+            _spec.GRSpec,
         symbolic:
             bool=False
         ) -> (
@@ -92,18 +91,13 @@ def synthesize(
             None):
     """Return strategy satisfying the specification `spec`.
 
-    @param spec:
-        If a `str`, then in structured slugs syntax.
     @return:
         If realizable return synthesized strategy,
         otherwise `None`.
     """
-    if isinstance(spec, _spec.GRSpec):
-        assert not spec.moore
-        assert not spec.plus_one
-        struct = _spec.translate(spec, 'slugs')
-    else:
-        struct = spec
+    assert not spec.moore
+    assert not spec.plus_one
+    struct = _spec.translate(spec, 'slugs')
     with tempfile.NamedTemporaryFile(delete=False) as fin:
         fin.write(bytes(struct, 'utf-8'))
     realizable, out = _call_slugs(
