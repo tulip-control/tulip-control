@@ -185,7 +185,7 @@ def to_tulip_transys(
         path:
             str
         ) -> MC:
-    """Return Markov chain or decisiom process from `prism` file.
+    """Return Markov chain or decision process from `prism` file.
 
     @param path:
         path to the `prism` file
