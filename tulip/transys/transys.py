@@ -991,11 +991,11 @@ def add_initial_states(
     For example if `isinstance(ofts, FTS)`:
 
     ```python
-    import tulip.transys.transys as _trs
+    import tulip.transys.transys as trs
 
 
     initial_labels = [{'home'}]
-    _trs.add_initial_states(ofts, initial_labels)
+    trs.add_initial_states(ofts, initial_labels)
     ```
 
     @param ap_labels:
