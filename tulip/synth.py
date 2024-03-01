@@ -1721,8 +1721,6 @@ def strategy2mealy(
     mach.states.add(initial_state)
     mach.states.initial.add(initial_state)
     # fix an ordering for keys
-    # because tuple(dict.items()) is not safe:
-    # <https://docs.python.org/2/library/stdtypes.html#dict.items>
     keys = list(all_vars)
     if hasattr(A, 'initial_nodes'):
         _init_edges_using_initial_nodes(
