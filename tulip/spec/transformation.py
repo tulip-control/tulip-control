@@ -148,7 +148,7 @@ class Tree(
             tree:
                 'Tree'
             ) -> None:
-        """Add the `tree` at node `nd`.
+        """Add the `tree` at node `leaf`.
 
         @param tree:
             to be added, without copying AST nodes.
@@ -376,7 +376,7 @@ def pair_node_to_var(
     May be extended in the future, depending on what the
     tools support and is thus needed here.
 
-    @type `nd`:
+    @type `c`:
         `Const` or
         `Num`
     @return:
