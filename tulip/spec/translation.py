@@ -37,13 +37,15 @@
 - JTLV:
   <http://jtlv.ysaar.net/>
 - SMV:
-  <http://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html>
+  <https://web.archive.org/web/20201231070353/
+   https://nusmv.fbk.eu/NuSMV/userman/v21/nusmv_3.html>
 - SPIN:
   <http://spinroot.com/spin/Man/ltl.html>
   <http://spinroot.com/spin/Man/operators.html>
 - python (Boolean formulas only)
 - WRING:
-  <http://vlsi.colorado.edu/~rbloem/wring.html>
+  <https://web.archive.org/web/20160321085248/
+   http://vlsi.colorado.edu/~rbloem/wring.html>
   (see top of file: LTL.pm)
 """
 import collections.abc as _abc
