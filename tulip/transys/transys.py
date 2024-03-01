@@ -1259,7 +1259,7 @@ def simu_abstract(
         the one you want to get
         its bi/dual-simulation abstraction.
     @param simu_type:
-        string 'bi'/'dual', flag used to switch b.w.
+        string 'bi'/'dual', flag used to switch between
         bisimulation algorithm and
         dual-simulation algorithm.
     @return:
