@@ -151,7 +151,7 @@ def _bitfields_to_ints(
             dict
         ) -> dict[
             str,
-            bool | int]:
+            int]:
     """Convert bitfield representation to integers."""
     int_state = dict()
     for var, dom in vrs.items():
@@ -181,7 +181,7 @@ def _call_slugs(
             str |
             None=None
         ) -> tuple[
-            str,
+            bool,
             str]:
     """Call `slugs` and return results.
 

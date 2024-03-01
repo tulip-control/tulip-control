@@ -169,7 +169,7 @@ def ts_ba_sync_prod(
         buchi_automaton:
             automata.BuchiAutomaton
         ) -> tuple[
-            transys.FiniteTransitionSystem,
+            FTS,
             set]:
     r"""Construct transition system for the synchronous product TS * BA.
 
