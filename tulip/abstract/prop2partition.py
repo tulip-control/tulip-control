@@ -107,7 +107,6 @@ class PropPreservingPartition(
                 bool=True):
         if regions is None:
             regions = list()
-        # super().__init__(adj)
         if prop_regions is None:
             self.prop_regions = None
         else:
