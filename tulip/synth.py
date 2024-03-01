@@ -259,9 +259,8 @@ def _conj_actions(
 
 # duplicate states are impossible,
 # because each networkx vertex is unique
-# non-contiguous integerss for
-# states fine: you are lossing efficiency
-# - synth doesn't care about that
+# non-contiguous integers for states work too,
+# though a less efficient representation.
 
 
 def iter2var(
