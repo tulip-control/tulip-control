@@ -13,7 +13,7 @@ on:
 jobs:
     build:
         name: Build
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         strategy:
             matrix:
                 python-version: [
@@ -65,7 +65,7 @@ jobs:
                 ./run_tests.py --outofsource full
     static_analysis:
         name: Static analysis of Python code
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         strategy:
             matrix:
                 python-version: [
@@ -111,7 +111,7 @@ jobs:
                     -x tulip/interfaces/stormpy.py
     docs:
         name: Build documentation
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         if: github.ref == 'refs/heads/main'
         strategy:
             matrix:
