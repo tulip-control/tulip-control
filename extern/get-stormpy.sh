@@ -38,9 +38,12 @@
 # sed -i "s/PREFIXTOREPLACE/$PREPLACE/g" carl/carlTargets.cmake
 # export carl_DIR=${PWD}/carl
 
-curl -L -sS -o carl.tar.gz \
-https://github.com/tulip-control/data/releases/download/stormpy_dependencies/carl.tar.gz
-echo 'abe2e0df679fc18322986e9609ffdd2fa36300d240c8a37510b1b9902e037502  carl.tar.gz' | \
+if [ ! -f carl.tar.gz ]
+then
+    curl -L -sS -o carl.tar.gz \
+    https://github.com/tulip-control/data/releases/download/stormpy_dependencies/carl.tar.gz
+fi
+echo 'd3be70201b852c4cb717c162268ef5c74fdfe79f8c6ae49bd2fabd7542bf0418  carl.tar.gz' | \
     shasum -a 256 -c -
 mkdir -p extern
 tar -xzf carl.tar.gz -C extern
@@ -81,12 +84,12 @@ export carl_DIR=${PWD}/extern/carl/build
 ## pycarl https://github.com/moves-rwth/pycarl/
 if [ ! -f pycarl.tgz ]
 then
-    curl -sSL -o pycarl.tgz https://github.com/moves-rwth/pycarl/archive/2.0.4.tar.gz
+    curl -sSL -o pycarl.tgz https://github.com/moves-rwth/pycarl/archive/refs/tags/2.2.0.tar.gz
 fi
-echo '751debb79599d697046ed89638503f946a35f316864bf405acc743df15173947  pycarl.tgz' | \
+echo '64885a0b0abf13aaed542a05ef8e590194b13626dcd07209ec55b41f788c6a56  pycarl.tgz' | \
     shasum -a 256 -c -
 tar xzf pycarl.tgz
-pushd pycarl-2.0.4
+pushd pycarl-2.2.0
 python3 setup.py develop
 popd
 
@@ -103,9 +106,12 @@ popd
 # sed -i "s/PREFIXTOREPLACE/$PREPLACE/g" storm/stormTargets.cmake
 # export storm_DIR=${PWD}/storm
 
-curl -L -sS -o storm.tar.gz \
-https://github.com/tulip-control/data/releases/download/stormpy_dependencies/storm.tar.gz
-echo 'ff983436bc572f80b62e5dabc849376d25c0e69c0819435bc5ae238e927aaac5  storm.tar.gz' | \
+if [ ! -f storm.tar.gz ]
+then
+    curl -L -sS -o storm.tar.gz \
+    https://github.com/tulip-control/data/releases/download/stormpy_dependencies/storm.tar.gz
+fi
+echo '1bd6af73b5a833d4577340605f91a4d7c180954b030dc11dd5e51b0544db426e  storm.tar.gz' | \
     shasum -a 256 -c -
 mkdir -p extern
 tar -xzf storm.tar.gz -C extern
@@ -155,11 +161,11 @@ export storm_DIR=${PWD}/extern/storm/build
 ## stormpy https://moves-rwth.github.io/stormpy/
 if [ ! -f stormpy-stable.tgz ]
 then
-    curl -sSL -o stormpy-stable.tgz https://github.com/moves-rwth/stormpy/archive/1.6.2.tar.gz
+    curl -sSL -o stormpy-stable.tgz https://github.com/moves-rwth/stormpy/archive/refs/tags/1.8.0.tar.gz
 fi
-echo '78f94f5d367b69c438b0442c24e74ca62887e751ea067e69c0d98cf32a12219c  stormpy-stable.tgz' | \
+echo '3c59fb8bed69637e7a1e96b9372198a3428b305520108baa3df627a35940762d  stormpy-stable.tgz' | \
     shasum -a 256 -c -
 tar xzf stormpy-stable.tgz
-pushd stormpy-1.6.2
+pushd stormpy-1.8.0
 python3 setup.py develop
 popd
