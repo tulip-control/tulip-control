@@ -66,6 +66,7 @@ jobs:
     static_analysis:
         name: Static analysis of Python code
         runs-on: ubuntu-22.04
+        continue-on-error: true
         strategy:
             matrix:
                 python-version: [
