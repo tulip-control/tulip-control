@@ -159,9 +159,8 @@ def _test_files(
             'Try calling this script with the "-h" flag.')
         exit(1)
     if excludefiles:
-        omit = os.path.join(tests_dir, omit)
         more_args.extend(
-            f'--ignore-glob={omit}'
+            f'--ignore-glob={os.path.join(tests_dir, omit)}'
             for omit in excludefiles)
     return more_args, testfiles
 
@@ -194,10 +193,7 @@ def _collect_testdir_files(
             str
         ) -> list[str]:
     """Return files contained in directory `tests_dir`."""
-    available = list()
-    for _, _, filenames in os.walk(tests_dir):
-        available.extend(filenames)
-        return available
+    return list(d.name for d in os.scandir(tests_dir))
 
 
 def _add_files_matching_basename(
@@ -209,7 +205,7 @@ def _add_files_matching_basename(
             list[str],
         available:
             _abc.Iterable[str]
-        ) -> str:
+        ) -> str | None:
     """Add to lists of files the matching Python files."""
     match = _filter_filenames(basename, available)
     if len(match) > 1:
