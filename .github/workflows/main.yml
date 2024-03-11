@@ -139,6 +139,7 @@ jobs:
                 BIN_BRANCH="docs_bin"
                 git fetch origin $BIN_BRANCH
                 git restore --source=origin/$BIN_BRANCH '*.png'
+                make html
             - name: Push built documentation to `git` branch
               run: |
                 DOCS_BRANCH="docs_pages"
@@ -148,6 +149,12 @@ jobs:
                 git fetch origin $DOCS_BRANCH
                 git checkout -b $DOCS_BRANCH
                 git status
+                git clone --filter=blob:none --no-checkout https://github.com/tulip-control/tulip-control.git temporary
+                cd temporary
+                THIS_COMMIT=`git log --pretty=%H -1 origin/main -- doc tulip examples`
+                cd ..
+                echo $THIS_COMMIT > COMMIT
+                git add COMMIT
                 mkdir docs
                 touch docs/.nojekyll
                 cp -R $DOCS_BUILD_ROOT/. docs/
@@ -157,7 +164,7 @@ jobs:
                 committed by GitHub Actions.'
                 # detect changes to the built documentation
                 git diff --exit-code --quiet $DOCS_BRANCH \
-                    origin/$DOCS_BRANCH -- docs \
+                    origin/$DOCS_BRANCH -- COMMIT \
                     || ret=$?
                 if [[ "${ret}" -eq 1 ]]; then
                     echo 'The built documentation changed, \
