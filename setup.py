@@ -25,7 +25,7 @@ PROJECT_URLS = {
 VERSION_FILE = f'{NAME}/_version.py'
 MAJOR = 1
 MINOR = 4
-MICRO = 0
+MICRO = 1
 VERSION = f'{MAJOR}.{MINOR}.{MICRO}'
 VERSION_TEXT = (
     '# This file was generated from setup.py\n'
