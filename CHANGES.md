@@ -2,7 +2,7 @@
 
 
 ## 1.4.0
-(future)
+2024-03-13
 
 - require Python >= 3.10
 
@@ -15,7 +15,29 @@
 - CI: run all tests on [GitHub Actions](
       https://github.com/tulip-control/tulip-control/actions)
 
-- rm interface to `jtlv` solver in 9634403c4f6fc78deb09bdfce978569f878973b8
+- remove interface to `jtlv` solver in 9634403c4f6fc78deb09bdfce978569f878973b8
+
+- API: replace arg `option` with kwarg `solver` for func `synth.synthesize`
+
+- new dual-simulation algorithm available by calling `tulip.abstract.discretize`
+  with `simu_type='dual'`
+
+- new method `GRSpec.declare` for declaring variables
+
+- new function `tulip.abstract.plot.simulate2d` that simulates solution
+  systems with two-dimensional continuous dynamics
+
+- fix `find_controller` for target regions with several polytopes,
+  https://github.com/tulip-control/tulip-control/pull/242
+
+- new minimum-violation planning module (tulip.mvp)
+
+- interface to [stormpy](https://github.com/moves-rwth/stormpy) and therefore
+  to the probabilistic model checker [Storm](https://www.stormchecker.org/)
+
+- many improvements to style, documentation, examples, and error messages
+
+- add many type hints and begin to perform static analysis accordingly
 
 
 ## 1.3.0
