@@ -13,15 +13,6 @@ import setuptools
 
 
 NAME = 'tulip'
-PROJECT_URLS = {
-    'Bug Tracker':
-        'https://github.com/tulip-control/tulip-control/issues',
-    'Documentation':
-        'https://tulip-control.sourceforge.io/doc/',
-    'API Documentation':
-        'https://tulip-control.sourceforge.io/api-doc/',
-    'Source Code':
-        'https://github.com/tulip-control/tulip-control'}
 VERSION_FILE = f'{NAME}/_version.py'
 MAJOR = 1
 MINOR = 4
@@ -32,17 +23,6 @@ VERSION_TEXT = (
     "version = '{version}'\n")
 logging.basicConfig(level=logging.WARNING)
 _logger = logging.getLogger(__name__)
-classifiers = [
-    'Development Status :: 2 - Pre-Alpha',
-    'Intended Audience :: Science/Research',
-    'License :: OSI Approved :: BSD License',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3 :: Only',
-    'Topic :: Scientific/Engineering']
-package_data = {
-    'tulip.spec': ['ltl_parsetab.py'],
-    'tulip.interfaces': ['ltl2ba_parsetab.py']}
 
 
 def git_version(
@@ -116,37 +96,8 @@ def run_setup() -> None:
     setuptools.setup(
         name=NAME,
         version=version,
-        description='Temporal Logic Planning (TuLiP) Toolbox',
-        author='Caltech Control and Dynamical Systems',
-        author_email='tulip@tulip-control.org',
-        url='http://tulip-control.org',
-        project_urls=PROJECT_URLS,
-        license='BSD',
-        classifiers=classifiers,
-        python_requires='>=3.10',
-        install_requires=[
-            'graphviz >= 0.20',
-            'networkx >= 2.0',
-            'numpy >= 1.24',
-            'omega >= 0.3.1, < 0.4.0',
-            'ply >= 3.4, <= 3.10',
-            'polytope >= 0.2.1',
-            'scipy'],
-        tests_require=[
-            'matplotlib >= 2.0.0',
-            'gr1py >= 0.2.0',
-            'pytest',
-            'setuptools >= 39.0.0'],
-        packages=[
-            'tulip',
-            'tulip.transys',
-            'tulip.transys.export',
-            'tulip.abstract',
-            'tulip.spec',
-            'tulip.interfaces'],
         package_dir={
-            'tulip': 'tulip'},
-        package_data=package_data)
+            'tulip': 'tulip'})
     # ply failed ?
     if plytable_build_failed:
         print('!' * 65 +
