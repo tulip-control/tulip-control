@@ -224,9 +224,9 @@ entirely ignored.
   - DEP: deprecate something, or remove a deprecated object
   - DEV: development utility
   - DOC: documentation (docstrings too)
-  - DRAFT: to be rewritten / fixed up (to be rebased, never in master)
+  - DRAFT: to be rewritten / fixed up (to be rebased, never in main)
   - ENH: enhancement
-  - EXP: experimental (to be rebased, never in master)
+  - EXP: experimental (to be rebased, never in main)
   - GIT: related to ``git`` configuration, for example changes to
     the files ``.gitignore`` and ``.gitattributes``
   - IMG: changes to sources of images (for example, SVG files)
