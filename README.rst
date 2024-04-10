@@ -26,7 +26,7 @@ A test suite is provided under ``tests/``.  Consult the section "Testing" below.
 
 Pip can install the latest *development* snapshot too::
 
-  pip install https://github.com/tulip-control/tulip-control/archive/master.zip
+  pip install https://github.com/tulip-control/tulip-control/archive/main.zip
 
 Code under development can be unstable so trying `pip install tulip` first
 is recommended.

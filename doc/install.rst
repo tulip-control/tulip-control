@@ -267,4 +267,4 @@ remote server installation
 
 Instructions for installing ``tulip`` and its dependencies from scratch on a
 Unix server can be found `here
-<https://github.com/tulip-control/tulip-control/blob/master/contrib/nessainstall/instructions.md>`_.
+<https://github.com/tulip-control/tulip-control/blob/main/contrib/nessainstall/instructions.md>`_.
