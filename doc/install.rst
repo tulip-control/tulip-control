@@ -4,7 +4,7 @@ Installation
 TuLiP works with Python 3. The Python versions supported are defined as
 the argument of parameter `python_requires`, within `setup.py`.
 To install with `pip <https://pip.pypa.io/en/stable/>`_
-from `PyPI <https://pypi.python.org/pypi/tulip>`_::
+from `PyPI <https://pypi.org/project/tulip/>`_::
 
   $ pip install tulip
 
@@ -13,27 +13,27 @@ or from source::
   $ pip install .
 
 ``pip`` installs Python dependencies `automatically
-<https://pip.pypa.io/en/stable/reference/pip_install/#installation-order>`_.
+<https://pip.pypa.io/en/stable/cli/pip_install/#installation-order>`_.
 They are listed in ``install_requires`` within ``setup.py``.
 The only Python packages that you may want to install yourself,
 in order to link them properly are:
 
-* `NumPy <http://numpy.org/>`_
-* `SciPy <http://www.scipy.org/>`_
+* `NumPy <https://numpy.org/>`_
+* `SciPy <https://scipy.org/>`_
 
 The following are optional dependencies,
 listed with a summary of dependent features:
 
-* `Matplotlib <http://matplotlib.org/>`_ --
+* `Matplotlib <https://matplotlib.org/>`_ --
   many visualization features
 
-* `Graphviz <http://www.graphviz.org/>`_ --
+* `Graphviz <https://www.graphviz.org/>`_ --
   to plot graphs, for example discrete state machines
 
-* `CVXOPT <http://cvxopt.org/>`_ --
+* `CVXOPT <https://cvxopt.org/>`_ --
   construction and manipulation of discrete abstractions
 
-* `GLPK <http://www.gnu.org/s/glpk/>`_ --
+* `GLPK <https://www.gnu.org/software/glpk/>`_ --
   fast linear programming solver
 
 .. image:: tulip_dependencies.svg
@@ -43,7 +43,7 @@ For computing discrete abstractions from hybrid system descriptions,
 it is highly recommended that you install both CVXOPT and GLPK.
 Note that you need to install GLPK *before* installing CVXOPT,
 and follow the `CVXOPT installation instructions
-<http://cvxopt.org/install/index.html>`_
+<https://cvxopt.org/install/index.html>`_
 to link CVXOPT to GLPK.
 (If you use
 `MacPorts <http://www.macports.org/>`_,
@@ -94,8 +94,8 @@ GR(1)
 LTL
 ```
 
-* `Lily <http://www.iaik.tugraz.at/content/research/design_verification/lily/>`_,
-  which is based on `Wring <http://vlsi.colorado.edu/~rbloem/wring.html>`_.
+* `Lily <http://www.ist.tugraz.at/staff/jobstmann/lily/>`_,
+  which is based on `Wring <https://web.archive.org/web/20160321085248/http://vlsi.colorado.edu/~rbloem/wring.html>`_.
 
 
 Testing your installation
@@ -225,7 +225,7 @@ Installing other Python dependencies
 ````````````````````````````````````
 
 The command ``pip install ...`` will usually suffice. To
-get `PLY <http://www.dabeaz.com/ply/>`_, try::
+get `PLY <https://www.dabeaz.com/ply/>`_, try::
 
   $ pip install ply
 
@@ -237,7 +237,7 @@ virtualenv and pydoc
 
 If you have installed TuLiP into a `virtualenv
 <http://www.virtualenv.org/>`_-built environment, then the documentation may not
-be visible through `pydoc <http://docs.python.org/library/pydoc.html>`_ .  We
+be visible through `pydoc <https://docs.python.org/3/library/pydoc.html>`_ .  We
 describe two solutions here, the first being more general. ::
 
   $ alias pydoc='python -m pydoc'
