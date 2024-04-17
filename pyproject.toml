@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tulip"
+description = "Temporal Logic Planning (TuLiP) Toolbox"
+authors = [{name = "Caltech Control and Dynamical Systems", email = "tulip@tulip-control.org"}]
+readme = "README.rst"
+license = {text = "BSD-3-Clause"}
+classifiers = [
+    "License :: OSI Approved :: BSD License",
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = [
+    "graphviz >= 0.20",
+    "networkx >= 2.0",
+    "numpy >= 1.24",
+    "omega >= 0.3.1, < 0.4.0",
+    "ply >= 3.4, <= 3.10",
+    "polytope >= 0.2.1",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "http://tulip-control.org"
+"Bug Tracker" = "https://github.com/tulip-control/tulip-control/issues"
+"Documentation" = "https://tulip-control.sourceforge.io/doc/"
+"API Documentation" = "https://tulip-control.sourceforge.io/api-doc/"
+"Source Code" = "https://github.com/tulip-control/tulip-control"
+
+[project.optional-dependencies]
+test = [
+    "matplotlib >= 2.0.0",
+    "gr1py >= 0.2.0",
+    "pytest",
+    "setuptools >= 39.0.0",
+]
+
+[tool.setuptools]
+packages = [
+    "tulip",
+    "tulip.transys",
+    "tulip.transys.export",
+    "tulip.abstract",
+    "tulip.spec",
+    "tulip.interfaces",
+]
+
+[tool.setuptools.package-data]
+"tulip.spec" = ["ltl_parsetab.py"]
+"tulip.interfaces" = ["ltl2ba_parsetab.py"]
