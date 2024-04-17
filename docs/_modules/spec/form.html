@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spec.form &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="../../_static/patch.css?v=0ad0caba" />
+    
+    <script src="../../_static/documentation_options.js?v=350a9c04"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="../../_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">spec.form</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for spec.form</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2011-2015 by California Institute of Technology</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions</span>
+<span class="c1"># are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1">#</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># 3. Neither the name of the California Institute of Technology nor</span>
+<span class="c1">#    the names of its contributors may be used to endorse or promote</span>
+<span class="c1">#    products derived from this software without specific prior</span>
+<span class="c1">#    written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c1"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH</span>
+<span class="c1"># OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<span class="c1"># SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF</span>
+<span class="c1"># USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,</span>
+<span class="c1"># OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT</span>
+<span class="c1"># OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+<span class="c1"># SUCH DAMAGE.</span>
+<span class="sd">&quot;&quot;&quot;Formulae constituting specifications.</span>
+
+<span class="sd">what this module adds to the pure syntactic manipulations of</span>
+<span class="sd">`transformation` is a variable table, with game semantics in particular.</span>
+
+<span class="sd">Also, those modules are for manipulating expressions.</span>
+<span class="sd">This module knows about program structure,</span>
+<span class="sd">namely the sections of a specification file.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">_abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">_ty</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">import</span> <span class="nn">tulip.spec.parser</span> <span class="k">as</span> <span class="nn">parser</span>
+<span class="kn">import</span> <span class="nn">tulip.spec.transformation</span> <span class="k">as</span> <span class="nn">tx</span>
+<span class="kn">import</span> <span class="nn">tulip.spec.translation</span> <span class="k">as</span> <span class="nn">ts</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;QInit&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;LTL&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GRSpec&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;replace_dependent_vars&#39;</span><span class="p">]</span>
+
+
+<span class="n">QInit</span> <span class="o">=</span> <span class="n">_ty</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span>
+    <span class="sa">r</span><span class="s1">&#39;\A \A&#39;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">&#39;\A \E&#39;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">&#39;\E \A&#39;</span><span class="p">,</span>
+    <span class="sa">r</span><span class="s1">&#39;\E \E&#39;</span><span class="p">]</span>
+<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">LTL</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;LTL formula (specification).</span>
+
+<span class="sd">    Minimal class that describes an LTL formula in the canonical TuLiP</span>
+<span class="sd">    syntax.  It contains three attributes:</span>
+
+<span class="sd">      - `formula`: a `str` of the formula.  Syntax is only enforced</span>
+<span class="sd">        if the user requests it, e.g., using the `check_form` method.</span>
+
+<span class="sd">      - `input_variables`: a `dict` of variables (names given as</span>
+<span class="sd">        strings) and their domains; each key is a variable name and</span>
+<span class="sd">        its value (in the dictionary) is its domain.  See notes below.</span>
+<span class="sd">        Semantically, these variables are considered to be inputs</span>
+<span class="sd">        (i.e., uncontrolled, externally determined).</span>
+
+<span class="sd">      - `output_variables`: similar to `input_variables`, but</span>
+<span class="sd">        considered to be outputs, i.e., controlled, the strategy for</span>
+<span class="sd">        setting of which we seek in formal synthesis.</span>
+
+<span class="sd">    N.B., domains are specified in multiple datatypes.  The type is</span>
+<span class="sd">    indicated below in parenthesis.  Recognized domains, along with</span>
+<span class="sd">    examples, are:</span>
+
+<span class="sd">      - boolean (`str`); this domain is specified by `&quot;boolean&quot;`;</span>
+<span class="sd">      - finite_set (`set`); e.g., `{1, 3, 5}`;</span>
+<span class="sd">      - range (`tuple` of length 2); e.g., `(0, 15)`.</span>
+
+<span class="sd">    As with the `formula` attribute, type-checking is only performed</span>
+<span class="sd">    if requested by the user.  E.g., any iterable can act as a</span>
+<span class="sd">    finite_set.  However, a range domain must be a `tuple` of length</span>
+<span class="sd">    2; otherwise it is ambiguous with finite_set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">formula</span><span class="p">:</span>
+                <span class="nb">str</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">input_variables</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">output_variables</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate an LTL object.</span>
+
+<span class="sd">        Any non-None arguments are saved to the corresponding</span>
+<span class="sd">        attribute by reference.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">formula</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">formula</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">input_variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">output_variables</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_variables</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span> <span class="o">=</span> <span class="n">formula</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_variables</span> <span class="o">=</span> <span class="n">input_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span> <span class="o">=</span> <span class="n">output_variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_vars</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;LTL(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="si">}</span><span class="s2">&#39;, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;input_variables=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_variables</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;output_variables=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_domain_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s1">&#39;boolean&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">d</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">]&#39;</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;{&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;}&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized variable domain type.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">dumps</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump TuLiP LTL file string.</span>
+
+<span class="sd">        @param timestamp:</span>
+<span class="sd">            If True, then add comment to file with</span>
+<span class="sd">            current time in UTC.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;# Generated at &#39;</span> <span class="o">+</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S UTC&#39;</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">gmtime</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;0  # Version</span><span class="se">\n</span><span class="si">%%</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_variables</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;INPUT:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_domain_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">OUTPUT:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_domain_str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">output</span><span class="si">}</span><span class="se">\n</span><span class="s1">%%</span><span class="se">\n</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">formula</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">check_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raise Exception if variabe definitions are invalid.</span>
+
+<span class="sd">        Checks:</span>
+
+<span class="sd">          - env and sys have common vars</span>
+<span class="sd">          - some var is also a possible value of some var (including itself)</span>
+<span class="sd">            (of arbitrary finite data type)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">common_vars</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_variables</span>
+                       <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_variables</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">common_vars</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;Env and sys have variables in &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;common: </span><span class="si">{</span><span class="n">common_vars</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_form</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">check_undeclared_identifiers</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Verify formula syntax and type-check variable domains.</span>
+
+<span class="sd">        Return True iff OK.</span>
+
+<span class="sd">        UNDER DEVELOPMENT; function signature may change without</span>
+<span class="sd">        notice.  Calling will result in NotImplementedError.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">:</span>
+                <span class="nb">str</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LTL&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create LTL object from TuLiP LTL file string.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># Ignore leading and trailing whitespace</span>
+            <span class="n">comment_ind</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">comment_ind</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">comment_ind</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">:</span>  <span class="c1"># Version number is the first nonblank line</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Malformed version number.&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unrecognized version number: &quot;</span> <span class="o">+</span>
+                                     <span class="nb">str</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+                <span class="k">break</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s1">&#39; \# .* (\n | $) &#39;</span><span class="p">,</span>
+                <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                <span class="n">s</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">VERBOSE</span><span class="p">)</span>
+                    <span class="c1"># Strip comments</span>
+            <span class="n">preamble</span><span class="p">,</span> <span class="n">declar</span><span class="p">,</span> <span class="n">formula</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%%</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">input_ind</span> <span class="o">=</span> <span class="n">declar</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;INPUT:&#39;</span><span class="p">)</span>
+            <span class="n">output_ind</span> <span class="o">=</span> <span class="n">declar</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;OUTPUT:&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">output_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">output_ind</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Default is OUTPUT</span>
+            <span class="k">if</span> <span class="n">input_ind</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">input_section</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">output_section</span> <span class="o">=</span> <span class="n">declar</span><span class="p">[</span><span class="n">output_ind</span><span class="p">:]</span>
+            <span class="k">elif</span> <span class="n">input_ind</span> <span class="o">&lt;</span> <span class="n">output_ind</span><span class="p">:</span>
+                <span class="n">input_section</span> <span class="o">=</span> <span class="n">declar</span><span class="p">[</span><span class="n">input_ind</span><span class="p">:</span><span class="n">output_ind</span><span class="p">]</span>
+                <span class="n">output_section</span> <span class="o">=</span> <span class="n">declar</span><span class="p">[</span><span class="n">output_ind</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_section</span> <span class="o">=</span> <span class="n">declar</span><span class="p">[</span><span class="n">output_ind</span><span class="p">:</span><span class="n">input_ind</span><span class="p">]</span>
+                <span class="n">input_section</span> <span class="o">=</span> <span class="n">declar</span><span class="p">[</span><span class="n">input_ind</span><span class="p">:]</span>
+            <span class="n">input_section</span> <span class="o">=</span> <span class="n">input_section</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;INPUT:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">output_section</span> <span class="o">=</span> <span class="n">output_section</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;OUTPUT:&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">variables</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(),</span> <span class="nb">dict</span><span class="p">()]</span>
+            <span class="n">sections</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_section</span><span class="p">,</span> <span class="n">output_section</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">var_declar</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">var_declar</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                        <span class="k">continue</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">domain</span> <span class="o">=</span> <span class="n">var_declar</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                    <span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">domain</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;[&#39;</span><span class="p">:</span>  <span class="c1"># Range-type domain</span>
+                        <span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                        <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">domain</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:]),</span>
+                            <span class="nb">int</span><span class="p">(</span><span class="n">domain</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="n">domain</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">)]))</span>
+                    <span class="k">elif</span> <span class="n">domain</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;{&#39;</span><span class="p">:</span>  <span class="c1"># Finite set domain</span>
+                        <span class="n">domain</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="k">assert</span> <span class="n">domain</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;}&#39;</span>
+                        <span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># Remove opening, closing braces</span>
+                        <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">domain</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+                            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">))</span>
+                        <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">domain</span> <span class="o">==</span> <span class="s1">&#39;boolean&#39;</span><span class="p">:</span>
+                        <span class="n">variables</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Malformed TuLiP LTL specification string.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LTL</span><span class="p">(</span>
+            <span class="n">formula</span><span class="o">=</span><span class="n">formula</span><span class="p">,</span>
+            <span class="n">input_variables</span><span class="o">=</span><span class="n">variables</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">output_variables</span><span class="o">=</span><span class="n">variables</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">:</span>
+                <span class="nb">str</span> <span class="o">|</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">IO</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LTL&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrap `loads` for reading from files.</span>
+
+<span class="sd">        @param f:</span>
+<span class="sd">            If `str`, attempt to open a</span>
+<span class="sd">            file named &quot;f&quot; read-only.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LTL</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+
+<span class="n">VariableDeclaration</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span>
+    <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
+<span class="n">Conjuncts</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">str</span> <span class="o">|</span>
+    <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="GRSpec">
+<a class="viewcode-back" href="../../tutorial.html#spec.GRSpec">[docs]</a>
+<span class="k">class</span> <span class="nc">GRSpec</span><span class="p">(</span>
+        <span class="n">LTL</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;GR(1) specification.</span>
+
+<span class="sd">    The basic form is:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    (env_init &amp; []env_safety &amp; []&lt;&gt;env_prog_1 &amp; []&lt;&gt;env_prog_2 &amp; ...)</span>
+<span class="sd">    -&gt; (sys_init &amp; []sys_safety &amp; []&lt;&gt;sys_prog_1 &amp; []&lt;&gt;sys_prog_2 &amp; ...)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Attributes:</span>
+
+<span class="sd">    - `moore`: select whether a strategy can see primed</span>
+<span class="sd">      environment variables.</span>
+
+<span class="sd">    - `plus_one`: select causal implication between</span>
+<span class="sd">      assumptions and guarantees.</span>
+
+<span class="sd">    - `qinit`: select quantification of initial values</span>
+<span class="sd">      for variables:</span>
+
+<span class="sd">      `win` below describes the set of winning states.</span>
+<span class="sd">      `internal_init` is the initial condition for the</span>
+<span class="sd">      internal strategy variables.</span>
+<span class="sd">      `Op == expr` means operator `Op` is defined as</span>
+<span class="sd">      the expression `expr`.</span>
+
+<span class="sd">      - `r&#39;\A \A&#39;`:</span>
+<span class="sd">        `forall env_vars:  forall sys_vars:  env_init -&gt; win`.</span>
+<span class="sd">        `sys_init` must be empty or contain true.</span>
+<span class="sd">        The strategy enumeration iterates through</span>
+<span class="sd">        all assignments that satisfy</span>
+<span class="sd">        `env_init &amp; internal_init`.</span>
+
+<span class="sd">      - `r&#39;\A \E&#39;`:</span>
+<span class="sd">        `forall env_vars:  exist sys_vars:  form`,</span>
+<span class="sd">        where:</span>
+<span class="sd">        - `form == sys_init &amp; (env_init -&gt; win)`</span>
+<span class="sd">          (`plus_one is True`)</span>
+<span class="sd">        - `form == env_init -&gt; (sys_init &amp; win)`</span>
+<span class="sd">          (`plus_one is False`)</span>
+<span class="sd">        The strategy enumeration iterates</span>
+<span class="sd">        through all assignments that</span>
+<span class="sd">        satisfy `\E sys_vars:  env_init`, and</span>
+<span class="sd">        picks assignments that satisfy</span>
+<span class="sd">        `form &amp; internal_init`.</span>
+
+<span class="sd">      - `r&#39;\E \A&#39;`:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        exist sys_vars:  forall env_vars:  form</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        where:</span>
+<span class="sd">        - `form == sys_init &amp; (env_init -&gt; win)`</span>
+<span class="sd">          (`plus_one is True`)</span>
+<span class="sd">        - `form == env_init -&gt; (sys_init &amp; win)`</span>
+<span class="sd">          (`plus_one is False`)</span>
+
+<span class="sd">        The strategy enumeration picks</span>
+<span class="sd">        an assignment that satisfies:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        internal_init &amp; \A env_vars:  form</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        and iterates through all assignments</span>
+<span class="sd">        that satisfy `env_init`.</span>
+
+<span class="sd">      - `r&#39;\E \E&#39;`:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        exist env_vars:  exist sys_vars:  sys_init &amp; win</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        `env_init` must be empty or contain true.</span>
+<span class="sd">        The strategy enumeration picks</span>
+<span class="sd">        an assignment that satisfies:</span>
+
+<span class="sd">        ```</span>
+<span class="sd">        sys_init &amp; win &amp; internal_init</span>
+<span class="sd">        ```</span>
+
+<span class="sd">    - `env_vars`: alias for `input_variables` of `LTL`,</span>
+<span class="sd">      concerning variables that are determined</span>
+<span class="sd">      by the environment.</span>
+
+<span class="sd">    - `env_init`: `list` of `str` that</span>
+<span class="sd">      specifies the assumption about the</span>
+<span class="sd">      initial state of the environment.</span>
+
+<span class="sd">    - `env_safety`: `list` of `str` that</span>
+<span class="sd">      specifies the assumption about the</span>
+<span class="sd">      evolution of the environment state.</span>
+
+<span class="sd">    - `env_prog`: `list` of `str` that</span>
+<span class="sd">      specifies the justice assumption</span>
+<span class="sd">      on the environment.</span>
+
+<span class="sd">    - `sys_vars`: alias for `output_variables` of `LTL`,</span>
+<span class="sd">      concerning variables that are controlled</span>
+<span class="sd">      by the system.</span>
+
+<span class="sd">    - `sys_init`: `list` of `str` that</span>
+<span class="sd">      specifies the requirement</span>
+<span class="sd">      on the initial state of the system.</span>
+
+<span class="sd">    - `sys_safety`: `list` of `str` that</span>
+<span class="sd">      specifies the safety requirement.</span>
+
+<span class="sd">    - `sys_prog`: `list` of `str` that</span>
+<span class="sd">      specifies the progress requirement.</span>
+
+<span class="sd">    An empty list for any formula</span>
+<span class="sd">    (e.g., if `env_init = list()`)</span>
+<span class="sd">    is marked as `True` in the specification.</span>
+
+<span class="sd">    This corresponds to the constant Boolean function,</span>
+<span class="sd">    which usually means that subformula has no</span>
+<span class="sd">    effect (is non-restrictive) on the spec.</span>
+
+<span class="sd">    Consult `GRSpec.__init__` concerning</span>
+<span class="sd">    arguments at the time of instantiation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">env_vars</span><span class="p">:</span>
+                <span class="n">VariableDeclaration</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sys_vars</span><span class="p">:</span>
+                <span class="n">VariableDeclaration</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">env_init</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">sys_init</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">env_safety</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">sys_safety</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">env_prog</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">sys_prog</span><span class="p">:</span>
+                <span class="n">Conjuncts</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="n">moore</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">plus_one</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">qinit</span><span class="p">:</span>
+                <span class="n">QInit</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\A \A&#39;</span><span class="p">,</span>
+            <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate a GRSpec object.</span>
+
+<span class="sd">        Instantiating GRSpec without arguments results in an empty</span>
+<span class="sd">        formula.  The default domain of a variable is &quot;boolean&quot;.</span>
+
+<span class="sd">        @param env_vars:</span>
+<span class="sd">            If env_vars is a dictionary, then its keys</span>
+<span class="sd">            should be variable names, and values are domains of the</span>
+<span class="sd">            corresponding variable.  Else, if env_vars is an iterable,</span>
+<span class="sd">            then assume all environment variables are `boolean` (or</span>
+<span class="sd">            &quot;atomic propositions&quot;).  Cf. `GRSpec` for details.</span>
+<span class="sd">        @param sys_vars:</span>
+<span class="sd">            Mutatis mutandis, env_vars.</span>
+<span class="sd">        @param env_init, env_safety, env_prog,</span>
+<span class="sd">                sys_init, sys_safety, sys_prog:</span>
+<span class="sd">            An empty string is converted to an empty list.</span>
+<span class="sd">            A string is placed in a list.</span>
+<span class="sd">            iterables are converted to lists.  Cf. `GRSpec`.</span>
+<span class="sd">        @param qinit:</span>
+<span class="sd">            see class docstring</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cache</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;jtlv&#39;</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;gr1c&#39;</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;slugs&#39;</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">()}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bool_int</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;env_&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_&#39;</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="s1">&#39;safety&#39;</span><span class="p">,</span> <span class="s1">&#39;prog&#39;</span><span class="p">}}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">moore</span> <span class="o">=</span> <span class="n">moore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plus_one</span> <span class="o">=</span> <span class="n">plus_one</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qinit</span> <span class="o">=</span> <span class="n">qinit</span>
+        <span class="k">if</span> <span class="n">env_vars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">env_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">env_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;boolean&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">env_vars</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sys_vars</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sys_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sys_vars</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">sys_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;boolean&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sys_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">sys_vars</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">mapper</span><span class="p">(</span>
+                <span class="n">part</span><span class="p">:</span>
+                    <span class="n">Conjuncts</span><span class="p">,</span>
+                <span class="n">name</span><span class="p">:</span>
+                    <span class="nb">str</span>
+                <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+            <span class="k">match</span> <span class="n">part</span><span class="p">:</span>
+                <span class="k">case</span> <span class="nb">str</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="p">[</span><span class="n">part</span><span class="p">]</span>
+                <span class="k">case</span> <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">():</span>
+                    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+                <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                        <span class="s1">&#39;Expected `Iterable` &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;as `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">`, but &#39;</span>
+                        <span class="s1">&#39;instead got: &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">part</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">env_init</span><span class="p">,</span> <span class="n">sys_init</span><span class="p">,</span>
+            <span class="n">env_safety</span><span class="p">,</span> <span class="n">sys_safety</span><span class="p">,</span>
+            <span class="n">env_prog</span><span class="p">,</span> <span class="n">sys_prog</span><span class="p">]</span>
+        <span class="p">(</span><span class="n">env_init</span><span class="p">,</span> <span class="n">sys_init</span><span class="p">,</span>
+         <span class="n">env_safety</span><span class="p">,</span> <span class="n">sys_safety</span><span class="p">,</span>
+         <span class="n">env_prog</span><span class="p">,</span> <span class="n">sys_prog</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
+                <span class="n">mapper</span><span class="p">,</span> <span class="n">parts</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span> <span class="o">=</span> <span class="n">env_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span> <span class="o">=</span> <span class="n">sys_init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span> <span class="o">=</span> <span class="n">env_safety</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span> <span class="o">=</span> <span class="n">sys_safety</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span> <span class="o">=</span> <span class="n">env_prog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span> <span class="o">=</span> <span class="n">sys_prog</span>
+        <span class="n">LTL</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">formula</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_canon</span><span class="p">(),</span>
+            <span class="n">input_variables</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">,</span>
+            <span class="n">output_variables</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">declare</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Declare flexible variables.</span>
+
+<span class="sd">        Positional arguments are names of Boolean-valued variables.</span>
+<span class="sd">        Keyword arguments are names of integer or string valued</span>
+<span class="sd">        variables, declared by a pair of integers, or a sequence of</span>
+<span class="sd">        strings respectively.</span>
+
+<span class="sd">        By default declare as system variables.</span>
+<span class="sd">        If `env=True` then declare as environment variables.</span>
+<span class="sd">        To declare a variable named `env`, use the constructor</span>
+<span class="sd">        or modify directly the attributes `env_vars`, `sys_vars`.</span>
+
+<span class="sd">        If already declared, the given type hints should</span>
+<span class="sd">        match existing ones.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">kw</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;env&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span> <span class="n">env</span>
+            <span class="c1"># &quot;env&quot; not a var name</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">is_int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">is_int</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1"># duck check by appending &#39;&#39;</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">((</span><span class="n">v</span><span class="p">,</span> <span class="s1">&#39;boolean&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">)</span>
+        <span class="c1"># `LTL.*_variables` equal these (see `self.__init__`)</span>
+        <span class="n">target</span><span class="p">,</span> <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span>
+        <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
+            <span class="n">target</span><span class="p">,</span> <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="p">,</span> <span class="n">target</span>
+        <span class="c1"># redeclarations must match</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">other</span><span class="p">,</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">target</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">target</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s1">&#39;,</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+            <span class="sa">f</span><span class="s1">&#39;env_vars=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;sys_vars=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;env_init=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;sys_init=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;env_safety=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;sys_safety=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;env_prog=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s1">&#39;sys_prog=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s1">)&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_canon</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">dumps</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_canon</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">LTL</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">loads</span><span class="p">(</span>
+            <span class="n">s</span><span class="p">:</span>
+                <span class="nb">str</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GRSpec&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create GRSpec object from TuLiP LTL file string.</span>
+
+<span class="sd">        UNDER DEVELOPMENT; function signature may change without</span>
+<span class="sd">        notice.  Calling will result in NotImplementedError.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">:</span>
+                <span class="nb">str</span> <span class="o">|</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">IO</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GRSpec&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wrap `loads` for reading from files.</span>
+
+<span class="sd">        UNDER DEVELOPMENT; function signature may change without</span>
+<span class="sd">        notice.  Calling will result in NotImplementedError.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="k">def</span> <span class="nf">pretty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string intended to be readable.&quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;ENVIRONMENT VARIABLES:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">(none)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">SYSTEM VARIABLES:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">output</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="se">\t</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">(none)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">FORMULA:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;ASSUMPTION:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    INITIAL</span><span class="se">\n\t</span><span class="s1">  &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    SAFETY</span><span class="se">\n\t</span><span class="s1">  []&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; []&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    LIVENESS</span><span class="se">\n\t</span><span class="s1">  []&lt;&gt;&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; []&lt;&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s1">&#39;GUARANTEE:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    INITIAL</span><span class="se">\n\t</span><span class="s1">  &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    SAFETY</span><span class="se">\n\t</span><span class="s1">  []&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; []&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">&#39;    LIVENESS</span><span class="se">\n\t</span><span class="s1">  []&lt;&gt;&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1">&amp; []&lt;&gt;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">)&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span> <span class="nf">check_syntax</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raise `AssertionError` for misplaced primed variables.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_no_primed</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span>
+            <span class="s1">&#39;assumed initial condition&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_no_primed</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">,</span>
+            <span class="s1">&#39;guaranteed initial condition&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_no_primed</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">,</span>
+            <span class="s1">&#39;liveness assumption&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_assert_no_primed</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">,</span>
+            <span class="s1">&#39;liveness guarantee&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">primed</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">collect_primed_vars</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">primed</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                    <span class="s1">&#39;Syntax error: &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;primed system variable &quot;</span><span class="si">{</span><span class="n">var</span><span class="si">}</span><span class="s1">&quot;&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39; found in env safety: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_assert_no_primed</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">formulae</span><span class="p">:</span>
+                <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">name</span><span class="p">:</span>
+                <span class="nb">str</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Raise `AssertionError` if primed vars in `formulae`.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">formulae</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">primed</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">collect_primed_vars</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">primed</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                <span class="s1">&#39;Syntax error: &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;primed variables: </span><span class="si">{</span><span class="n">primed</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39; found in </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GRSpec&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a copy of `self`.&quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span>
+            <span class="n">env_vars</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">),</span>
+            <span class="n">sys_vars</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">),</span>
+            <span class="n">env_init</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">),</span>
+            <span class="n">env_safety</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">),</span>
+            <span class="n">env_prog</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">),</span>
+            <span class="n">sys_init</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">),</span>
+            <span class="n">sys_safety</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">),</span>
+            <span class="n">sys_prog</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">))</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">moore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moore</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">plus_one</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plus_one</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">qinit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinit</span>
+        <span class="k">return</span> <span class="n">r</span>
+
+    <span class="k">def</span> <span class="fm">__or__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">other</span><span class="p">:</span>
+                <span class="s1">&#39;GRSpec&#39;</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GRSpec&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create union of two specifications.&quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">GRSpec</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;type(other) must be GRSpec&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">moore</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">moore</span><span class="p">,</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">moore</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">moore</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">plus_one</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">plus_one</span><span class="p">,</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plus_one</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">plus_one</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">qinit</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">qinit</span><span class="p">,</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">qinit</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">qinit</span><span class="p">)</span>
+        <span class="c1"># common vars have same types ?</span>
+        <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">env_vars</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">!=</span> <span class="n">result</span><span class="o">.</span><span class="n">env_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mismatched variable domains&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">varname</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]</span> <span class="o">!=</span> <span class="n">result</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">[</span><span class="n">varname</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Mismatched variable domains&#39;</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">env_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">sys_vars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">to_canon</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Output formula in TuLiP LTL syntax.</span>
+
+<span class="sd">        The format is described in the [Specifications section](</span>
+<span class="sd">            https://tulip-control.sourceforge.io/doc/specifications.html)</span>
+<span class="sd">        of the TuLiP User&#39;s Guide.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conj_cstr</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s1">&#39; &amp;&amp; &#39;</span> <span class="k">if</span> <span class="n">s</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">:</span>
+            <span class="n">assumption</span> <span class="o">+=</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">:</span>
+            <span class="n">assumption</span> <span class="o">+=</span> <span class="n">conj_cstr</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">+</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_safety</span><span class="p">,</span> <span class="s1">&#39;[]&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">:</span>
+            <span class="n">assumption</span> <span class="o">+=</span> <span class="n">conj_cstr</span><span class="p">(</span><span class="n">assumption</span><span class="p">)</span> <span class="o">+</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_prog</span><span class="p">,</span> <span class="s1">&#39;[]&lt;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">guarantee</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">:</span>
+            <span class="n">guarantee</span> <span class="o">+=</span> <span class="n">conj_cstr</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">+</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">:</span>
+            <span class="n">guarantee</span> <span class="o">+=</span> <span class="n">conj_cstr</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">+</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_safety</span><span class="p">,</span> <span class="s1">&#39;[]&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">:</span>
+            <span class="n">guarantee</span> <span class="o">+=</span> <span class="n">conj_cstr</span><span class="p">(</span><span class="n">guarantee</span><span class="p">)</span> <span class="o">+</span> <span class="n">_conj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_prog</span><span class="p">,</span> <span class="s1">&#39;[]&lt;&gt;&#39;</span><span class="p">)</span>
+        <span class="c1"># Put the parts together, simplifying in special cases</span>
+        <span class="k">if</span> <span class="n">guarantee</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">assumption</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">assumption</span><span class="si">}</span><span class="s1">) -&gt; (</span><span class="si">{</span><span class="n">guarantee</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">guarantee</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;True&#39;</span>
+
+    <span class="k">def</span> <span class="nf">sub_values</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">var_values</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Substitute given values for variables.</span>
+
+<span class="sd">        Note that there are three ways to substitute values for variables:</span>
+
+<span class="sd">          - syntactic using this function</span>
+
+<span class="sd">          - no substitution by user code, instead flatten to python and</span>
+<span class="sd">            use `eval` together with a `dict` defining</span>
+<span class="sd">            the values of variables, as done in `eval_init`.</span>
+
+<span class="sd">        For converting non-integer finite types to</span>
+<span class="sd">        integer types, use `replace_finite_by_int`.</span>
+
+<span class="sd">        @return:</span>
+<span class="sd">            `dict` of ASTs after the substitutions,</span>
+<span class="sd">            keyed by original clause (before substitution).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;substitute values for variables...&#39;</span><span class="p">)</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">formula</span><span class="p">,</span> <span class="n">tree</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Tree</span><span class="o">.</span><span class="n">from_recursive_ast</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+            <span class="n">tx</span><span class="o">.</span><span class="n">sub_values</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">var_values</span><span class="p">)</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">formula</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">to_recursive_ast</span><span class="p">()</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done with substitutions.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">compile_init</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">no_str</span><span class="p">:</span>
+                <span class="nb">bool</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">types</span><span class="o">.</span><span class="n">CodeType</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compile python expression for initial conditions.</span>
+
+<span class="sd">        The returned bytecode can be used with `eval`</span>
+<span class="sd">        and a `dict` assigning values to variables.</span>
+<span class="sd">        Its value is the implication</span>
+
+<span class="sd">        ```tla</span>
+<span class="sd">        env_init =&gt; sys_init</span>
+<span class="sd">        ```</span>
+
+<span class="sd">        Use the corresponding python data types</span>
+<span class="sd">        for the `dict` values:</span>
+
+<span class="sd">              - `bool` for Boolean variables</span>
+<span class="sd">              - `int` for integers</span>
+<span class="sd">              - `str` for arbitrary finite types</span>
+
+<span class="sd">        @param no_str:</span>
+<span class="sd">            if True, then compile the formula</span>
+<span class="sd">            where all string variables have been replaced by integers.</span>
+<span class="sd">            Otherwise compile the original formula containing strings.</span>
+<span class="sd">        @return:</span>
+<span class="sd">            python expression compiled for `eval`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">str_to_int</span><span class="p">()</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;env&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">env_init</span><span class="p">,</span>
+            <span class="s1">&#39;sys&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sys_init</span><span class="p">}</span>
+        <span class="n">pyinit</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">side</span><span class="p">,</span> <span class="n">clauses</span> <span class="ow">in</span> <span class="n">init</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">no_str</span><span class="p">:</span>
+                <span class="n">clauses</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bool_int</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">clauses</span><span class="p">]</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;clauses to compile: </span><span class="si">{</span><span class="n">clauses</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="p">[</span><span class="n">ts</span><span class="o">.</span><span class="n">translate_ast</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s1">&#39;python&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">clauses</span><span class="p">]</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;after translation to python: </span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">_conj</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="s1">&#39;and&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+            <span class="n">pyinit</span><span class="p">[</span><span class="n">side</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="n">assumption</span> <span class="o">=</span> <span class="n">pyinit</span><span class="p">[</span><span class="s1">&#39;env&#39;</span><span class="p">]</span>
+        <span class="n">guarantee</span> <span class="o">=</span> <span class="n">pyinit</span><span class="p">[</span><span class="s1">&#39;sys&#39;</span><span class="p">]</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;not (</span><span class="si">{</span><span class="n">assumption</span><span class="si">}</span><span class="s1">) or (</span><span class="si">{</span><span class="n">guarantee</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">return</span> <span class="nb">compile</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s1">&#39;&lt;string&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">str_to_int</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace arbitrary finite vars with int vars.</span>
+
+<span class="sd">        Returns spec itself if it contains only int vars.</span>
+<span class="sd">        Otherwise it returns a copy of spec with all arbitrary</span>
+<span class="sd">        finite vars replaced by int-valued vars.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;convert string variables to integers...&#39;</span><span class="p">)</span>
+        <span class="n">vars_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="n">vars_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
+        <span class="n">fvars</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="p">:</span> <span class="n">d</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">vars_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">list</span><span class="p">)}</span>
+        <span class="c1"># replace symbols by ints</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bool_int</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">:</span>
+                    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is in _bool_int cache&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is not in _bool_int cache&#39;</span><span class="p">)</span>
+                <span class="c1"># get AST</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ast</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="c1"># create AST copy with int and bool vars only</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Tree</span><span class="o">.</span><span class="n">from_recursive_ast</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="n">tx</span><span class="o">.</span><span class="n">sub_constants</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">fvars</span><span class="p">)</span>
+                <span class="n">b</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">to_recursive_ast</span><span class="p">()</span>
+                <span class="c1"># formula of int/bool AST</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span>  <span class="c1"># cache</span>
+                <span class="c1"># remember map from clauses to int/bool clauses</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_bool_int</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done converting to integer variables.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ast</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return AST corresponding to formula x.</span>
+
+<span class="sd">        If AST for formula `x` has already been computed earlier,</span>
+<span class="sd">        then return cached result.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">_logger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;current cache of ASTs:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                         <span class="n">pprint</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;check if: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">, is in cache.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is already in cache&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;AST cache does not contain:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Need to parse.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse each clause and store it.</span>
+
+<span class="sd">        The AST resulting from each clause is stored</span>
+<span class="sd">        in the `dict` attribute `ast`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;parsing ASTs to cache them...&#39;</span><span class="p">)</span>
+        <span class="n">vardoms</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span>
+        <span class="n">vardoms</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
+        <span class="c1"># parse new clauses and cache the resulting ASTs</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">:</span>
+                    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1"> is already in cache&#39;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;parse: </span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">tree</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Tree</span><span class="o">.</span><span class="n">from_recursive_ast</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+                <span class="n">tx</span><span class="o">.</span><span class="n">check_for_undefined_identifiers</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">vardoms</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="c1"># rm cached ASTs that correspond to deleted clauses</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collect_cache_garbage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ast</span><span class="p">)</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;done parsing ASTs.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_collect_cache_garbage</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">cache</span><span class="p">:</span>
+                <span class="nb">dict</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;collecting garbage from GRSpec cache...&#39;</span><span class="p">)</span>
+        <span class="c1"># rm cached ASTs that correspond to deleted clauses</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">:</span>
+            <span class="c1"># emptied earlier ?</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">w</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="c1"># exclude given formulas</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">difference_update</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+            <span class="c1"># exclude int/bool-only forms of formulas</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">difference_update</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">_bool_int</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">w</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cleaned </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="si">}</span><span class="s1"> cached elements.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">replace_dependent_vars</span><span class="p">(</span>
+        <span class="n">spec</span><span class="p">:</span>
+            <span class="n">GRSpec</span><span class="p">,</span>
+        <span class="n">bool2form</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+        <span class="s1">&#39;replacing dependent variables &#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;using the map:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">bool2form</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">vs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">env_vars</span><span class="p">)</span>
+    <span class="n">vs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">sys_vars</span><span class="p">)</span>
+    <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;variables:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">vs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">bool2subtree</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">boolvar</span><span class="p">,</span> <span class="n">formula</span> <span class="ow">in</span> <span class="n">bool2form</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;checking var: </span><span class="si">{</span><span class="n">boolvar</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">boolvar</span> <span class="ow">in</span> <span class="n">vs</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">vs</span><span class="p">[</span><span class="n">boolvar</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;boolean&#39;</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">boolvar</span><span class="si">}</span><span class="s1"> is indeed Boolean&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;spec does not contain var: </span><span class="si">{</span><span class="n">boolvar</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
+        <span class="n">bool2subtree</span><span class="p">[</span><span class="n">boolvar</span><span class="p">]</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Tree</span><span class="o">.</span><span class="n">from_recursive_ast</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;env_init&#39;</span><span class="p">,</span> <span class="s1">&#39;env_safety&#39;</span><span class="p">,</span> <span class="s1">&#39;env_prog&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;sys_init&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_safety&#39;</span><span class="p">,</span> <span class="s1">&#39;sys_prog&#39;</span><span class="p">}:</span>
+        <span class="n">part</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">clause</span> <span class="ow">in</span> <span class="n">part</span><span class="p">:</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;replacing in clause:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">clause</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">ast</span><span class="p">(</span><span class="n">clause</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Tree</span><span class="o">.</span><span class="n">from_recursive_ast</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+            <span class="n">tx</span><span class="o">.</span><span class="n">sub_bool_with_subtree</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">bool2subtree</span><span class="p">)</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">to_recursive_ast</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;caluse tree after replacement:</span><span class="se">\n\t</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_conj</span><span class="p">(</span>
+        <span class="n">iterable</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">,</span>
+        <span class="n">unary</span><span class="p">:</span>
+            <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">op</span><span class="p">:</span>
+            <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;&amp;&amp;&#39;</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="n">op</span><span class="si">}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">unary</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">iterable</span><span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">spec.form</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

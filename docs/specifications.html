@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>4. Specifications &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="5. Enumerated property representations" href="transys.html" />
+    <link rel="prev" title="3. Tutorial and Examples" href="tutorial.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="transys.html" title="5. Enumerated property representations"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial and Examples"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">4. </span>Specifications</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="specifications">
+<h1><span class="section-number">4. </span>Specifications<a class="headerlink" href="#specifications" title="Link to this heading">¶</a></h1>
+<p>Currently the best support available in TuLiP is for specifications
+expressed as GR(1) formulae, which constitutes a sublanguage of LTL.
+Nonetheless, a more general LTL specification string is described
+in the below section <a class="reference internal" href="#tulip-ltl-label"><span class="std std-ref">TuLiP LTL syntax</span></a>, and
+it is supported through the class <code class="docutils literal notranslate"><span class="pre">tulip.spec.LTL</span></code>.
+Consult <a class="reference internal" href="install.html"><span class="doc">Installation</span></a> (specifically, <a class="reference internal" href="install.html#synt-tools-sec-label"><span class="std std-ref">Alternative discrete synthesis tools</span></a>)
+about alternative solvers if you are interested in
+languages that are not equivalent to GR(1).</p>
+<section id="getting-started">
+<h2><span class="section-number">4.1. </span>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h2>
+<p>To create an empty LTL formula and print it, try</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.spec</span> <span class="kn">import</span> <span class="n">LTL</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">LTL</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The GR(1) formula <img class="math" src="_images/math/8a5fbad2b2969a5d97122c553284c310a25d345e.png" alt="\square \Diamond p"/>,
+in which the environment is empty
+(so, there is no “assumption” part of the specification), and
+where <img class="math" src="_images/math/141bbefb74014fc5e43499901bf78607ae335583.png" alt="p"/> is Boolean and controlled,
+can be created and printed as a specification string
+(cf. <a class="reference internal" href="#tulip-ltl-label"><span class="std std-ref">TuLiP LTL syntax</span></a>) by</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.spec</span> <span class="kn">import</span> <span class="n">GRSpec</span>
+<span class="n">f</span> <span class="o">=</span> <span class="n">GRSpec</span><span class="p">(</span><span class="n">sys_vars</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;p&quot;</span><span class="p">},</span> <span class="n">sys_prog</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;p&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">dumps</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The result of which should look similar to</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>0  # Version
+
+%%
+OUTPUT:
+p : boolean;
+
+%%
+[]&lt;&gt;(p)
+</pre></div>
+</div>
+<p>If you are only interested in the formula itself,
+presented minimally or with pretty-formatting,
+then also try</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">pretty</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The result of the second line (using <code class="docutils literal notranslate"><span class="pre">pretty()</span></code>) should look similar to</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>ENVIRONMENT VARIABLES:
+        (none)
+
+SYSTEM VARIABLES:
+        p     boolean
+
+FORMULA:
+ASSUMPTION:
+GUARANTEE:
+    LIVENESS
+          []&lt;&gt;(p)
+</pre></div>
+</div>
+</section>
+<section id="tulip-ltl-syntax">
+<span id="tulip-ltl-label"></span><h2><span class="section-number">4.2. </span>TuLiP LTL syntax<a class="headerlink" href="#tulip-ltl-syntax" title="Link to this heading">¶</a></h2>
+<p>The LTL syntax defined in
+<a class="reference external" href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form">EBNF</a>
+below can be parsed by <code class="docutils literal notranslate"><span class="pre">tulip.spec.lexyacc</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>expr ::=
+       (* arithmetic operators *)
+       | expr &#39;*&#39; expr  (* multiplication *)
+       | expr &#39;/&#39; expr  (* division *)
+       | expr &#39;+&#39; expr  (* addition *)
+       | expr &#39;-&#39; expr  (* subtraction *)
+       | expr &#39;&lt;&lt;&gt;&gt;&#39; NUMBER  (* truncation of numbers *)
+
+       (* equality in set theory *)
+       | expr &#39;=&#39; expr
+
+       (* negation of `=` *)
+       | expr &#39;/=&#39; expr
+       | expr &#39;!=&#39; expr
+       | expr &#39;^&#39; expr
+
+       (* comparison in arithmetic *)
+       | expr &#39;&lt;=&#39; expr
+       | expr &#39;=&lt;&#39; expr
+
+       (* comparison in arithmetic *)
+       | expr &#39;&gt;=&#39; expr
+
+       (* logical negation *)
+       | &#39;~&#39; expr
+       | &#39;!&#39; expr
+
+       (* conjunction *)
+       | expr &#39;/\&#39; expr
+       | expr &#39;&amp;&#39; expr
+       | expr &#39;&amp;&amp;&#39; expr
+
+       (* disjunction *)
+       | expr &#39;\/&#39; expr
+       | expr &#39;|&#39; expr
+       | expr &#39;||&#39; expr
+
+       (* logical implication *)
+       | expr &#39;=&gt;&#39; expr
+       | expr &#39;-&gt;&#39; expr
+
+       (* logical equivalence *)
+       | expr &#39;&lt;=&gt;&#39; expr
+       | expr &#39;&lt;-&gt;&#39; expr
+
+       (* ternary conditional
+          (&quot;if&quot; expression) *)
+       | &#39;(&#39; &#39;ite&#39; expr &#39;,&#39; expr &#39;,&#39; expr &#39;)&#39;
+
+       (* &quot;next&quot; action operator *)
+       | expr &quot;&#39;&quot;
+       | &#39;X&#39; expr
+       | &#39;next&#39; expr
+
+       (* &quot;always&quot; temporal operator *)
+       | &#39;[]&#39; expr
+       | &#39;G&#39; expr
+
+       (* &quot;eventually&quot; temporal operator *)
+       | &#39;&lt;&gt;&#39; expr
+       | &#39;F&#39; expr
+
+       (* &quot;until&quot; temporal operator *)
+       | expr &#39;U&#39; expr
+
+       (* &quot;release&quot; temporal operator *)
+       | expr &#39;R&#39; expr
+
+       (* parentheses *)
+       | &#39;(&#39; expr &#39;)&#39;
+
+       (* Boolean constants *)
+       | TRUE
+       | FALSE
+
+       (* integral numeralic literals *)
+       | NUMBER
+
+       (* identifiers *)
+       | variable
+
+       (* string literals *)
+       | string
+
+variable ::= NAME
+
+string ::= &#39;&quot;&#39; NAME &#39;&quot;&#39;
+</pre></div>
+</div>
+<p>where:</p>
+<ul class="simple">
+<li><p>NAME can be any alphanumeric other than <code class="docutils literal notranslate"><span class="pre">next</span></code> that
+does not start with any character from <code class="docutils literal notranslate"><span class="pre">'F',</span> <span class="pre">'G',</span> <span class="pre">'R',</span> <span class="pre">'U',</span> <span class="pre">'X'</span></code>.</p></li>
+<li><p>NUMBER any non-negative integer</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TRUE</span></code> is case-insensitive <code class="docutils literal notranslate"><span class="pre">'true'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">FALSE</span></code> is case-insensitive <code class="docutils literal notranslate"><span class="pre">'false'</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">(*</span></code> and <code class="docutils literal notranslate"><span class="pre">*)</span></code> delimit comments to the above grammar</p></li>
+<li><p>a number of operators are of TLA+</p></li>
+</ul>
+<p>The token precedence (lowest to highest) and associativity
+(r = right, l = left, n = none) is:</p>
+<ul class="simple">
+<li><p><strong>&lt;=&gt;</strong>, <strong>&lt;-&gt;</strong> (l)</p></li>
+<li><p><strong>=&gt;</strong>, <strong>-&gt;</strong> (l)</p></li>
+<li><p><strong>^</strong> (l)</p></li>
+<li><p><strong>/</strong>, <strong>|</strong> (l)</p></li>
+<li><p><strong>/**, **&amp;</strong> (l)</p></li>
+<li><p><strong>[]</strong>, <strong>&lt;&gt;</strong> (l)</p></li>
+<li><p><strong>U</strong>, <strong>W</strong>, <strong>R</strong> (l)</p></li>
+<li><p><strong>=</strong>, <strong>/=</strong>, <strong>!=</strong> (l)</p></li>
+<li><p><strong>&lt;=</strong>, <strong>=&lt;</strong>, <strong>&gt;=</strong>, <strong>&gt;</strong> (l)</p></li>
+<li><p><strong>+</strong>, <strong>-</strong> (l)</p></li>
+<li><p><strong>*</strong>, <strong>/</strong> (l)</p></li>
+<li><p><strong>~</strong>, <strong>!</strong> (r)</p></li>
+<li><p><strong>X</strong> (r)</p></li>
+<li><p><strong>‘</strong> (l)</p></li>
+<li><p>TRUE, FALSE</p></li>
+</ul>
+<p>Expressions of the above form are successfully parsed.
+This does <em>not</em> mean that they can be used to produce valid output
+to be fed to specific solvers.
+In other words the parser is more permissive than what each tool
+(and others to be added in the future) supports.</p>
+<p>For example: <code class="docutils literal notranslate"><span class="pre">variable</span> <span class="pre">'+'</span> <span class="pre">variable</span></code> is valid as parser input,
+but <strong>may be invalid</strong> when passed to a particular solver.</p>
+<section id="full-operator-names">
+<h3><span class="section-number">4.2.1. </span>Full operator names<a class="headerlink" href="#full-operator-names" title="Link to this heading">¶</a></h3>
+<p>If you would like to use as operators strings like: <code class="docutils literal notranslate"><span class="pre">and</span></code>,
+then your input can be converted automatically to the above syntax
+by the following lexical substitutions:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">next</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">X</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">always</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">eventually</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">until</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">U</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">stronguntil</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">U</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">weakuntil</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">W</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unless</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">W</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">release</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">V</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">implies</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">-&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">equivalent</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">not</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">!</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">and</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">&amp;&amp;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">or</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">||</span></code></p></li>
+</ul>
+<p>These substitutions are <strong>not</strong> enabled by default.
+In order to enable them, pass the argument <code class="docutils literal notranslate"><span class="pre">full_operators</span> <span class="pre">=</span> <span class="pre">True</span></code> to
+<code class="docutils literal notranslate"><span class="pre">tulip.spec.parser.parser</span></code>.</p>
+</section>
+</section>
+<section id="tulip-ltl-specification-files">
+<h2><span class="section-number">4.3. </span>TuLiP LTL specification files<a class="headerlink" href="#tulip-ltl-specification-files" title="Link to this heading">¶</a></h2>
+<p><em>The description of format here is normative.</em> While details may
+vary among versions of the format, it is always the case that the first
+non-blank line must be the version number, which is a non-negative integer.</p>
+<section id="version-0">
+<h3><span class="section-number">4.3.1. </span>Version 0<a class="headerlink" href="#version-0" title="Link to this heading">¶</a></h3>
+<p>An LTL specification file must consist of three sections,
+which are separated by <code class="docutils literal notranslate"><span class="pre">%%</span></code>.
+The first section is referred to as the <strong>preamble</strong>, the second as the
+<strong>declarations section</strong>, and the third as the <strong>formula section</strong>.  Comments
+can appear anywhere, are begun with <code class="docutils literal notranslate"><span class="pre">#</span></code>, and continue to the end of the line.
+Entirely blank lines are ignored.  In the preamble, the first non-blank line
+must be the version number, which is a non-negative integer.</p>
+<p>In the declarations section, there are two optional keywords that may appear in
+any order: <code class="docutils literal notranslate"><span class="pre">INPUT:</span></code> and <code class="docutils literal notranslate"><span class="pre">OUTPUT:</span></code>.  If given, each must appear on its own
+line, with no variable declarations.  All variable declarations following
+<code class="docutils literal notranslate"><span class="pre">INPUT:</span></code>, up to the appearance of <code class="docutils literal notranslate"><span class="pre">OUTPUT:</span></code> or <code class="docutils literal notranslate"><span class="pre">%%</span></code>, are taken to be
+“input variables”, sometimes called uncontrolled or part of the “environment”.
+All variable declarations following <code class="docutils literal notranslate"><span class="pre">OUTPUT:</span></code>, up to the appearance of
+<code class="docutils literal notranslate"><span class="pre">INPUT:</span></code> or <code class="docutils literal notranslate"><span class="pre">%%</span></code>, are taken to be “output variables”, sometimes called
+controlled or part of the “system”.  The default behavior (i.e., if these
+keywords are omitted) is that of <code class="docutils literal notranslate"><span class="pre">OUTPUT:</span></code>.</p>
+<p>A variable declaration is of the form <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">:</span> <span class="pre">domain;</span></code>.  It may span multiple
+lines.  The domain may be</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">boolean</span></code>, if the variable (i.e., atomic proposition) can either be True or
+False;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[a,b]</span></code>, where <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code> are integers; or</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">{...}</span></code>, where <code class="docutils literal notranslate"><span class="pre">...</span></code> is a comma-separated list.  The parser will attempt
+to cast each element as an integer; if it fails, then the element is saved
+verbatim as a string.</p></li>
+</ul>
+<p>Everything appearing after the second <code class="docutils literal notranslate"><span class="pre">%%</span></code>, excepting comments, is considered
+to be part of the LTL formula.  Much of the syntax is taken from the <a class="reference external" href="http://spinroot.com/spin/Man/ltl.html">LTL
+formula syntax</a> of <a class="reference external" href="http://spinroot.com/spin/">Spin</a>.  While it will later be expressed by
+a (Extended?) BNF grammar, the formula syntax is descibed in the following.</p>
+<ol class="arabic simple">
+<li><p>An <strong>identifier</strong> is of the form <code class="docutils literal notranslate"><span class="pre">[a-zA-Z_][a-zA-Z0-9_.]*</span></code> Note that we do
+not restrict identifiers from beginning with operator keywords, e.g., <strong>X</strong>
+because of the spacing requirement (see below).</p></li>
+<li><p><strong>True</strong> and <strong>False</strong> are Boolean constants.  No variable (identifier) can
+be thus named.</p></li>
+<li><p>Boolean operators are <strong>!</strong> (negation), <strong>&amp;&amp;</strong> (conjunction), <strong>||</strong>
+(disjunction), <strong>-&gt;</strong> (implication), and <strong>&lt;-&gt;</strong> (equivalence).</p></li>
+<li><p>Temporal operators are <strong>[]</strong> (always), <strong>&lt;&gt;</strong> (eventually), <strong>X</strong> (next),
+<strong>U</strong> (until), <strong>V</strong> or <strong>R</strong> (release).</p></li>
+<li><p>Notice that the alternative operators <strong>/\</strong> and <strong>\/</strong> for <strong>&amp;&amp;</strong> and
+<strong>||</strong>, respectively, are not included; cf. the <a class="reference external" href="http://spinroot.com/spin/Man/ltl.html">Spin LTL formula syntax</a>.  Furthermore, <strong>W</strong> (weak until)
+is not included, except for the parser of the GR(1) fragment.</p></li>
+<li><p>Space is required wherever its absence would cause parsing ambiguity.  E.g.,
+<code class="docutils literal notranslate"><span class="pre">Xp</span></code> is always an identifier, whereas <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">p</span></code> is a formula in which
+the next operator is applied to the identifier <code class="docutils literal notranslate"><span class="pre">p</span></code>.</p></li>
+<li><p>Let <code class="docutils literal notranslate"><span class="pre">u</span></code> and <code class="docutils literal notranslate"><span class="pre">v</span></code> be variables over integer domains, and let <code class="docutils literal notranslate"><span class="pre">k</span></code> be
+an integer.
+Then “basic comparisons” are <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">&lt;</span> <span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">v</span></code>, <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">&lt;</span> <span class="pre">k</span></code>, and <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">k</span></code>.
+The following derived operators are also available,
+with their meaning matching that of the C language:
+<code class="docutils literal notranslate"><span class="pre">&lt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;</span></code>, <code class="docutils literal notranslate"><span class="pre">&gt;=</span></code>, <code class="docutils literal notranslate"><span class="pre">!=</span></code>.  Addition within comparisons,
+given in the form <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">&lt;</span> <span class="pre">v+k</span></code> or <code class="docutils literal notranslate"><span class="pre">u</span> <span class="pre">=</span> <span class="pre">v+k</span></code>, is available,
+along with derived comparisons as in the previous item.
+Subtraction is similarly supported;
+replace <code class="docutils literal notranslate"><span class="pre">+</span></code> with <code class="docutils literal notranslate"><span class="pre">-</span></code>.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">4. Specifications</a><ul>
+<li><a class="reference internal" href="#getting-started">4.1. Getting started</a></li>
+<li><a class="reference internal" href="#tulip-ltl-syntax">4.2. TuLiP LTL syntax</a><ul>
+<li><a class="reference internal" href="#full-operator-names">4.2.1. Full operator names</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tulip-ltl-specification-files">4.3. TuLiP LTL specification files</a><ul>
+<li><a class="reference internal" href="#version-0">4.3.1. Version 0</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="tutorial.html"
+                          title="previous chapter"><span class="section-number">3. </span>Tutorial and Examples</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="transys.html"
+                          title="next chapter"><span class="section-number">5. </span>Enumerated property representations</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/specifications.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="transys.html" title="5. Enumerated property representations"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial and Examples"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">4. </span>Specifications</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

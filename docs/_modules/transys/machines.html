@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>transys.machines &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="../../_static/patch.css?v=0ad0caba" />
+    
+    <script src="../../_static/documentation_options.js?v=350a9c04"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="../../_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">transys.machines</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for transys.machines</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2013-2015 by California Institute of Technology</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions</span>
+<span class="c1"># are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1">#</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># 3. Neither the name of the California Institute of Technology nor</span>
+<span class="c1">#    the names of its contributors may be used to endorse or promote</span>
+<span class="c1">#    products derived from this software without specific prior</span>
+<span class="c1">#    written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c1"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH</span>
+<span class="c1"># OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<span class="c1"># SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF</span>
+<span class="c1"># USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,</span>
+<span class="c1"># OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT</span>
+<span class="c1"># OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+<span class="c1"># SUCH DAMAGE.</span>
+<span class="sd">&quot;&quot;&quot;Finite State Machines Module&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections.abc</span> <span class="k">as</span> <span class="nn">_abc</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">pprint</span> <span class="k">as</span> <span class="nn">_pp</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">_ty</span>
+
+<span class="kn">import</span> <span class="nn">tulip.transys.export.machine2scxml</span> <span class="k">as</span> <span class="nn">_scxml</span>
+<span class="kn">import</span> <span class="nn">tulip.transys.labeled_graphs</span> <span class="k">as</span> <span class="nn">_graphs</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;create_machine_ports&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MooreMachine&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MealyMachine&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;guided_run&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;random_run&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;interactive_run&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;moore2mealy&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;mealy2moore&#39;</span><span class="p">]</span>
+
+
+<span class="n">_hl</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span>
+<span class="c1"># port type</span>
+<span class="n">pure</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;present&#39;</span><span class="p">,</span> <span class="s1">&#39;absent&#39;</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">is_valuation</span><span class="p">(</span>
+        <span class="n">ports</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+        <span class="n">valuations</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">ports</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">curvaluation</span> <span class="o">=</span> <span class="n">valuations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="c1"># functional set membership description ?</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">port_type</span><span class="p">):</span>
+            <span class="n">ok</span> <span class="o">=</span> <span class="n">port_type</span><span class="p">(</span><span class="n">curvaluation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ok</span> <span class="o">=</span> <span class="n">curvaluation</span> <span class="ow">in</span> <span class="n">port_type</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s1">&#39;Not a valuation.&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">create_machine_ports</span><span class="p">(</span>
+        <span class="n">spc_vars</span><span class="p">:</span>
+            <span class="nb">dict</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create proper port domains of valuations, given port types.</span>
+
+<span class="sd">    @param spc_vars:</span>
+<span class="sd">        port names and types inside `tulip`.</span>
+<span class="sd">        For arbitrary finite types the type</span>
+<span class="sd">        can be a list of strings,</span>
+<span class="sd">        instead of a range of integers.</span>
+<span class="sd">        These are as originally defined by the user or synth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ports</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">env_var</span><span class="p">,</span> <span class="n">var_type</span> <span class="ow">in</span> <span class="n">spc_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">var_type</span> <span class="o">==</span> <span class="s1">&#39;boolean&#39;</span><span class="p">:</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="c1"># integer domain</span>
+            <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">var_type</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_type</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># arbitrary finite domain</span>
+            <span class="c1"># defined by list var_type</span>
+            <span class="n">domain</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">var_type</span><span class="p">)</span>
+        <span class="n">ports</span><span class="p">[</span><span class="n">env_var</span><span class="p">]</span> <span class="o">=</span> <span class="n">domain</span>
+    <span class="k">return</span> <span class="n">ports</span>
+
+
+<div class="viewcode-block" id="Transducer">
+<a class="viewcode-back" href="../../tutorial.html#transys.machines.Transducer">[docs]</a>
+<span class="k">class</span> <span class="nc">Transducer</span><span class="p">(</span>
+        <span class="n">_graphs</span><span class="o">.</span><span class="n">LabeledDiGraph</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sequential Transducer, i.e., a letter-to-letter function.</span>
+
+<span class="sd">    Inputs</span>
+<span class="sd">    ======</span>
+<span class="sd">    `P = {p1, p2,...}` is the set of input ports.</span>
+<span class="sd">    An input port p takes values in a set `Vp`.</span>
+<span class="sd">    The set `Vp` is called the &quot;type&quot; of input port `p`.</span>
+<span class="sd">    A &quot;valuation&quot; is an assignment of values to the input ports in `P`.</span>
+
+<span class="sd">    We call &quot;inputs&quot; the set of pairs:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    {(p_i, Vp_i), ...}</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    of input ports p_i and their corresponding types `Vp_i`.</span>
+
+<span class="sd">    A guard is a predicate (bool-valued) used as sub-label for a transition.</span>
+<span class="sd">    A guard is defined by a set and evaluated using set membership.</span>
+<span class="sd">    So given an input port value `p=x`, then if:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    x \in guard_set</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    then the guard is `True`, otherwise it is `False`.</span>
+
+<span class="sd">    The &quot;inputs&quot; are defined by an `OrderedDict`:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    {&#39;p1&#39;: explicit, &#39;p2&#39;: check, &#39;p3&#39;: None, ...}</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    where:</span>
+<span class="sd">    - `explicit`:</span>
+<span class="sd">      is an iterable representation of Vp,</span>
+<span class="sd">      possible only for discrete Vp.</span>
+<span class="sd">      If &#39;p1&#39; is explicitly typed,</span>
+<span class="sd">      then guards are evaluated directly:</span>
+
+<span class="sd">      ```</span>
+<span class="sd">      input_port_value == guard_value ?</span>
+<span class="sd">      ```</span>
+
+<span class="sd">    - `check`:</span>
+<span class="sd">      is a class with methods:</span>
+
+<span class="sd">      - `__contains__(x)`:</span>
+<span class="sd">        check if guard value given to input port `&#39;p1&#39;` is</span>
+<span class="sd">        in the set of possible values Vp.</span>
+
+<span class="sd">      - `__call__(guard_set, input_port_value)`:</span>
+<span class="sd">        check if `input_port_value \in guard_set`</span>
+<span class="sd">        This allows symbolic type definitions.</span>
+
+<span class="sd">        For example, `input_port_value` might be assigned</span>
+<span class="sd">        `int` values, but the `guard_set` be defined by</span>
+<span class="sd">        a symbolic expression as the string: `&#39;x&lt;=5&#39;`.</span>
+
+<span class="sd">        Then the user is responsible for providing</span>
+<span class="sd">        the appropriate method to the Mealy Machine,</span>
+<span class="sd">        using the custom `check` class described here.</span>
+
+<span class="sd">        Note that we could provide a rudimentary library</span>
+<span class="sd">        for the basic types of checks, e.g., for</span>
+<span class="sd">        the above simple symbolic case, where using</span>
+<span class="sd">        function `eval()` is sufficient.</span>
+
+<span class="sd">      - `None`:</span>
+<span class="sd">        signifies that no type is currently defined for</span>
+<span class="sd">        this input port, so input type checking and guard</span>
+<span class="sd">        evaluation are disabled.</span>
+
+<span class="sd">        This can be used to skip type definitions when</span>
+<span class="sd">        they are not needed by the user.</span>
+
+<span class="sd">        However, since Machines are in general the output</span>
+<span class="sd">        of synthesis, it follows that they are constructed</span>
+<span class="sd">        by code, so the benefits of typedefs will be</span>
+<span class="sd">        considerable compared to the required coding effort.</span>
+
+<span class="sd">    Guards annotate transitions:</span>
+
+<span class="sd">      Guards: States x States ---&gt; Input_Predicates</span>
+
+<span class="sd">    Outputs</span>
+<span class="sd">    =======</span>
+<span class="sd">    Similarly defined to inputs, but:</span>
+
+<span class="sd">    - for Mealy Machines they annotate transitions</span>
+<span class="sd">    - for Moore Machines they annotate states</span>
+
+<span class="sd">    State Variables</span>
+<span class="sd">    ===============</span>
+<span class="sd">    Similarly defined to inputs, they annotate states,</span>
+<span class="sd">    for both Mealy and Moore machines:</span>
+
+<span class="sd">    States ---&gt; State_Variables</span>
+
+<span class="sd">    Update Function</span>
+<span class="sd">    ===============</span>
+<span class="sd">    The transition relation:</span>
+
+<span class="sd">    - for Mealy Machines:</span>
+
+<span class="sd">      ```</span>
+<span class="sd">      States x Input_Valuations ---&gt; Output_Valuations x States</span>
+<span class="sd">      ```</span>
+
+<span class="sd">      Note that in the range Output_Valuations are ordered before States</span>
+<span class="sd">      to emphasize that an output_valuation is produced</span>
+<span class="sd">      during the transition, NOT at the next state.</span>
+
+<span class="sd">      The data structure representation of the update function is</span>
+<span class="sd">      by storage of the Guards function and definition of Guard</span>
+<span class="sd">      evaluation for each input port via the OrderedDict discussed above.</span>
+
+<span class="sd">    - for Moore Machines:</span>
+
+<span class="sd">      ```</span>
+<span class="sd">      States x Input_Valuations ---&gt; States</span>
+<span class="sd">      States ---&gt; Output_valuations</span>
+<span class="sd">      ```</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ====</span>
+<span class="sd">    A transducer may operate on either finite or infinite words, i.e.,</span>
+<span class="sd">    it is not equipped with interpretation semantics on the words,</span>
+<span class="sd">    so it does not &quot;care&quot; about word length.</span>
+<span class="sd">    It continues as long as its input is fed with letters.</span>
+
+<span class="sd">    For Machines, each state label consists of (possibly multiple) sublabels,</span>
+<span class="sd">    each of which is either a variable, or, only for Moore machines,</span>
+<span class="sd">    may be an output.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    ========</span>
+<span class="sd">    FSM, MealyMachine, MooreMachine</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># values will point to</span>
+        <span class="c1"># values of _*_label_def below</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_vars</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># self.set_actions = dict()</span>
+        <span class="c1"># state labeling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_label_def</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_dot_label_format</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;type?label&#39;</span><span class="p">:</span>
+                <span class="s1">&#39;:&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;separator&#39;</span><span class="p">:</span>
+                <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">}</span>
+        <span class="c1"># edge labeling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transition_label_def</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_label_format</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;type?label&#39;</span><span class="p">:</span>
+                <span class="s1">&#39;:&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;separator&#39;</span><span class="p">:</span>
+                <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_mask</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_dot_mask</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_export_fname</span> <span class="o">=</span> <span class="s1">&#39;fsm&#39;</span>
+        <span class="n">_graphs</span><span class="o">.</span><span class="n">LabeledDiGraph</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dot_node_shape</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;ellipse&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_export_fname</span> <span class="o">=</span> <span class="s1">&#39;fsm&#39;</span>
+
+    <span class="k">def</span> <span class="nf">add_inputs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">new_inputs</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">masks</span><span class="p">:</span>
+                <span class="nb">dict</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create new inputs.</span>
+
+<span class="sd">        @param new_inputs:</span>
+<span class="sd">            `dict` of pairs {port_name : port_type}</span>
+<span class="sd">            where:</span>
+<span class="sd">            - port_name: str</span>
+<span class="sd">            - port_type: Iterable | check class</span>
+<span class="sd">        @param masks:</span>
+<span class="sd">            custom mask functions, for each sublabel</span>
+<span class="sd">            based on its current value</span>
+<span class="sd">            each such function returns:</span>
+<span class="sd">            - True, if the sublabel should be shown</span>
+<span class="sd">            - False, otherwise (to hide it)</span>
+
+<span class="sd">            `dict` of functions `{port_name : mask_function}`</span>
+<span class="sd">            each `mask_function` returns bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">new_inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># append</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transition_label_def</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_type</span>
+            <span class="c1"># inform inputs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_type</span>
+            <span class="c1"># printing format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_label_format</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">port_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">:</span>
+                <span class="n">mask_func</span> <span class="o">=</span> <span class="n">masks</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_mask</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_func</span>
+
+    <span class="k">def</span> <span class="nf">add_state_vars</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">new_state_vars</span><span class="p">:</span>
+                <span class="nb">dict</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var_type</span> <span class="ow">in</span> <span class="n">new_state_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># append</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_label_def</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_type</span>
+            <span class="c1"># inform state vars</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">state_vars</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_label_def</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+            <span class="c1"># printing format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_dot_label_format</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span></div>
+
+
+
+<span class="k">class</span> <span class="nc">MooreMachine</span><span class="p">(</span>
+        <span class="n">Transducer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Moore machine.</span>
+
+<span class="sd">    A Moore machine implements the discrete dynamics:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    x[k + 1] = f(x[k], u[k])</span>
+<span class="sd">    y[k] = g(x[k])</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    where:</span>
+<span class="sd">    - `k`: discrete time = sequence index</span>
+<span class="sd">    - `x`: state = valuation of state variables</span>
+<span class="sd">    - `X`: set of states = `S`</span>
+<span class="sd">    - `u`: inputs = valuation of input ports</span>
+<span class="sd">    - `y`: output actions = valuation of output ports</span>
+<span class="sd">    - `f`: `X-&gt; 2^X`, transition function</span>
+<span class="sd">    - `g`: `X-&gt; Out`, output function</span>
+
+<span class="sd">    Observe that the output depends only on the state.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ====</span>
+<span class="sd">    valuation: assignment of values to each port</span>
+
+<span class="sd">    Reference</span>
+<span class="sd">    =========</span>
+<span class="sd">    [M56](</span>
+<span class="sd">        https://tulip-control.sourceforge.io/doc/bibliography.html#m56)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Instantiate a Moore state machine.&quot;&quot;&quot;</span>
+        <span class="n">Transducer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dot_node_shape</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;ellipse&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_export_fname</span> <span class="o">=</span> <span class="s1">&#39;moore&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get informal string representation.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">Moore Machine: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;State Variables:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_vars</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s1">&#39;Input Ports:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s1">&#39;Output Ports:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s1">&#39;States &amp; State Var Values: (state : outputs : vars)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">label_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1"> :</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="c1"># split into vars and outputs</span>
+            <span class="n">var_values</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                    <span class="n">label_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_vars</span><span class="p">}</span>
+            <span class="n">output_values</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                    <span class="n">label_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_print_label</span><span class="p">(</span><span class="n">var_values</span><span class="p">)</span><span class="si">}</span><span class="s1"> : &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_print_label</span><span class="p">(</span><span class="n">output_values</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="s1">&#39;Initial States:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_pp</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;Transitions &amp; Labels: (from --&gt; to : label)</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">from_state</span><span class="p">,</span> <span class="n">to_state</span><span class="p">,</span> <span class="n">label_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transitions</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">from_state</span><span class="si">}</span><span class="s1"> ---&gt; &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">to_state</span><span class="si">}</span><span class="s1"> :</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                <span class="n">_print_label</span><span class="p">(</span><span class="n">label_dict</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">add_outputs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">new_outputs</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">masks</span><span class="p">:</span>
+                <span class="nb">dict</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">new_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># append</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_label_def</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_type</span>
+            <span class="c1"># inform state vars</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_type</span>
+            <span class="c1"># printing format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state_dot_label_format</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">port_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">:</span>
+                <span class="n">mask_func</span> <span class="o">=</span> <span class="n">masks</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_state_dot_mask</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_func</span>
+
+
+<span class="k">class</span> <span class="nc">MealyMachine</span><span class="p">(</span>
+        <span class="n">Transducer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mealy machine.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
+
+<span class="sd">    Traffic Light: Fig. 3.14, p.72 [LS11](</span>
+<span class="sd">        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    m = MealyMachine()</span>
+<span class="sd">    pure_signal = {&#39;present&#39;, &#39;absent&#39;}</span>
+<span class="sd">    m.add_inputs([(&#39;tick&#39;, pure_signal) ])</span>
+<span class="sd">    m.add_outputs([(&#39;go&#39;, pure_signal), (&#39;stop&#39;, pure_signal) ])</span>
+<span class="sd">    m.states.add_from([&#39;red&#39;, &#39;green&#39;, &#39;yellow&#39;])</span>
+<span class="sd">    m.states.initial.add(&#39;red&#39;)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    For brevity:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    p = &#39;present&#39;</span>
+<span class="sd">    a = &#39;absent&#39;</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    The transitions can equivalently be defined with dict().</span>
+<span class="sd">    So instead of the previous `m.transitions.add`, we can use:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    label = dict(</span>
+<span class="sd">        tick=p,</span>
+<span class="sd">        go=p,</span>
+<span class="sd">        stop=a)</span>
+<span class="sd">    m.transitions.add(&#39;red&#39;, &#39;green&#39;, **label)</span>
+<span class="sd">    label = dict(</span>
+<span class="sd">        tick=p,</span>
+<span class="sd">        go=a,</span>
+<span class="sd">        stop=p)</span>
+<span class="sd">    m.transitions.add(&#39;green&#39;, &#39;yellow&#39;, **label)</span>
+<span class="sd">    label = dict(</span>
+<span class="sd">        tick=p,</span>
+<span class="sd">        go=a,</span>
+<span class="sd">        stop=p)</span>
+<span class="sd">    m.transitions.add(&#39;yellow&#39;, &#39;red&#39;, **label)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    This avoids any ordering issues, i.e., changing the</span>
+<span class="sd">    order of the sublabels does not matter:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    label = dict(</span>
+<span class="sd">        go=p,</span>
+<span class="sd">        tick=p,</span>
+<span class="sd">        stop=a)</span>
+<span class="sd">    m.transitions.add(&#39;red&#39;, &#39;green&#39;, **label)</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Theory</span>
+<span class="sd">    ======</span>
+<span class="sd">    A Mealy machine implements the discrete dynamics:</span>
+
+<span class="sd">    ```</span>
+<span class="sd">    x[k + 1] = f(x[k], u[k])</span>
+<span class="sd">    y[k] = g(x[k], u[k])</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    where:</span>
+<span class="sd">    - `k`: discrete time = sequence index</span>
+<span class="sd">    - `x`: state = valuation of state variables</span>
+<span class="sd">    - `X`: set of states = S</span>
+<span class="sd">    - `u`: inputs = valuation of input ports</span>
+<span class="sd">    - `y`: output actions = valuation of output ports</span>
+<span class="sd">    - `f`: `X -&gt; 2^X`, transition function</span>
+<span class="sd">    - `g`: `X -&gt; Out`, output function</span>
+
+<span class="sd">    Observe that the output is defined when a reaction occurs to an input.</span>
+
+<span class="sd">    Note</span>
+<span class="sd">    ====</span>
+<span class="sd">    valuation: assignment of values to each port</span>
+
+<span class="sd">    Reference</span>
+<span class="sd">    =========</span>
+<span class="sd">    [M55](</span>
+<span class="sd">        https://tulip-control.sourceforge.io/doc/bibliography.html#m55)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Transducer</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># will point to selected values of</span>
+        <span class="c1"># self._transition_label_def</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dot_node_shape</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">normal</span><span class="o">=</span><span class="s1">&#39;ellipse&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default_export_fname</span> <span class="o">=</span> <span class="s1">&#39;mealy&#39;</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get informal string representation.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">Mealy Machine: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;State Variables:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state_vars</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;States &amp; State Var Values:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">label_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1"> :</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_print_label</span><span class="p">(</span><span class="n">label_dict</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="s1">&#39;Initial States:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_pp</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="s1">&#39;Input Ports:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s1">&#39;Output Ports:</span><span class="se">\n\t</span><span class="s1">(name : type)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_print_ports</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span> <span class="o">+</span>
+            <span class="s1">&#39;Transitions &amp; Labels: (from --&gt; to : label)</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">from_state</span><span class="p">,</span> <span class="n">to_state</span><span class="p">,</span> <span class="n">label_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">transitions</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">from_state</span><span class="si">}</span><span class="s1"> ---&gt; &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">to_state</span><span class="si">}</span><span class="s1"> :</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+                <span class="n">_print_label</span><span class="p">(</span><span class="n">label_dict</span><span class="p">))</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">_save</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">path</span><span class="p">:</span>
+                <span class="nb">str</span><span class="p">,</span>
+            <span class="n">fileformat</span><span class="p">:</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;scxml&#39;</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export options available only for Mealy machines.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fileformat</span> <span class="o">!=</span> <span class="s1">&#39;scxml&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">_scxml</span><span class="o">.</span><span class="n">mealy2scxml</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># dump to file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">add_outputs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">new_outputs</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">,</span>
+            <span class="n">masks</span><span class="p">:</span>
+                <span class="nb">dict</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add new outputs.</span>
+
+<span class="sd">        @param new_outputs:</span>
+<span class="sd">            dict of pairs {port_name : port_type}</span>
+<span class="sd">            where:</span>
+<span class="sd">            - port_name: str</span>
+<span class="sd">            - port_type: Iterable | check class</span>
+<span class="sd">        @param masks:</span>
+<span class="sd">            - keys are port_names (see arg: new_outputs)</span>
+<span class="sd">            - values are custom mask functions,</span>
+<span class="sd">              for each sublabel</span>
+<span class="sd">              based on its current value.</span>
+<span class="sd">              Each such function returns:</span>
+<span class="sd">              - True, if the sublabel should be shown</span>
+<span class="sd">              - False, otherwise (to hide it)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">new_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># append</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transition_label_def</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">port_type</span>
+            <span class="c1"># inform state vars</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transition_label_def</span><span class="p">[</span><span class="n">port_name</span><span class="p">])</span>
+            <span class="c1"># printing format</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_label_format</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;/</span><span class="si">{</span><span class="n">port_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">masks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">port_name</span> <span class="ow">in</span> <span class="n">masks</span><span class="p">:</span>
+                <span class="n">mask_func</span> <span class="o">=</span> <span class="n">masks</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_transition_dot_mask</span><span class="p">[</span><span class="n">port_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">mask_func</span>
+
+    <span class="k">def</span> <span class="nf">reaction</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">from_state</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+            <span class="n">lazy</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return next state and output, when reacting to given inputs.</span>
+
+<span class="sd">        The machine must be deterministic.</span>
+<span class="sd">        (for each state and input at most a single transition enabled,</span>
+<span class="sd">        this notion does not coincide with output-determinism)</span>
+
+<span class="sd">        Not exactly a wrapper of `Transitions.find`,</span>
+<span class="sd">        because it matches only that part of an edge label</span>
+<span class="sd">        that corresponds to the inputs.</span>
+
+<span class="sd">        @param from_state:</span>
+<span class="sd">            transition starts from this state.</span>
+<span class="sd">            element of `self.states`</span>
+<span class="sd">        @param inputs:</span>
+<span class="sd">            `dict` that assigns a valid value to</span>
+<span class="sd">            each input port.</span>
+<span class="sd">            {&#39;port_name&#39;: port_value, ...}</span>
+<span class="sd">        @param lazy:</span>
+<span class="sd">            Lazy evaluation of inputs? If lazy=True, then</span>
+<span class="sd">            allow an incomplete specification of input if there is</span>
+<span class="sd">            precisely one enabled transition.</span>
+<span class="sd">        @return:</span>
+<span class="sd">            output values and next state.</span>
+<span class="sd">            `(next_state, outputs)`</span>
+<span class="sd">            where `outputs`:</span>
+<span class="sd">                `{&#39;port_name&#39;: port_value, ...}`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">lazy</span><span class="p">:</span>
+            <span class="n">restricted_inputs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">restricted_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span>
+        <span class="c1"># match only inputs (explicit valuations, not symbolic)</span>
+        <span class="n">enabled_trans</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">([</span><span class="n">from_state</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">project_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">restricted_inputs</span><span class="p">)</span> <span class="o">==</span> <span class="n">inputs</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled_trans</span><span class="p">:</span>
+            <span class="n">some_possibilities</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">([</span><span class="n">from_state</span><span class="p">],</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                <span class="c1"># The number of possible inputs to suggest here is</span>
+                <span class="c1"># arbitrary. Consider making it a function parameter.</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">some_possibilities</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">possible_inputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">restricted_inputs</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">possible_inputs</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">some_possibilities</span><span class="p">:</span>
+                    <span class="n">some_possibilities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">possible_inputs</span><span class="p">)</span>
+        <span class="c1"># must be deterministic</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">attr_dict</span><span class="p">),</span> <span class="o">=</span> <span class="n">enabled_trans</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled_trans</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">some_possibilities</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;state </span><span class="si">{</span><span class="n">from_state</span><span class="si">}</span><span class="s1"> is a dead-end. &#39;</span>
+                        <span class="s1">&#39;There are no possible inputs from &#39;</span>
+                        <span class="s1">&#39;it.&#39;</span>
+                        <span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;not a valid input, &#39;</span>
+                        <span class="s1">&#39;some possible inputs include: &#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">some_possibilities</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;must be input-deterministic, &#39;</span>
+                    <span class="s1">&#39;found enabled transitions: &#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">enabled_trans</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span><span class="n">attr_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">next_state</span><span class="p">,</span> <span class="n">outputs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reactionpart</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">from_state</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Wraps `reaction()` with `lazy=True`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">(</span>
+            <span class="n">from_state</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span>
+            <span class="n">lazy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">from_state</span><span class="p">:</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Optional</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">input_sequences</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Guided or interactive run.</span>
+
+<span class="sd">        @param input_sequences:</span>
+<span class="sd">            if `None`, then call `interactive_run`,</span>
+<span class="sd">            otherwise call `guided_run`.</span>
+<span class="sd">        @return:</span>
+<span class="sd">            output of `guided_run`, otherwise `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">input_sequences</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interactive_run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">from_state</span><span class="o">=</span><span class="n">from_state</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">guided_run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">,</span>
+                <span class="n">from_state</span><span class="o">=</span><span class="n">from_state</span><span class="p">,</span>
+                <span class="n">input_sequences</span><span class="o">=</span><span class="n">input_sequences</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">guided_run</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span><span class="p">,</span>
+        <span class="n">from_state</span><span class="p">:</span>
+            <span class="n">_ty</span><span class="o">.</span><span class="n">Optional</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_sequences</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">|</span>
+            <span class="kc">None</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">list</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run deterministic machine reacting to given inputs.</span>
+
+<span class="sd">    @param from_state:</span>
+<span class="sd">        start simulation</span>
+<span class="sd">    @param mealy:</span>
+<span class="sd">        input-deterministic Mealy machine</span>
+<span class="sd">    @param from_state:</span>
+<span class="sd">        start simulation at this state.</span>
+<span class="sd">        If `None`, then use the unique initial state `Sinit`.</span>
+<span class="sd">    @param input_sequences:</span>
+<span class="sd">        one sequence of values for each input port</span>
+<span class="sd">    @return:</span>
+<span class="sd">        sequence of states and sequence of output valuations</span>
+<span class="sd">        `(states, output_sequences)`</span>
+<span class="sd">        where:</span>
+<span class="sd">        - `states` not containing `from_state`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seqs</span> <span class="o">=</span> <span class="n">input_sequences</span>
+        <span class="c1"># abbreviation</span>
+    <span class="n">missing_ports</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">seqs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">missing_ports</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;missing input port(s): &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">missing_ports</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># dict of lists ?</span>
+    <span class="n">non_lists</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+            <span class="n">seqs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">non_lists</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;Values must be lists, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;for: </span><span class="si">{</span><span class="n">non_lists</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># uniform list len ?</span>
+    <span class="n">cardinalities</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">,</span> <span class="n">seqs</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cardinalities</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;All input sequences must be of equal length.&#39;</span><span class="p">)</span>
+    <span class="c1"># note: initial sys state</span>
+    <span class="c1"># non-determinism not checked</span>
+    <span class="c1"># initial sys edge non-determinism</span>
+    <span class="c1"># checked instead (more restrictive)</span>
+    <span class="k">if</span> <span class="n">from_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">from_state</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">seqs</span><span class="o">.</span><span class="n">values</span><span class="p">())))</span>
+    <span class="n">states_seq</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">output_seqs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+                <span class="n">seqs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">state</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">reaction</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="n">states_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">output_seqs</span><span class="p">:</span>
+            <span class="n">output_seqs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">outputs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">states_seq</span><span class="p">,</span>
+        <span class="n">output_seqs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">random_run</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span><span class="p">,</span>
+        <span class="n">from_state</span><span class="p">:</span>
+            <span class="n">_ty</span><span class="o">.</span><span class="n">Optional</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">N</span><span class="p">:</span>
+            <span class="nb">int</span><span class="o">=</span><span class="mi">10</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">list</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return run from given state for N random inputs.</span>
+
+<span class="sd">    Inputs selected randomly in a way that does not block the machine</span>
+<span class="sd">    So they are not arbitrarily random.</span>
+<span class="sd">    If the machine is a valid synthesis solution,</span>
+<span class="sd">    then all safe environment inputs can be generated this way.</span>
+
+<span class="sd">    Randomly generated inputs may violate liveness assumption on environment.</span>
+
+<span class="sd">    @param mealy:</span>
+<span class="sd">        input-deterministic Mealy machine</span>
+<span class="sd">    @param N:</span>
+<span class="sd">        number of reactions (inputs)</span>
+<span class="sd">    @return:</span>
+<span class="sd">        same as `guided_run`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">from_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">from_state</span>
+    <span class="n">states_seq</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">output_seqs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">trans</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">find</span><span class="p">([</span><span class="n">state</span><span class="p">])</span>
+        <span class="c1"># choose next transition</span>
+        <span class="n">selected_trans</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">trans</span><span class="p">))</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">new_state</span><span class="p">,</span> <span class="n">attr_dict</span> <span class="o">=</span> <span class="n">selected_trans</span>
+        <span class="c1"># extend execution trace</span>
+        <span class="n">states_seq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_state</span><span class="p">)</span>
+        <span class="c1"># extend output traces</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+            <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">output_seqs</span><span class="p">:</span>
+            <span class="n">output_seqs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="c1"># updates</span>
+        <span class="n">old_state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">new_state</span>
+        <span class="c1"># printing</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+            <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;move from</span><span class="se">\n\t</span><span class="s1"> state: </span><span class="si">{</span><span class="n">old_state</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1"> with input: </span><span class="si">{</span><span class="n">inputs</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1"> to state: </span><span class="si">{</span><span class="n">new_state</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;</span><span class="se">\n\t</span><span class="s1"> reacting by producing &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;output: </span><span class="si">{</span><span class="n">outputs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">states_seq</span><span class="p">,</span>
+        <span class="n">output_seqs</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">interactive_run</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span><span class="p">,</span>
+        <span class="n">from_state</span><span class="p">:</span>
+            <span class="n">_ty</span><span class="o">.</span><span class="n">Optional</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run input-deterministic Mealy machine using user input.</span>
+
+<span class="sd">    @param mealy:</span>
+<span class="sd">        input-deterministic Mealy machine</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">from_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">from_state</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Current state: </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_interactive_run_step</span><span class="p">(</span><span class="n">mealy</span><span class="p">,</span> <span class="n">state</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">break</span>
+
+
+<span class="k">def</span> <span class="nf">_interactive_run_step</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span><span class="p">,</span>
+        <span class="n">state</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Current state is None&#39;</span><span class="p">)</span>
+    <span class="c1"># note: the spaghettiness of</span>
+    <span class="c1"># previous version was caused</span>
+    <span class="c1"># by interactive simulation allowing</span>
+    <span class="c1"># both output-non-determinism and</span>
+    <span class="c1"># implementing spawning (which</span>
+    <span class="c1"># makes sense only for generators,</span>
+    <span class="c1"># *not* for transducers)</span>
+    <span class="n">trans</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">find</span><span class="p">([</span><span class="n">state</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">trans</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Stop: no outgoing transitions.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">selected_trans</span> <span class="o">=</span> <span class="n">_select_transition</span><span class="p">(</span><span class="n">mealy</span><span class="p">,</span> <span class="n">trans</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s1">&#39;Selection not recognized. &#39;</span>
+                <span class="s1">&#39;Please try again.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">selected_trans</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">from_</span><span class="p">,</span> <span class="n">to_state</span><span class="p">,</span> <span class="n">attr_dict</span> <span class="o">=</span> <span class="n">selected_trans</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+        <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+        <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s1">&#39;Moving from state: </span><span class="si">{</span><span class="n">state</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;, to state: </span><span class="si">{</span><span class="n">to_state</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;given inputs: </span><span class="si">{</span><span class="n">inputs</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="sa">f</span><span class="s1">&#39;reacting with outputs: </span><span class="si">{</span><span class="n">outputs</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">def</span> <span class="nf">_select_transition</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span><span class="p">,</span>
+        <span class="n">trans</span><span class="p">:</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Found more than 1 outgoing transitions:&#39;</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">trans</span><span class="p">):</span>
+        <span class="n">from_state</span><span class="p">,</span> <span class="n">to_state</span><span class="p">,</span> <span class="n">attr_dict</span> <span class="o">=</span> <span class="n">t</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+            <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">project_dict</span><span class="p">(</span>
+            <span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1"> : &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">from_state</span><span class="si">}</span><span class="s1"> ---&gt; </span><span class="si">{</span><span class="n">to_state</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> inputs: </span><span class="si">{</span><span class="n">inputs</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> outputs: </span><span class="si">{</span><span class="n">outputs</span><span class="si">}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">msg</span> <span class="o">+=</span> <span class="p">(</span>
+        <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;Select from the available transitions above</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;by giving its integer,</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;Press &quot;Enter&quot; to stop the simulation:</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> int = &#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+    <span class="n">id_selected</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">id_selected</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">trans</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">id_selected</span><span class="p">)]</span>
+
+
+<span class="k">def</span> <span class="nf">moore2mealy</span><span class="p">(</span>
+        <span class="n">moore</span><span class="p">:</span>
+            <span class="n">MooreMachine</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MealyMachine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Moore machine to equivalent Mealy machine.</span>
+
+<span class="sd">    Reference</span>
+<span class="sd">    =========</span>
+<span class="sd">    [LS11](</span>
+<span class="sd">        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">moore</span><span class="p">,</span> <span class="n">MooreMachine</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;moore must be a MooreMachine&#39;</span><span class="p">)</span>
+    <span class="n">mealy</span> <span class="o">=</span> <span class="n">MealyMachine</span><span class="p">()</span>
+    <span class="c1"># cp inputs</span>
+    <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">moore</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">mask_func</span> <span class="o">=</span> <span class="n">moore</span><span class="o">.</span><span class="n">_transition_dot_mask</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">port_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">port_name</span><span class="p">:</span> <span class="n">mask_func</span><span class="p">}</span>
+        <span class="n">mealy</span><span class="o">.</span><span class="n">add_inputs</span><span class="p">({</span><span class="n">port_name</span><span class="p">:</span> <span class="n">port_type</span><span class="p">},</span> <span class="n">masks</span><span class="o">=</span><span class="n">masks</span><span class="p">)</span>
+    <span class="c1"># cp outputs</span>
+    <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">moore</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">mask_func</span> <span class="o">=</span> <span class="n">moore</span><span class="o">.</span><span class="n">_state_dot_mask</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">port_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">port_name</span><span class="p">:</span> <span class="n">mask_func</span><span class="p">}</span>
+        <span class="n">mealy</span><span class="o">.</span><span class="n">add_outputs</span><span class="p">({</span><span class="n">port_name</span><span class="p">:</span> <span class="n">port_type</span><span class="p">},</span> <span class="n">masks</span><span class="o">=</span><span class="n">masks</span><span class="p">)</span>
+    <span class="c1"># cp states</span>
+    <span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add_from</span><span class="p">(</span><span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="p">())</span>
+    <span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add_from</span><span class="p">(</span><span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">)</span>
+    <span class="c1"># cp transitions</span>
+    <span class="k">for</span> <span class="n">si</span> <span class="ow">in</span> <span class="n">moore</span><span class="p">:</span>
+        <span class="n">output_values</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">si</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">moore</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+        <span class="n">output_values</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">output_values</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">si_</span><span class="p">,</span> <span class="n">sj</span><span class="p">,</span> <span class="n">attr_dict</span> <span class="ow">in</span> <span class="n">moore</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">si</span><span class="p">):</span>
+            <span class="c1"># note that we don&#39;t filter only input ports,</span>
+            <span class="c1"># so other edge annotation is preserved</span>
+            <span class="n">attr_dict</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">attr_dict</span><span class="p">)</span>
+            <span class="n">attr_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">output_values</span><span class="p">)</span>
+            <span class="n">mealy</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">si</span><span class="p">,</span> <span class="n">sj</span><span class="p">,</span> <span class="n">attr_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mealy</span>
+
+
+<span class="k">def</span> <span class="nf">mealy2moore</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MealyMachine</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MooreMachine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert Mealy machine to almost equivalent Moore machine.</span>
+
+<span class="sd">    A Mealy machine cannot be transformed to an equivalent Moore machine.</span>
+<span class="sd">    It can be converted to a Moore machine with an arbitrary initial output,</span>
+<span class="sd">    which outputs the Mealy output at its next reaction.</span>
+
+<span class="sd">    Reference</span>
+<span class="sd">    =========</span>
+<span class="sd">    [LS11](</span>
+<span class="sd">        https://tulip-control.sourceforge.io/doc/bibliography.html#ls11)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: check for when Mealy is exactly convertible to Moore</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mealy</span><span class="p">,</span> <span class="n">MealyMachine</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;moore must be a MealyMachine&#39;</span><span class="p">)</span>
+    <span class="n">moore</span> <span class="o">=</span> <span class="n">MooreMachine</span><span class="p">()</span>
+    <span class="c1"># cp inputs</span>
+    <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">mask_func</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">_transition_dot_mask</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">port_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">port_name</span><span class="p">:</span> <span class="n">mask_func</span><span class="p">}</span>
+        <span class="n">moore</span><span class="o">.</span><span class="n">add_inputs</span><span class="p">({</span><span class="n">port_name</span><span class="p">:</span> <span class="n">port_type</span><span class="p">},</span> <span class="n">masks</span><span class="o">=</span><span class="n">masks</span><span class="p">)</span>
+    <span class="c1"># cp outputs</span>
+    <span class="k">for</span> <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="ow">in</span> <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">mask_func</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">_transition_dot_mask</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">port_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">masks</span> <span class="o">=</span> <span class="p">{</span><span class="n">port_name</span><span class="p">:</span> <span class="n">mask_func</span><span class="p">}</span>
+        <span class="n">moore</span><span class="o">.</span><span class="n">add_outputs</span><span class="p">({</span><span class="n">port_name</span><span class="p">:</span> <span class="n">port_type</span><span class="p">},</span> <span class="n">masks</span><span class="o">=</span><span class="n">masks</span><span class="p">)</span>
+    <span class="c1"># initial state with arbitrary label</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">v</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+            <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="n">s0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># create maps between Moore and Mealy states</span>
+    <span class="n">moore2mealy_states</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># {qj: si} (function)</span>
+    <span class="n">mealy2moore_states</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># {si: {qj, qk, ...}} (relation)</span>
+    <span class="n">new_s0</span> <span class="o">=</span> <span class="n">_create_state_str</span><span class="p">(</span>
+        <span class="n">s0</span><span class="p">,</span> <span class="n">out</span><span class="p">,</span> <span class="n">moore</span><span class="p">,</span> <span class="n">moore2mealy_states</span><span class="p">,</span>
+        <span class="n">mealy2moore_states</span><span class="p">)</span>
+    <span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_s0</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+    <span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_s0</span><span class="p">)</span>
+    <span class="c1"># cp transitions and create appropriate states</span>
+    <span class="n">Q</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">Q</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_s0</span><span class="p">)</span>
+    <span class="n">S</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_s0</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">Q</span><span class="p">:</span>
+        <span class="n">new_si</span> <span class="o">=</span> <span class="n">Q</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">si</span> <span class="o">=</span> <span class="n">moore2mealy_states</span><span class="p">[</span><span class="n">new_si</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">si_</span><span class="p">,</span> <span class="n">sj</span><span class="p">,</span> <span class="n">attr_dict</span> <span class="ow">in</span> <span class="n">mealy</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">si</span><span class="p">):</span>
+            <span class="n">in_values</span><span class="p">,</span> <span class="n">out_values</span> <span class="o">=</span> <span class="n">_split_io</span><span class="p">(</span><span class="n">attr_dict</span><span class="p">,</span> <span class="n">mealy</span><span class="p">)</span>
+            <span class="n">new_sj</span> <span class="o">=</span> <span class="n">_create_state_str</span><span class="p">(</span>
+                <span class="n">sj</span><span class="p">,</span> <span class="n">out_values</span><span class="p">,</span> <span class="n">moore</span><span class="p">,</span> <span class="n">moore2mealy_states</span><span class="p">,</span>
+                <span class="n">mealy2moore_states</span><span class="p">)</span>
+            <span class="n">moore</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_si</span><span class="p">,</span> <span class="n">new_sj</span><span class="p">,</span> <span class="n">in_values</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_sj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">S</span><span class="p">:</span>
+                <span class="n">Q</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_sj</span><span class="p">)</span>
+                <span class="n">S</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_sj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">moore</span>
+
+
+<span class="k">def</span> <span class="nf">_print_ports</span><span class="p">(</span>
+        <span class="n">port_dict</span><span class="p">:</span>
+            <span class="nb">dict</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">print_port</span><span class="p">(</span><span class="n">name_type</span><span class="p">):</span>
+        <span class="n">port_name</span><span class="p">,</span> <span class="n">port_type</span> <span class="o">=</span> <span class="n">name_type</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">{</span><span class="n">port_name</span><span class="si">}</span><span class="s1"> : &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">_pp</span><span class="o">.</span><span class="n">pformat</span><span class="p">(</span><span class="n">port_type</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
+        <span class="n">print_port</span><span class="p">,</span>
+        <span class="n">port_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_print_label</span><span class="p">(</span>
+        <span class="n">label_dict</span><span class="p">:</span>
+            <span class="nb">dict</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">print_label</span><span class="p">(</span><span class="n">name_value</span><span class="p">):</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">name_value</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\t\t</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> : </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span>
+        <span class="n">print_label</span><span class="p">,</span>
+        <span class="n">label_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_create_state_str</span><span class="p">(</span>
+        <span class="n">mealy_state</span><span class="p">,</span>
+        <span class="n">output</span><span class="p">,</span>
+        <span class="n">moore</span><span class="p">:</span>
+            <span class="n">MooreMachine</span><span class="p">,</span>
+        <span class="n">moore2mealy_states</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">mealy2moore_states</span><span class="p">:</span>
+            <span class="nb">dict</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Used to create Moore states when converting Mealy -&gt; Moore.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">mealy2moore_states</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">mealy_state</span><span class="p">,</span> <span class="nb">set</span><span class="p">()):</span>
+        <span class="c1"># check output values</span>
+        <span class="k">if</span> <span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">==</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span>
+    <span class="c1"># create new</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;s</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">moore</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">moore</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">moore2mealy_states</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">mealy_state</span>
+    <span class="n">mealy2moore_states</span><span class="p">[</span><span class="n">mealy_state</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+
+<span class="k">def</span> <span class="nf">_split_io</span><span class="p">(</span>
+        <span class="n">attr_dict</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">,</span>
+        <span class="n">machine</span><span class="p">:</span>
+            <span class="n">Transducer</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split into inputs and outputs.&quot;&quot;&quot;</span>
+    <span class="n">input_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+            <span class="n">attr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">machine</span><span class="o">.</span><span class="n">inputs</span><span class="p">}</span>
+    <span class="n">output_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span>
+            <span class="n">attr_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">machine</span><span class="o">.</span><span class="n">outputs</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">input_values</span><span class="p">,</span> <span class="n">output_values</span>
+
+
+<span class="k">def</span> <span class="nf">project_dict</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Container</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">x</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">y</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">trim_dict</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Container</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">x</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">y</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">strip_ports</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="p">:</span>
+            <span class="n">MooreMachine</span><span class="p">,</span>
+        <span class="n">names</span><span class="p">:</span>
+            <span class="n">_abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MealyMachine</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove ports in `names`.</span>
+
+<span class="sd">    For example, to remove the atomic propositions</span>
+<span class="sd">    labeling the transition system `ts` used</span>
+<span class="sd">    (so they are dependent variables), call it as:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    strip_ports(mealy, ts.atomic_propositions)</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">MealyMachine</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">trim</span><span class="p">(</span><span class="n">ports</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">trim_dict</span><span class="p">(</span>
+            <span class="n">ports</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">add_inputs</span><span class="p">(</span><span class="n">trim</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="o">.</span><span class="n">inputs</span><span class="p">))</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">add_outputs</span><span class="p">(</span><span class="n">trim</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="o">.</span><span class="n">outputs</span><span class="p">))</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">mealy</span><span class="p">)</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add_from</span><span class="p">(</span>
+        <span class="n">mealy</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="p">)</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">mealy</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">trim_dict</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="o">**</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">new</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">transys.machines</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

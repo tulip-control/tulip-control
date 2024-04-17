@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>9. Additional Problem Formulations &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="10. Developer’s Guide" href="dev_guide.html" />
+    <link rel="prev" title="8. Benchmarks" href="benchmarks.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="dev_guide.html" title="10. Developer’s Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="benchmarks.html" title="8. Benchmarks"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">9. </span>Additional Problem Formulations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="additional-problem-formulations">
+<h1><span class="section-number">9. </span>Additional Problem Formulations<a class="headerlink" href="#additional-problem-formulations" title="Link to this heading">¶</a></h1>
+<section id="discrete-time-linear-with-disturbances">
+<h2><span class="section-number">9.1. </span>Discrete-time linear with disturbances<a class="headerlink" href="#discrete-time-linear-with-disturbances" title="Link to this heading">¶</a></h2>
+<p>E.g., described in <a class="reference external" href="bibliography.html#fdlom16">[FDLOM16]</a>, <a class="reference external" href="bibliography.html#wtoxm11">[WTOXM11]</a>, <a class="reference external" href="bibliography.html#w10">[W10]</a>.</p>
+<section id="problem-description">
+<h3><span class="section-number">9.1.1. </span>Problem description<a class="headerlink" href="#problem-description" title="Link to this heading">¶</a></h3>
+<section id="system-model">
+<h4><span class="section-number">9.1.1.1. </span>System model<a class="headerlink" href="#system-model" title="Link to this heading">¶</a></h4>
+<p>Consider a system model <strong>S</strong> with a set <em>V</em> = <em>S</em> U <em>E</em> of variables where <em>S</em> and <em>E</em> are disjoint sets that represent, respectively, the set of plant variables that are regulated by the planner-controller subsystem and the set of environment variables whose values may change arbitrarily throughout an execution.</p>
+<p>The domain of <em>V</em> is given by dom(<em>V</em>) = dom(<em>S</em>) x dom(<em>E</em>) and a state of the system can be written as <em>v</em> = (<em>s</em>, <em>e</em>) where</p>
+<p><img class="math" src="_images/math/57642da91c3c91787df688e2edcfbb106af1e94f.png" alt="s \in \text{dom}(S) \subseteq \mathbb{R}^n \text{ and } e \in \text{dom}(E)."/></p>
+<p>Call <em>s</em> the controlled state and <em>e</em> the environment state.</p>
+<p>Assume that the controlled state evolves according to the following discrete-time linear time-invariant state space model: for <img class="math" src="_images/math/2484d11a7cd89940b9cc4f92a8ca25c3ce367252.png" alt="t \in \{0, 1, 2, \ldots\},"/></p>
+<div class="math">
+<p><img src="_images/math/ef2cf98d2b87d8fe18efe786ab5418243e97484b.png" alt="\begin{array}{rcl}
+  s[t+1] &amp;=&amp; As[t] + Bu[t] + Ed[t]\\
+  u[t] &amp;\in&amp; U\\
+  d[t] &amp;\in&amp; D\\
+  s[0] &amp;\in&amp; \text{dom}(S)
+\end{array}"/></p>
+</div><p>where <img class="math" src="_images/math/af9e3d2ad97eb9d3817ed2473ad362b970dc05de.png" alt="U \subseteq \mathbb{R}^m"/> is the set of admissible control inputs,
+<img class="math" src="_images/math/e2f8b826428bc229782ce2ae8c10d59b6582cbf1.png" alt="D \subseteq \mathbb{R}^p"/> is the set of exogenous disturbances and
+<img class="math" src="_images/math/b4ea46383a4a1eb84f2b698287d1e7842f5e7a2b.png" alt="s[t],~u[t]"/> and <img class="math" src="_images/math/45e4ca9b2f5aded17286ce6ce6898435d9cb2dc5.png" alt="d[t]"/> are the controlled state, the control signal,
+and the exogenous disturbance, respectively, at time <em>t</em>.</p>
+</section>
+<section id="system-specification">
+<h4><span class="section-number">9.1.1.2. </span>System specification<a class="headerlink" href="#system-specification" title="Link to this heading">¶</a></h4>
+<p>The system specification <img class="math" src="_images/math/ed710ddac707fcbc540bfe7b354ca2d900f0faa0.png" alt="\varphi"/> consists of the following components:</p>
+<ul class="simple">
+<li><p>the assumption <img class="math" src="_images/math/d58cc088d11bf2a10f34e3841180dc416d6ebfb1.png" alt="\varphi_{init}"/> on the initial condition of the system,</p></li>
+<li><p>the assumption <img class="math" src="_images/math/8328333ef095293eef414ed8545138bb802a2419.png" alt="\varphi_e"/> on the environment, and</p></li>
+<li><p>the desired behavior <img class="math" src="_images/math/d55c07c57a993429551b5ba4e1e7a00ec16a2f73.png" alt="\varphi_s"/> of the system.</p></li>
+</ul>
+<p>Specifically, <img class="math" src="_images/math/ed710ddac707fcbc540bfe7b354ca2d900f0faa0.png" alt="\varphi"/> can be written as</p>
+<div class="math">
+<p><img src="_images/math/933376d71ede59a0997e415145577716fcfd9acc.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e)
+ \rightarrow \varphi_s."/></p>
+</div><p>In general, <img class="math" src="_images/math/d55c07c57a993429551b5ba4e1e7a00ec16a2f73.png" alt="\varphi_s"/> is a conjunction of safety, guarantee,
+obligation, progress, response and stability properties; <img class="math" src="_images/math/d58cc088d11bf2a10f34e3841180dc416d6ebfb1.png" alt="\varphi_{init}"/> is a propositional formula; and <img class="math" src="_images/math/8328333ef095293eef414ed8545138bb802a2419.png" alt="\varphi_e"/> is a conjunction of safety and justice formula.</p>
+</section>
+<section id="planner-controller-synthesis-problem">
+<h4><span class="section-number">9.1.1.3. </span>Planner-Controller Synthesis Problem<a class="headerlink" href="#planner-controller-synthesis-problem" title="Link to this heading">¶</a></h4>
+<p>Given the system model <strong>S</strong> and the system specification <img class="math" src="_images/math/1fead044976e415b249dd33a0e7292d5e73baa17.png" alt="\varphi,"/> synthesize a planner-controller subsystem that generates a sequence of control signals <img class="math" src="_images/math/4493e125e87c26191e235826241301cff0eb854e.png" alt="u[0], u[1], \ldots \in U"/> to the plant to ensure that starting from any initial condition,
+<img class="math" src="_images/math/ed710ddac707fcbc540bfe7b354ca2d900f0faa0.png" alt="\varphi"/> is satisfied for any sequence of exogenous disturbances <img class="math" src="_images/math/ef8c161b283ca5c2169b59a7f32b6a62ea2ee20e.png" alt="d[0], d[1], \ldots \in D"/> and any sequence of environment states.</p>
+</section>
+</section>
+<section id="solution-strategy">
+<h3><span class="section-number">9.1.2. </span>Solution strategy<a class="headerlink" href="#solution-strategy" title="Link to this heading">¶</a></h3>
+<p>We follow a hierarchical approach to attack the Planner-Controller Synthesis Problem:</p>
+<ul class="simple">
+<li><p>Construct a finite transition system <strong>D</strong> (e.g. a Kripke structure) that serves as an abstract model of <strong>S</strong> (which typically has infinitely many states);</p>
+<ul>
+<li><p>To construct a finite transition system <strong>D</strong> from the physical model <strong>S</strong>, we first partition dom(<em>S</em>) and dom(<em>E</em>) into finite sets <img class="math" src="_images/math/48571342c8733eaf635c19a28bc586e39c21f8dc.png" alt="{\mathcal S}"/> and <img class="math" src="_images/math/870ed51ce39b09a40162ee717f86af09a7866af1.png" alt="{\mathcal E}"/>, respectively, of equivalence classes or cells such that the partition is proposition preserving. Roughly speaking, a partition is said to be proposition preserving if for any atomic proposition <img class="math" src="_images/math/9cc8517129c87252edd7fe2e4532af9dcf7a54d9.png" alt="\pi"/> and any states <img class="math" src="_images/math/50af82ed6b1ed2eb0d4d9dacd373fa38fc486df4.png" alt="v_{1}"/> and <img class="math" src="_images/math/bc571742f4d73b1340cbec44681283dda6010d30.png" alt="v_{2}"/> that belong to the same cell in the partition, <img class="math" src="_images/math/50af82ed6b1ed2eb0d4d9dacd373fa38fc486df4.png" alt="v_{1}"/> satisfies <img class="math" src="_images/math/9cc8517129c87252edd7fe2e4532af9dcf7a54d9.png" alt="\pi"/> if and only if <img class="math" src="_images/math/bc571742f4d73b1340cbec44681283dda6010d30.png" alt="v_{2}"/> also satisfies <img class="math" src="_images/math/c08c456ba8691c85d9695e18e97d9fea1041538c.png" alt="\pi."/> Denote the resulting discrete domain of the system by <img class="math" src="_images/math/cfe32d043c2530b937fd313c85b5018daedd6e2c.png" alt="\mathcal{V} = \mathcal{S} \times \mathcal{E}."/></p></li>
+<li><p>The transitions of <strong>D</strong> are determined based on the following notion of finite time reachability. Let <img class="math" src="_images/math/b0e609c8aaf71537d8fe9114f4c600418ea73dd4.png" alt="\mathcal{S} = \{ \varsigma_{1},\varsigma_{2}, \ldots, \varsigma_{l} \}"/> be a set of discrete controlled states. Define a map <img class="math" src="_images/math/e312549636566ebb96e2e8c92a2ca9ac1bcf0b4e.png" alt="T_{s} : \text{dom}(S) \rightarrow \mathcal{S}"/> that sends a continuous controlled state to a discrete controlled state of its equivalence class.</p></li>
+<li><p>A discrete state <img class="math" src="_images/math/4610330414c1a149dfe2145a1acf1d24952a1399.png" alt="\varsigma_{j}"/> is said to be reachable from a discrete state <img class="math" src="_images/math/22c0707fd9f0657df961c23d898d915992d55cd8.png" alt="\varsigma_{i},"/> only if  starting from any point <img class="math" src="_images/math/5ad58f9e7ff8f0577aee1977ce0a3b067fb5d781.png" alt="s[0] \in T^{-1}_{s}(\varsigma_i),"/> there exists a horizon length <img class="math" src="_images/math/e45354bf0b254d5571f04cad6d313d3129f1b90a.png" alt="N \in \{0, 1, \ldots\}"/> and a sequence of control signals <img class="math" src="_images/math/44200eef7cf22e62b5e1d6e0373db79679890588.png" alt="u[0], u[1], \ldots, u[N-1] \in U"/> that takes the system to a point <img class="math" src="_images/math/509fed319edc28eec83f6a3498893d3a893699b6.png" alt="s[N] \in T^{-1}_{s}(\varsigma_j)"/> satisfying the constraint <img class="math" src="_images/math/c5846dc7f857ee7324f7dc5368ed555fbdd1929e.png" alt="s[t] \in T^{-1}_{s}(\varsigma_i) \cup T^{-1}_{s}(\varsigma_j), \forall t \in \{0, \ldots, N\}"/> for any sequence of exogenous disturbances <img class="math" src="_images/math/4ddec1cbaf220fd8ffb8bbf52514e12aa5b54d04.png" alt="d[0], d[1], \ldots, d[N-1] \in D."/> In general, for two discrete states, establishing the reachability relation is hard because it requires seaching for a proper horizon length <img class="math" src="_images/math/db7c5f721ab0dc0689272e3de184a4348c971555.png" alt="N."/> In the restricted case where the horizon length is prespecified and <img class="math" src="_images/math/debb313ef2021de5c77b74613bd006d2ff98b0ee.png" alt="U,~D, \text{ and } T^{-1}_{a} (\varsigma_i),~i \in\{1,\ldots,l\}"/> are polyhedral sets, one can establish the reachability relation by solving a affine feasibility problem equivalent to computing the projection of a polytope on to a lower dimensional coordinate aligned subspace.</p></li>
+</ul>
+</li>
+<li><p>Synthesize a discrete planner that computes a discrete plan satisfying the specification <img class="math" src="_images/math/ed710ddac707fcbc540bfe7b354ca2d900f0faa0.png" alt="\varphi"/> based on the abstract, finite-state model <strong>D</strong>;</p></li>
+<li><p>Design a continuous controller that implements the discrete plan.</p></li>
+</ul>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">9. Additional Problem Formulations</a><ul>
+<li><a class="reference internal" href="#discrete-time-linear-with-disturbances">9.1. Discrete-time linear with disturbances</a><ul>
+<li><a class="reference internal" href="#problem-description">9.1.1. Problem description</a><ul>
+<li><a class="reference internal" href="#system-model">9.1.1.1. System model</a></li>
+<li><a class="reference internal" href="#system-specification">9.1.1.2. System specification</a></li>
+<li><a class="reference internal" href="#planner-controller-synthesis-problem">9.1.1.3. Planner-Controller Synthesis Problem</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#solution-strategy">9.1.2. Solution strategy</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="benchmarks.html"
+                          title="previous chapter"><span class="section-number">8. </span>Benchmarks</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="dev_guide.html"
+                          title="next chapter"><span class="section-number">10. </span>Developer’s Guide</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/formulations.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="dev_guide.html" title="10. Developer’s Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="benchmarks.html" title="8. Benchmarks"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">9. </span>Additional Problem Formulations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

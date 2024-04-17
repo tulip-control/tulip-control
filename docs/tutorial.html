@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>3. Tutorial and Examples &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="4. Specifications" href="specifications.html" />
+    <link rel="prev" title="2. Installation" href="install.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="specifications.html" title="4. Specifications"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="2. Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">3. </span>Tutorial and Examples</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="tutorial-and-examples">
+<h1><span class="section-number">3. </span>Tutorial and Examples<a class="headerlink" href="#tutorial-and-examples" title="Link to this heading">¶</a></h1>
+<p>TuLiP is developed for synthesis of discrete controllers for hybrid control
+systems, including supervisory controllers, switching controllers and
+receding horizon temporal logic planners (not supported in this version).</p>
+<p>To design a system, humans start by expressing the intended design in
+mathematics. This mathematical description is then given to a computer,
+which computes a controller to be used for creating the physical system.</p>
+<img alt="Overview of what TuLiP does." src="_images/tulip_workflow.png" />
+<p>Whether a controller exists, and whether the computer succeeds in finding
+a controller, depend on the feasibility of the specification, as well as the
+computational resources available and the algorithms used.</p>
+<p>The main elements that the mathematical specification describes are:</p>
+<ul class="simple">
+<li><p>Goal</p></li>
+<li><p>Physics</p></li>
+<li><p>Environment</p></li>
+</ul>
+<p>The goal is what we want the system to accomplish.
+The physics is how the system behaves in the real world, e.g., inertia.
+The environment is the rest of the world, and what assumptions are made
+about how it interacts with the system that is being designed.</p>
+<section id="synthesis-of-reactive-controllers">
+<h2><span class="section-number">3.1. </span>Synthesis of Reactive Controllers<a class="headerlink" href="#synthesis-of-reactive-controllers" title="Link to this heading">¶</a></h2>
+<p>To illustrate the basic synthesis capabilities of TuLiP, we synthesize a
+simple discrete state controller for a robotic motion control system.</p>
+<section id="problem-formulation">
+<h3><span class="section-number">3.1.1. </span>Problem Formulation<a class="headerlink" href="#problem-formulation" title="Link to this heading">¶</a></h3>
+<p>We consider a physical system with given dynamics (“plant”) and
+a controller that we are about to design ourselves.
+Both discrete-valued and continuous-valued variables may be used
+to describe the behavior of the system.</p>
+<p>The environment can affect this system in two ways:</p>
+<ol class="arabic simple">
+<li><p>through discrete-valued variables</p></li>
+<li><p>through continuous-valued variables, understood as “disturbance” (noise).</p></li>
+</ol>
+<p>In summary, we study problems with the following elements:</p>
+<ol class="arabic simple">
+<li><p>discrete-valued plant variables (“discrete state”)</p></li>
+<li><p>continuous-valued plant variables (“continuous state”)</p></li>
+<li><p>discrete-valued environment variables</p></li>
+<li><p>continuous-valued environment variables (disturbance)</p></li>
+<li><p>specification: formulae, including difference equations.</p></li>
+</ol>
+<p>Here, <cite>discrete</cite> state refers to variables that take only a finite number
+of possible values in the system behaviors that interest us,
+whereas <cite>continuous</cite> state refers to variables that can take
+an infinite number of possible values, e.g., the position of the car.</p>
+<p>The <cite>environment</cite> state is related to factors over which the controller
+has no authority, such as the position of an obstacle, or the outside
+temperature.  At any given time, the controller regulates the <cite>system</cite> (or
+<cite>controlled</cite>) state so as to satisfy the specification, given the
+current state of plant, environment, and the controller’s “internal” state
+(memory – think of a microprocessor’s own memory).</p>
+<p>We say that a specification is <cite>realizable</cite> if there exists a controller
+exists that steers the plant in a way that, for all environment behaviors
+that we assume are possible to happen, the specification requirements
+on the plant are satisfied.</p>
+<p>We will use the following variables and functions of time to
+describe the continuous dynamics:</p>
+<ol class="arabic simple">
+<li><p><img class="math" src="_images/math/907a4add6d5db5b7f197f7924f1371b8ac404fe6.png" alt="t"/> a variable that represents discrete time</p></li>
+<li><p><img class="math" src="_images/math/4be40294ccac3c5e9bfd0c49381af6aef0ce3172.png" alt="s[t]"/> continuous state,</p></li>
+<li><p><img class="math" src="_images/math/38a4a7c7faa2572432efb5866c9317cb41fd44bd.png" alt="u[t]"/> control input signal,</p></li>
+<li><p><img class="math" src="_images/math/45e4ca9b2f5aded17286ce6ce6898435d9cb2dc5.png" alt="d[t]"/> (uncontrolled) disturbance.</p></li>
+</ol>
+<p>Suppose the continuous state of the system evolves according to the
+following discrete-time linear time-invariant state space model:
+for <img class="math" src="_images/math/df5feb129ca88907b966e6a21fd5aa5715f647c5.png" alt="t \in \{0, 1, 2, ...\}"/></p>
+<div class="math" id="equation-dynamics">
+<p><span class="eqno">(1)<a class="headerlink" href="#equation-dynamics" title="Link to this equation">¶</a></span><img src="_images/math/1d6dbe31ae8cd55dd7553cbe4f705602435188d8.png" alt="s[t+1]  =   As[t] + Bu[t] + Ed[t] + K"/></p>
+</div><p>where:</p>
+<ol class="arabic simple">
+<li><p><img class="math" src="_images/math/9890e0ef0b9a6e03d30324afac19edd3399c8a2d.png" alt="u[t] \in U"/></p></li>
+<li><p><img class="math" src="_images/math/da178cd93f3a5ab317610621bfd607762897d279.png" alt="d[t] \in D"/></p></li>
+<li><p><img class="math" src="_images/math/32dfe7daafbd8913eb49ecd90756d15072a31c61.png" alt="s[0] \in S"/></p></li>
+<li><dl class="simple">
+<dt><img class="math" src="_images/math/1d0ad92a7c6a61a5e2e3045da022e5d1a328378a.png" alt="S \subseteq \mathbb{R}^n"/> are the continuous states</dt><dd><p>over which we study the system behavior,</p>
+</dd>
+</dl>
+</li>
+<li><p><img class="math" src="_images/math/af9e3d2ad97eb9d3817ed2473ad362b970dc05de.png" alt="U \subseteq \mathbb{R}^m"/> is the set of admissible control inputs,</p></li>
+<li><dl class="simple">
+<dt><img class="math" src="_images/math/e2f8b826428bc229782ce2ae8c10d59b6582cbf1.png" alt="D \subseteq \mathbb{R}^p"/> is the set of exogenous disturbances</dt><dd><p>that we assume are possible.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>We consider the case where the sets <img class="math" src="_images/math/b553eec8f6f7619da8663a8ba22701b0d7e57335.png" alt="S, U, D"/> are bounded polytopes.</p>
+<p>The control design problem is solved in two phases.
+In the fist phase we abstract continuous-valued variables,
+replacing them with discrete-valued variables,
+with suitable constraints on their assumed and required behavior that
+faithfully represent what is going on at the continuous level.</p>
+<p>At the discrete level, a controller is synthesized from a specification
+expressed in temporal logic. The specification is written in what
+is known as an assume-guarantee form:</p>
+<div class="math" id="equation-spec">
+<p><span class="eqno">(2)<a class="headerlink" href="#equation-spec" title="Link to this equation">¶</a></span><img src="_images/math/1a5265e8b0bf0af2e1bfa340cea0c6eec9638259.png" alt="\varphi = \big(\varphi_{init} \wedge \varphi_e)
+\overset{sr}{\rightarrow}
+\varphi_s"/></p>
+</div><p>where:</p>
+<ol class="arabic simple">
+<li><p><img class="math" src="_images/math/d58cc088d11bf2a10f34e3841180dc416d6ebfb1.png" alt="\varphi_{init}"/> is an <cite>assumption</cite> on what initial states are possible</p></li>
+<li><p><img class="math" src="_images/math/8328333ef095293eef414ed8545138bb802a2419.png" alt="\varphi_e"/> is an <cite>assumption</cite> about how the environment behaves,</p></li>
+<li><p><img class="math" src="_images/math/d55c07c57a993429551b5ba4e1e7a00ec16a2f73.png" alt="\varphi_s"/> is a <cite>requirement</cite> on the desired behavior we want,
+and the physical constraints that have to be satisfied.</p></li>
+</ol>
+<p>These descriptions are not absolute. Some times, there are aspects of
+a problem that can be modeled in equivalent ways as either assumptions or
+requirements, using environment or system variables to represent them.
+This is a choice made during modeling of a problem with mathematics.</p>
+<p>As described in the <a class="reference internal" href="intro.html"><span class="doc">Introduction</span></a>, our approach to this reactive control
+system synthesis consists of the following main steps:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Abstract the continuous-valued variables using discrete-valued
+variables, by <a class="reference internal" href="#ssec-prop-part"><span class="std std-ref">generating a partition of the continuous states that
+preserves the meaning of statements that appear in the specification.</span></a></p></li>
+<li><p>Abstract the possible changes of continuous-valued variables,
+by <a class="reference internal" href="#ssec-disc"><span class="std std-ref">discretizing the continuous dynamics,
+based on solving reachability problems.</span></a></p></li>
+<li><p><a class="reference internal" href="#ssec-syn"><span class="std std-ref">Digital design synthesis,</span></a>
+by solving games of infinite duration.</p></li>
+</ol>
+</div></blockquote>
+<p>These steps are summarized in the following figure:</p>
+<img alt="Overview of TuLiP input, computation, and output." src="_images/tulip_summary.png" />
+<p>In particular, realizability of the specification (together with the
+abstracted continuous dynamics) is decided in the middle of this image,
+by using reactive synthesis algorithms.</p>
+</section>
+<section id="proposition-preserving-partition-of-continuous-state-space">
+<span id="ssec-prop-part"></span><h3><span class="section-number">3.1.2. </span>Proposition Preserving Partition of Continuous State Space<a class="headerlink" href="#proposition-preserving-partition-of-continuous-state-space" title="Link to this heading">¶</a></h3>
+<p>Given the continuous state space <img class="math" src="_images/math/b988975be41fd13b4d091c10202ba19374643586.png" alt="S"/> of the system and the set
+<img class="math" src="_images/math/fa42721f8c25667f4df046c57f8aac88b622affa.png" alt="\Pi_c"/> of propositions on the continuous state of the system, we
+partition <img class="math" src="_images/math/b988975be41fd13b4d091c10202ba19374643586.png" alt="S"/> into a finite number of cells such that all the
+continuous states in each cell satisfy exactly the same set of propositions
+in <img class="math" src="_images/math/fa42721f8c25667f4df046c57f8aac88b622affa.png" alt="\Pi_c"/>.</p>
+<p>This can be done using the following function call:</p>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">abstract.</span></span><span class="sig-name descname"><span class="pre">prop2part</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_space</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_props_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Polytope</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PropPreservingPartition</span></span></span><a class="reference internal" href="_modules/abstract/prop2partition.html#prop2part"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Takes a domain <cite>state_space</cite> and a <cite>list</cite> of
+propositions <cite>cont_props</cite>, and returns
+a proposition-preserving partition of
+the state-space.</p>
+<section id="relevant">
+<h4><span class="section-number">3. </span>Relevant<a class="headerlink" href="#relevant" title="Link to this heading">¶</a></h4>
+<p><cite>PropPreservingPartition</cite>,
+<cite>polytope.Polytope</cite></p>
+<dl class="simple">
+<dt>&#64;param state_space:</dt><dd><p>problem domain</p>
+</dd>
+<dt>&#64;param cont_props_dict:</dt><dd><p>propositions</p>
+</dd>
+<dt>&#64;return:</dt><dd><p>state-space quotient partition induced
+by propositions</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p>The above function returns a proposition preserving partition as a PropPreservingPartition object.</p>
+<blockquote>
+<div><dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">abstract.</span></span><span class="sig-name descname"><span class="pre">PropPreservingPartition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">adj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">lil_array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop_regions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/abstract/prop2partition.html#PropPreservingPartition"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Partition class with following fields:</p>
+<p>Attributes:</p>
+<ul class="simple">
+<li><p><cite>domain</cite>: the domain we want to partition</p></li>
+<li><p><cite>regions</cite>: <a href="#id1"><span class="problematic" id="id2">`</span></a>Region`s of
+proposition-preserving partition</p></li>
+<li><p><cite>adj</cite>: sparse matrix showing which
+regions are adjacent.
+The order of <cite>Region`s is the
+same as in the `list</cite> <cite>regions</cite>.</p>
+<ul>
+<li><p>type: <cite>scipy</cite> <cite>lil</cite> <cite>sparse</cite></p></li>
+</ul>
+</li>
+<li><p><cite>prop_regions</cite>: map from atomic
+proposition symbols to continuous subsets</p></li>
+</ul>
+<section id="id3">
+<h4><span class="section-number">3. </span>Relevant<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p><cite>prop2part</cite></p>
+</section>
+</dd></dl>
+
+</div></blockquote>
+</section>
+<section id="continuous-state-space-discretization">
+<span id="ssec-disc"></span><h3><span class="section-number">3.1.3. </span>Continuous State Space Discretization<a class="headerlink" href="#continuous-state-space-discretization" title="Link to this heading">¶</a></h3>
+<p>Given a proposition preserving partition of the continuous state space and
+the evolution of the continuous state as in <a class="reference internal" href="#equation-dynamics">(1)</a>,
+we refine the partition based on the reachability relation between cells
+and obtain a finite state abstraction of the evolution of the continuous state,
+represented by a finite transition system.</p>
+<p>The abstraction algorithms that are implemented in TuLiP take the:</p>
+<ul class="simple">
+<li><p>description of the dynamics as difference equations that
+are piecewise-affine over a polytopic partition, together with the</p></li>
+<li><p>proposition-preserving partition of the continuous state space,</p></li>
+</ul>
+<p>and refine them into a (discrete) graph and a new partition of the state space
+into polytopes. These polytopes can be smaller in size than the polytopes
+that comprise the proposition-preserving partition.</p>
+<p>The nodes of this graph (which is generated from the abstraction algorithm)
+correspond to the polytopes of this new partition of the state space.
+The arcs (directed edges) that connect the nodes represent feasible transitions
+in the continuous state space.</p>
+<p>When creating these arcs, the abstraction algorithm ensures that it will be
+possible to guide the system from the source region (polytope) of the arc,
+to the destination region of the arc, in the presence of any environment
+disturbances specified in the difference equations.</p>
+<p>Ensuring this property during abstraction is necessary to enable the
+implementation of the discrete controller, that is synthesized automatically
+in a later step described below, by continuous feedback controllers.</p>
+<p>The next figure shows this abstraction step. We start from the proposition
+preserving partition on the left, together with the dynamics, and
+obtain by abstraction the discrete graph and matching partition on the right.</p>
+<img alt="Abstracting the dynamics by refining the polytopic partition of the state space, and creating a graph that corresponds to this partition, and to the transitions that are implementable between regions of this partition." src="_images/abstracting_dynamics.png" />
+<p>The LtiSysDyn class is used to define continuous dynamics.</p>
+<blockquote>
+<div><dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hybrid.</span></span><span class="sig-name descname"><span class="pre">LtiSysDyn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Uset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_semantics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'discrete'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sampled'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybrid.html#LtiSysDyn"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Represents discrete-time continuous-state dynamics.</p>
+<p>Specifically, dynamics of the form:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">s[t</span> <span class="pre">+</span> <span class="pre">1]</span> <span class="pre">=</span> <span class="pre">A</span> <span class="pre">*</span> <span class="pre">s[t]</span> <span class="pre">+</span> <span class="pre">B</span> <span class="pre">*</span> <span class="pre">u[t]</span> <span class="pre">+</span> <span class="pre">E</span> <span class="pre">*</span> <span class="pre">d[t]</span> <span class="pre">+</span> <span class="pre">K</span>
+<span class="pre">`</span></code></p>
+<p>subject to the constraints:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">u[t]</span> <span class="pre">\in</span> <span class="pre">Uset</span>
+<span class="pre">d[t]</span> <span class="pre">\in</span> <span class="pre">Wset</span>
+<span class="pre">s[t]</span> <span class="pre">\in</span> <span class="pre">domain</span>
+<span class="pre">`</span></code></p>
+<p>where:
+- <cite>u[t]</cite> the control input
+- <cite>d[t]</cite> the disturbance input
+- <cite>s[t]</cite> the system state</p>
+<p>Attributes:</p>
+<ul>
+<li><p><cite>A</cite>, <cite>B</cite>, <cite>E</cite>, <cite>K</cite>, (matrices)</p></li>
+<li><p><cite>Uset</cite>, <cite>Wset</cite>, (each a <cite>polytope.Polytope</cite>)</p></li>
+<li><p><cite>domain</cite> (<cite>polytope.Polytope</cite> or <cite>polytope.Region</cite>)</p></li>
+<li><p><cite>time_semantics</cite>:
+- <cite>‘discrete’</cite>: if the system is</p>
+<blockquote>
+<div><p>originally a discrete-time system, or</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>‘sampled’</cite>: if the system is sampled from
+a continuous-time system)</p></li>
+</ul>
+</li>
+<li><p>timestep: A positive real number containing the
+timestep (for sampled system)</p></li>
+</ul>
+<p>as defined above.</p>
+<section id="note">
+<h4><span class="section-number">3. </span>Note<a class="headerlink" href="#note" title="Link to this heading">¶</a></h4>
+<p>For state-dependent bounds on the input,</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">[u[t];</span> <span class="pre">s[t]]</span> <span class="pre">\in</span> <span class="pre">Uset</span>
+<span class="pre">`</span></code></p>
+<p>can be used.</p>
+</section>
+<section id="id4">
+<h4><span class="section-number">3. </span>Relevant<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<p><cite>PwaSysDyn</cite>,
+<cite>SwitchedSysDyn</cite>,
+<cite>polytope.Polytope</cite></p>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p>Once we have the proposition preserving partition and the continuous dynamics,
+continuous state space discretization can be done using the following function call:</p>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">abstract.</span></span><span class="sig-name descname"><span class="pre">discretize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">part</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PropPreservingPartition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ssys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">LtiSysDyn</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">PwaSysDyn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cell_volume</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">closed_loop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conservative</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_poly</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_all_horizon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trans_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">remove_trans</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">abs_tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-07</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_img</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cont_props</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Polytope</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_every</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simu_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'bi'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'dual'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bi'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AbstractPwa</span></span></span><a class="reference internal" href="_modules/abstract/discretization.html#discretize"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Refine the partition via bisimulation or dual-simulation.</p>
+<p>Refines the partition via either:
+- bisimulation, or
+- dual-simulation</p>
+<p>algorithms, and establish transitions
+based on reachability analysis.</p>
+<section id="reference">
+<h4><span class="section-number">3. </span>Reference<a class="headerlink" href="#reference" title="Link to this heading">¶</a></h4>
+<dl class="simple">
+<dt>[NOTM12](</dt><dd><p><a class="reference external" href="https://tulip-control.sourceforge.io/doc/bibliography.html#notm12">https://tulip-control.sourceforge.io/doc/bibliography.html#notm12</a>)</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h4><span class="section-number">3. </span>Relevant<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<p><cite>prop2partition.pwa_partition</cite>,
+<cite>prop2partition.part2convex</cite></p>
+<dl class="simple">
+<dt>&#64;param N:</dt><dd><p>horizon length</p>
+</dd>
+<dt>&#64;param min_cell_volume:</dt><dd><p>the minimum volume of
+cells in the resulting partition.</p>
+</dd>
+<dt>&#64;param closed_loop:</dt><dd><p>boolean indicating whether
+the <cite>closed loop</cite> algorithm should be used.
+(default is <cite>True</cite>)</p>
+</dd>
+<dt>&#64;param conservative:</dt><dd><ul class="simple">
+<li><p><cite>True</cite>: force sequence in reachability analysis
+to stay inside starting cell</p></li>
+<li><p><cite>False</cite>: safety is ensured by keeping the
+sequence inside a convexified version of
+the original proposition-preserving cell.</p></li>
+</ul>
+</dd>
+<dt>&#64;param max_num_poly:</dt><dd><p>maximum number of
+polytopes in a region to use in
+reachability analysis.</p>
+</dd>
+<dt>&#64;param use_all_horizon:</dt><dd><p>in closed-loop algorithm:
+if we should look for reachability also
+in less than <cite>N</cite> steps.</p>
+</dd>
+<dt>&#64;param trans_length:</dt><dd><p>the number of polytopes
+allowed to cross in a transition.
+A value of <cite>1</cite> checks transitions
+only between neighbors, a value of <cite>2</cite> checks
+neighbors of neighbors and so on.</p>
+</dd>
+<dt>&#64;param remove_trans:</dt><dd><p>if <cite>True</cite>, then remove
+the found transitions between non-neighbors.</p>
+</dd>
+<dt>&#64;param abs_tol:</dt><dd><p>maximum volume for an “empty” polytope</p>
+</dd>
+<dt>&#64;param plotit:</dt><dd><p>plot partitioning as it evolves</p>
+</dd>
+<dt>&#64;param save_img:</dt><dd><p>save snapshots of partitioning
+to PDF files,
+requires <cite>plotit=True</cite></p>
+</dd>
+<dt>&#64;param cont_props:</dt><dd><p>continuous propositions to plot</p>
+</dd>
+<dt>&#64;param simu_type:</dt><dd><ul class="simple">
+<li><p><cite>‘bi’</cite> (default): use bisimulation partition</p></li>
+<li><p><cite>‘dual’</cite>: use dual-simulation partition</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p id="ssec-syn">The option <code class="docutils literal notranslate"><span class="pre">use_all_horizon</span></code> changes both how reachability is computed
+during discretization, and also what assumption is made about when the
+discrete-valued environment variables are sampled:</p>
+<ul class="simple">
+<li><p>With <code class="docutils literal notranslate"><span class="pre">use_all_horizon</span> <span class="pre">=</span> <span class="pre">False</span></code>, a fixed sampling period is assumed,
+and reachability problems are solved for a fixed (discrete-time) horizon
+equal to <cite>N</cite> steps.</p></li>
+<li><p>With <code class="docutils literal notranslate"><span class="pre">use_all_horizon</span> <span class="pre">=</span> <span class="pre">True</span></code>, reachability considers trajectories
+that take <cite>1..N</cite> steps. As a result, from different states, the same
+discrete-strategy (see below) transition can take a different number
+of time steps to be implemented in the continuous state space.
+This requires the assumption that the system can sample the discrete-valued
+environment variables at times that continuous transitions complete.</p></li>
+</ul>
+</section>
+<section id="digital-design-synthesis">
+<h3><span class="section-number">3.1.4. </span>Digital design synthesis<a class="headerlink" href="#digital-design-synthesis" title="Link to this heading">¶</a></h3>
+<p>The continuous state space discretization generates a finite state
+abstraction of the continuous state, represented by a finite transition
+system.  Each state in this finite transition system corresponds to a cell
+in the continuous domain.  A transition <img class="math" src="_images/math/abc668d6348930639a61837c3c31d69b34694b8a.png" alt="c_i \to c_j"/> in this finite
+state system indicates that from any continuous state <img class="math" src="_images/math/8fb1fc12384d9c1b73b81b87315f7654511a2c0e.png" alt="s_0"/> that
+belongs to cell <img class="math" src="_images/math/30634b08f5df289a7acab4963cb6a3e6b99aba0f.png" alt="c_i"/>, there exists a sequence of control inputs
+<img class="math" src="_images/math/4e420ae81b11e10b25af33d0eada84441c819330.png" alt="u_0, u_1, \ldots, u_{N-1}"/> that takes the system to another
+continuous state <img class="math" src="_images/math/32329ce8563b28cbdc9b607b234140b835418fa0.png" alt="s_{N}"/> in cell <img class="math" src="_images/math/6f079f634d501d4dcfd466b3d465269b10c451f7.png" alt="c_j"/>.  Hence, under the
+assumption that the desired behavior is a stutter-invariant property,
+we can describe the continuous dynamics by an LTL formula of the form</p>
+<div class="math">
+<p><img src="_images/math/6aa4ca12ffb61158b3fbce1d2d59e6397b8029fa.png" alt="(v = c_i) \implies \big(\bigvee_{j \text{ s.t. } c_i \to c_j} v' = c_j\big),"/></p>
+</div><p>where <img class="math" src="_images/math/02d98909b5d6acd6a7ff927d4d42790bdd407d58.png" alt="v"/> is a new discrete variable that describes in which cell
+the continuous state is.</p>
+<p>Since the partition is proposition preserving, all the continuous states
+that belong to the same cell satisfy exactly the same set of propositions on
+the continuous state. By the abuse of notation, we write <img class="math" src="_images/math/5c4e38d1a7a59b9de6ead57f889e7f25f3e4f900.png" alt="c_j \models
+X_i"/> if all the continuous states in cell <img class="math" src="_images/math/6f079f634d501d4dcfd466b3d465269b10c451f7.png" alt="c_j"/> satisfy proposition
+<img class="math" src="_images/math/74a2595134b54bda04be7e52e5792f63c573fb22.png" alt="X_i"/>.  Then, we can replace any proposition <img class="math" src="_images/math/74a2595134b54bda04be7e52e5792f63c573fb22.png" alt="X_i"/> on the
+continuous state variables by the formula <img class="math" src="_images/math/9abd5c46d1b132d1fcf6fc30c08cf00f4631f925.png" alt="\displaystyle{\bigvee_{j
+\text{ s.t. } c_j \models X_i} v = c_j}"/>.</p>
+<p>Putting everything together, we now obtain a specification of the form in
+<a class="reference internal" href="#equation-spec">(2)</a> (see also <a class="reference internal" href="specifications.html"><span class="doc">Specifications</span></a>).  We can then use a GR(1) game
+solver, as those available in <a class="reference external" href="https://github.com/tulip-control/omega">omega</a>
+and <a class="reference external" href="http://scottman.net/2012/gr1c">gr1c</a>
+to automatically synthesize a strategy that
+ensures the satisfaction of the specification, taking into account all the
+possible behaviors of the environment.  This is done using the
+<code class="docutils literal notranslate"><span class="pre">synth.synthesize</span></code> function:</p>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">synth.</span></span><span class="sig-name descname"><span class="pre">synthesize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">GRSpec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FiniteTransitionSystem</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FiniteTransitionSystem</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_env_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_sys_init</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rm_deadends</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solver</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'gr1c'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'gr1py'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'omega'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'slugs'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'omega'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">MealyMachine</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="_modules/synth.html#synthesize"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Call synthesis tool <cite>solver</cite> on the specification.</p>
+<p>There are three attributes of <cite>specs</cite> that define what
+kind of controller you are looking for:</p>
+<ol class="arabic">
+<li><p><cite>moore</cite>:
+What information the controller knows
+when deciding the next
+values of controlled variables:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Moore: can read current state,
+but not next environment variable values, or</p></li>
+<li><p>Mealy: can read current state and
+next environment variable values.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt><cite>qinit</cite>:</dt><dd><p>Quantification of initial variable values:
+Whether all states that satisfy
+a predicate should be winning,
+or the initial values of
+some (or all) the variables is
+subject to the synthesizer’s choice.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>plus_one</cite>:</dt><dd><p>The form of assume-guarantee specification,
+i.e., how the system guarantees relate to
+assumptions about the environment.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p>For more details about these attributes, see <cite>GRSpec</cite>.</p>
+<p>The states of the transition system can be either:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>all integers, or</p></li>
+<li><p>all strings</p></li>
+</ul>
+</div></blockquote>
+<p>For more details of how
+the transition system is represented in
+logic look at <cite>synthesize_many</cite>.</p>
+<section id="beware">
+<h4><span class="section-number">3. </span>Beware!<a class="headerlink" href="#beware" title="Link to this heading">¶</a></h4>
+<p>This function provides a generic interface to a variety
+of routines.  Being under active development, the types of
+arguments supported and types of objects returned may change
+without notice.</p>
+<dl>
+<dt>&#64;param env:</dt><dd><p>A transition system describing the environment:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>states controlled by environment</p></li>
+<li><p>input: sys_actions</p></li>
+<li><p>output: env_actions</p></li>
+<li><p>initial states constrain the environment</p></li>
+</ul>
+</div></blockquote>
+<p>This constrains the transitions available to
+the environment, given the outputs from the system.</p>
+</dd>
+<dt>&#64;param sys:</dt><dd><p>A transition system describing the system:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>states controlled by the system</p></li>
+<li><p>input: env_actions</p></li>
+<li><p>output: sys_actions</p></li>
+<li><p>initial states constrain the system</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>&#64;param ignore_env_init:</dt><dd><p>Ignore any initial state information
+contained in env.</p>
+</dd>
+<dt>&#64;param ignore_sys_init:</dt><dd><p>Ignore any initial state information
+contained in sys.</p>
+</dd>
+<dt>&#64;param rm_deadends:</dt><dd><p>return a strategy that contains no terminal states.</p>
+</dd>
+<dt>&#64;param solver:</dt><dd><p>Magic string that declares what tool to invoke,
+what method to use, etc.  Currently recognized forms:</p>
+<p>For GR(1) synthesis:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><cite>“gr1c”</cite>:
+use gr1c via <cite>interfaces.gr1c</cite>.
+written in C using CUDD, symbolic</p></li>
+<li><p><cite>“gr1py”</cite>:
+use gr1py via <cite>interfaces.gr1py</cite>.
+Python, enumerative</p></li>
+<li><p><cite>“omega”</cite>:
+use omega via <cite>interfaces.omega</cite>.
+Python using <cite>dd</cite> or Cython using CUDD, symbolic</p></li>
+<li><p><cite>“slugs”</cite>:
+use slugs via <cite>interfaces.slugs</cite>.
+C++ using CUDD, symbolic</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt>&#64;return:</dt><dd><p>If spec is realizable,
+then return a Mealy machine implementing the strategy.
+Otherwise return None.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p>This synthesis step is conceptually depicted in the next figure,
+where the synthesis algorithms are used to decide whether a strategy exists
+that guarantees the specification requirements, under the specification
+assumptions. If such a strategy exists, then it is constructed.</p>
+<img alt="Reactive synthesis can be regarded as solving a discrete game." src="_images/strategy_synthesis.png" />
+<p>More details about how Moore/Mealy capability,
+the assume-guarantee form of specification, and
+quantification of initial variable values are selected is described
+in the class <code class="docutils literal notranslate"><span class="pre">spec.GRSpec</span></code>:</p>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py" id="spec.GRSpec">
+<span class="sig-prename descclassname"><span class="pre">spec.</span></span><span class="sig-name descname"><span class="pre">GRSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">env_vars:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">...]</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_vars:</span> <span class="pre">dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">...]</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_init:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_init:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_safety:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_safety:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env_prog:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sys_prog:</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">~collections.abc.Iterable[str]</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">moore:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plus_one:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qinit:</span> <span class="pre">~typing.Literal['\\A</span> <span class="pre">\\A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'\\A</span> <span class="pre">\\E'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'\\E</span> <span class="pre">\\A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'\\E</span> <span class="pre">\\E']</span> <span class="pre">=</span> <span class="pre">'\\A</span> <span class="pre">\\A'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser=&lt;module</span> <span class="pre">'tulip.spec.parser'</span> <span class="pre">from</span> <span class="pre">'/opt/hostedtoolcache/Python/3.10.14/x64/lib/python3.10/site-packages/tulip/spec/parser.py'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/spec/form.html#GRSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#spec.GRSpec" title="Link to this definition">¶</a></dt>
+<dd><p>GR(1) specification.</p>
+<p>The basic form is:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">(env_init</span> <span class="pre">&amp;</span> <span class="pre">[]env_safety</span> <span class="pre">&amp;</span> <span class="pre">[]&lt;&gt;env_prog_1</span> <span class="pre">&amp;</span> <span class="pre">[]&lt;&gt;env_prog_2</span> <span class="pre">&amp;</span> <span class="pre">...)</span>
+<span class="pre">-&gt;</span> <span class="pre">(sys_init</span> <span class="pre">&amp;</span> <span class="pre">[]sys_safety</span> <span class="pre">&amp;</span> <span class="pre">[]&lt;&gt;sys_prog_1</span> <span class="pre">&amp;</span> <span class="pre">[]&lt;&gt;sys_prog_2</span> <span class="pre">&amp;</span> <span class="pre">...)</span>
+<span class="pre">`</span></code></p>
+<p>Attributes:</p>
+<ul>
+<li><p><cite>moore</cite>: select whether a strategy can see primed
+environment variables.</p></li>
+<li><p><cite>plus_one</cite>: select causal implication between
+assumptions and guarantees.</p></li>
+<li><p><cite>qinit</cite>: select quantification of initial values
+for variables:</p>
+<p><cite>win</cite> below describes the set of winning states.
+<cite>internal_init</cite> is the initial condition for the
+internal strategy variables.
+<cite>Op == expr</cite> means operator <cite>Op</cite> is defined as
+the expression <cite>expr</cite>.</p>
+<ul>
+<li><p><cite>r’A A’</cite>:
+<cite>forall env_vars:  forall sys_vars:  env_init -&gt; win</cite>.
+<cite>sys_init</cite> must be empty or contain true.
+The strategy enumeration iterates through
+all assignments that satisfy
+<cite>env_init &amp; internal_init</cite>.</p></li>
+<li><p><cite>r’A E’</cite>:
+<cite>forall env_vars:  exist sys_vars:  form</cite>,
+where:
+- <cite>form == sys_init &amp; (env_init -&gt; win)</cite></p>
+<blockquote>
+<div><p>(<cite>plus_one is True</cite>)</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>form == env_init -&gt; (sys_init &amp; win)</cite>
+(<cite>plus_one is False</cite>)</p></li>
+</ul>
+<p>The strategy enumeration iterates
+through all assignments that
+satisfy <cite>E sys_vars:  env_init</cite>, and
+picks assignments that satisfy
+<cite>form &amp; internal_init</cite>.</p>
+</li>
+<li><p><cite>r’E A’</cite>:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">exist</span> <span class="pre">sys_vars:</span>&#160; <span class="pre">forall</span> <span class="pre">env_vars:</span>&#160; <span class="pre">form</span>
+<span class="pre">`</span></code></p>
+<p>where:
+- <cite>form == sys_init &amp; (env_init -&gt; win)</cite></p>
+<blockquote>
+<div><p>(<cite>plus_one is True</cite>)</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>form == env_init -&gt; (sys_init &amp; win)</cite>
+(<cite>plus_one is False</cite>)</p></li>
+</ul>
+<p>The strategy enumeration picks
+an assignment that satisfies:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">internal_init</span> <span class="pre">&amp;</span> <span class="pre">\A</span> <span class="pre">env_vars:</span>&#160; <span class="pre">form</span>
+<span class="pre">`</span></code></p>
+<p>and iterates through all assignments
+that satisfy <cite>env_init</cite>.</p>
+</li>
+<li><p><cite>r’E E’</cite>:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">exist</span> <span class="pre">env_vars:</span>&#160; <span class="pre">exist</span> <span class="pre">sys_vars:</span>&#160; <span class="pre">sys_init</span> <span class="pre">&amp;</span> <span class="pre">win</span>
+<span class="pre">`</span></code></p>
+<p><cite>env_init</cite> must be empty or contain true.
+The strategy enumeration picks
+an assignment that satisfies:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">sys_init</span> <span class="pre">&amp;</span> <span class="pre">win</span> <span class="pre">&amp;</span> <span class="pre">internal_init</span>
+<span class="pre">`</span></code></p>
+</li>
+</ul>
+</li>
+<li><p><cite>env_vars</cite>: alias for <cite>input_variables</cite> of <cite>LTL</cite>,
+concerning variables that are determined
+by the environment.</p></li>
+<li><p><cite>env_init</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the assumption about the
+initial state of the environment.</p></li>
+<li><p><cite>env_safety</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the assumption about the
+evolution of the environment state.</p></li>
+<li><p><cite>env_prog</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the justice assumption
+on the environment.</p></li>
+<li><p><cite>sys_vars</cite>: alias for <cite>output_variables</cite> of <cite>LTL</cite>,
+concerning variables that are controlled
+by the system.</p></li>
+<li><p><cite>sys_init</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the requirement
+on the initial state of the system.</p></li>
+<li><p><cite>sys_safety</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the safety requirement.</p></li>
+<li><p><cite>sys_prog</cite>: <cite>list</cite> of <cite>str</cite> that
+specifies the progress requirement.</p></li>
+</ul>
+<p>An empty list for any formula
+(e.g., if <cite>env_init = list()</cite>)
+is marked as <cite>True</cite> in the specification.</p>
+<p>This corresponds to the constant Boolean function,
+which usually means that subformula has no
+effect (is non-restrictive) on the spec.</p>
+<p>Consult <cite>GRSpec.__init__</cite> concerning
+arguments at the time of instantiation.</p>
+</dd></dl>
+
+</div></blockquote>
+<p>The resulting output is a controller function that decides what values
+the controlled (discrete-valued) variables should take next.</p>
+<p>A <cite>Moore</cite> controller function cannot read the next
+values of (discrete-valued) environment variables before taking this
+decision, whereas a <cite>Mealy</cite> controller function can.
+Moore controllers are more realistic, and less prone to modeling errors,
+thus recommended.</p>
+<blockquote>
+<div><dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">transys.machines.</span></span><span class="sig-name descname"><span class="pre">Transducer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/transys/machines.html#Transducer"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Sequential Transducer, i.e., a letter-to-letter function.</p>
+<section id="inputs">
+<h4><span class="section-number">3. </span>Inputs<a class="headerlink" href="#inputs" title="Link to this heading">¶</a></h4>
+<p><cite>P = {p1, p2,…}</cite> is the set of input ports.
+An input port p takes values in a set <cite>Vp</cite>.
+The set <cite>Vp</cite> is called the “type” of input port <cite>p</cite>.
+A “valuation” is an assignment of values to the input ports in <cite>P</cite>.</p>
+<p>We call “inputs” the set of pairs:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">{(p_i,</span> <span class="pre">Vp_i),</span> <span class="pre">...}</span>
+<span class="pre">`</span></code></p>
+<p>of input ports p_i and their corresponding types <cite>Vp_i</cite>.</p>
+<p>A guard is a predicate (bool-valued) used as sub-label for a transition.
+A guard is defined by a set and evaluated using set membership.
+So given an input port value <cite>p=x</cite>, then if:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">x</span> <span class="pre">\in</span> <span class="pre">guard_set</span>
+<span class="pre">`</span></code></p>
+<p>then the guard is <cite>True</cite>, otherwise it is <cite>False</cite>.</p>
+<p>The “inputs” are defined by an <cite>OrderedDict</cite>:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">{'p1':</span> <span class="pre">explicit,</span> <span class="pre">'p2':</span> <span class="pre">check,</span> <span class="pre">'p3':</span> <span class="pre">None,</span> <span class="pre">...}</span>
+<span class="pre">`</span></code></p>
+<p>where:
+- <cite>explicit</cite>:</p>
+<blockquote>
+<div><p>is an iterable representation of Vp,
+possible only for discrete Vp.
+If ‘p1’ is explicitly typed,
+then guards are evaluated directly:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">input_port_value</span> <span class="pre">==</span> <span class="pre">guard_value</span> <span class="pre">?</span>
+<span class="pre">`</span></code></p>
+</div></blockquote>
+<ul>
+<li><p><cite>check</cite>:
+is a class with methods:</p>
+<ul>
+<li><p><cite>__contains__(x)</cite>:
+check if guard value given to input port <cite>‘p1’</cite> is
+in the set of possible values Vp.</p></li>
+<li><p><cite>__call__(guard_set, input_port_value)</cite>:
+check if <cite>input_port_value in guard_set</cite>
+This allows symbolic type definitions.</p>
+<p>For example, <cite>input_port_value</cite> might be assigned
+<cite>int</cite> values, but the <cite>guard_set</cite> be defined by
+a symbolic expression as the string: <cite>‘x&lt;=5’</cite>.</p>
+<p>Then the user is responsible for providing
+the appropriate method to the Mealy Machine,
+using the custom <cite>check</cite> class described here.</p>
+<p>Note that we could provide a rudimentary library
+for the basic types of checks, e.g., for
+the above simple symbolic case, where using
+function <cite>eval()</cite> is sufficient.</p>
+</li>
+<li><p><cite>None</cite>:
+signifies that no type is currently defined for
+this input port, so input type checking and guard
+evaluation are disabled.</p>
+<p>This can be used to skip type definitions when
+they are not needed by the user.</p>
+<p>However, since Machines are in general the output
+of synthesis, it follows that they are constructed
+by code, so the benefits of typedefs will be
+considerable compared to the required coding effort.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>Guards annotate transitions:</p>
+<blockquote>
+<div><p>Guards: States x States —&gt; Input_Predicates</p>
+</div></blockquote>
+</section>
+<section id="outputs">
+<h4><span class="section-number">3. </span>Outputs<a class="headerlink" href="#outputs" title="Link to this heading">¶</a></h4>
+<p>Similarly defined to inputs, but:</p>
+<ul class="simple">
+<li><p>for Mealy Machines they annotate transitions</p></li>
+<li><p>for Moore Machines they annotate states</p></li>
+</ul>
+</section>
+<section id="state-variables">
+<h4><span class="section-number">3. </span>State Variables<a class="headerlink" href="#state-variables" title="Link to this heading">¶</a></h4>
+<p>Similarly defined to inputs, they annotate states,
+for both Mealy and Moore machines:</p>
+<p>States —&gt; State_Variables</p>
+</section>
+<section id="update-function">
+<h4><span class="section-number">3. </span>Update Function<a class="headerlink" href="#update-function" title="Link to this heading">¶</a></h4>
+<p>The transition relation:</p>
+<ul>
+<li><p>for Mealy Machines:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">States</span> <span class="pre">x</span> <span class="pre">Input_Valuations</span> <span class="pre">---&gt;</span> <span class="pre">Output_Valuations</span> <span class="pre">x</span> <span class="pre">States</span>
+<span class="pre">`</span></code></p>
+<p>Note that in the range Output_Valuations are ordered before States
+to emphasize that an output_valuation is produced
+during the transition, NOT at the next state.</p>
+<p>The data structure representation of the update function is
+by storage of the Guards function and definition of Guard
+evaluation for each input port via the OrderedDict discussed above.</p>
+</li>
+<li><p>for Moore Machines:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">States</span> <span class="pre">x</span> <span class="pre">Input_Valuations</span> <span class="pre">---&gt;</span> <span class="pre">States</span>
+<span class="pre">States</span> <span class="pre">---&gt;</span> <span class="pre">Output_valuations</span>
+<span class="pre">`</span></code></p>
+</li>
+</ul>
+</section>
+<section id="id6">
+<h4><span class="section-number">3. </span>Note<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<p>A transducer may operate on either finite or infinite words, i.e.,
+it is not equipped with interpretation semantics on the words,
+so it does not “care” about word length.
+It continues as long as its input is fed with letters.</p>
+<p>For Machines, each state label consists of (possibly multiple) sublabels,
+each of which is either a variable, or, only for Moore machines,
+may be an output.</p>
+</section>
+<section id="see-also">
+<h4><span class="section-number">3. </span>See Also<a class="headerlink" href="#see-also" title="Link to this heading">¶</a></h4>
+<p>FSM, MealyMachine, MooreMachine</p>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p>It should be noted that a temporal logic formula / property should be
+notionally distinguished from a synthesis problem:</p>
+<ul class="simple">
+<li><p>You may write a formula to describe how a variable can change over time.
+You may write even an assume-guarantee formula to describe an open-system
+specification (i.e., how a system should behave in a certain environment).</p></li>
+<li><p>A synthesis problem includes a definition of what the controller can do,
+and whether the synthesizer should satisfy all initial conditions we wrote,
+or is allowed to pick some initial conditions (thus synthesize the initial
+conditions too).</p></li>
+</ul>
+<p>You may encounter this distinction if you give to <code class="docutils literal notranslate"><span class="pre">synthesize</span></code> both
+a transition system and temporal logic formulae.
+You may choose to define strategy capabilities (Moore/Mealy) as
+attributes to both, but these choices will have to agree,
+because one controller will be synthesized, not two.</p>
+</section>
+<section id="example-1-discrete-state-robot-motion-planning">
+<span id="ssec-ex1"></span><h3><span class="section-number">3.1.5. </span>Example 1: Discrete State Robot Motion Planning<a class="headerlink" href="#example-1-discrete-state-robot-motion-planning" title="Link to this heading">¶</a></h3>
+<p>This example is provided in examples/discrete.py.
+It illustrates the use of the <code class="docutils literal notranslate"><span class="pre">omega</span></code> module in synthesizing a planner
+for a robot that only needs to make discrete decision.</p>
+<img alt="_images/robot_simple.png" class="align-center" src="_images/robot_simple.png" />
+<p>We consider the robot moving around the regions as shown in the above figure
+while receiving externally triggered park signal.
+The specification of the robot is</p>
+<div class="math">
+<p><img src="_images/math/089327af1be84609824bf37e75ffdcfbccac52d4.png" alt="\varphi = \square \diamond(\neg park)
+\overset{sr}{\rightarrow}
+(\square \diamond(s \in C_5)
+\wedge \square(park \implies \diamond(s \in C_0)))."/></p>
+</div><p>We cannot, however, deal with this specification directly since it is not in
+the form of GR(1).  An equivalent GR(1) specification of the above
+specification can be obtained by introducing an auxiliary discrete system
+variable <img class="math" src="_images/math/e8a8c4840a8cd5b61857c0248f8df12b65ce8070.png" alt="X0reach,"/> initialized to <cite>True</cite>. The transition relation of
+<img class="math" src="_images/math/e8a8c4840a8cd5b61857c0248f8df12b65ce8070.png" alt="X0reach,"/> is given by
+<img class="math" src="_images/math/3aaaac31e574a2d6ef1e8c9cf60e7dd1841053b6.png" alt="\square(X0reach' = (s \in C_0 \vee (X0reach \wedge \neg park)))."/></p>
+<p>To automatically synthesize a planner for this robot, we first import the
+necessary modules:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import the packages that we need</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">tulip</span> <span class="kn">import</span> <span class="n">transys</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">synth</span>
+</pre></div>
+</div>
+<p>We next define the dynamics of the system, modeled as a discrete transition
+system in which the robot can be located anyplace no a 2x3 grid of cells.
+Transitions between adjacent cells are allowed, which we model as a
+transition system in this example (it would also be possible to do this via
+a formula):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create a finite transition system</span>
+<span class="n">sys</span> <span class="o">=</span> <span class="n">transys</span><span class="o">.</span><span class="n">FTS</span><span class="p">()</span>
+
+<span class="c1"># Define the states of the system</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add_from</span><span class="p">([</span><span class="s1">&#39;X0&#39;</span><span class="p">,</span> <span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X2&#39;</span><span class="p">,</span> <span class="s1">&#39;X3&#39;</span><span class="p">,</span> <span class="s1">&#39;X4&#39;</span><span class="p">,</span> <span class="s1">&#39;X5&#39;</span><span class="p">])</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;X0&#39;</span><span class="p">)</span>    <span class="c1"># start in state X0</span>
+
+<span class="c1"># Define the allowable transitions</span>
+<span class="c1">#! TODO (IF): can arguments be a singleton instead of a list?</span>
+<span class="c1">#! TODO (IF): can we use lists instead of sets?</span>
+<span class="c1">#!   * use optional flag to allow list as label</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X0&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X3&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X1&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X0&#39;</span><span class="p">,</span> <span class="s1">&#39;X4&#39;</span><span class="p">,</span> <span class="s1">&#39;X2&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X2&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X5&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X3&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X0&#39;</span><span class="p">,</span> <span class="s1">&#39;X4&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X4&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X3&#39;</span><span class="p">,</span> <span class="s1">&#39;X1&#39;</span><span class="p">,</span> <span class="s1">&#39;X5&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_comb</span><span class="p">({</span><span class="s1">&#39;X5&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;X4&#39;</span><span class="p">,</span> <span class="s1">&#39;X2&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>To create the specification, we label some of the states with names:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add atomic propositions to the states</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">atomic_propositions</span><span class="o">.</span><span class="n">add_from</span><span class="p">({</span><span class="s1">&#39;home&#39;</span><span class="p">,</span> <span class="s1">&#39;lot&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;X0&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;home&#39;</span><span class="p">})</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;X5&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;lot&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>These names serve as atomic propositions that are true when the system is in
+the indicated states.</p>
+<p>The environment can issue a park signal that requires the robot to respond
+by moving to the lower left corner of the grid.  We assume that
+the park signal is turned off infinitely often.  We describe this using the
+following code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">env_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;park&#39;</span><span class="p">}</span>
+<span class="n">env_init</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>                <span class="c1"># empty set</span>
+<span class="n">env_prog</span> <span class="o">=</span> <span class="s1">&#39;!park&#39;</span>
+<span class="n">env_safe</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>                <span class="c1"># empty set</span>
+</pre></div>
+</div>
+<p>Here the specification is broken up into four pieces: a description of the
+discrete environment variables (<code class="docutils literal notranslate"><span class="pre">env_vars</span></code>), a specification for
+the initial condition for the environment (<code class="docutils literal notranslate"><span class="pre">env_init</span></code>), a progress
+formula (<code class="docutils literal notranslate"><span class="pre">env_prog</span></code>) that must be satisfied infinitely often, and
+a safety formula (<code class="docutils literal notranslate"><span class="pre">env_safe</span></code>) that must hold at all times during
+the execution.  The <code class="docutils literal notranslate"><span class="pre">set()</span></code> command is used to initialize one or
+more of these variables to the empty set.</p>
+<p>The system specification is that the robot should repeatedly revisit
+the upper right corner of the grid while at the same time responding
+to the park signal by visiting the lower left corner.  The LTL
+specification is given by</p>
+<div class="math">
+<p><img src="_images/math/d63e25b8b1b01e5341c35cb4791cc4f70f5bb8d0.png" alt="\square\diamond home \wedge \square (park \implies \diamond lot)"/></p>
+</div><p>Since this specification is not in GR(1) form, we introduce the
+variable X0reach that is initialized to True and the specification
+<img class="math" src="_images/math/ce9dfa171896d89a0748b5626092eaeaf2883427.png" alt="\square(park \implies \diamond lot)"/> becomes</p>
+<div class="math">
+<p><img src="_images/math/a189fe23ec0553b334bbd0ef7cf237f7071ac4af.png" alt="\square( (X0reach' = lot) \vee (X0reach \wedge \neg park))"/></p>
+</div><p>The python code to implement this logic is given by:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Augment the system description to make it GR(1)</span>
+<span class="c1">#! TODO: create a function to convert this type of spec automatically</span>
+<span class="n">sys_vars</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X0reach&#39;</span><span class="p">}</span>          <span class="c1"># infer the rest from TS</span>
+<span class="n">sys_init</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;X0reach&#39;</span><span class="p">}</span>
+<span class="n">sys_prog</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;home&#39;</span><span class="p">}</span>             <span class="c1"># []&lt;&gt;home</span>
+<span class="n">sys_safe</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;(X (X0reach) &lt;-&gt; lot) || (X0reach &amp;&amp; !park)&#39;</span><span class="p">}</span>
+<span class="n">sys_prog</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;X0reach&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Note the use of <code class="docutils literal notranslate"><span class="pre">&lt;-&gt;</span></code> for equivalence (equality).  As in the case
+of the environmental specification, the system specification consists of
+four parts that provide additional discrete system variables
+(<code class="docutils literal notranslate"><span class="pre">sys_vars</span></code>), initial conditions (<code class="docutils literal notranslate"><span class="pre">sys_init</span></code>), progress
+conditions (<code class="docutils literal notranslate"><span class="pre">sys_prog</span></code>) and safety conditions
+(<code class="docutils literal notranslate"><span class="pre">sys_safe</span></code>).</p>
+<p>Finally, we construct the full specification for the system and environment
+by creating a GR(1) specification consisting of the various pieces we have
+constructed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the specification</span>
+<span class="n">specs</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">GRSpec</span><span class="p">(</span><span class="n">env_vars</span><span class="p">,</span> <span class="n">sys_vars</span><span class="p">,</span> <span class="n">env_init</span><span class="p">,</span> <span class="n">sys_init</span><span class="p">,</span>
+                    <span class="n">env_safe</span><span class="p">,</span> <span class="n">sys_safe</span><span class="p">,</span> <span class="n">env_prog</span><span class="p">,</span> <span class="n">sys_prog</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To synthesize the controller, we call the <code class="docutils literal notranslate"><span class="pre">synth.synthesize()</span></code>
+function.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Moore machines</span>
+<span class="c1"># controller reads `env_vars, sys_vars`, but not next `env_vars` values</span>
+<span class="n">specs</span><span class="o">.</span><span class="n">moore</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1"># synthesizer should find initial system values that satisfy</span>
+<span class="c1"># `env_init /\ sys_init` and work, for every environment variable</span>
+<span class="c1"># initial values that satisfy `env_init`.</span>
+<span class="n">specs</span><span class="o">.</span><span class="n">qinit</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\E \A&#39;</span>
+<span class="n">ctrl</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">synthesize</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span> <span class="n">sys</span><span class="o">=</span><span class="n">sys</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">ctrl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;unrealizable&#39;</span>
+</pre></div>
+</div>
+<p>The controller can now be saved in graphical form, or printed if
+the dependencies for DOT layout are not available:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">ctrl</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;discrete.png&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="example-2-continuous-state-robot-motion-planning">
+<span id="ssec-ex2"></span><h3><span class="section-number">3.1.6. </span>Example 2: Continuous State Robot Motion Planning<a class="headerlink" href="#example-2-continuous-state-robot-motion-planning" title="Link to this heading">¶</a></h3>
+<p>This example is provided in examples/continuous.py.
+It is an extension of the previous example by including continuous dynamics.</p>
+<p>First, we import the necessary modules,
+specify the smv file, spc file and aut file,
+and specify the environment and the discrete system variables
+as in the previous example.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tulip</span> <span class="kn">import</span> <span class="n">spec</span><span class="p">,</span> <span class="n">synth</span><span class="p">,</span> <span class="n">hybrid</span>
+<span class="kn">from</span> <span class="nn">polytope</span> <span class="kn">import</span> <span class="n">box2poly</span>
+<span class="kn">from</span> <span class="nn">tulip.abstract</span> <span class="kn">import</span> <span class="n">prop2part</span><span class="p">,</span> <span class="n">discretize</span>
+<span class="kn">from</span> <span class="nn">tulip.abstract.plot</span> <span class="kn">import</span> <span class="n">plot_partition</span>
+</pre></div>
+</div>
+<p>Next, we specify the continuous dynamics.  This includes specifying the
+continuous state space, propositions on continuous variables, and the
+dynamics.  The robot dynamics in this case is <img class="math" src="_images/math/a8b881ed2e8833fa34bac3f44b4194e5d3cdc9bb.png" alt="\dot{x} = u_x + 5d_x,
+\dot{y} = u_y + 5d_y,"/> discretized with a sampling time of 0.2.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Problem parameters</span>
+<span class="n">input_bound</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">uncertainty</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+<span class="c1"># Continuous state space</span>
+<span class="n">cont_state_space</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]])</span>
+
+<span class="c1"># Continuous dynamics</span>
+<span class="c1"># (continuous-state, discrete-time)</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]])</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]])</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+<span class="c1"># Available control, possible disturbances</span>
+<span class="n">U</span> <span class="o">=</span> <span class="n">input_bound</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">uncertainty</span> <span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+
+<span class="c1"># Convert to polyhedral representation</span>
+<span class="n">U</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+
+<span class="c1"># Construct the LTI system describing the dynamics</span>
+<span class="n">sys_dyn</span> <span class="o">=</span> <span class="n">hybrid</span><span class="o">.</span><span class="n">LtiSysDyn</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">cont_state_space</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we can construct the proposition preserving partition of the continuous
+state space and discretize the continuous state space based on the dynamics.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define atomic propositions for relevant regions of state space</span>
+<span class="n">cont_props</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+<span class="n">cont_props</span><span class="p">[</span><span class="s1">&#39;home&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+<span class="n">cont_props</span><span class="p">[</span><span class="s1">&#39;lot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]])</span>
+
+<span class="c1"># Compute the proposition preserving partition of the continuous state space</span>
+<span class="n">cont_partition</span> <span class="o">=</span> <span class="n">prop2part</span><span class="p">(</span><span class="n">cont_state_space</span><span class="p">,</span> <span class="n">cont_props</span><span class="p">)</span>
+<span class="n">plot_partition</span><span class="p">(</span><span class="n">cont_partition</span><span class="p">)</span> <span class="k">if</span> <span class="n">show</span> <span class="k">else</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Given dynamics &amp; proposition-preserving partition, find feasible transitions</span>
+<span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">discretize</span><span class="p">(</span>
+    <span class="n">cont_partition</span><span class="p">,</span> <span class="n">sys_dyn</span><span class="p">,</span> <span class="n">closed_loop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">N</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">min_cell_volume</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">plotit</span><span class="o">=</span><span class="n">show</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The rest is the same as in the previous example.  We specify the
+environment, create a GR(1) system specification, and synthesize a
+controller.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Synthesize</span>
+<span class="n">ctrl</span> <span class="o">=</span> <span class="n">synth</span><span class="o">.</span><span class="n">synthesize</span><span class="p">(</span><span class="n">specs</span><span class="p">,</span>
+                        <span class="n">sys</span><span class="o">=</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">ts</span><span class="p">,</span> <span class="n">ignore_sys_init</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">ctrl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;unrealizable&#39;</span>
+
+
+<span class="c1"># Generate a graphical representation of the controller for viewing</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">ctrl</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;continuous.png&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="working-with-systems-with-piecewise-affine-dynamics">
+<h2><span class="section-number">3.2. </span>Working with Systems with Piecewise Affine Dynamics<a class="headerlink" href="#working-with-systems-with-piecewise-affine-dynamics" title="Link to this heading">¶</a></h2>
+<p>TuLiP can also handle piecewise affine dynamics of the form:</p>
+<p>for <img class="math" src="_images/math/7f6e2975df88ee6b9086b73d1ac6f67733bf2fbd.png" alt="t \in \{0,1,2,...\}"/></p>
+<div class="math" id="equation-pwadynamics">
+<p><span class="eqno">(3)<a class="headerlink" href="#equation-pwadynamics" title="Link to this equation">¶</a></span><img src="_images/math/0906f52865e5cac42f03e8ca0a32e43bc270072f.png" alt="s[t+1]  &amp;=   A_is[t] + B_iu[t] + E_id[t] + K_i\\
+u[t]    &amp;\in U_i\\
+d[t]    &amp;\in D_i\\
+s[t]    &amp;\in S_i"/></p>
+</div><p>where <img class="math" src="_images/math/8defe57c71e4dbf74d405b405b10705a0addda92.png" alt="S_i \subseteq \mathbb{R}^n"/> for <img class="math" src="_images/math/922cff8cb6775663a28b8455e0b4489e92456326.png" alt="i \in \{0,1,2,
+\ldots,n_s\}"/> form a polytopic partition of the state space <img class="math" src="_images/math/b988975be41fd13b4d091c10202ba19374643586.png" alt="S"/>, in
+<a class="reference internal" href="#equation-dynamics">(1)</a>, <img class="math" src="_images/math/3b6fe0dfb74e203e7f9bb808d5e1254eee4d616e.png" alt="U_i \subseteq \mathbb{R}^m"/> is the set of admissible
+control inputs, <img class="math" src="_images/math/d0e34f84db6cdd228fe76e603bc2228a449a7a7f.png" alt="D_i \subseteq \mathbb{R}^p"/> is the set of exogenous
+disturbances within <img class="math" src="_images/math/f18bf639d8e5490eec40c8a4a6a7a1389c3dd6a5.png" alt="S_i"/>, and <img class="math" src="_images/math/6497c5dbd39a949770fd4e941fec85dfecd54186.png" alt="s[t], u[t], d[t]"/> are the
+continuous state, the control signal and the exogenous disturbance,
+respectively, at time <img class="math" src="_images/math/907a4add6d5db5b7f197f7924f1371b8ac404fe6.png" alt="t"/>.</p>
+<p>LtiSysDyn class is used to represent subsystems of the form
+<a class="reference internal" href="#equation-pwadynamics">(3)</a>.</p>
+<blockquote>
+<div><dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hybrid.</span></span><span class="sig-name descname"><span class="pre">LtiSysDyn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">A</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">K</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Uset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_semantics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'discrete'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sampled'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybrid.html#LtiSysDyn"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Represents discrete-time continuous-state dynamics.</p>
+<p>Specifically, dynamics of the form:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">s[t</span> <span class="pre">+</span> <span class="pre">1]</span> <span class="pre">=</span> <span class="pre">A</span> <span class="pre">*</span> <span class="pre">s[t]</span> <span class="pre">+</span> <span class="pre">B</span> <span class="pre">*</span> <span class="pre">u[t]</span> <span class="pre">+</span> <span class="pre">E</span> <span class="pre">*</span> <span class="pre">d[t]</span> <span class="pre">+</span> <span class="pre">K</span>
+<span class="pre">`</span></code></p>
+<p>subject to the constraints:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">u[t]</span> <span class="pre">\in</span> <span class="pre">Uset</span>
+<span class="pre">d[t]</span> <span class="pre">\in</span> <span class="pre">Wset</span>
+<span class="pre">s[t]</span> <span class="pre">\in</span> <span class="pre">domain</span>
+<span class="pre">`</span></code></p>
+<p>where:
+- <cite>u[t]</cite> the control input
+- <cite>d[t]</cite> the disturbance input
+- <cite>s[t]</cite> the system state</p>
+<p>Attributes:</p>
+<ul>
+<li><p><cite>A</cite>, <cite>B</cite>, <cite>E</cite>, <cite>K</cite>, (matrices)</p></li>
+<li><p><cite>Uset</cite>, <cite>Wset</cite>, (each a <cite>polytope.Polytope</cite>)</p></li>
+<li><p><cite>domain</cite> (<cite>polytope.Polytope</cite> or <cite>polytope.Region</cite>)</p></li>
+<li><p><cite>time_semantics</cite>:
+- <cite>‘discrete’</cite>: if the system is</p>
+<blockquote>
+<div><p>originally a discrete-time system, or</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>‘sampled’</cite>: if the system is sampled from
+a continuous-time system)</p></li>
+</ul>
+</li>
+<li><p>timestep: A positive real number containing the
+timestep (for sampled system)</p></li>
+</ul>
+<p>as defined above.</p>
+<section id="id7">
+<h3><span class="section-number">3. </span>Note<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>For state-dependent bounds on the input,</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">[u[t];</span> <span class="pre">s[t]]</span> <span class="pre">\in</span> <span class="pre">Uset</span>
+<span class="pre">`</span></code></p>
+<p>can be used.</p>
+</section>
+<section id="id8">
+<h3><span class="section-number">3. </span>Relevant<a class="headerlink" href="#id8" title="Link to this heading">¶</a></h3>
+<p><cite>PwaSysDyn</cite>,
+<cite>SwitchedSysDyn</cite>,
+<cite>polytope.Polytope</cite></p>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<p>The subsystems can be put together to define a piecewise affine system which
+is represented by PwaSysDyn class.</p>
+<blockquote>
+<div><dl class="py class">
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">hybrid.</span></span><span class="sig-name descname"><span class="pre">PwaSysDyn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_subsys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">LtiSysDyn</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">domain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Polytope</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Region</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_semantics</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'discrete'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'sampled'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/hybrid.html#PwaSysDyn"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Specifies a polytopic piecewise-affine system.</p>
+<p>Attributes:</p>
+<ul>
+<li><p><cite>list_subsys</cite>: list of <cite>LtiSysDyn</cite></p></li>
+<li><p><cite>domain</cite>: domain over which piecewise-affine
+system is defined.</p></li>
+<li><p><cite>time_semantics</cite>: either
+- <cite>‘discrete’</cite> (if system is originally</p>
+<blockquote>
+<div><p>a discrete-time system) or</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><cite>‘sampled’</cite> (if system is sampled from
+a continuous-time system)</p></li>
+</ul>
+</li>
+<li><p><cite>timestep</cite>: A positive real number that contains
+the timestep (for sampled systems)</p></li>
+</ul>
+<p>For the system to be well-defined the domains of
+its subsystems should be mutually exclusive
+(modulo intersections with empty interior) and
+cover the domain.</p>
+<section id="id9">
+<h3><span class="section-number">3. </span>Relevant<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p><cite>LtiSysDyn</cite>,
+<cite>SwitchedSysDyn</cite>,
+<cite>polytope.Polytope</cite></p>
+</section>
+</dd></dl>
+
+</div></blockquote>
+<section id="example-3-robot-motion-planning-with-piecewise-affine-dynamics">
+<h3><span class="section-number">3.2.1. </span>Example 3: Robot Motion Planning with Piecewise Affine Dynamics<a class="headerlink" href="#example-3-robot-motion-planning-with-piecewise-affine-dynamics" title="Link to this heading">¶</a></h3>
+<p>This example is provided in examples/pwa.py.
+It is an extension of the previous examples including a robot model
+with piecewise affine dynamics.</p>
+<p>Assume our robot is traveling on a nonhomogenous surface (x-y plane),
+resulting in different dynamics at different parts of the plane.
+Since the continuous state space in this example is just x-y position, different
+dynamics in different parts of the surface can be modeled as a piecewise
+affine system. When <img class="math" src="_images/math/49f5be4aa76f3866e96d61d300723e4d90d9ec84.png" alt="s[t] \in[0, 3]\times[0.5, 2]"/>, the following dynamics
+are active:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">subsys0</span><span class="p">():</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.105_2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.105_2</span><span class="p">]])</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.105_2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.105_2</span><span class="p">]])</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">U</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+    <span class="n">U</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">input_bound</span><span class="p">)</span>
+
+    <span class="n">W</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+    <span class="n">W</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">uncertainty</span><span class="p">)</span>
+
+    <span class="n">dom</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">]])</span>
+
+    <span class="n">sys_dyn</span> <span class="o">=</span> <span class="n">LtiSysDyn</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">dom</span><span class="p">)</span>
+    <span class="c1">#sys_dyn.plot()</span>
+
+    <span class="k">return</span> <span class="n">sys_dyn</span>
+</pre></div>
+</div>
+<p>When <img class="math" src="_images/math/1b595915f2a16ceba197cf808fa37ab7780f4d83.png" alt="s[t] \in[0, 3]\times[0, 0.5]"/>, the following dynamics
+are active:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">subsys1</span><span class="p">():</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.994_8</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.105_2</span><span class="p">]])</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.105_2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.105_2</span><span class="p">]])</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">U</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+    <span class="n">U</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">input_bound</span><span class="p">)</span>
+
+    <span class="n">W</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]])</span>
+    <span class="n">W</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">uncertainty</span><span class="p">)</span>
+
+    <span class="n">dom</span> <span class="o">=</span> <span class="n">box2poly</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span>
+
+    <span class="n">sys_dyn</span> <span class="o">=</span> <span class="n">LtiSysDyn</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">dom</span><span class="p">)</span>
+    <span class="c1">#sys_dyn.plot()</span>
+
+    <span class="k">return</span> <span class="n">sys_dyn</span>
+</pre></div>
+</div>
+<p>Piecewise affine system can be formed from the dynamics of its subsystems.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">subsystems</span> <span class="o">=</span> <span class="p">[</span><span class="n">subsys0</span><span class="p">(),</span> <span class="n">subsys1</span><span class="p">()]</span>
+
+<span class="c1"># Build piecewise affine system from its subsystems</span>
+<span class="n">sys_dyn</span> <span class="o">=</span> <span class="n">PwaSysDyn</span><span class="p">(</span><span class="n">subsystems</span><span class="p">,</span> <span class="n">cont_state_space</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">plotting</span><span class="p">:</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">sys_dyn</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;pwa_sys_dyn.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Discretization and synthesis follow exactly as before.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">3. Tutorial and Examples</a><ul>
+<li><a class="reference internal" href="#synthesis-of-reactive-controllers">3.1. Synthesis of Reactive Controllers</a><ul>
+<li><a class="reference internal" href="#problem-formulation">3.1.1. Problem Formulation</a></li>
+<li><a class="reference internal" href="#proposition-preserving-partition-of-continuous-state-space">3.1.2. Proposition Preserving Partition of Continuous State Space</a></li>
+<li><a class="reference internal" href="#continuous-state-space-discretization">3.1.3. Continuous State Space Discretization</a></li>
+<li><a class="reference internal" href="#digital-design-synthesis">3.1.4. Digital design synthesis</a><ul>
+<li><a class="reference internal" href="#spec.GRSpec"><code class="docutils literal notranslate"><span class="pre">GRSpec()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#example-1-discrete-state-robot-motion-planning">3.1.5. Example 1: Discrete State Robot Motion Planning</a></li>
+<li><a class="reference internal" href="#example-2-continuous-state-robot-motion-planning">3.1.6. Example 2: Continuous State Robot Motion Planning</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#working-with-systems-with-piecewise-affine-dynamics">3.2. Working with Systems with Piecewise Affine Dynamics</a><ul>
+<li><a class="reference internal" href="#example-3-robot-motion-planning-with-piecewise-affine-dynamics">3.2.1. Example 3: Robot Motion Planning with Piecewise Affine Dynamics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="install.html"
+                          title="previous chapter"><span class="section-number">2. </span>Installation</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="specifications.html"
+                          title="next chapter"><span class="section-number">4. </span>Specifications</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="specifications.html" title="4. Specifications"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="2. Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">3. </span>Tutorial and Examples</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

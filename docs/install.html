@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2. Installation &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Tutorial and Examples" href="tutorial.html" />
+    <link rel="prev" title="1. Introduction" href="intro.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial and Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">2. </span>Installation</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="installation">
+<h1><span class="section-number">2. </span>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>TuLiP works with Python 3. The Python versions supported are defined as
+the argument of parameter <cite>python_requires</cite>, within <cite>setup.py</cite>.
+To install with <a class="reference external" href="https://pip.pypa.io/en/stable/">pip</a>
+from <a class="reference external" href="https://pypi.python.org/pypi/tulip">PyPI</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install tulip
+</pre></div>
+</div>
+<p>or from source:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install .
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span></code> installs Python dependencies <a class="reference external" href="https://pip.pypa.io/en/stable/reference/pip_install/#installation-order">automatically</a>.
+They are listed in <code class="docutils literal notranslate"><span class="pre">install_requires</span></code> within <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>.
+The only Python packages that you may want to install yourself,
+in order to link them properly are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://numpy.org/">NumPy</a></p></li>
+<li><p><a class="reference external" href="http://www.scipy.org/">SciPy</a></p></li>
+</ul>
+<p>The following are optional dependencies,
+listed with a summary of dependent features:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="http://matplotlib.org/">Matplotlib</a> –
+many visualization features</p></li>
+<li><p><a class="reference external" href="http://www.graphviz.org/">Graphviz</a> –
+to plot graphs, for example discrete state machines</p></li>
+<li><p><a class="reference external" href="http://cvxopt.org/">CVXOPT</a> –
+construction and manipulation of discrete abstractions</p></li>
+<li><p><a class="reference external" href="http://www.gnu.org/s/glpk/">GLPK</a> –
+fast linear programming solver</p></li>
+</ul>
+<img alt="_images/tulip_dependencies.svg" class="align-center" src="_images/tulip_dependencies.svg" /><p>For computing discrete abstractions from hybrid system descriptions,
+it is highly recommended that you install both CVXOPT and GLPK.
+Note that you need to install GLPK <em>before</em> installing CVXOPT,
+and follow the <a class="reference external" href="http://cvxopt.org/install/index.html">CVXOPT installation instructions</a>
+to link CVXOPT to GLPK.
+(If you use
+<a class="reference external" href="http://www.macports.org/">MacPorts</a>,
+please note that MacPorts does not do this linking automatically.)</p>
+<p>The latest release of TuLiP can be downloaded also from
+<a class="reference external" href="https://sourceforge.net/projects/tulip-control/files/">SourceForge</a>.</p>
+<section id="alternative-discrete-synthesis-tools">
+<span id="synt-tools-sec-label"></span><h2><span class="section-number">2.1. </span>Alternative discrete synthesis tools<a class="headerlink" href="#alternative-discrete-synthesis-tools" title="Link to this heading">¶</a></h2>
+<p>The default synthesis tool for GR(1) and Rabin(1) specifications is
+<a class="reference external" href="https://github.com/tulip-control/omega">omega</a>
+(installed by <code class="docutils literal notranslate"><span class="pre">pip</span></code>).</p>
+<p>TuLiP can use other tools for formal synthesis.
+Those for which an interface is available are listed below.
+Also consult <a class="reference internal" href="specifications.html"><span class="doc">Specifications</span></a> concerning relevant syntax and
+summaries of the specification languages.
+Generally, direct interfaces are defined as modules in
+the subpackage <code class="docutils literal notranslate"><span class="pre">tulip.interfaces</span></code>.
+However, these tools can be accessed indirectly,
+by appropriately setting parameters for various functions in TuLiP,
+such as <code class="docutils literal notranslate"><span class="pre">tulip.synth.synthesize()</span></code>.</p>
+<p>These are <em>optional dependencies</em>. TuLiP is useful without having them
+installed, but certain functionality is only available when they are.</p>
+<section id="gr-1">
+<h3><span class="section-number">2.1.1. </span>GR(1)<a class="headerlink" href="#gr-1" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="http://scottman.net/2012/gr1c">gr1c</a>.
+Please install at least version 0.9.0.
+The introduction of
+<a class="reference external" href="https://tulip-control.github.io/gr1c/">the manual of gr1c</a>
+is a good place to begin.</p></li>
+<li><p><a class="reference external" href="https://github.com/slivingston/gr1py">gr1py</a></p></li>
+<li><p><a class="reference external" href="https://github.com/LTLMoP/slugs">slugs</a></p></li>
+</ul>
+</section>
+<section id="ltl">
+<h3><span class="section-number">2.1.2. </span>LTL<a class="headerlink" href="#ltl" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference external" href="http://www.iaik.tugraz.at/content/research/design_verification/lily/">Lily</a>,
+which is based on <a class="reference external" href="http://vlsi.colorado.edu/~rbloem/wring.html">Wring</a>.</p></li>
+</ul>
+</section>
+</section>
+<section id="testing-your-installation">
+<h2><span class="section-number">2.2. </span>Testing your installation<a class="headerlink" href="#testing-your-installation" title="Link to this heading">¶</a></h2>
+<p>TuLiP is distributed with tests for itself that, like those for NumPy, provide a
+way to check that TuLiP is behaving as expected.  To perform basic tests that
+should pass on any TuLiP installation, from the command-line try</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ ./run_tests.py
+</pre></div>
+</div>
+<p>There is an extensive test suite that includes tests involving optional
+dependencies. To perform it, <code class="docutils literal notranslate"><span class="pre">./run_tests.py</span> <span class="pre">full</span></code>. It is important to note
+that some tests may fail because an <strong>optional</strong> dependency is missing, not
+because the TuLiP installation itself is flawed. Use the flag “-h” to get a
+description of driver script options.  More details about testing TuLiP oriented
+for developers are provided in the <a class="reference internal" href="dev_guide.html"><span class="doc">Developer’s Guide</span></a>.</p>
+</section>
+<section id="new-to-python">
+<span id="newbie-scipy-sec-label"></span><h2><span class="section-number">2.3. </span>New to Python?<a class="headerlink" href="#new-to-python" title="Link to this heading">¶</a></h2>
+<p>Newcomers to scientific computing with Python should read
+<a class="reference internal" href="#newbie-scipy-sec-label"><span class="std std-ref">New to Python?</span></a>.</p>
+<p>If you don’t already use Python for scientific computing, consider using
+<a class="reference external" href="http://enthought.com">Enthought Python Distribution (EPD)</a> or <a class="reference external" href="https://www.enthought.com/products/canopy/">Enthought
+Canopy</a>. This may make the
+installation process easier.  The EPD Free and Canopy Express distributions come
+with Python and includes NumPy, SciPy, matplotlib. EPD Free or Canopy Express
+together with networkx, cvxopt, and PLY is sufficient to run TuLiP.</p>
+<p>Alternatives to Enthought are listed on the <a class="reference external" href="http://www.scipy.org/install.html">SciPy installation webpage</a>.  In particular, also try <a class="reference external" href="http://docs.continuum.io/anaconda/">Anaconda</a>.</p>
+<p>EPD seems to work fine on most platforms but if you cannot get it to work, more
+alternative packages for Mac OS X and Microsoft Windows are mentioned below.</p>
+</section>
+<section id="troubleshooting">
+<span id="troubleshoot-sec-label"></span><h2><span class="section-number">2.4. </span>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">¶</a></h2>
+<p>Regarding installation of numerical computing packages (NumPy, etc.),
+for the love of all that is good, please run tests to verify proper
+behavior!  …unless you use a very well established install method.
+Nonetheless, unit testing is always good practice.</p>
+<p>If you think the necessary packages are installed, but are unsure how
+to debug Python, then consider the following tips.  To see the python
+path, execute:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python -c &#39;import sys; print(&quot;\n&quot;.join(sys.path))&#39;
+</pre></div>
+</div>
+<p>Each path searched is listed on a new line. You can augment this list
+by appending locations (separated by “:”) to the environment variable
+<strong>PYTHONPATH</strong>.  To see what it’s currently set to, and add a new path
+to “/home/frodo/work”, use:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ echo $PYTHONPATH
+$ export PYTHONPATH=$PYTHONPATH:/home/frodo/work
+</pre></div>
+</div>
+<p>You may need to tweak the export statement depending on your terminal
+shell.  All of my examples are tested with zsh (the Z shell).</p>
+<section id="mac-os-x">
+<h3><span class="section-number">2.4.1. </span>Mac OS X<a class="headerlink" href="#mac-os-x" title="Link to this heading">¶</a></h3>
+<p>For installing SciPy, NumPy, consider trying
+<a class="reference external" href="http://fonnesbeck.github.com/ScipySuperpack/">Scipy Superpack for Mac OSX</a> by Chris Fonnesbeck.</p>
+<p>When installing CVXOPT using MacPorts, there are some compatibility issues
+that cause CVXOPT to fail to install.  The following customizations will link
+numpy against Apple’s implementation of LAPACK and BLAS and bypass this
+issue:</p>
+<ul>
+<li><p>Uninstall atlas (if installed):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo port uninstall atlas; sudo port clean atlas
+</pre></div>
+</div>
+</li>
+<li><p>Uninstall numpy (if installed):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo port uninstall numpy; sudo port clean numpy
+</pre></div>
+</div>
+</li>
+<li><p>Install numpy without atlas:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo port install py27-numpy -atlas
+</pre></div>
+</div>
+</li>
+<li><p>Install cvxopt without atlas or dsdp:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ sudo port install py27-cvxopt -atlas -dsdp
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Note that if you have packages that rely on numpy (such as scipy), you will
+have to uninstall and reinstall those packages as well.</p>
+</section>
+<section id="microsoft-windows">
+<h3><span class="section-number">2.4.2. </span>Microsoft Windows<a class="headerlink" href="#microsoft-windows" title="Link to this heading">¶</a></h3>
+<p>For Windows users, type the above commands without “$” in the terminal. For
+example, check the version of your Python by typing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">V</span>
+</pre></div>
+</div>
+<p>To check whether the packages has been installed, open a new terminal and try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">scipy</span>
+<span class="kn">import</span> <span class="nn">cvxopt</span>
+</pre></div>
+</div>
+<p>If an error message occurs, the package might not be visible on the current path
+or may not be installed at all. When you cannot find a suitable package of
+NumPy, SciPy, CVXOPT, and Matplotlib for your system, consider trying
+<a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/">Unofficial Windows Binaries for Python Extension Packages</a> by Christoph Gohlke.</p>
+<p>The package of gr1c for Windows still cannot be found. But without this package,
+you can also run most TuLiP functions.</p>
+</section>
+<section id="installing-other-python-dependencies">
+<h3><span class="section-number">2.4.3. </span>Installing other Python dependencies<a class="headerlink" href="#installing-other-python-dependencies" title="Link to this heading">¶</a></h3>
+<p>The command <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">...</span></code> will usually suffice. To
+get <a class="reference external" href="http://www.dabeaz.com/ply/">PLY</a>, try:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install ply
+</pre></div>
+</div>
+</section>
+<section id="virtualenv-and-pydoc">
+<span id="venv-pydoc-sec-label"></span><h3><span class="section-number">2.4.4. </span>virtualenv and pydoc<a class="headerlink" href="#virtualenv-and-pydoc" title="Link to this heading">¶</a></h3>
+<p>If you have installed TuLiP into a <a class="reference external" href="http://www.virtualenv.org/">virtualenv</a>-built environment, then the documentation may not
+be visible through <a class="reference external" href="http://docs.python.org/library/pydoc.html">pydoc</a> .  We
+describe two solutions here, the first being more general.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ alias pydoc=&#39;python -m pydoc&#39;
+</pre></div>
+</div>
+<p>If that fails, try to explicitly augment the path used by pydoc with an alias.
+E.g., suppose your username is “frodo”, you are running Python v2.6, and your
+virtual environment is called “PY_scratch” under your home directory.  Then the
+appropriate alias is similar to:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ alias pydoc=&#39;PYTHONPATH=$PYTHONPATH:/home/frodo/PY_scratch/lib/python2.6/site-packages/ pydoc&#39;
+</pre></div>
+</div>
+<p>To set this alias for every new terminal session, add the line to your shell
+startup script; e.g., <code class="docutils literal notranslate"><span class="pre">~/.bashrc</span></code> for bash, or <code class="docutils literal notranslate"><span class="pre">~/.zshrc</span></code> for zsh <a class="footnote-reference brackets" href="#f1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>.
+To test it, try looking at the transys subpackage by entering:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pydoc tulip.transys
+</pre></div>
+</div>
+<p class="rubric">Footnotes</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>On Unix systems, in particular GNU/Linux and Mac OS X, the
+terminal shell treats <code class="docutils literal notranslate"><span class="pre">~</span></code> as a special symbol representing
+the home directory of the current user.</p>
+</aside>
+</aside>
+</section>
+<section id="remote-server-installation">
+<h3><span class="section-number">2.4.5. </span>remote server installation<a class="headerlink" href="#remote-server-installation" title="Link to this heading">¶</a></h3>
+<p>Instructions for installing <code class="docutils literal notranslate"><span class="pre">tulip</span></code> and its dependencies from scratch on a
+Unix server can be found <a class="reference external" href="https://github.com/tulip-control/tulip-control/blob/master/contrib/nessainstall/instructions.md">here</a>.</p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">2. Installation</a><ul>
+<li><a class="reference internal" href="#alternative-discrete-synthesis-tools">2.1. Alternative discrete synthesis tools</a><ul>
+<li><a class="reference internal" href="#gr-1">2.1.1. GR(1)</a></li>
+<li><a class="reference internal" href="#ltl">2.1.2. LTL</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#testing-your-installation">2.2. Testing your installation</a></li>
+<li><a class="reference internal" href="#new-to-python">2.3. New to Python?</a></li>
+<li><a class="reference internal" href="#troubleshooting">2.4. Troubleshooting</a><ul>
+<li><a class="reference internal" href="#mac-os-x">2.4.1. Mac OS X</a></li>
+<li><a class="reference internal" href="#microsoft-windows">2.4.2. Microsoft Windows</a></li>
+<li><a class="reference internal" href="#installing-other-python-dependencies">2.4.3. Installing other Python dependencies</a></li>
+<li><a class="reference internal" href="#virtualenv-and-pydoc">2.4.4. virtualenv and pydoc</a></li>
+<li><a class="reference internal" href="#remote-server-installation">2.4.5. remote server installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="intro.html"
+                          title="previous chapter"><span class="section-number">1. </span>Introduction</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="tutorial.html"
+                          title="next chapter"><span class="section-number">3. </span>Tutorial and Examples</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="3. Tutorial and Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">2. </span>Installation</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

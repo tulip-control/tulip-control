@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>6. Code generation and exporting of controllers &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. Gridworlds" href="gridworlds.html" />
+    <link rel="prev" title="5. Enumerated property representations" href="transys.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="gridworlds.html" title="7. Gridworlds"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="transys.html" title="5. Enumerated property representations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">6. </span>Code generation and exporting of controllers</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="code-generation-and-exporting-of-controllers">
+<h1><span class="section-number">6. </span>Code generation and exporting of controllers<a class="headerlink" href="#code-generation-and-exporting-of-controllers" title="Link to this heading">¶</a></h1>
+<p>Besides the various routines for analysis and execution of controllers
+constructed with TuLiP, it is also possible to automatically generate
+implementations in formats appropriate for use in other contexts.  We refer to
+this process as <em>exporting</em>.  Here we provide descriptions and examples of the
+various exporting routines available.</p>
+<section id="python-case">
+<h2><span class="section-number">6.1. </span><code class="docutils literal notranslate"><span class="pre">python_case</span></code><a class="headerlink" href="#python-case" title="Link to this heading">¶</a></h2>
+<p>Given a Mealy machine (Sec. 3.3 in <a class="reference external" href="bibliography.html#ls11">[LS11]</a>) as would be obtained, for example, from an invocation of
+<code class="docutils literal notranslate"><span class="pre">tulip.synth.synthesize</span></code>, the function <code class="docutils literal notranslate"><span class="pre">python_case</span></code> in <code class="docutils literal notranslate"><span class="pre">tulip.dumpsmach</span></code>
+generates an implementation as a standalone Python class.  The class implements
+the machine by</p>
+<ul class="simple">
+<li><p>tracking the current state of the machine and</p></li>
+<li><p>providing a <code class="docutils literal notranslate"><span class="pre">move</span></code> method that accepts the input of the machine and returns
+the appropriate output as a dictionary in which the output variable names are
+keys.</p></li>
+</ul>
+<p>Calls to <code class="docutils literal notranslate"><span class="pre">move</span></code> cause the internal state to transition.  The machine can be
+reset to its initial state by manually calling the <code class="docutils literal notranslate"><span class="pre">__init__</span></code> method or
+effectively by creating a new instance. Note that the internal state is entirely
+represented by the attribute <code class="docutils literal notranslate"><span class="pre">state</span></code>. Thus it is possible to save a copy of
+the current state of the machine and return to it later. E.g., the output that
+would be obtained if some inputs were applied can be discovered by the following
+idiom.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="n">saved_state</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">state</span><span class="p">)</span>
+<span class="n">sample_outputs</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="o">**</span><span class="n">sample_inputs</span><span class="p">)</span>
+<span class="n">M</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">saved_state</span>
+</pre></div>
+</div>
+<p>The generated code does not depend on <code class="docutils literal notranslate"><span class="pre">tulip</span></code>; that is, it can run without
+TuLiP being installed.  As such, we refer to it as being “standalone”.</p>
+<section id="example">
+<h3><span class="section-number">6.1.1. </span>Example<a class="headerlink" href="#example" title="Link to this heading">¶</a></h3>
+<p>Consider the script <code class="docutils literal notranslate"><span class="pre">examples/robot_planning/gr1.py</span></code> as distributed with
+TuLiP.  At the end of the script, there is an object named <code class="docutils literal notranslate"><span class="pre">ctrl</span></code> that is an
+instance of <code class="docutils literal notranslate"><span class="pre">MealyMachine</span></code>.  It represents the controller that was constructed
+automatically (or “synthesized”) according to the specification.  Append the
+following code to the end of the script <code class="docutils literal notranslate"><span class="pre">gr1.py</span></code>.  (Alternatively, if IPython
+is installed, then first run <code class="docutils literal notranslate"><span class="pre">ipython</span> <span class="pre">-i</span> <span class="pre">gr1.py</span></code>, and then enter the
+following.)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip</span> <span class="kn">import</span> <span class="n">dumpsmach</span>
+<span class="n">dumpsmach</span><span class="o">.</span><span class="n">write_python_case</span><span class="p">(</span><span class="s2">&quot;gr1controller.py&quot;</span><span class="p">,</span> <span class="n">ctrl</span><span class="p">,</span> <span class="n">classname</span><span class="o">=</span><span class="s2">&quot;ExampleCtrl&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first line merely loads the <code class="docutils literal notranslate"><span class="pre">dumpsmach</span></code> module.  The second line calls a
+function that, in turn, calls <code class="docutils literal notranslate"><span class="pre">python_case</span></code> and saves the result to a file
+named “gr1controller.py”.  That file contains a class named “ExampleCtrl” that
+implements <code class="docutils literal notranslate"><span class="pre">ctrl</span></code>, as demonstrated by the following script.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">gr1controller</span> <span class="kn">import</span> <span class="n">ExampleCtrl</span>
+
+<span class="n">M</span> <span class="o">=</span> <span class="n">ExampleCtrl</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;In order, the input variables: &#39;</span><span class="o">+</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">input_vars</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+    <span class="n">input_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;park&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="o">**</span><span class="n">input_values</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Alternatively, the above code can be modified by calling <code class="docutils literal notranslate"><span class="pre">M.move</span></code> with the
+input variable names as keyword parameters:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">park</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">6. Code generation and exporting of controllers</a><ul>
+<li><a class="reference internal" href="#python-case">6.1. <code class="docutils literal notranslate"><span class="pre">python_case</span></code></a><ul>
+<li><a class="reference internal" href="#example">6.1.1. Example</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="transys.html"
+                          title="previous chapter"><span class="section-number">5. </span>Enumerated property representations</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="gridworlds.html"
+                          title="next chapter"><span class="section-number">7. </span>Gridworlds</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/codegen.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="gridworlds.html" title="7. Gridworlds"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="transys.html" title="5. Enumerated property representations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">6. </span>Code generation and exporting of controllers</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

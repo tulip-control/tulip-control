@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>5. Enumerated property representations &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="6. Code generation and exporting of controllers" href="codegen.html" />
+    <link rel="prev" title="4. Specifications" href="specifications.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="codegen.html" title="6. Code generation and exporting of controllers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="specifications.html" title="4. Specifications"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">5. </span>Enumerated property representations</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="enumerated-property-representations">
+<h1><span class="section-number">5. </span>Enumerated property representations<a class="headerlink" href="#enumerated-property-representations" title="Link to this heading">¶</a></h1>
+<p>The subpackage <code class="docutils literal notranslate"><span class="pre">tulip.transys</span></code> (abbreviated to <code class="docutils literal notranslate"><span class="pre">transys</span></code> below)
+contains classes for representing discrete relations with
+data structures that are enumerated in the computer’s memory.
+This contrasts with symbolic data structures, discussed in the literature.</p>
+<p>The core class is <code class="docutils literal notranslate"><span class="pre">transys.labeled_graphs.LabeledDiGraph</span></code>,
+itself a subclass of <code class="docutils literal notranslate"><span class="pre">networkx.MultiDiGraph</span></code>.
+The design philosophy is to deviate little from <code class="docutils literal notranslate"><span class="pre">networkx</span></code>,
+so it helps to familiarize oneself directly with <code class="docutils literal notranslate"><span class="pre">networkx</span></code>.</p>
+<p>The modules <code class="docutils literal notranslate"><span class="pre">transys.mathset</span></code> and <code class="docutils literal notranslate"><span class="pre">transys.products</span></code> are auxiliary,
+and the subpackage <code class="docutils literal notranslate"><span class="pre">transys.export</span></code> contains functionality for
+saving graphs in various formats, mainly formatting for layout by GraphViz.</p>
+<p>The entry point for a user comprises of the <code class="docutils literal notranslate"><span class="pre">transys</span></code> modules:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">transys</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">automata</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">machines</span></code></p></li>
+</ul>
+<p>The mathematical objects representable with classes from these modules
+can all be described uniformly and elegantly in the same mathematical language.
+The only reason that different classes are available is for reasons of
+implementation convenience for the user.</p>
+<p>The following discussion is organized into parts.
+First, we describe the class <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph</span></code>, because the above
+modules contain its children.
+Second, we describe the children in each module.</p>
+<section id="labeled-graphs">
+<h2><span class="section-number">5.1. </span>Labeled graphs<a class="headerlink" href="#labeled-graphs" title="Link to this heading">¶</a></h2>
+<p>Already, <code class="docutils literal notranslate"><span class="pre">networkx</span></code> graphs <a class="reference external" href="https://networkx.github.io/documentation/stable/tutorial.html#node-attributes">provide labeling capabilities</a>
+for nodes and edges.
+A <code class="docutils literal notranslate"><span class="pre">dict</span></code> is associated with each node and (multi)edge.
+The labeling annotation can be stored as a key-value pair in the <code class="docutils literal notranslate"><span class="pre">dict</span></code>.
+What <code class="docutils literal notranslate"><span class="pre">networkx</span></code> does not provide is a mechanism for checking label consistency.</p>
+<p>This is the main purpose of <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph</span></code>, via <code class="docutils literal notranslate"><span class="pre">mathset.TypedDict</span></code>.
+In the following, we call this consistency check “label type checking”.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph</span></code> is associated with label types,
+defined as arguments to the constructor.
+Each label type is identified by a key, and is associated to values
+that can be paired to the key.</p>
+<p>Each graph node or edge can be annotated with a key-value pair.
+If the key belongs to the label types, then the value must be
+consistent with the type definition for that key.
+For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.transys</span> <span class="kn">import</span> <span class="n">labeled_graphs</span>
+
+<span class="n">t</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;color&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">},</span>
+         <span class="n">setter</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">labeled_graphs</span><span class="o">.</span><span class="n">LabeledDiGraph</span><span class="p">(</span><span class="n">node_label_types</span><span class="o">=</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Upon creation, each node is labeled with the <code class="docutils literal notranslate"><span class="pre">default</span></code> value,
+here <code class="docutils literal notranslate"><span class="pre">green</span></code>.</p>
+<p>If we try to assign an invalid value to the typed key <code class="docutils literal notranslate"><span class="pre">color</span></code>,
+then an <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> will be raised.
+In this case, the only typed key is <code class="docutils literal notranslate"><span class="pre">'color'</span></code>.
+You cannot use another key, unless you pass <code class="docutils literal notranslate"><span class="pre">check=False</span></code>, as in</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;on&#39;</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using untyped keys like <code class="docutils literal notranslate"><span class="pre">mode</span></code> allows any key, as is normal in <code class="docutils literal notranslate"><span class="pre">networkx</span></code>.
+But arbitrarily named keys won’t be recognized by <code class="docutils literal notranslate"><span class="pre">transys</span></code>,
+and the right keys with the wrong values will cause errors in <code class="docutils literal notranslate"><span class="pre">tulip</span></code>.
+This is the motivation for implementing typing.
+Untyped keys are allowed for any additional annotation that
+one may need to solve a particular problem.</p>
+<p>Arguably, a most handy method is <code class="docutils literal notranslate"><span class="pre">save</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;awesome.pdf&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">LabeledDiGraph</span></code> is not intended to be instantiated itself,
+but subclassed. The following sections consider the subclasses
+present in the three main modules of <code class="docutils literal notranslate"><span class="pre">transys</span></code>.
+To define your own subclasses of <code class="docutils literal notranslate"><span class="pre">LabeledDiGraphs</span></code>, read its docstring.
+In that case, the constructors (<code class="docutils literal notranslate"><span class="pre">__init__</span></code>) of existing
+subclasses can serve as examples.</p>
+</section>
+<section id="transition-systems">
+<h2><span class="section-number">5.2. </span>Transition systems<a class="headerlink" href="#transition-systems" title="Link to this heading">¶</a></h2>
+<p>A <code class="docutils literal notranslate"><span class="pre">transys.transys.FiniteTransitionSystem</span></code> describes a
+set of sequences of nodes (states), as all the paths through it.
+This set corresponds to a set of sequences of labels,
+via the node and edge label annotations.
+Usually, it is the latter set of sequences that is specified by
+a temporal logic formula.</p>
+<p>Each node is labeled with a set of atomic propositions,
+owned by the player that governs the change of current node.
+Each edge is labeled with:</p>
+<ul class="simple">
+<li><p>a system action (key <code class="docutils literal notranslate"><span class="pre">'sys_actions'</span></code>)</p></li>
+<li><p>an environment action (key <code class="docutils literal notranslate"><span class="pre">'env_actions'</span></code>)</p></li>
+</ul>
+<p>If there is no environment, then the transition system describes
+a “closed system” (only existentially quantified), with only
+system actions. Otherwise, the transition system describes the
+interaction between two players, an “open system”, or game.</p>
+<p>Viewing it as a game is an informal way of referring to
+the existential and universal quantifiers that are later applied to
+system and environment variables, respectively.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.transys</span> <span class="kn">import</span> <span class="n">transys</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">transys</span><span class="o">.</span><span class="n">FTS</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">atomic_propositions</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">}</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">})</span>
+<span class="c1">#</span>
+<span class="c1"># 2 ways to change a label</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">})</span>
+<span class="c1">#</span>
+<span class="c1"># or</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The method <code class="docutils literal notranslate"><span class="pre">add_node</span></code> overwrites the existing label,
+so the label value <code class="docutils literal notranslate"><span class="pre">{'a'}</span></code> is replaced by <code class="docutils literal notranslate"><span class="pre">{'b'}</span></code>.
+The attribute <code class="docutils literal notranslate"><span class="pre">atomic_propositions</span></code> allows adding
+more symbols to an existing set.</p>
+<p>The argument-value pair <code class="docutils literal notranslate"><span class="pre">ap={'a'}</span></code> is used as a key-value
+pair in the <code class="docutils literal notranslate"><span class="pre">dict</span></code> that stores the node’s annotation.
+An existing <code class="docutils literal notranslate"><span class="pre">dict</span></code> can also be passed, by unpacking, or
+using the argument <code class="docutils literal notranslate"><span class="pre">attr_dict</span></code>.</p>
+<p>The annotation can be retrieved with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">annot</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This assigns to <code class="docutils literal notranslate"><span class="pre">annot</span></code> the exact <code class="docutils literal notranslate"><span class="pre">set</span></code> object that labels
+the node <code class="docutils literal notranslate"><span class="pre">'s0'</span></code>. If no modification is intended, it is safer
+to copy that set</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">r</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span>
+<span class="n">annot</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Attention is required, to avoid invalidating labels by mutation.
+The label values are checked only through <code class="docutils literal notranslate"><span class="pre">add_node</span></code> or
+setting of a value for <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code>. If we directly modify an
+existing label value <code class="docutils literal notranslate"><span class="pre">g.node['s0']['ap'].add('c')</span></code>,
+then we can alter it to become invalid
+(<code class="docutils literal notranslate"><span class="pre">'c'</span></code> is not in <code class="docutils literal notranslate"><span class="pre">atomic_propositions</span></code>).</p>
+<p>To guard against such invalid values,
+call the method <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph.is_consistent</span></code>,
+which will detect any inconsistencies.
+In the future, the integrated type checking may be
+replaced completely with the flat approach of calling <code class="docutils literal notranslate"><span class="pre">is_consistent</span></code>.</p>
+<p>To avoid this issue altogether, labels can be modified as follows</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.transys</span> <span class="kn">import</span> <span class="n">transys</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">transys</span><span class="o">.</span><span class="n">FTS</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">atomic_propositions</span> <span class="o">|=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">}</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">})</span>
+<span class="c1">#</span>
+<span class="c1"># this does trigger type checking</span>
+<span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">union</span><span class="p">({</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">})</span>
+<span class="c1">#</span>
+<span class="c1"># equivalently</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;s0&#39;</span><span class="p">][</span><span class="s1">&#39;ap&#39;</span><span class="p">]</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">union</span><span class="p">({</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="n">r</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The same mechanisms work for edges, but it is advisable to use
+<code class="docutils literal notranslate"><span class="pre">LabeledDiGraph.transitions.find</span></code> instead.
+This avoids having to reason about the integer keys used internally by
+<code class="docutils literal notranslate"><span class="pre">networkx</span></code> to distinguish between edges with
+the same pair of endpoint nodes (multi-edges).
+A method <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph.states.find</span></code> is available too.</p>
+<p>The method <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph.transitions.find</span></code> is intended as a tool
+to slice the transition relation:</p>
+<ul class="simple">
+<li><p>find all edges from a given state</p></li>
+<li><p>find all edges to a given state</p></li>
+<li><p>find all edges with given label</p></li>
+<li><p>any combination of the above</p></li>
+</ul>
+<p>For example, to find from state <code class="docutils literal notranslate"><span class="pre">'s0'</span></code> with <code class="docutils literal notranslate"><span class="pre">sys_action</span> <span class="pre">=</span> <span class="pre">'jump'</span></code> all
+possible post states,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">set</span><span class="p">([</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">with_attr_dict</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sys_action&#39;</span><span class="p">:</span><span class="s1">&#39;jump&#39;</span><span class="p">})])</span>
+</pre></div>
+</div>
+<p>Alternatively <code class="docutils literal notranslate"><span class="pre">find()</span></code> may be bypassed in favor of the <code class="docutils literal notranslate"><span class="pre">networkx</span></code> method <a class="reference external" href="https://networkx.github.io/documentation/stable/reference/classes/generated/networkx.MultiDiGraph.edges.html">edges</a>, as in</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="s1">&#39;s0&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;sys_action&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;jump&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To add or label multiple nodes with one call,
+call <code class="docutils literal notranslate"><span class="pre">LabeledDiGraph.add_nodes_from</span></code>, as described <a class="reference external" href="https://networkx.github.io/documentation/stable/reference/classes/generated/networkx.MultiDiGraph.add_nodes_from.html">here</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="c1">#</span>
+<span class="c1"># multiple nodes, common label</span>
+<span class="n">label</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;snow&#39;</span><span class="p">,</span> <span class="s1">&#39;north&#39;</span><span class="p">}</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">([(</span><span class="n">u</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ap</span><span class="o">=</span><span class="n">label</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">])</span>
+<span class="c1">#</span>
+<span class="c1"># multiple nodes, different labels</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;a&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">}]</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">([(</span><span class="n">u</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">ap</span><span class="o">=</span><span class="n">label</span><span class="p">))</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">labels</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>This might look cumbersome, but it becomes convenient for setting multiple labels:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">g</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">env_actions</span><span class="o">=</span><span class="s1">&#39;block&#39;</span><span class="p">,</span> <span class="n">sys_actions</span><span class="o">=</span><span class="s1">&#39;jump&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="automata">
+<h2><span class="section-number">5.3. </span>Automata<a class="headerlink" href="#automata" title="Link to this heading">¶</a></h2>
+<p>There is no real difference between a “transition system” and an “automaton”.
+Both are ways of describing a set of sequences.
+The only difference is that some parts of an automaton are omitted when
+talking about a transition system, because they are trivial.</p>
+<p>Currently, the automata in <cite>transys</cite> are “existential”.
+This means that a sequence belongs to the set described by an automaton,
+if, and only if, there exists at least one satisfactory path through the
+graph that represents the automaton.</p>
+<p>What makes a path “satisfactory” doesn’t have a fixed meaning: it depends.
+To distinguish satisfactory from other paths, an <em>acceptance condition</em> is
+made part of an automaton description.
+It is common to call “accepting” a path that satisfies a given condition.</p>
+<p>Traditionally, types of acceptance conditions have been associated with
+names of people: Buchi, Rabin, Streett, Muller (“parity” is an exception).
+Rabin and Streett correspond to the disjunctive and conjunctive
+normal forms of a temporal logic formula.</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">tulip.transys.automata</span></code> module you will find subclasses of
+<code class="docutils literal notranslate"><span class="pre">LabeledDiGraph</span></code> that are geared towards describing sets in the style
+just mentioned. For example, the following code creates a Buchi automaton:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.transys</span> <span class="kn">import</span> <span class="n">automata</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">automata</span><span class="o">.</span><span class="n">BA</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">atomic_propositions</span><span class="o">.</span><span class="n">add_from</span><span class="p">([</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">])</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">accepting</span><span class="o">.</span><span class="n">add_from</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">letter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">letter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;b&#39;</span><span class="p">})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">letter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">})</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">letter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>A difference between transition systems and automata is
+that the former usually have labeling on nodes, the latter on edges.
+Historically, this is due to how algorithms for
+enumerated model checking evolved. It is only a matter of
+representation, not a feature of the sets that
+these data structures describe.</p>
+</section>
+<section id="transducers-machines">
+<h2><span class="section-number">5.4. </span>Transducers (Machines)<a class="headerlink" href="#transducers-machines" title="Link to this heading">¶</a></h2>
+<p>A transducer represents a function from finite sequences of input
+(say symbols typed on a keyboard), to the next output (say screen color).
+So, a transducer is an <em>implementation</em>, described in a way that is
+executable (step-by-step). It differs from the above mainly programmatically.</p>
+<p>If the design intent is described with a specification that is not
+itself the implementation, then (automated) synthesis can construct
+an implementation. Some forms of synthesis are available via <code class="docutils literal notranslate"><span class="pre">tulip.synth</span></code>.
+By convention, the constructed implementation is represented by <code class="docutils literal notranslate"><span class="pre">machines.MealyMachine</span></code>.</p>
+<p>The Mealy machine for producing a sequence of alternating 0s and 1s has the form:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tulip.transys</span> <span class="kn">import</span> <span class="n">machines</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">machines</span><span class="o">.</span><span class="n">MealyMachine</span><span class="p">()</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_inputs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">increment_index</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">}))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_outputs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">sequence_element</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}))</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">g</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">initial</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">increment_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sequence_element</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">increment_index</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sequence_element</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This Mealy machine is supposed to be “executed” as follows.
+It starts at node <code class="docutils literal notranslate"><span class="pre">0</span></code>. It reads an element from the input sequence.
+The element is an assignment of values to identifiers.
+Here, the only input identifier (“port”) is <code class="docutils literal notranslate"><span class="pre">'increment_index'</span></code>.
+Then, the machine picks an edge labeled with the given input assignment.
+The only such edge is <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">1)</span></code>. The next node is <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>The machine produces the next element of the output sequence.
+This element is an assignment to output identifiers.
+In our example, the assignment of value <code class="docutils literal notranslate"><span class="pre">0</span></code> to identifier <code class="docutils literal notranslate"><span class="pre">'sequence_element'</span></code>.
+Since we just started running the machine <code class="docutils literal notranslate"><span class="pre">g</span></code>, this output assignment is
+the first element in the output sequence.</p>
+<p>You can get all this done with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">v</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">reaction</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="n">increment_index</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>which returns <code class="docutils literal notranslate"><span class="pre">v</span> <span class="pre">=</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">=</span> <span class="pre">dict(sequence_element=0)</span></code>.</p>
+<p>The class <code class="docutils literal notranslate"><span class="pre">machines.MooreMachine</span></code> differs from a Mealy machine,
+in that it imposes that element <code class="docutils literal notranslate"><span class="pre">k</span></code> of the output sequence
+can depend only on elements <em>before</em> element <code class="docutils literal notranslate"><span class="pre">k</span></code> of the input sequence.
+Use <code class="docutils literal notranslate"><span class="pre">machines.MealyMachine</span></code>, because it is less restrictive.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">5. Enumerated property representations</a><ul>
+<li><a class="reference internal" href="#labeled-graphs">5.1. Labeled graphs</a></li>
+<li><a class="reference internal" href="#transition-systems">5.2. Transition systems</a></li>
+<li><a class="reference internal" href="#automata">5.3. Automata</a></li>
+<li><a class="reference internal" href="#transducers-machines">5.4. Transducers (Machines)</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="specifications.html"
+                          title="previous chapter"><span class="section-number">4. </span>Specifications</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="codegen.html"
+                          title="next chapter"><span class="section-number">6. </span>Code generation and exporting of controllers</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/transys.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="codegen.html" title="6. Code generation and exporting of controllers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="specifications.html" title="4. Specifications"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">5. </span>Enumerated property representations</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

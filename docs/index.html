@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TuLiP User’s Guide &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Introduction" href="intro.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">TuLiP User’s Guide</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="tulip-user-s-guide">
+<h1>TuLiP User’s Guide<a class="headerlink" href="#tulip-user-s-guide" title="Link to this heading">¶</a></h1>
+<p>Welcome to TuLiP, the Temporal Logic Planning Toolbox.  This user’s guide is
+intended for people who are interested in making use of TuLiP to synthesize
+reactive controllers for hybrid systems and perform related functions.</p>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">1. Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#package-overview">1.1. Package Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#version-1-0-release-notes">1.2. Version 1.0 Release Notes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#other-sources-of-documentation">1.3. Other sources of documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#getting-help">1.4. Getting help</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">2. Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#alternative-discrete-synthesis-tools">2.1. Alternative discrete synthesis tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#testing-your-installation">2.2. Testing your installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#new-to-python">2.3. New to Python?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#troubleshooting">2.4. Troubleshooting</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">3. Tutorial and Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#synthesis-of-reactive-controllers">3.1. Synthesis of Reactive Controllers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#working-with-systems-with-piecewise-affine-dynamics">3.2. Working with Systems with Piecewise Affine Dynamics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="specifications.html">4. Specifications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="specifications.html#getting-started">4.1. Getting started</a></li>
+<li class="toctree-l2"><a class="reference internal" href="specifications.html#tulip-ltl-syntax">4.2. TuLiP LTL syntax</a></li>
+<li class="toctree-l2"><a class="reference internal" href="specifications.html#tulip-ltl-specification-files">4.3. TuLiP LTL specification files</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transys.html">5. Enumerated property representations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="transys.html#labeled-graphs">5.1. Labeled graphs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transys.html#transition-systems">5.2. Transition systems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transys.html#automata">5.3. Automata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transys.html#transducers-machines">5.4. Transducers (Machines)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="codegen.html">6. Code generation and exporting of controllers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="codegen.html#python-case">6.1. <code class="docutils literal notranslate"><span class="pre">python_case</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="gridworlds.html">7. Gridworlds</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gridworlds.html#description-format">7.1. Description format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gridworlds.html#generating-continuous-space-partitions">7.2. Generating continuous-space partitions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="benchmarks.html">8. Benchmarks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#robot-motion-planning">8.1. Robot Motion Planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="benchmarks.html#aircraft-electric-power-systems">8.2. Aircraft Electric Power Systems</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="formulations.html">9. Additional Problem Formulations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="formulations.html#discrete-time-linear-with-disturbances">9.1. Discrete-time linear with disturbances</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev_guide.html">10. Developer’s Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#organization-and-rules">10.1. Organization and Rules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#testing">10.2. Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#version-naming">10.3. Version naming</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#making-releases">10.4. Making releases</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#contributions">10.5. Contributions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev_guide.html#advice">10.6. Advice</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bibliography.html">11. Bibliography</a></li>
+</ul>
+</div>
+<p>Special pages:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="intro.html"
+                          title="next chapter"><span class="section-number">1. </span>Introduction</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="1. Introduction"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">TuLiP User’s Guide</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

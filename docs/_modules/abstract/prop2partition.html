@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>abstract.prop2partition &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="../../_static/patch.css?v=0ad0caba" />
+    
+    <script src="../../_static/documentation_options.js?v=350a9c04"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="../../_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">abstract.prop2partition</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for abstract.prop2partition</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) 2011-2014 by California Institute of Technology</span>
+<span class="c1"># All rights reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions</span>
+<span class="c1"># are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1">#</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># 3. Neither the name of the California Institute of Technology nor</span>
+<span class="c1">#    the names of its contributors may be used to endorse or promote</span>
+<span class="c1">#    products derived from this software without specific prior</span>
+<span class="c1">#    written permission.</span>
+<span class="c1">#</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="c1"># &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL CALTECH</span>
+<span class="c1"># OR THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<span class="c1"># SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="c1"># LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF</span>
+<span class="c1"># USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND</span>
+<span class="c1"># ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,</span>
+<span class="c1"># OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT</span>
+<span class="c1"># OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF</span>
+<span class="c1"># SUCH DAMAGE.</span>
+<span class="c1">#</span>
+<span class="sd">&quot;&quot;&quot;Proposition-preserving partition module.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">typing</span> <span class="k">as</span> <span class="nn">_ty</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">polytope</span> <span class="k">as</span> <span class="nn">pc</span>
+<span class="kn">import</span> <span class="nn">polytope.plot</span> <span class="k">as</span> <span class="nn">_pplot</span>
+<span class="kn">import</span> <span class="nn">scipy.sparse</span> <span class="k">as</span> <span class="nn">sp</span>
+
+<span class="kn">import</span> <span class="nn">tulip.graphics</span> <span class="k">as</span> <span class="nn">_graphics</span>
+<span class="n">_mpl</span> <span class="o">=</span> <span class="n">_graphics</span><span class="o">.</span><span class="n">_mpl</span>
+<span class="kn">import</span> <span class="nn">tulip.transys</span> <span class="k">as</span> <span class="nn">trs</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;PropPreservingPartition&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PPP&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;prop2part&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;part2convex&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;pwa_partition&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;add_grid&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ppp2ts&#39;</span><span class="p">]</span>
+
+
+<span class="n">_hl</span> <span class="o">=</span> <span class="mi">40</span> <span class="o">*</span> <span class="s1">&#39;-&#39;</span>
+<span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+<span class="n">Polytope</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">pc</span><span class="o">.</span><span class="n">Polytope</span> <span class="o">|</span>
+    <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PropPreservingPartition">
+<a class="viewcode-back" href="../../tutorial.html#abstract.PropPreservingPartition">[docs]</a>
+<span class="k">class</span> <span class="nc">PropPreservingPartition</span><span class="p">(</span>
+        <span class="n">pc</span><span class="o">.</span><span class="n">MetricPartition</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Partition class with following fields:</span>
+
+<span class="sd">    Attributes:</span>
+
+<span class="sd">    - `domain`: the domain we want to partition</span>
+
+<span class="sd">    - `regions`: `Region`s of</span>
+<span class="sd">      proposition-preserving partition</span>
+
+<span class="sd">    - `adj`: sparse matrix showing which</span>
+<span class="sd">      regions are adjacent.</span>
+<span class="sd">      The order of `Region`s is the</span>
+<span class="sd">      same as in the `list` `regions`.</span>
+
+<span class="sd">      - type: `scipy` `lil` `sparse`</span>
+
+<span class="sd">    - `prop_regions`: map from atomic</span>
+<span class="sd">      proposition symbols to continuous subsets</span>
+
+
+<span class="sd">    Relevant</span>
+<span class="sd">    ========</span>
+<span class="sd">    `prop2part`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">domain</span><span class="p">:</span>
+                <span class="n">Polytope</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">regions</span><span class="p">:</span>
+                <span class="nb">list</span><span class="p">[</span><span class="n">Polytope</span><span class="p">]</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">adj</span><span class="p">:</span>
+                <span class="n">sp</span><span class="o">.</span><span class="n">lil_array</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">prop_regions</span><span class="p">:</span>
+                <span class="nb">dict</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Polytope</span><span class="p">]</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">check</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">regions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">prop_regions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># don&#39;t call it</span>
+                <span class="c1"># use try because it should work</span>
+                <span class="c1"># vs hasattr, which would look like normal selection</span>
+                <span class="n">prop_regions</span><span class="o">.</span><span class="n">keys</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s1">&#39;`prop_regions` must be `dict`.&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;Got instead: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">prop_regions</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">prop_regions</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">adj</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">k</span> <span class="o">=</span> <span class="n">adj</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">k</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;adj must be square&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;`adj` size does not agree &#39;</span>
+                    <span class="s1">&#39;with number of regions&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regions</span> <span class="o">=</span> <span class="n">regions</span><span class="p">[:]</span>
+        <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">regions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">region</span> <span class="o">&lt;=</span> <span class="n">domain</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s1">&#39;Partition: Region:</span><span class="se">\n\n</span><span class="si">{</span><span class="n">region</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="s1">&#39;is not subset of given domain:</span><span class="se">\n\t</span><span class="s1">&#39;</span>
+                        <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">domain</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_symbolic</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">domain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="n">adj</span>
+
+    <span class="k">def</span> <span class="nf">reg2props</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">region_index</span><span class="p">:</span>
+                <span class="nb">int</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">region_index</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># TODO: iterator over pairs</span>
+    <span class="c1"># TODO: use `networkx` graph to store partition</span>
+
+    <span class="k">def</span> <span class="nf">is_symbolic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the set of preserved predicates</span>
+<span class="sd">        are bijectively mapped to the symbols.</span>
+
+<span class="sd">        Symbols = Atomic Propositions</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;No continuous propositions defined.&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">props</span> <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Partitions: Region labeled with propositions:</span><span class="se">\n\t</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;not all of which are in the &#39;</span>
+                <span class="s1">&#39;continuous atomic propositions:</span><span class="se">\n\t</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">preserves_predicates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return `True` if each `Region` &lt;= Predicates for the</span>
+<span class="sd">        predicates in `prop_regions.values`,</span>
+<span class="sd">        where `prop_regions` is a bijection to</span>
+<span class="sd">        &quot;continuous&quot; propositions of the specification&#39;s alphabet.</span>
+
+<span class="sd">        Note</span>
+<span class="sd">        ====</span>
+<span class="sd">        1. `prop_regions` in practice need not be injective.</span>
+<span class="sd">            It doesnt hurt - though creates unnecessary redundancy.</span>
+
+<span class="sd">        2. The specification alphabet is fixed an user-defined.</span>
+<span class="sd">            It should be distinguished from the auxiliary alphabet</span>
+<span class="sd">            generated automatically during abstraction,</span>
+<span class="sd">            which defines another partition with</span>
+<span class="sd">            its own bijection to TS.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">all_props</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regions</span><span class="p">:</span>
+            <span class="c1"># Propositions True in Region</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="p">:</span>
+                <span class="n">preimage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">region</span> <span class="o">&lt;=</span> <span class="n">preimage</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="c1"># Propositions False in Region</span>
+            <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">all_props</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="p">):</span>
+                <span class="n">preimage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">preimage</span><span class="p">)</span><span class="o">.</span><span class="n">volume</span> <span class="o">&gt;</span> <span class="n">pc</span><span class="o">.</span><span class="n">polytope</span><span class="o">.</span><span class="n">ABS_TOL</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get informal string representation.&quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="si">{</span><span class="n">_hl</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="s1">&#39;Proposition Preserving Partition:</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="n">_hl</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span>
+            <span class="sa">f</span><span class="s1">&#39;Domain: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regions</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;Region: </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1"> Propositions: &#39;</span>
+                <span class="n">active_props</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">active_props</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">active_props</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adj</span><span class="p">,</span> <span class="s1">&#39;toarray&#39;</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;Adjacency matrix:</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">adj</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">trans</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">ppp2trans</span><span class="p">:</span>
+                <span class="nb">list</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">only_adjacent</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">:</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+                    <span class="s1">&#39;_mpl.axes.Axes&#39;</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">]</span>
+                <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">plot_numbers</span><span class="p">:</span>
+                <span class="nb">bool</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">color_seed</span><span class="p">:</span>
+                <span class="nb">int</span> <span class="o">|</span>
+                <span class="kc">None</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_mpl.axes.Axes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For details see `polytope.plot.plot_partition`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_pplot</span><span class="o">.</span><span class="n">plot_partition</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">trans</span><span class="p">,</span>
+            <span class="n">ppp2trans</span><span class="p">,</span> <span class="n">only_adjacent</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">,</span> <span class="n">plot_numbers</span><span class="p">,</span> <span class="n">color_seed</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">plot_props</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">ax</span><span class="p">:</span>
+                <span class="n">_ty</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+                    <span class="s1">&#39;_mpl.axes.Axes&#39;</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">]</span>
+                <span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">text_color</span><span class="p">:</span>
+                <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_mpl.axes.Axes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot labeled regions of continuous propositions.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="p">,</span> <span class="n">fig</span> <span class="o">=</span> <span class="n">_graphics</span><span class="o">.</span><span class="n">newax</span><span class="p">()</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">bounding_box</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">u</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">poly</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop_regions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">isect_poly</span> <span class="o">=</span> <span class="n">poly</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+            <span class="n">isect_poly</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+                <span class="n">hatch</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">isect_poly</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
+                <span class="n">prop</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">text_color</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
+
+
+<span class="n">PPP</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span>
+
+
+<div class="viewcode-block" id="prop2part">
+<a class="viewcode-back" href="../../tutorial.html#abstract.prop2part">[docs]</a>
+<span class="k">def</span> <span class="nf">prop2part</span><span class="p">(</span>
+        <span class="n">state_space</span><span class="p">:</span>
+            <span class="n">pc</span><span class="o">.</span><span class="n">Polytope</span><span class="p">,</span>
+        <span class="n">cont_props_dict</span><span class="p">:</span>
+            <span class="nb">dict</span><span class="p">[</span><span class="n">pc</span><span class="o">.</span><span class="n">Polytope</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropPreservingPartition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Takes a domain `state_space` and a `list` of</span>
+<span class="sd">    propositions `cont_props`, and returns</span>
+<span class="sd">    a proposition-preserving partition of</span>
+<span class="sd">    the state-space.</span>
+
+
+<span class="sd">    Relevant</span>
+<span class="sd">    ========</span>
+<span class="sd">    `PropPreservingPartition`,</span>
+<span class="sd">    `polytope.Polytope`</span>
+
+
+<span class="sd">    @param state_space:</span>
+<span class="sd">        problem domain</span>
+<span class="sd">    @param cont_props_dict:</span>
+<span class="sd">        propositions</span>
+<span class="sd">    @return:</span>
+<span class="sd">        state-space quotient partition induced</span>
+<span class="sd">        by propositions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">first_poly</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>  <span class="c1"># Initial Region&#39;s polytopes</span>
+    <span class="n">first_poly</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">state_space</span><span class="p">)</span>
+    <span class="n">regions</span> <span class="o">=</span> <span class="p">[</span><span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span><span class="n">first_poly</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">cur_prop</span> <span class="ow">in</span> <span class="n">cont_props_dict</span><span class="p">:</span>
+        <span class="n">cur_prop_poly</span> <span class="o">=</span> <span class="n">cont_props_dict</span><span class="p">[</span><span class="n">cur_prop</span><span class="p">]</span>
+        <span class="n">num_reg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">regions</span><span class="p">)</span>
+        <span class="n">prop_holds_reg</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_reg</span><span class="p">):</span> <span class="c1">#i region counter</span>
+            <span class="n">region_now</span> <span class="o">=</span> <span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="c1">#loop for prop holds</span>
+            <span class="n">prop_holds_reg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">prop_now</span> <span class="o">=</span> <span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">dummy</span> <span class="o">=</span> <span class="n">region_now</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">cur_prop_poly</span><span class="p">)</span>
+            <span class="c1"># does cur_prop hold in dummy ?</span>
+            <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_fulldim</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
+                <span class="n">dum_prop</span> <span class="o">=</span> <span class="n">prop_now</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">dum_prop</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">cur_prop</span><span class="p">)</span>
+                <span class="c1"># is dummy a Polytope ?</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">([</span><span class="n">dummy</span><span class="p">],</span> <span class="n">dum_prop</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># dummy is a Region</span>
+                    <span class="n">dummy</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="n">dum_prop</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dummy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">prop_holds_reg</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">#does not hold in the whole region</span>
+                <span class="c1"># (-&gt; no need for the 2nd loop)</span>
+                <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region_now</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1">#loop for prop does not hold</span>
+            <span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">([],</span> <span class="n">props</span><span class="o">=</span><span class="n">prop_now</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">dummy</span> <span class="o">=</span> <span class="n">region_now</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">cur_prop_poly</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_fulldim</span><span class="p">(</span><span class="n">dummy</span><span class="p">):</span>
+                <span class="n">dum_prop</span> <span class="o">=</span> <span class="n">prop_now</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="c1"># is dummy a Polytope ?</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">regions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">pc</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">dummy</span><span class="p">)],</span>
+                        <span class="n">dum_prop</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># dummy is a Region</span>
+                    <span class="n">dummy</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="n">dum_prop</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">regions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dummy</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">regions</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">hold_count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_holds_reg</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">prop_holds_reg</span><span class="p">[</span><span class="n">hold_count</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="n">regions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">hold_count</span><span class="o">-</span><span class="n">count</span><span class="p">)</span>
+                <span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+    <span class="n">mypartition</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">state_space</span><span class="p">),</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="n">regions</span><span class="p">,</span>
+        <span class="n">prop_regions</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">cont_props_dict</span><span class="p">))</span>
+    <span class="n">mypartition</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">find_adjacent_regions</span><span class="p">(</span><span class="n">mypartition</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">mypartition</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">part2convex</span><span class="p">(</span>
+        <span class="n">ppp</span><span class="p">:</span>
+            <span class="n">PropPreservingPartition</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">PropPreservingPartition</span><span class="p">,</span>
+            <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine partition so that cells be convex.</span>
+
+<span class="sd">    Takes a proposition-preserving partition, and</span>
+<span class="sd">    generates another proposition-preserving partition,</span>
+<span class="sd">    such that each cell in the new partition is</span>
+<span class="sd">    a convex polytope.</span>
+
+<span class="sd">    @return:</span>
+<span class="sd">        refinement into convex polytopes and</span>
+<span class="sd">        map from new to old Regions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cvxpart</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="p">),</span>
+        <span class="n">prop_regions</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">))</span>
+    <span class="n">new2old</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">)):</span>
+        <span class="n">simplified_reg</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
+            <span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">check_convex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">simplified_reg</span><span class="p">)):</span>
+            <span class="n">region_now</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">simplified_reg</span><span class="p">[</span><span class="n">j</span><span class="p">]],</span>
+                <span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>
+            <span class="n">cvxpart</span><span class="o">.</span><span class="n">regions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">region_now</span><span class="p">)</span>
+            <span class="n">new2old</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">cvxpart</span><span class="o">.</span><span class="n">adj</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">find_adjacent_regions</span><span class="p">(</span><span class="n">cvxpart</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">cvxpart</span><span class="p">,</span> <span class="n">new2old</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">pwa_partition</span><span class="p">(</span>
+        <span class="n">pwa_sys</span><span class="p">:</span>
+            <span class="s1">&#39;PwaSysDyn&#39;</span><span class="p">,</span>
+        <span class="n">ppp</span><span class="p">:</span>
+            <span class="n">PropPreservingPartition</span><span class="p">,</span>
+        <span class="n">abs_tol</span><span class="p">:</span>
+            <span class="nb">float</span><span class="o">=</span><span class="mf">1e-5</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">PropPreservingPartition</span><span class="p">,</span>
+            <span class="nb">list</span><span class="p">,</span>
+            <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This function takes:</span>
+
+<span class="sd">    - a piecewise affine system `pwa_sys` and</span>
+<span class="sd">    - a proposition-preserving partition `ppp`</span>
+<span class="sd">      whose domain is a subset of the domain of `pwa_sys`</span>
+
+<span class="sd">    and returns a *refined* proposition preserving partition</span>
+<span class="sd">    where in each region a unique subsystem of `pwa_sys` is active.</span>
+
+
+<span class="sd">    Reference</span>
+<span class="sd">    =========</span>
+<span class="sd">    Modified from Petter Nilsson&#39;s code</span>
+<span class="sd">    implementing merge algorithm in:</span>
+
+<span class="sd">    Nilsson et al.</span>
+<span class="sd">    `Temporal Logic Control of Switched Affine Systems with an</span>
+<span class="sd">    Application in Fuel Balancing`, ACC 2012.</span>
+
+
+<span class="sd">    Relevant</span>
+<span class="sd">    ========</span>
+<span class="sd">    `discretize`</span>
+
+
+<span class="sd">    @return:</span>
+<span class="sd">        new partition and associated maps:</span>
+<span class="sd">        - new partition `new_ppp`</span>
+<span class="sd">        - map of `new_ppp.regions` to `pwa_sys.list_subsys`</span>
+<span class="sd">        - map of `new_ppp.regions` to `ppp.regions`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_fulldim</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">pwa_sys</span><span class="o">.</span><span class="n">domain</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s1">&#39;piecewise-affine system &#39;</span>
+            <span class="s1">&#39;is not defined everywhere in &#39;</span>
+            <span class="s1">&#39;the state-space&#39;</span><span class="p">)</span>
+    <span class="c1"># for each subsystem&#39;s domain, cut it into pieces</span>
+    <span class="c1"># each piece is the intersection with</span>
+    <span class="c1"># a unique Region in ppp.regions</span>
+    <span class="n">new_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">subsys_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">subsys</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pwa_sys</span><span class="o">.</span><span class="n">list_subsys</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">):</span>
+            <span class="n">isect</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">subsys</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_fulldim</span><span class="p">(</span><span class="n">isect</span><span class="p">):</span>
+                <span class="n">rc</span><span class="p">,</span> <span class="n">xc</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cheby_ball</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">rc</span> <span class="o">&lt;</span> <span class="n">abs_tol</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="s1">&#39;One of the regions in &#39;</span>
+                        <span class="s1">&#39;the refined PPP is &#39;</span>
+                        <span class="s1">&#39;too small, this may cause &#39;</span>
+                        <span class="s1">&#39;numerical problems&#39;</span><span class="p">)</span>
+                <span class="c1"># not Region yet, but Polytope ?</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">isect</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">([</span><span class="n">isect</span><span class="p">])</span>
+                <span class="c1"># label with AP</span>
+                <span class="n">isect</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="c1"># store new Region</span>
+                <span class="n">new_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span>
+                <span class="c1"># keep track of original Region in ppp.regions</span>
+                <span class="n">parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+                <span class="c1"># index of subsystem active within isect</span>
+                <span class="n">subsys_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="c1"># compute spatial adjacency matrix</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_list</span><span class="p">)</span>
+    <span class="n">adj</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lil_array</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ri</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_list</span><span class="p">):</span>
+        <span class="n">pi</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">rj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">new_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]):</span>
+            <span class="n">pj</span> <span class="o">=</span> <span class="n">parents</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">adj</span><span class="p">[</span><span class="n">pi</span><span class="p">,</span> <span class="n">pj</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">pi</span> <span class="o">==</span> <span class="n">pj</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">pc</span><span class="o">.</span><span class="n">is_adjacent</span><span class="p">(</span><span class="n">ri</span><span class="p">,</span> <span class="n">rj</span><span class="p">):</span>
+                    <span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="n">adj</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">new_ppp</span> <span class="o">=</span> <span class="n">PropPreservingPartition</span><span class="p">(</span>
+        <span class="n">domain</span> <span class="o">=</span> <span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="n">new_list</span><span class="p">,</span>
+        <span class="n">adj</span> <span class="o">=</span> <span class="n">adj</span><span class="p">,</span>
+        <span class="n">prop_regions</span> <span class="o">=</span> <span class="n">ppp</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">new_ppp</span><span class="p">,</span> <span class="n">subsys_list</span><span class="p">,</span> <span class="n">parents</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">add_grid</span><span class="p">(</span>
+        <span class="n">ppp</span><span class="p">:</span>
+            <span class="n">PropPreservingPartition</span><span class="p">,</span>
+        <span class="n">grid_size</span><span class="p">:</span>
+            <span class="nb">float</span> <span class="o">|</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span>
+            <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_grid_pnts</span><span class="p">:</span>
+            <span class="nb">int</span> <span class="o">|</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span>
+            <span class="kc">None</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">abs_tol</span><span class="p">:</span>
+            <span class="nb">float</span><span class="o">=</span><span class="mf">1e-10</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PropPreservingPartition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine proposition-preserving partition using grids.</span>
+
+<span class="sd">    This function takes a proposition-preserving</span>
+<span class="sd">    partition `ppp`, and the size of the grid, or</span>
+<span class="sd">    the number of grids, and returns a refined</span>
+<span class="sd">    proposition-preserving partition with grids.</span>
+
+<span class="sd">    Input:</span>
+
+<span class="sd">    - `grid_size`: the size of the grid</span>
+<span class="sd">    - `num_grid_pnts`: the number of grids</span>
+<span class="sd">      for each dimension</span>
+
+<span class="sd">    Output:</span>
+
+<span class="sd">      - partition with grids</span>
+
+<span class="sd">    Note: There could be numerical instabilities when</span>
+<span class="sd">    the continuous propositions in `ppp` do not align well with</span>
+<span class="sd">    the grid, resulting in very small regions.</span>
+<span class="sd">    Performace significantly degrades without `glpk`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">grid_size</span> <span class="o">!=</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_grid_pnts</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s1">&#39;Only one of &#39;</span>
+            <span class="s1">&#39;the grid size or number of &#39;</span>
+            <span class="s1">&#39;grid points parameters is &#39;</span>
+            <span class="s1">&#39;allowed to be given.&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">grid_size</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">num_grid_pnts</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+            <span class="s1">&#39;At least one of the &#39;</span>
+            <span class="s1">&#39;grid size or number of &#39;</span>
+            <span class="s1">&#39;grid points parameters &#39;</span>
+            <span class="s1">&#39;must be given.&#39;</span><span class="p">)</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">domain_bb</span> <span class="o">=</span> <span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="o">.</span><span class="n">bounding_box</span>
+    <span class="n">size_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">grid_size</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">grid_size</span><span class="p">)</span> <span class="o">==</span> <span class="n">dim</span><span class="p">:</span>
+                <span class="n">size_list</span> <span class="o">=</span> <span class="n">grid_size</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;`grid_size` is not &#39;</span>
+                    <span class="s1">&#39;given in a correct format.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">grid_size</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+                <span class="n">size_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grid_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;grid_size is not given in &#39;</span>
+                <span class="s1">&#39;a correct format.&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">num_grid_pnts</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">num_grid_pnts</span><span class="p">)</span> <span class="o">==</span> <span class="n">dim</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">num_grid_pnts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">int</span><span class="p">):</span>
+                        <span class="n">grid_size</span><span class="o">=</span><span class="p">(</span>
+                                <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span>
+                                <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                            <span class="p">)</span> <span class="o">/</span> <span class="n">num_grid_pnts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                        <span class="n">size_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grid_size</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s1">&#39;`num_grid_pnts` is not &#39;</span>
+                            <span class="s1">&#39;given in a correct format.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s1">&#39;`num_grid_pnts` is not given &#39;</span>
+                    <span class="s1">&#39;in a correct format.&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">num_grid_pnts</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+                <span class="n">grid_size</span><span class="o">=</span><span class="p">(</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span>
+                        <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="p">)</span> <span class="o">/</span> <span class="n">num_grid_pnts</span>
+                <span class="n">size_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">grid_size</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s1">&#39;`num_grid_pnts` is not given &#39;</span>
+                <span class="s1">&#39;in a correct format.&#39;</span><span class="p">)</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">list_grid</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">dim</span><span class="p">:</span>
+        <span class="n">list_grid</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_interval</span><span class="p">(</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">j</span><span class="p">]),</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">domain_bb</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]),</span>
+            <span class="n">size_list</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+            <span class="n">abs_tol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">re_list</span> <span class="o">=</span> <span class="n">list_grid</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">re_list</span> <span class="o">=</span> <span class="n">product_interval</span><span class="p">(</span>
+                    <span class="n">re_list</span><span class="p">,</span> <span class="n">list_grid</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">re_list</span> <span class="o">=</span> <span class="n">product_interval</span><span class="p">(</span>
+                    <span class="n">re_list</span><span class="p">,</span> <span class="n">list_grid</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">new_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">re_list</span><span class="p">)):</span>
+        <span class="n">temp_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">dim</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">temp_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">re_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span>
+                <span class="n">re_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">)):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">box2poly</span><span class="p">(</span><span class="n">temp_list</span><span class="p">)</span>
+            <span class="n">isect</span> <span class="o">=</span> <span class="n">tmp</span><span class="o">.</span><span class="n">intersect</span><span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">abs_tol</span><span class="p">)</span>
+            <span class="c1"># if pc.is_fulldim(isect):</span>
+            <span class="n">rc</span><span class="p">,</span> <span class="n">xc</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cheby_ball</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rc</span> <span class="o">&gt;</span> <span class="n">abs_tol</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">rc</span> <span class="o">&lt;</span> <span class="n">abs_tol</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span>
+                        <span class="s1">&#39;Warning: &#39;</span>
+                        <span class="s1">&#39;One of the regions in &#39;</span>
+                        <span class="s1">&#39;the refined PPP is too small&#39;</span>
+                        <span class="s1">&#39;, this may cause numerical problems&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">isect</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">Region</span><span class="p">([</span><span class="n">isect</span><span class="p">],</span> <span class="p">[])</span>
+                <span class="n">isect</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="n">ppp</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">new_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">isect</span><span class="p">)</span>
+                <span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+    <span class="n">adj</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">lil_array</span><span class="p">(</span>
+        <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_list</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_list</span><span class="p">)),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_list</span><span class="p">)):</span>
+        <span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_list</span><span class="p">)):</span>
+            <span class="n">todo</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">ppp</span><span class="o">.</span><span class="n">adj</span><span class="p">[</span><span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">parent</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span>
+                 <span class="n">parent</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">parent</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="ow">and</span>
+                <span class="n">pc</span><span class="o">.</span><span class="n">is_adjacent</span><span class="p">(</span><span class="n">new_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">new_list</span><span class="p">[</span><span class="n">j</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">todo</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">adj</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">adj</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">PropPreservingPartition</span><span class="p">(</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">ppp</span><span class="o">.</span><span class="n">domain</span><span class="p">,</span>
+        <span class="n">regions</span><span class="o">=</span><span class="n">new_list</span><span class="p">,</span>
+        <span class="n">adj</span><span class="o">=</span><span class="n">adj</span><span class="p">,</span>
+        <span class="n">prop_regions</span><span class="o">=</span><span class="n">ppp</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">)</span>
+
+
+<span class="c1">#### Helper functions ####</span>
+
+
+<span class="k">def</span> <span class="nf">compute_interval</span><span class="p">(</span>
+        <span class="n">low_domain</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">,</span>
+        <span class="n">high_domain</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">,</span>
+        <span class="n">abs_tol</span><span class="p">:</span>
+            <span class="nb">float</span><span class="o">=</span><span class="mf">1e-7</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">[</span>
+                <span class="nb">float</span><span class="p">,</span>
+                <span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute intervals for each dimension.&quot;&quot;&quot;</span>
+    <span class="n">list_g</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">low_domain</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="n">size</span> <span class="o">+</span> <span class="n">abs_tol</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">high_domain</span><span class="p">:</span>
+            <span class="n">list_g</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">high_domain</span><span class="p">])</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">list_g</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">size</span><span class="p">])</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">size</span>
+    <span class="k">return</span> <span class="n">list_g</span>
+
+
+<span class="k">def</span> <span class="nf">product_interval</span><span class="p">(</span>
+        <span class="n">list1</span><span class="p">:</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
+        <span class="n">list2</span><span class="p">:</span>
+            <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Combine all intervals, for any two interval lists.&quot;&quot;&quot;</span>
+    <span class="n">new_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list1</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list2</span><span class="p">)):</span>
+            <span class="n">new_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list1</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">list2</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">new_list</span>
+
+
+<span class="k">def</span> <span class="nf">ppp2ts</span><span class="p">(</span>
+        <span class="n">part</span><span class="p">:</span>
+            <span class="n">PropPreservingPartition</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span>
+            <span class="n">trs</span><span class="o">.</span><span class="n">FTS</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive transition system from proposition preserving partition.</span>
+
+<span class="sd">    @param part:</span>
+<span class="sd">        labeled polytopic partition from</span>
+<span class="sd">        which to derive the transition system</span>
+<span class="sd">    @return:</span>
+<span class="sd">        `(ts, state_map)`</span>
+<span class="sd">        finite transition system labeled with propositions</span>
+<span class="sd">        from the given partition, and map of</span>
+<span class="sd">        polytope indices to transition system states.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># generate transition system and add transitions</span>
+    <span class="n">ofts</span> <span class="o">=</span> <span class="n">trs</span><span class="o">.</span><span class="n">FTS</span><span class="p">()</span>
+    <span class="n">adj</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">adj</span>  <span class="c1"># `sp.lil_array`</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">adj</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ofts_states</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">ofts_states</span> <span class="o">=</span> <span class="n">trs</span><span class="o">.</span><span class="n">prepend_with</span><span class="p">(</span><span class="n">ofts_states</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+    <span class="n">ofts</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add_from</span><span class="p">(</span><span class="n">ofts_states</span><span class="p">)</span>
+    <span class="n">ofts</span><span class="o">.</span><span class="n">transitions</span><span class="o">.</span><span class="n">add_adj</span><span class="p">(</span><span class="n">adj</span><span class="p">,</span> <span class="n">ofts_states</span><span class="p">)</span>
+    <span class="c1"># decorate TS with state labels</span>
+    <span class="n">atomic_propositions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">prop_regions</span><span class="p">)</span>
+    <span class="n">ofts</span><span class="o">.</span><span class="n">atomic_propositions</span><span class="o">.</span><span class="n">add_from</span><span class="p">(</span><span class="n">atomic_propositions</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">state</span><span class="p">,</span> <span class="n">region</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ofts_states</span><span class="p">,</span> <span class="n">part</span><span class="o">.</span><span class="n">regions</span><span class="p">):</span>
+        <span class="n">state_prop</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">ofts</span><span class="o">.</span><span class="n">states</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">ap</span><span class="o">=</span><span class="n">state_prop</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">ofts</span><span class="p">,</span> <span class="n">ofts_states</span><span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">abstract.prop2partition</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

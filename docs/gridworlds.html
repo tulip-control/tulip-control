@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>7. Gridworlds &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="8. Benchmarks" href="benchmarks.html" />
+    <link rel="prev" title="6. Code generation and exporting of controllers" href="codegen.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="benchmarks.html" title="8. Benchmarks"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="codegen.html" title="6. Code generation and exporting of controllers"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">7. </span>Gridworlds</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="gridworlds">
+<h1><span class="section-number">7. </span>Gridworlds<a class="headerlink" href="#gridworlds" title="Link to this heading">¶</a></h1>
+<p>The <code class="docutils literal notranslate"><span class="pre">gridworld</span></code> module provides routines for working with
+2-dimensional, 4-connected rectangular grids. Examples are given in
+the directory <code class="docutils literal notranslate"><span class="pre">examples/gridworlds</span></code>.  The primary source of detailed
+documentation is in <a class="reference external" href="http://www.python.org/dev/peps/pep-0257/#what-is-a-docstring">docstrings</a> found
+in the source code itself. There are several ways to get at this;
+e.g., you could use <a class="reference external" href="http://docs.python.org/library/pydoc.html">pydoc</a> by</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>$ pydoc tulip.gridworld
+</pre></div>
+</div>
+<p>(See <a class="reference internal" href="install.html#venv-pydoc-sec-label"><span class="std std-ref">virtualenv and pydoc</span></a> for troubleshooting.)  The basic
+representation is provided by the class <code class="docutils literal notranslate"><span class="pre">GridWorld</span></code>.  In all example
+code below, we assume the <code class="docutils literal notranslate"><span class="pre">gridworld</span></code> module has been imported as
+<code class="docutils literal notranslate"><span class="pre">gw</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tulip.gridworld</span> <span class="k">as</span> <span class="nn">gw</span>
+</pre></div>
+</div>
+<section id="description-format">
+<h2><span class="section-number">7.1. </span>Description format<a class="headerlink" href="#description-format" title="Link to this heading">¶</a></h2>
+<p>A gridworld problem can be defined by a “gridworld description
+string.” The core parsing routine is the <code class="docutils literal notranslate"><span class="pre">GridWorld.loads</span></code>; it is
+the current reference implementation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tulip.gridworld.GridWorld.loads">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">GridWorld.</span></span><span class="sig-name descname"><span class="pre">loads</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gw_desc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GridWorld</span></span></span><a class="reference internal" href="_modules/tulip/gridworld.html#GridWorld.loads"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tulip.gridworld.GridWorld.loads" title="Link to this definition">¶</a></dt>
+<dd><p>Reincarnate using given gridworld description string.</p>
+<dl class="simple">
+<dt>&#64;param gw_desc:</dt><dd><p>String containing a gridworld description.</p>
+</dd>
+</dl>
+<p>In a gridworld description, any line beginning with # is
+ignored (regarded as a comment). The first non-blank and
+non-comment line must give the grid size as two positive
+integers separated by whitespace, with the first being the
+number of rows and the second the number of columns.</p>
+<p>Each line after the size line is used to construct a row of
+the gridworld. These are read in order with maximum number of
+lines being the number of rows in the gridworld.  A row
+definition is whitespace-sensitive up to the number of columns
+(any characters beyond the column count are ignored, so in
+particular trailing whitespace is allowed) and can include the
+following symbols:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘ ‘ : an empty cell,</p></li>
+<li><p>‘*’ : a statically occupied cell,</p></li>
+<li><p>‘I’ : possible initial cell,</p></li>
+<li><p>‘G’ : goal cell (must be visited infinitely often).</p></li>
+</ul>
+</div></blockquote>
+<p>If the end of file is reached before all rows have been
+constructed, then the remaining rows are assumed to be empty.
+After all rows have been constructed, the remainder of the
+file is ignored.</p>
+</dd></dl>
+
+<section id="examples">
+<h3><span class="section-number">7.1.1. </span>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h3>
+<p>Consider a 2 x 3 gridworld where you wish to declare the cell at (1,2)
+(the bottom-right) as the initial position and (1,0) as a goal
+cell. This is achieved with the description string</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>#    0 1 2
+#   -------
+#  0| |*| |
+#   -------
+#  1|G| |I|
+#   -------
+
+2 3
+ *
+G I
+</pre></div>
+</div>
+<p>Any line beginning with <code class="docutils literal notranslate"><span class="pre">#</span></code> is treated as a comment and ignored. The
+purpose of the comment in this example is to provide an annotated view
+of the grid; for large problems, comments can be very helpful for
+humans, and anyway provide a means to make notes such as who created
+the file, a timestamp, and other experimental parameters. In this
+example, only the last three lines are critical. <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">3</span></code> declares that
+there are 2 rows and 3 columns. The other two lines define grid
+contents. Explicitly, there is a static obstacle at the first row and
+second column (i.e., at (0,1)). The last line indicates where the goal
+<code class="docutils literal notranslate"><span class="pre">G</span></code> and initial position <code class="docutils literal notranslate"><span class="pre">I</span></code> should be.</p>
+<p>If the above description string were in a file called <code class="docutils literal notranslate"><span class="pre">trivial.txt</span></code>,
+then you could load it using</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;trivial.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">triv</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">GridWorld</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To prettily print the result, and then to print the variable name of
+the cell located at (0,0), you would then</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">triv</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">triv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>See the method <code class="docutils literal notranslate"><span class="pre">pretty</span></code> for more formatting options (the first line
+above internally invokes <code class="docutils literal notranslate"><span class="pre">pretty</span></code> with sane defaults).  Notice that
+the variable name has prefix “Y”. This could be changed in the
+<code class="docutils literal notranslate"><span class="pre">prefix</span></code> argument used above when instantiating <code class="docutils literal notranslate"><span class="pre">GridWorld</span></code>. The
+string returned by <code class="docutils literal notranslate"><span class="pre">triv[0,0]</span></code> can be written in specifications.
+Indexing follows that of Python; in particular, negative indices are
+supported.</p>
+</section>
+</section>
+<section id="generating-continuous-space-partitions">
+<h2><span class="section-number">7.2. </span>Generating continuous-space partitions<a class="headerlink" href="#generating-continuous-space-partitions" title="Link to this heading">¶</a></h2>
+<p>Given a <code class="docutils literal notranslate"><span class="pre">GridWorld</span></code> object <code class="docutils literal notranslate"><span class="pre">Y</span></code>, you can create a
+<code class="docutils literal notranslate"><span class="pre">PropPreservingPartition</span></code> object describing the grid in a continuous
+state space with the method <code class="docutils literal notranslate"><span class="pre">dump_ppartition</span></code>.
+An example is to generate a random gridworld, generate an initial
+proposition-preserving partition, and then refine it based on
+continuous state space dynamics, as shown in the code below. Note that
+we use mostly default argument values to minimize clutter.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tulip.abstract</span> <span class="kn">import</span> <span class="n">discretize</span>
+<span class="kn">from</span> <span class="nn">tulip</span> <span class="kn">import</span> <span class="n">gridworld</span> <span class="k">as</span> <span class="n">gw</span>
+<span class="kn">from</span> <span class="nn">tulip.hybrid</span> <span class="kn">import</span> <span class="n">LtiSysDyn</span>
+<span class="kn">from</span> <span class="nn">polytope</span> <span class="kn">import</span> <span class="n">Polytope</span>
+<span class="kn">from</span> <span class="nn">polytope.plot</span> <span class="kn">import</span> <span class="n">plot_partition</span>
+
+<span class="c1"># Trivial dynamics</span>
+<span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">U</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">]]),</span>
+             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">],[</span><span class="mf">1.</span><span class="p">],[</span><span class="mf">1.</span><span class="p">],[</span><span class="mf">1.</span><span class="p">]]))</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">Polytope</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span><span class="mf">0.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">1.</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="o">-</span><span class="mf">1.</span><span class="p">]]),</span>
+             <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]))</span>
+<span class="n">sys_dyn</span> <span class="o">=</span> <span class="n">LtiSysDyn</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">,</span><span class="n">E</span><span class="p">,</span> <span class="n">Uset</span><span class="o">=</span><span class="n">U</span><span class="p">,</span> <span class="n">Wset</span><span class="o">=</span><span class="n">W</span><span class="p">)</span>
+
+<span class="c1"># Generate random gridworld, dump it and discretize based on dynamics</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">gw</span><span class="o">.</span><span class="n">random_world</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">num_init</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_goals</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">disc_dynamics</span> <span class="o">=</span> <span class="n">discretize</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">dump_ppartition</span><span class="p">(),</span> <span class="n">sys_dyn</span><span class="p">)</span>
+
+<span class="c1"># Pretty print abstraction to terminal, and depict partition reachability</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+<span class="n">plot_partition</span><span class="p">(</span><span class="n">disc_dynamics</span><span class="o">.</span><span class="n">ppp</span><span class="p">,</span> <span class="n">trans</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">7. Gridworlds</a><ul>
+<li><a class="reference internal" href="#description-format">7.1. Description format</a><ul>
+<li><a class="reference internal" href="#tulip.gridworld.GridWorld.loads"><code class="docutils literal notranslate"><span class="pre">GridWorld.loads()</span></code></a></li>
+<li><a class="reference internal" href="#examples">7.1.1. Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#generating-continuous-space-partitions">7.2. Generating continuous-space partitions</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="codegen.html"
+                          title="previous chapter"><span class="section-number">6. </span>Code generation and exporting of controllers</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="benchmarks.html"
+                          title="next chapter"><span class="section-number">8. </span>Benchmarks</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/gridworlds.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="benchmarks.html" title="8. Benchmarks"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="codegen.html" title="6. Code generation and exporting of controllers"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">7. </span>Gridworlds</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>

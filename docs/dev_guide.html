@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>10. Developer’s Guide &#8212; TuLiP 1.4.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=ff85e404" />
+    <link rel="stylesheet" type="text/css" href="_static/patch.css?v=0ad0caba" />
+    
+    <script src="_static/documentation_options.js?v=350a9c04"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <script src="_static/sidebar.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="11. Bibliography" href="bibliography.html" />
+    <link rel="prev" title="9. Additional Problem Formulations" href="formulations.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="bibliography.html" title="11. Bibliography"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="formulations.html" title="9. Additional Problem Formulations"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">10. </span>Developer’s Guide</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="developer-s-guide">
+<h1><span class="section-number">10. </span>Developer’s Guide<a class="headerlink" href="#developer-s-guide" title="Link to this heading">¶</a></h1>
+<p>The purpose of this page is to provide guidelines for contributors to the TuLiP
+project.  Also consult the <a class="reference external" href="https://github.com/tulip-control/tulip-control/wiki">Developers’ Wiki</a> and
+the <a class="reference external" href="https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/">tulip-control-discuss mailing list</a>
+(members only).</p>
+<section id="organization-and-rules">
+<span id="sec-code-style-guidelines"></span><h2><span class="section-number">10.1. </span>Organization and Rules<a class="headerlink" href="#organization-and-rules" title="Link to this heading">¶</a></h2>
+<p>We begin with important organizational notes and <strong>rules</strong> that should
+be followed:</p>
+<ul>
+<li><p><a class="reference external" href="https://www.python.org/dev/peps/pep-0020/">PEP 20</a>.</p></li>
+<li><p><a class="reference external" href="http://python.org/dev/peps/pep-0008/">PEP 8</a>.  Especially, you should</p>
+<ul class="simple">
+<li><p>use 4-space indentation;</p></li>
+<li><p>keep lines as short as possible, and at most 79 characters;</p></li>
+<li><p>name classes like <code class="docutils literal notranslate"><span class="pre">OurExample</span></code>, and methods like <code class="docutils literal notranslate"><span class="pre">generate_names</span></code>;
+notice that the former name is an object, whereas the latter is a command.</p></li>
+</ul>
+</li>
+<li><p>Avoid trailing whitespace.</p></li>
+<li><p><a class="reference external" href="http://python.org/dev/peps/pep-0257/">PEP 257</a>.  In summary, you should
+write a docstring for any public object (e.g., classes, methods, modules), and
+it should begin with a single-line summary.  This summary should be an
+imperative statement (e.g., “Compute the volume of given polytope.”).  Any
+additional documentation beyond the single-line summary can be included after
+leaving a blank line.</p></li>
+<li><p>Be careful what you export, i.e., make sure that what is obtained when someone
+uses “from tulip.foo import *” is what you intend.  Otherwise, hide names
+using the <a class="reference external" href="http://docs.python.org/3/reference/lexical_analysis.html#reserved-classes-of-identifiers">“_” prefix</a>.</p></li>
+<li><p>API documentation is built using <a class="reference external" href="http://epydoc.sourceforge.net/">Epydoc</a>.
+Accordingly, docstrings should be marked up with <a class="reference external" href="http://epydoc.sourceforge.net/manual-epytext.html">Epytext</a>.</p></li>
+<li><p>The User’s and Developer’s Guides are built using
+<a class="reference external" href="http://sphinx.pocoo.org/">Sphinx</a>.
+It uses a small extension of <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a>.
+Consult the <a class="reference external" href="http://docutils.sourceforge.net/docs/user/rst/quickref.html">reST quick reference</a>.</p></li>
+<li><p>Besides the previous two sources, documentation can appear in plaintext files,
+notably in README files.  These should have line widths of at most 80 characters.
+E.g., this can be achieved at the command-line using <code class="docutils literal notranslate"><span class="pre">fold</span> <span class="pre">-s</span> <span class="pre">-w</span> <span class="pre">80</span></code> or
+in <a class="reference external" href="http://www.gnu.org/software/emacs">Emacs</a> by <code class="docutils literal notranslate"><span class="pre">C-u</span> <span class="pre">80</span> <span class="pre">M-x</span> <span class="pre">set-fill-column</span></code>.</p></li>
+<li><p>When committing to the repository, you should write a summary line, at most 60
+characters in length, and if elaboration is necessary, then first skip a line
+(i.e., leave one blank) before beginning with details.</p></li>
+<li><p>A copyright notice and pointer to the <code class="docutils literal notranslate"><span class="pre">LICENSE</span></code> file of <code class="docutils literal notranslate"><span class="pre">tulip</span></code> shall be placed
+as comments at the top of each source file (unless no copyright applies).</p></li>
+<li><p>When referring to publications, check for a corresponding entry in
+<code class="docutils literal notranslate"><span class="pre">doc/bib.txt</span></code> and create one if needed. The syntax is described in
+<code class="docutils literal notranslate"><span class="pre">genbib.py</span></code>. References in the Sphinx-built documentation are achieved by
+including a link, e.g., inline like</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>`[WTOXM11] &lt;bibliography.html#wtoxm11&gt;`_
+</pre></div>
+</div>
+<p>which renders as <a class="reference external" href="bibliography.html#wtoxm11">[WTOXM11]</a>.
+References in docstrings (in the code)
+should be to the URL of the corresponding entry on the TuLiP website,
+using <a class="reference external" href="https://en.wikipedia.org/wiki/Markdown">Markdown syntax</a>,
+e.g.,</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">WTOXM11</span><span class="p">](</span>
+    <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">tulip</span><span class="o">-</span><span class="n">control</span><span class="o">.</span><span class="n">sourceforge</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">doc</span><span class="o">/</span><span class="n">bibliography</span><span class="o">.</span><span class="n">html</span><span class="c1">#wtoxm11)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="testing">
+<h2><span class="section-number">10.2. </span>Testing<a class="headerlink" href="#testing" title="Link to this heading">¶</a></h2>
+<p>A script for running tests is <code class="docutils literal notranslate"><span class="pre">run_test.py</span></code> in the root of the source
+tree. Without the <code class="docutils literal notranslate"><span class="pre">-f</span></code> or <code class="docutils literal notranslate"><span class="pre">--testfiles</span></code> switch, <code class="docutils literal notranslate"><span class="pre">run_tests.py</span></code> expects the
+user to request a family of tests to perform. The default is “base”, which
+corresponds to tests that should pass when the required dependencies of TuLiP
+are satisfied. The other extreme is “full”, which performs all tests. In
+between, other families are defined, e.g., “hybrid”, which involves all “base”
+tests and any tests that should pass given a successful <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">tulip[hybrid]</span></code>,
+namely, when the optional packages <code class="docutils literal notranslate"><span class="pre">cvxopt</span></code> and <code class="docutils literal notranslate"><span class="pre">polytope</span></code> are present.</p>
+<p>Provided the <code class="docutils literal notranslate"><span class="pre">-f</span></code> or <code class="docutils literal notranslate"><span class="pre">--testfiles</span></code> switch, it searches under the directory
+<code class="docutils literal notranslate"><span class="pre">tests/</span></code> for files with names ending in “_test.py”, and passes these to
+<a class="reference external" href="https://pytest.org">pytest</a>.  Use the flag “-h” to
+see driver script options.  Extra details about options:</p>
+<ul class="simple">
+<li><p>The flag “–cover” to generate a coverage report, which will likely be placed
+under <code class="docutils literal notranslate"><span class="pre">tests/cover/</span></code>.  It uses <a class="reference external" href="http://www.nedbatchelder.com/code/modules/coverage.html">Ned Batchelder’s coverage module</a>.</p></li>
+<li><p>The flag “–outofsource” will cause <code class="docutils literal notranslate"><span class="pre">tulip</span></code> to be imported from outside the
+current directory.  This is useful for testing against the installed form of
+TuLiP.</p></li>
+</ul>
+</section>
+<section id="version-naming">
+<h2><span class="section-number">10.3. </span>Version naming<a class="headerlink" href="#version-naming" title="Link to this heading">¶</a></h2>
+<p>For version numbers, the style is N.m.x where</p>
+<ul class="simple">
+<li><p>N = major version; everything that worked before could break</p></li>
+<li><p>m = revision; most functions should work, but might need (minor) modifications</p></li>
+<li><p>x = minor revision; code that ran should continue running</p></li>
+</ul>
+<p>So, if you go from version 1.2.2 to 1.2.3, then no interfaces should
+change, code should continue to run, etc.  If you go from 1.2.3 to
+1.3.0, then there might be changes in some arguments lists or other
+small things, but previous functionality still in place (somewhow).
+If you go from 1.3.0 to 2.0.0, then we can make whatever changes we
+want.</p>
+<p>None of these version numbers go in individual files, but
+the version number is a label for the entire package.</p>
+</section>
+<section id="making-releases">
+<h2><span class="section-number">10.4. </span>Making releases<a class="headerlink" href="#making-releases" title="Link to this heading">¶</a></h2>
+<ol class="arabic">
+<li><p>Collect list of major changes.</p></li>
+<li><p>Update the changelog.</p></li>
+<li><p>Tag with message of the form “REL: version 1.2.0”.</p></li>
+<li><p>Create source release, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">sdist</span></code>.</p></li>
+<li><p>Post it to PyPI and SourceForge.net.</p></li>
+<li><p>Build and post User’s Guide and API manual. Under the directory doc/, run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">./</span><span class="n">rsync</span><span class="o">-</span><span class="n">web</span><span class="o">.</span><span class="n">sh</span> <span class="n">USERNAME</span>
+<span class="o">./</span><span class="n">rsync</span><span class="o">-</span><span class="n">docs</span><span class="o">.</span><span class="n">sh</span> <span class="n">USERNAME</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">USERNAME</span></code> is your SourceForge.net handle.</p>
+</li>
+<li><p>Make announcement on <a class="reference external" href="https://lists.sourceforge.net/lists/listinfo/tulip-control-announce">tulip-control-announce mailing list</a>,
+providing major website links and the summary of changes.</p></li>
+<li><p>Bump version in the repository, in preparation for next release.</p></li>
+</ol>
+</section>
+<section id="contributions">
+<h2><span class="section-number">10.5. </span>Contributions<a class="headerlink" href="#contributions" title="Link to this heading">¶</a></h2>
+<p>Pull requests are expected to satisfy the following criteria:</p>
+<ol class="arabic simple">
+<li><p>add tests for new code</p></li>
+<li><p>ensure all tests are passing</p></li>
+<li><p>document any additions</p></li>
+<li><p>adhere to PEP8 style conventions</p></li>
+<li><p>use informative commit messages</p></li>
+<li><p>tidy commit history</p></li>
+</ol>
+</section>
+<section id="advice">
+<h2><span class="section-number">10.6. </span>Advice<a class="headerlink" href="#advice" title="Link to this heading">¶</a></h2>
+<p>The following are software engineering best practices that you should try to
+follow.  We mention them here for convenience of reference and to aid new
+committers. Unlike <a class="reference internal" href="#sec-code-style-guidelines"><span class="std std-ref">Organization and Rules</span></a>, this section can be
+entirely ignored.</p>
+<ul>
+<li><dl>
+<dt>Keep function length to a minimum.</dt><dd><p>As mentioned <a class="reference external" href="http://www.infoq.com/presentations/Scrub-Spin">at this talk</a>,
+<a class="reference external" href="http://en.wikipedia.org/wiki/Mars_Science_Laboratory">MSL</a>
+included the rule that no function should be longer than 75 lines of code.
+The Linux coding style guide is succinct</p>
+<blockquote>
+<div><dl class="simple">
+<dt>“The answer to that is that if you need more than 3 levels of indentation,</dt><dd><p>you’re screwed anyway,
+and should fix your program.”</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>For example, within any iteration, usually the iterated code block deserves
+its own function (or method).
+This changes context, helping to focus at each level individually.
+Things can also be named better, reusing names within the iteration w/o conflicts.
+Incidentally it also saves from long lines.
+Besides these, short functions are viewable w/o vertical scrolling.
+When debugging after months, the shorter the function,
+the faster it is loaded to working memory.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Avoid complicated conditions for if statements and other expressions.</dt><dd><p>Break them down into simpler ones. When possible write them in sequence
+(not nested), so that they are checked in an obvious order.
+This way a function returns when a condition is False, so the conjunction is
+implicit and easier to follow, one check at a time.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Name things to minimize comments.</dt><dd><p>Comments are useless if they attempt to explain what the code evidently does
+and can be harmful if they fail to do so and instead describe what it
+was intended to do, giving a false impression of correctness.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Have (simple) static checking on.</dt><dd><p>e.g. <a class="reference external" href="http://code.google.com/p/spyderlib/">Spyder</a> with
+<a class="reference external" href="https://pypi.python.org/pypi/pyflakes">pyflakes</a> enabled
+(Preferences-&gt; Editor-&gt; Code Introspection/Analysis-&gt; Code analysis
+(pyflakes) checked).</p>
+</dd>
+</dl>
+</li>
+<li><p>Modules shouldn’t become
+<a class="reference external" href="http://en.wikipedia.org/wiki/God_object">God objects</a>.
+Keep them short (at most a few thousand lines) and well-organized.</p></li>
+<li><p>Commit changes before you go to sleep.
+You can always <a class="reference external" href="https://help.github.com/articles/using-git-rebase/">rebase</a>
+later multiple times, until you are happy with the history.
+This ensures that history won’t have been forgotten by the time you return to
+that workspace.</p></li>
+<li><p>Prefix commits to classify the changes.
+The <a class="reference external" href="https://numpy.org/doc/stable/dev/development_workflow.html">NumPy development workflow</a>
+contains a summary of common abbreviations.
+Suggested abbreviations:</p>
+<ul class="simple">
+<li><p>API: backward incompatible change</p></li>
+<li><p>BIB: biliography (for BibTeX files)</p></li>
+<li><p>BIN: for generated files (usually those are binaries)</p></li>
+<li><p>BLD: related to building</p></li>
+<li><p>BUG: error correction</p></li>
+<li><p>CI: related to continuous integration tests (usually <code class="docutils literal notranslate"><span class="pre">.travis.yml</span></code>)</p></li>
+<li><p>CHG: change the code</p></li>
+<li><p>DEP: deprecate something, or remove a deprecated object</p></li>
+<li><p>DEV: development utility</p></li>
+<li><p>DOC: documentation (docstrings too)</p></li>
+<li><p>DRAFT: to be rewritten / fixed up (to be rebased, never in master)</p></li>
+<li><p>ENH: enhancement</p></li>
+<li><p>EXP: experimental (to be rebased, never in master)</p></li>
+<li><p>GIT: related to <code class="docutils literal notranslate"><span class="pre">git</span></code> configuration, for example changes to
+the files <code class="docutils literal notranslate"><span class="pre">.gitignore</span></code> and <code class="docutils literal notranslate"><span class="pre">.gitattributes</span></code></p></li>
+<li><p>IMG: changes to sources of images (for example, SVG files)</p></li>
+<li><p>MAI: maintenance</p></li>
+<li><p>MNT: same as “MAI”</p></li>
+<li><p>MV: move file(s)</p></li>
+<li><p>PEP8: style convention</p></li>
+<li><p>PEP*: change related to PEP*</p></li>
+<li><p>REF: refactoring</p></li>
+<li><p>REL: release-related</p></li>
+<li><p>REV: revert an earlier commit</p></li>
+<li><p>STY: style correction</p></li>
+<li><p>TST: testing</p></li>
+<li><p>TYP: type hints</p></li>
+<li><p>UI: user interface, e.g., command-line options,
+printing messages, logging, and similar changes</p></li>
+<li><p>WEB: changes to website; mostly relevant to branch <cite>gh-pages</cite></p></li>
+</ul>
+<p>Deciding which prefix from the above to use is not always straightforward,
+but doing so is a good exercise. Choose the more severe prefix applicable
+(usually API instead of MAI). For example, what distinguishes REF from MAI?
+REF should be a refactoring that produces code that is
+(for most practical purposes) equivalent, with the equivalence being
+clearly evident.</p>
+</li>
+</ul>
+<p>Further reading, of general interest:</p>
+<ul class="simple">
+<li><p>“<a class="reference external" href="http://who-t.blogspot.com/2009/12/on-commit-messages.html">On commit messages</a>” by Peter
+Hutterer (28 Dec 2009).</p></li>
+<li><p><a class="reference external" href="https://google.github.io/styleguide/pyguide.html">Google Python Style Guide</a></p></li>
+<li><p>Sections 1, 2, 4, 6, 8 of the <a class="reference external" href="https://github.com/torvalds/linux/blob/master/Documentation/process/coding-style.rst">Linux kernel coding style guide</a></p></li>
+<li><p><a class="reference external" href="http://en.wikipedia.org/wiki/The_Power_of_10:_Rules_for_Developing_Safety-Critical_Code">The Power of 10: Rules for Developing Safety-Critical Code</a></p></li>
+<li><p>Chapter 1: “Style”, <a class="reference external" href="http://www.cs.princeton.edu/~bwk/tpop.webpage/">The Practice of Programming</a></p></li>
+<li><p><a class="reference external" href="https://numpy.org/doc/stable/dev/index.html">NumPy development documentation</a></p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">10. Developer’s Guide</a><ul>
+<li><a class="reference internal" href="#organization-and-rules">10.1. Organization and Rules</a></li>
+<li><a class="reference internal" href="#testing">10.2. Testing</a></li>
+<li><a class="reference internal" href="#version-naming">10.3. Version naming</a></li>
+<li><a class="reference internal" href="#making-releases">10.4. Making releases</a></li>
+<li><a class="reference internal" href="#contributions">10.5. Contributions</a></li>
+<li><a class="reference internal" href="#advice">10.6. Advice</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="formulations.html"
+                          title="previous chapter"><span class="section-number">9. </span>Additional Problem Formulations</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="bibliography.html"
+                          title="next chapter"><span class="section-number">11. </span>Bibliography</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dev_guide.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+<div id="sidebarbutton" title="Collapse sidebar">
+<span>«</span>
+</div>
+
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="bibliography.html" title="11. Bibliography"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="formulations.html" title="9. Additional Problem Formulations"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">TuLiP 1.4.1 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href=""><span class="section-number">10. </span>Developer’s Guide</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2010-2017, California Institute of Technology.
+      Last updated on 17 April 2024.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.1.
+    </div>
+  </body>
+</html>
