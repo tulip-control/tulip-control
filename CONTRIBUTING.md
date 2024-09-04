@@ -9,4 +9,4 @@ Please consider the following items when opening a pull request:
 5. use informative commit messages
 6. tidy commit history
 
-[dev_guide]: https://github.com/tulip-control/tulip-control/blob/master/doc/dev_guide.rst
+[dev_guide]: https://github.com/tulip-control/tulip-control/blob/main/doc/dev_guide.rst
