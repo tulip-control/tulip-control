@@ -1,0 +1,27 @@
+commit 56b5bf44710e4420d868b3a13053dfd64c5cd075
+Author: Tkabb <31669570+Tkabb@users.noreply.github.com>
+Date:   Wed Oct 18 00:13:49 2017 +0200
+
+    Update load_discrete.m
+    
+    This definition is important before calling "load_Tulip", so it runs well and consider only the discrete case.
+
+diff --git a/contrib/matlabsim/discrete_example/load_discrete.m b/contrib/matlabsim/discrete_example/load_discrete.m
+index 1fdecf45..085fdff5 100644
+--- a/contrib/matlabsim/discrete_example/load_discrete.m
++++ b/contrib/matlabsim/discrete_example/load_discrete.m
+@@ -2,6 +2,7 @@
+ matfile = 'robot_discrete.mat';
+ timestep = 1;
+ modelname = 'Robot_Discrete';
++systype = 'is_discrete';
+ 
+ % Load the model
+ load_tulip;
+@@ -44,4 +45,4 @@
+ add_line(modelname, 'TulipController/1', 'Home/1', 'autorouting', 'on');
+ add_line(modelname, 'TulipController/2', 'Lot/1', 'autorouting', 'on');
+ add_line(modelname, 'TulipController/3', 'X0reach/1', 'autorouting', 'on');
+-add_line(modelname, 'TulipController/4', 'Loc/1', 'autorouting', 'on');
+\ No newline at end of file
++add_line(modelname, 'TulipController/4', 'Loc/1', 'autorouting', 'on');
