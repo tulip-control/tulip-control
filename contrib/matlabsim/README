@@ -1,5 +1,10 @@
 MATLAB Export
-Stephanie Tsuei, 2014
+
+Originally by Stephanie Tsuei, 2014
+
+NOTE
+There is some progress toward an alternative implementation at https://github.com/tulip-control/tulip-control/pull/189
+and patches from which are in the directory Sinit_patch/
 
 This folder contains the files required to export controllers to Simulink
 blocks and a couple examples for reference.
