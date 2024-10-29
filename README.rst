@@ -10,7 +10,7 @@ In most cases, it suffices to::
 
   pip install .
 
-TuLiP can be installed also `from PyPI <https://pypi.python.org/pypi/tulip>`_::
+TuLiP can be installed also `from PyPI <https://pypi.org/project/tulip>`_::
 
   pip install tulip
 

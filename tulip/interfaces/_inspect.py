@@ -56,11 +56,11 @@ def print_env() -> None:
     c.append(s)
     s = _format_python_package_message(
         'gr1py', gr1py_int.gr1py,
-        'https://pypi.python.org/pypi/gr1py')
+        'https://pypi.org/project/gr1py')
     c.append(s)
     s = _format_python_package_message(
         'dd', dd,
-        'https://pypi.python.org/pypi/dd')
+        'https://pypi.org/project/dd')
     c.append(s)
     if dd_cudd is None:
         s = (
@@ -72,19 +72,19 @@ def print_env() -> None:
     c.append(s)
     s = _format_python_package_message(
         'omega', omega_int.omega,
-        'https://pypi.python.org/pypi/omega')
+        'https://pypi.org/project/omega')
     c.append(s)
     s = _format_python_package_message(
         'numpy', numpy,
-        'https://pypi.python.org/pypi/numpy')
+        'https://pypi.org/project/numpy')
     c.append(s)
     s = _format_python_package_message(
         'scipy', scipy,
-        'https://pypi.python.org/pypi/scipy')
+        'https://pypi.org/project/scipy')
     c.append(s)
     s = _format_python_package_message(
         'cvxopt', cvxopt,
-        'https://pypi.python.org/pypi/cvxopt')
+        'https://pypi.org/project/cvxopt')
     c.append(s)
     if _check_glpsol():
         s = 'Found GLPK solver `glpsol` in `$PATH`.\n'
@@ -99,7 +99,7 @@ def print_env() -> None:
         s = f'Found module `cvxopt.glpk` as:\n    {cvxopt_glpk}\n.'
     c.append(s)
     s = _format_python_package_message(
-        'polytope', polytope, 'https://pypi.python.org/pypi/polytope')
+        'polytope', polytope, 'https://pypi.org/project/polytope')
     c.append(s)
     s = [
         'For details about what each package and solver does, '

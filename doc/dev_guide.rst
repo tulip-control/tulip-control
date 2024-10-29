@@ -192,7 +192,7 @@ entirely ignored.
 
 - Have (simple) static checking on.
     e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with
-    `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled
+    `pyflakes <https://pypi.org/project/pyflakes>`_ enabled
     (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis
     (pyflakes) checked).
 

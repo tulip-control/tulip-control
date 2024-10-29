@@ -791,7 +791,7 @@ def powerset(
     """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
 
     From <http://docs.python.org/3/library/itertools.html>,
-    also in <https://pypi.python.org/pypi/more-itertools>
+    also in <https://pypi.org/project/more-itertools>
     """
     s = list(iterable)
     return _itr.chain.from_iterable(

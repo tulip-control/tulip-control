@@ -1508,7 +1508,7 @@ class LabeledDiGraph(
 
         and for tikz:
 
-        - `dot2tex`: <https://pypi.python.org/pypi/dot2tex>
+        - `dot2tex`: <https://pypi.org/project/dot2tex>
         - `dot2texi`: <http://www.ctan.org/pkg/dot2texi>
           (to automate inclusion)
 
