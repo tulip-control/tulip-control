@@ -49,7 +49,6 @@ import errno
 import json
 import logging
 import os
-import pkg_resources as _pkg
 import subprocess
 import tempfile
 import typing as _ty
@@ -86,9 +85,20 @@ def check_gr1c() -> bool:
     except OSError:
         return False
     v = v.split()[1]
-    if _pkg.parse_version(v) >= _pkg.parse_version(GR1C_MIN_VERSION):
+    if _parse_version(v) >= _parse_version(GR1C_MIN_VERSION):
         return True
     return False
+
+
+def _parse_version(
+        version:
+            str
+        ) -> tuple[int, int, int]:
+    """Return version as tuple."""
+    numerals = version.split('.')
+    if len(numerals) != 3:
+        raise ValueError(version)
+    return tuple(map(int, numerals))
 
 
 def _assert_gr1c() -> None:

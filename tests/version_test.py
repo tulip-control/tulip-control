@@ -10,8 +10,7 @@ import sys
 import unittest.mock as mock
 
 import git
-import pkg_resources
-from pkg_resources.extern import packaging
+import packaging
 import pytest
 import tulip
 import tulip._version
@@ -71,7 +70,7 @@ def test_git_version(mock_repo):
 
 def assert_pep440(version):
     """Raise `AssertionError` if `version` violates PEP440."""
-    v = pkg_resources.parse_version(version)
+    v = packaging.version.parse(version)
     assert isinstance(v, packaging.version.Version), v
 
 

@@ -40,6 +40,7 @@ Homepage = "http://tulip-control.org"
 test = [
     "matplotlib >= 2.0.0",
     "gr1py >= 0.2.0",
+    "packaging >= 25.0",
     "pytest",
     "setuptools >= 39.0.0",
 ]

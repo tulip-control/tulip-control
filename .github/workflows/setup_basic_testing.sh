@@ -43,7 +43,7 @@ pip install dd \
 python setup.py sdist
 pip install dist/tulip-*.tar.gz
 # install test dependencies
-pip install pytest
+pip install pytest packaging
 # diagnostics
 dot -V
 set -o posix
