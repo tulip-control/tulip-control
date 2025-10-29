@@ -33,7 +33,9 @@ echo "b8e966b4562c96a03e7fbea23972958\
 # unpack
 tar -xzf ${CUDD_GZ}
 python -c 'from download import make_cudd; make_cudd()'
-python setup.py install --cudd
+pip install --upgrade wheel cython
+export DD_CUDD=1
+pip install . -vvv --use-pep517 --no-build-isolation
 cd tests/
 python -c 'import dd.cudd'
 cd ../..
