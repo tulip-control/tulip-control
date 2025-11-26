@@ -90,7 +90,7 @@ echo '64885a0b0abf13aaed542a05ef8e590194b13626dcd07209ec55b41f788c6a56  pycarl.t
     shasum -a 256 -c -
 tar xzf pycarl.tgz
 pushd pycarl-2.2.0
-python3 setup.py develop
+pip3 install -e .
 popd
 
 
@@ -167,5 +167,5 @@ echo '3c59fb8bed69637e7a1e96b9372198a3428b305520108baa3df627a35940762d  stormpy-
     shasum -a 256 -c -
 tar xzf stormpy-stable.tgz
 pushd stormpy-1.8.0
-python3 setup.py develop
+pip3 install -e .
 popd

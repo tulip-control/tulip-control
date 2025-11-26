@@ -17,7 +17,7 @@ You can now:
 ```
 mkvirtualenv nessa
 cd ~/nessa`
-python setup.py develop
+pip install -e .
 ```
 
 Then your editor (e.g. `spyder`) will see the docstrings and functions as you work on them

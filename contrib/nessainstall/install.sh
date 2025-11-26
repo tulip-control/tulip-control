@@ -346,7 +346,7 @@ fi
 cd tulip-control
 
 if [ "$tulip_develop" = "true" ]; then
-	python setup.py develop
+	pip install -e .
 else
     pip install .
 fi
