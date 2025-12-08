@@ -4,6 +4,9 @@
 # Prepare for running test collection "full".
 
 
+sudo apt install \
+    curl
+
 # install `cvxopt.glpk`
 export CVXOPT_BUILD_GLPK=1
 #
