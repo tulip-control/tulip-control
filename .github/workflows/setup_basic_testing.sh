@@ -8,7 +8,6 @@
 sudo apt update
 sudo apt install \
     gfortran \
-    libatlas-base-dev \
     liblapack-dev \
     libgmp-dev \
     libmpfr-dev \
