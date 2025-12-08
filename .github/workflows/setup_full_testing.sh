@@ -89,4 +89,5 @@ which slugs
 pip install gitpython
 #
 # install `stormpy` and its dependencies
-./extern/get-stormpy.sh
+pip install stormpy
+# ./extern/get-stormpy.sh
