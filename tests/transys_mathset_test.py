@@ -142,7 +142,7 @@ def subset_test():
     assert(s._set == {1,2} )
     assert(not bool(s._list) )
     #s.add(3)
-    return a
+
 
 def powerset_test():
     s = [[1, 2], '3', {'a':1}, 1]
@@ -160,7 +160,7 @@ def powerset_test():
     assert(isinstance(f, PowerSet) )
     assert(f.math_set._set == {1, '3', 6} )
     assert(compare_lists(f.math_set._list, [[1, 2], {'a':1} ] ) )
-    return s
+
 
 class PowerSet_operations_test:
     def setup_method(self):

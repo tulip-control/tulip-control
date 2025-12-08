@@ -30,7 +30,6 @@ def ts_test():
     for state in {'s1', 's2', 's3'}:
         assert(ts.states[state]['ap'] == set() )
     _logger.debug(ts)
-    return ts
 
 
 def ba_test():
@@ -52,12 +51,11 @@ def ba_test():
     ba.transitions.add('q0', 'q0', letter=set() )
     _logger.debug(ba)
     ba.save('ba.pdf')
-    return ba
 
 
 def ba_ts_prod_test():
-    ts = ts_test()
-    ba = ba_test()
+    ts = _make_ts()
+    ba = _make_ba()
     ba_ts = trs.products.ba_ts_sync_prod(ba, ts)
     check_prodba(ba_ts)
     ts_ba, persistent = trs.products.ts_ba_sync_prod(ts, ba)
@@ -66,7 +64,6 @@ def ba_ts_prod_test():
     assert(set(ts_ba.states) == states)
     assert(persistent == {('s0', 'q1')} )
     ba_ts.save('prod.pdf')
-    return ba_ts
 
 
 def check_prodba(ba_ts):
@@ -93,11 +90,41 @@ def check_prodba(ba_ts):
     )
 
 def on_the_fly_test():
-    ba = ba_test()
-    ts = ts_test()
+    ba = _make_ba()
+    ts = _make_ts()
     prodba = trs.OnTheFlyProductAutomaton(ba, ts)
     assert(set(prodba.states) == {('s0', 'q1'), ('s1', 'q0')})
     prodba.save('prodba_initialized.pdf')
     prodba.add_all_states()
     check_prodba(prodba)
     prodba.save('prodba_full.pdf')
+
+
+def _make_ts():
+    ts = trs.FTS()
+    states = {'s0', 's1', 's2', 's3'}
+    ts.states.add_from(states)
+    ts.states.initial.add_from({'s0', 's1'})
+    ts.atomic_propositions.add('p')
+    ts.transitions.add_from(
+        [('s0', 's1'), ('s1', 's2'),
+         ('s2', 's3'), ('s3', 's0')])
+    ts.atomic_propositions.add('p')
+    ts.states['s0']['ap'] = {'p'}
+    ts.states['s1']['ap'] = set()
+    ts.states['s2']['ap'] = set()
+    ts.states['s3']['ap'] = set()
+    return ts
+
+
+def _make_ba():
+    ba = trs.BA()
+    ba.atomic_propositions |= {'p'}
+    ba.states.add_from({'q0', 'q1'})
+    ba.states.initial.add('q0')
+    ba.accepting.add('q1')
+    ba.transitions.add('q0', 'q1', letter={'p'})
+    ba.transitions.add('q1', 'q1', letter={'p'})
+    ba.transitions.add('q1', 'q0', letter=set())
+    ba.transitions.add('q0', 'q0', letter=set())
+    return ba
