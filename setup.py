@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Installation script."""
+import importlib
 import logging
 import subprocess
 import sys
@@ -54,20 +55,23 @@ def run_setup() -> None:
     """Build parser, get version from `git`, install."""
     # Build PLY table, to be installed as tulip package data
     try:
-        import tulip.spec.lexyacc
-        tabmodule = tulip.spec.lexyacc.TABMODULE.split('.')[-1]
+        print('Building parser tables...')
+        lexyacc = import_module_from_file(
+            'lexyacc', 'tulip/spec/lexyacc.py')
+        tabmodule = lexyacc.TABMODULE.split('.')[-1]
         outputdir = 'tulip/spec'
-        parser = tulip.spec.lexyacc.Parser()
+        parser = lexyacc.Parser(ast='building')
         parser.build(
             tabmodule,
             outputdir=outputdir,
             write_tables=True,
             debug=True,
             debuglog=_logger)
-        import tulip.interfaces.ltl2ba
-        tabmodule = tulip.interfaces.ltl2ba.TABMODULE.split('.')[-1]
+        ltl2ba = import_module_from_file(
+            'ltl2ba', 'tulip/interfaces/ltl2ba.py')
+        tabmodule = ltl2ba.TABMODULE.split('.')[-1]
         outputdir = 'tulip/interfaces'
-        parser = tulip.interfaces.ltl2ba.Parser()
+        parser = ltl2ba.Parser()
         parser.build(
             tabmodule,
             outputdir=outputdir,
@@ -75,6 +79,7 @@ def run_setup() -> None:
             debug=True,
             debuglog=_logger)
         plytable_build_failed = False
+        print('Completed building parser tables.')
     except Exception as e:
         tb = ''.join(
             _tb.format_exception(e))
@@ -104,6 +109,20 @@ def run_setup() -> None:
               '    Failed to build PLY table.  ' +
               'Please run setup.py again.' +
               '!' * 65)
+
+
+def import_module_from_file(
+        module_name:
+            str,
+        filepath:
+            str):
+    """Return imported module."""
+    module_spec = importlib.util.spec_from_file_location(
+        module_name, filepath)
+    module = importlib.util.module_from_spec(module_spec)
+    sys.modules[module_name] = module
+    module_spec.loader.exec_module(module)
+    return module
 
 
 def install_cvxopt() -> None:

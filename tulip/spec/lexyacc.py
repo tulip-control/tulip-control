@@ -41,8 +41,6 @@ import warnings
 import ply.lex
 import ply.yacc
 
-import tulip.spec.ast as _ast
-
 
 _logger = logging.getLogger(__name__)
 TABMODULE = 'tulip.spec.ltl_parsetab'
@@ -252,6 +250,8 @@ class Parser:
             ast=None,
             lexer=None):
         if ast is None:
+            import tulip.spec.ast as _ast
+                # enables importing from `setup.py`
             self.ast = _ast.nodes
         else:
             self.ast = ast
@@ -349,8 +349,8 @@ class Parser:
                 str,
             debuglog:
                 logging.Logger |
-                None=None
-            ) -> _ast.NodeSpec:
+                None=None):
+            # ) -> _ast.NodeSpec:
         """Return syntax tree for `formula`.
 
         @param formula:
@@ -484,8 +484,8 @@ class Parser:
 
 def parse(
         formula:
-            str
-        ) -> _ast.NodeSpec:
+            str):
+        # ) -> _ast.NodeSpec:
     warnings.warn(
         'Deprecated: Better to '
         'instantiate a Parser once only.')

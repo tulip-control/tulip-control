@@ -32,12 +32,10 @@
 """Interface to `ltl2ba`."""
 import logging
 import subprocess
+import typing as _ty
 
-import networkx as nx
 import ply.lex
 import ply.yacc
-
-import tulip.transys as _trs
 
 
 TABMODULE = 'tulip.interfaces.ltl2ba_parsetab'
@@ -222,7 +220,7 @@ class Parser:
                 str
             ) -> tuple[
                 dict[str, str],
-                nx.DiGraph,
+                _ty.Any,  # `networkx.MultiDiGraph`
                 set[str],
                 set[str]]:
         """Return a Buchi automaton from parsing `ltl2ba_output`.
@@ -243,6 +241,7 @@ class Parser:
               the key `"guard"`, with a Boolean
               formula as value (the formula as `str`)
         """
+        import networkx as nx
         self.g = nx.MultiDiGraph()
         # flat is better than nested
         self.initial_nodes = set()
@@ -344,8 +343,7 @@ class Parser:
 
 def ltl2ba(
         formula:
-            str
-        ) -> _trs.BuchiAutomaton:
+            str):  # -> tulip.transys.BuchiAutomaton
     """Convert LTL formula to Buchi Automaton using `ltl2ba`.
 
     @param formula:
@@ -354,6 +352,7 @@ def ltl2ba(
         Buchi automaton whose edges are annotated
         with Boolean formulas as `str`
     """
+    import tulip.transys as _trs
     ltl2ba_out = call_ltl2ba(str(formula))
     parser = ltl2baint.Parser()
     symbols, g, initial, accepting = parser.parse(ltl2ba_out)
