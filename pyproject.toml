@@ -9,9 +9,8 @@ name = "tulip"
 description = "Temporal Logic Planning (TuLiP) Toolbox"
 authors = [{name = "Caltech Control and Dynamical Systems", email = "tulip@tulip-control.org"}]
 readme = "README.rst"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 classifiers = [
-    "License :: OSI Approved :: BSD License",
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering",
