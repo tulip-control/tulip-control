@@ -8,6 +8,7 @@
 sudo apt update
 sudo apt install \
     gfortran \
+    libsuitesparse-dev \
     liblapack-dev \
     libgmp-dev \
     libmpfr-dev \
@@ -24,6 +25,9 @@ sudo apt install \
     libz3-dev \
     python3-z3 \
     libhwloc-dev
+    # cvxopt:
+    #    libsuitesparse-dev
+    #    libglpk-dev
 # install dependencies from PyPI
 pip install \
     --ignore-installed \
