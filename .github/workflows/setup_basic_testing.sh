@@ -28,6 +28,7 @@ sudo apt install \
 pip install \
     --ignore-installed \
     --upgrade \
+        build \
         pip \
         setuptools \
         wheel
@@ -39,7 +40,7 @@ pip install \
 pip install dd \
     --no-binary dd
 # install `tulip`
-python setup.py sdist
+python -m build
 pip install dist/tulip-*.tar.gz
 # install test dependencies
 pip install pytest packaging
