@@ -167,9 +167,7 @@ class Parser:
         self.start = 'claim'
         self.tokens = self.lexer.tokens
         self.tabmodule = TABMODULE
-        self.build(
-            write_tables=True,
-            debug=False)
+        self.build()
         self.g = None
         self.initial_nodes = None
         self.accepting_nodes = None
