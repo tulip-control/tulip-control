@@ -36,8 +36,6 @@ Contains XML import and export functions,
 so that we can export (and not recompute)
 TuLiP data structures.
 """
-import typing as _ty
-
 import numpy
 import polytope
 import scipy.sparse as _sp
@@ -47,7 +45,7 @@ from tulip import abstract
 import xml.etree.ElementTree as ET
 
 
-_Data: _ty.TypeAlias = (
+_Data = (
     polytope.Polytope |
     polytope.Region |
     abstract.PropPreservingPartition |

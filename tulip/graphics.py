@@ -69,9 +69,9 @@ __all__ = [
 
 
 if _ty.TYPE_CHECKING:
-    _Digraph: _ty.TypeAlias = _gv.Digraph
-    _Axes: _ty.TypeAlias = _mpl.axes.Axes
-    _Figure: _ty.TypeAlias = _mpl.figure.Figure
+    _Digraph = _gv.Digraph
+    _Axes = _mpl.axes.Axes
+    _Figure = _mpl.figure.Figure
 else:
     _Digraph = _utl.get_type(_gv, 'Digraph')
     _Axes = _utl.get_type(_mpl, 'axes.Axes')
