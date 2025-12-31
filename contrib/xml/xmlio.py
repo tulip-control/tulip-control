@@ -214,7 +214,7 @@ def _import_xml(
     elif nodetype == T_ADJ:
         return _import_adj(node)
     elif nodetype == T_SET:
-        return _import_list(node, type_STR=T_SET)
+        return _import_list(node, type_str=T_SET)
     # Tulip data structures
     elif nodetype == T_POLYTOPE:
         return _import_polytope(node)
