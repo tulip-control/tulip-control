@@ -161,7 +161,7 @@ def exportXML(
     tree = _export_xml(data, None, tag)
     _make_pretty(tree)
     pretty_string = ET.tostring(tree)
-    xmlfile = open(filename, 'w')
+    xmlfile = open(filename, 'wb')
     xmlfile.write(pretty_string)
     xmlfile.close()
 
