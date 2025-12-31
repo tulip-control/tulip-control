@@ -115,13 +115,13 @@ def _make_pretty(
     tab_string = '\n' + '\t' * indent
     # If a tree has children,
     # put tabs in front of the first child
-    if tree.getchildren():
+    if list(tree):
         if tree.text is not None:
             tree.text = tab_string + tree.text
         else:
             tree.text = tab_string
     # Number of children in the tree
-    N = len(tree.getchildren())
+    N = len(list(tree))
     # Recursively run function on children
     for index, child in enumerate(tree):
         _make_pretty(child, indent=indent + 1)
