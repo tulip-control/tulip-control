@@ -309,7 +309,7 @@ def eq_gridworld_param():
         yield (G, H, is_equal)
 
 
-@pytest.mark.parametrize('G,H,eq', eq_gridworld_param())
+@pytest.mark.parametrize('G,H,eq', list(eq_gridworld_param()))
 def eq_gridworld_test(G, H, eq):
     if eq:
         G == H
