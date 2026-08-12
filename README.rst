@@ -72,7 +72,7 @@ For alternatives and a summary of usage, ``./run_tests.py -h``
 Contact and support
 -------------------
 
-* Ask for help on the `tulip-control-users mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-users>`_
+* Ask for help via `discussions on GitHub <https://github.com/tulip-control/tulip-control/discussions>`_.
 * For release announcements, join the `tulip-control-announce mailing list <https://sourceforge.net/p/tulip-control/mailman/tulip-control-announce>`_
 * Bug reports and feature requests should be made at https://github.com/tulip-control/tulip-control/issues
   Please check for prior discussion and reports before opening a new issue.

@@ -2,11 +2,7 @@ Developer's Guide
 =================
 
 The purpose of this page is to provide guidelines for contributors to the TuLiP
-project.  Also consult the `Developers' Wiki
-<https://github.com/tulip-control/tulip-control/wiki>`_ and
-the `tulip-control-discuss mailing list
-<https://sourceforge.net/p/tulip-control/mailman/tulip-control-discuss/>`_
-(members only).
+project.  Also consult the `Developers' Wiki <https://github.com/tulip-control/tulip-control/wiki>`_.
 
 .. _sec:code-style-guidelines:
 
