@@ -8,7 +8,6 @@ import traceback as _tb
 
 import setuptools
 # inline:
-# import git
 # import polytope
 # import tulip.spec.lexyacc
 
@@ -31,21 +30,21 @@ def git_version(
             str
         ) -> str:
     """Return version with local version identifier."""
-    import git
-    repo = git.Repo('.git')
-    repo.git.status()
-    sha = repo.head.commit.hexsha
-    if repo.is_dirty():
+    sha = subprocess.check_output([
+        'git', 'log', '-1', '--format=%H'
+    ], universal_newlines=True).strip()
+    status_output = subprocess.check_output([
+        'git', 'status', '--porcelain'
+    ], universal_newlines=True).strip()
+    if len(status_output) > 0:
         return f'{version}.dev0+{sha}.dirty'
     # commit is clean
     # is it release of `version` ?
     try:
-        tag = repo.git.describe(
-            match='v[0-9]*',
-            exact_match=True,
-            tags=True,
-            dirty=True)
-    except git.GitCommandError:
+        tag = subprocess.check_output([
+            'git', 'describe', r'--match=v[0-9]*','--exact-match','--tags','--dirty'
+        ], universal_newlines=True).strip()
+    except subprocess.CalledProcessError:
         return f'{version}.dev0+{sha}'
     assert tag == 'v' + version, (tag, version)
     return version

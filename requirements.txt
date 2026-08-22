@@ -2,15 +2,9 @@
 pip>=9.0.0
 setuptools>=39.0.0
 
-# easy extras
-gr1py>=0.2.0
-
 # extras (uncomment as needed)
 # cvxopt==...  # for faster polytopic operations.
     # Choose the version of `cvxopt` based on
     # what is required by the version of the
     # package `polytope` that is installed.
 # matplotlib  # for plots
-
-# dev
-gitpython==3.1.54
