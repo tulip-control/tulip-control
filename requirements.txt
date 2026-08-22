@@ -8,6 +8,3 @@ setuptools>=39.0.0
     # what is required by the version of the
     # package `polytope` that is installed.
 # matplotlib  # for plots
-
-# dev
-gitpython==3.1.54
