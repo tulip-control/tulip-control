@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 
-import packaging
+import packaging.version
 import pytest
 import tulip
 import tulip._version
