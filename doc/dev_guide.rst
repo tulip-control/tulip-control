@@ -29,10 +29,12 @@ be followed:
   imperative statement (e.g., "Compute the volume of given polytope.").  Any
   additional documentation beyond the single-line summary can be included after
   leaving a blank line.
+
 - Be careful what you export, i.e., make sure that what is obtained when someone
-  uses "from tulip.foo import \*" is what you intend.  Otherwise, hide names
+  uses ``from tulip.foo import *`` is what you intend.  Otherwise, hide names
   using the `"_" prefix
   <http://docs.python.org/3/reference/lexical_analysis.html#reserved-classes-of-identifiers>`_.
+
 - API documentation is built using `Epydoc <http://epydoc.sourceforge.net/>`_.
   Accordingly, docstrings should be marked up with `Epytext
   <http://epydoc.sourceforge.net/manual-epytext.html>`_.
@@ -108,10 +110,10 @@ For version numbers, the style is N.m.x where
 
 So, if you go from version 1.2.2 to 1.2.3, then no interfaces should
 change, code should continue to run, etc.  If you go from 1.2.3 to
-1.3.0, then there might be changes in some arguments lists or other
-small things, but previous functionality still in place (somewhow).
-If you go from 1.3.0 to 2.0.0, then we can make whatever changes we
-want.
+1.3.0, then there might be changes in some argument lists or other
+small things, but previous functionality still in place.
+If you go from 1.3.0 to 2.0.0, then we can make extensive
+backward-incompatible changes.
 
 None of these version numbers go in individual files, but
 the version number is a label for the entire package.
@@ -122,7 +124,7 @@ Making releases
 #. Collect list of major changes.
 #. Update the changelog.
 #. Tag with message of the form "REL: version 1.2.0".
-#. Create source release, ``python setup.py sdist``.
+#. Create source release, ``python -m build``
 #. Post it to PyPI and SourceForge.net.
 #. Build and post User's Guide and API manual. Under the directory doc/, run ::
 
@@ -157,52 +159,49 @@ committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
 entirely ignored.
 
 - Keep function length to a minimum.
-    As mentioned `at this talk <http://www.infoq.com/presentations/Scrub-Spin>`_,
-    `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_
-    included the rule that no function should be longer than 75 lines of code.
-    The Linux coding style guide is succinct
+  As mentioned `in this talk <http://www.infoq.com/presentations/Scrub-Spin>`_,
+  `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_
+  included the rule that no function should be longer than 75 lines of code.
 
-      "The answer to that is that if you need more than 3 levels of indentation,
-       you're screwed anyway,
-       and should fix your program."
+  For example, the code block inside an iteration statement
+  can be more readable if written as a separate function.
+  This helps focus at each level of logic.
 
-    For example, within any iteration, usually the iterated code block deserves
-    its own function (or method).
-    This changes context, helping to focus at each level individually.
-    Things can also be named better, reusing names within the iteration w/o conflicts.
-    Incidentally it also saves from long lines.
-    Besides these, short functions are viewable w/o vertical scrolling.
-    When debugging after months, the shorter the function,
-    the faster it is loaded to working memory.
+  In addition, less nesting of statements results in shorter
+  lines. Shorter functions fit on a single screen, making
+  reading them easier.
 
-- Avoid complicated conditions for if statements and other expressions.
-    Break them down into simpler ones. When possible write them in sequence
-    (not nested), so that they are checked in an obvious order.
-    This way a function returns when a condition is False, so the conjunction is
-    implicit and easier to follow, one check at a time.
+  When debugging after months, the shorter the function,
+  the faster it is loaded into working memory.
 
-- Name things to minimize comments.
-    Comments are useless if they attempt to explain what the code evidently does
-    and can be harmful if they fail to do so and instead describe what it
-    was intended to do, giving a false impression of correctness.
+- One way to make larger predicates of `if` statements more
+  readable is to spread them over multiple lines, for example::
 
-- Have (simple) static checking on.
-    e.g. `Spyder <http://code.google.com/p/spyderlib/>`_ with
-    `pyflakes <https://pypi.python.org/pypi/pyflakes>`_ enabled
-    (Preferences-> Editor-> Code Introspection/Analysis-> Code analysis
-    (pyflakes) checked).
+    is_positive_int = (
+        x.is_integer()
+        and x > 0)
+    if is_positive_int:
+        ...
+
+- Choose identifiers to minimize comments.
+  Comments become verbose if they duplicate what the code
+  does, and can confuse if they are not in sync with the
+  code they describe.
+
+- Add type hints to functions and use static type checkers,
+  for example `Mypy <https://pypi.org/project/mypy/>`_.
 
   .. advice for emacs users ?
 
-- Modules shouldn't become
-  `God objects <http://en.wikipedia.org/wiki/God_object>`_.
-  Keep them short (at most a few thousand lines) and well-organized.
+- Modules should not become too large. This is not necessarily
+  about the number of lines in a module, but rather its scope.
 
 - Commit changes before you go to sleep.
   You can always `rebase <https://help.github.com/articles/using-git-rebase/>`_
-  later multiple times, until you are happy with the history.
-  This ensures that history won't have been forgotten by the time you return to
-  that workspace.
+  later, until you are happy with ``git`` history.
+  This ensures that when you commit, you remember the
+  context needed for writing the commit messages and
+  organizing the changes into commits.
 
 - Prefix commits to classify the changes.
   The `NumPy development workflow
@@ -243,10 +242,10 @@ entirely ignored.
 
   Deciding which prefix from the above to use is not always straightforward,
   but doing so is a good exercise. Choose the more severe prefix applicable
-  (usually API instead of MAI). For example, what distinguishes REF from MAI?
-  REF should be a refactoring that produces code that is
-  (for most practical purposes) equivalent, with the equivalence being
-  clearly evident.
+  (usually ``API`` instead of ``MNT``).
+  For example, what distinguishes ``REF`` from ``MNT``?
+  ``REF`` should be a refactoring that produces code that is
+  equivalent, with the equivalence being clearly evident.
 
 
 Further reading, of general interest:
@@ -257,7 +256,7 @@ Further reading, of general interest:
 
 - `Google Python Style Guide <https://google.github.io/styleguide/pyguide.html>`_
 
-- Sections 1, 2, 4, 6, 8 of the `Linux kernel coding style guide
+- Sections 2, 4, 6, 8 of the `Linux kernel coding style guide
   <https://github.com/torvalds/linux/blob/master/Documentation/process/coding-style.rst>`_
 
 - `The Power of 10: Rules for Developing Safety-Critical Code
