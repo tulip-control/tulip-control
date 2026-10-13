@@ -159,7 +159,7 @@ committers. Unlike :ref:`sec:code-style-guidelines`, this section can be
 entirely ignored.
 
 - Keep function length to a minimum.
-  As mentioned `in this talk <http://www.infoq.com/presentations/Scrub-Spin>`_,
+  As mentioned `in this talk <https://dl.acm.org/doi/10.1145/1639950.1705499>`_,
   `MSL <http://en.wikipedia.org/wiki/Mars_Science_Laboratory>`_
   included the rule that no function should be longer than 75 lines of code.
 
