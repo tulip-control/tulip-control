@@ -90,5 +90,5 @@ echo "`pwd`/slugs-repo/src" >> $GITHUB_PATH
 which slugs
 #
 # install `stormpy` and its dependencies
-pip install stormpy
+pip install stormpy==1.14.0
 # ./extern/get-stormpy.sh
