@@ -89,10 +89,6 @@ echo "`pwd`/slugs-repo/src" >> $GITHUB_PATH
 # diagnostic information
 which slugs
 #
-# install Python requirements for
-# development testing
-pip install gitpython
-#
 # install `stormpy` and its dependencies
 pip install stormpy
 # ./extern/get-stormpy.sh

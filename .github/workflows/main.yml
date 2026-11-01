@@ -87,7 +87,7 @@ jobs:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies from PyPI
               run: |
-                pip install -U pip setuptools sphinx gitpython
+                pip install -U pip setuptools sphinx
                 pip install .
             - name: Build
               run: |
