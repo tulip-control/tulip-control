@@ -471,8 +471,8 @@ def check_syntax(
     Return `True` if syntax check passed, `False` on error.
     """
     _assert_gr1c()
-    f = tempfile.TemporaryFile()
-    f.write(bytes(spec_str, 'utf-8'))
+    f = tempfile.TemporaryFile(mode='wt')
+    f.write(spec_str)
     f.seek(0)
     p = subprocess.Popen(
         [f'{GR1C_BIN_PREFIX}gr1c', '-s'],
@@ -505,8 +505,8 @@ def check_realizable(
     _assert_gr1c()
     init_option = select_options(spec)
     s = translate(spec, 'gr1c')
-    f = tempfile.TemporaryFile()
-    f.write(bytes(s, 'utf-8'))
+    f = tempfile.TemporaryFile(mode='wt')
+    f.write(s)
     f.seek(0)
     _logger.info('starting realizability check')
     p = subprocess.Popen(
