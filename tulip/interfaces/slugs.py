@@ -210,7 +210,6 @@ def _call_slugs(
         subprocess.check_call(
             ['python', slugs_compiler_path, filename],
             stdout=slugs_infile,
-            stderr=subprocess.STDOUT,
             text=True)
     options = [slugs_path, slugs_infile.name]
     if synth:
