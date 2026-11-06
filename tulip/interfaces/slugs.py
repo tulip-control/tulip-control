@@ -211,7 +211,7 @@ def _call_slugs(
             ['python', slugs_compiler_path, filename],
             stdout=slugs_infile,
             stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            text=True)
     options = [slugs_path, slugs_infile.name]
     if synth:
         if symbolic:
@@ -237,7 +237,7 @@ def _call_slugs(
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            universal_newlines=True)
+            text=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception('slugs not found in path.')

@@ -116,7 +116,7 @@ def synthesize(
             [LILY, '-f', f, '-syn', IO_PARTITION_FILE],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            text=True)
         out = p.stdout.read()
     except OSError as e:
         if e.errno == errno.ENOENT:
