@@ -81,7 +81,7 @@ def check_gr1c() -> bool:
     try:
         v = subprocess.check_output(
             ["gr1c", "-V"],
-            universal_newlines=True)
+            text=True)
     except OSError:
         return False
     v = v.split()[1]
@@ -127,7 +127,7 @@ def get_version() -> tuple[int, int, int]:
     try:
         v_str = subprocess.check_output(
             ["gr1c", "-V"],
-            universal_newlines=True)
+            text=True)
     except OSError:
         raise OSError('gr1c not found')
     v_str = v_str.split()[1]
@@ -479,7 +479,7 @@ def check_syntax(
         stdin=f,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True)
+        text=True)
     p.wait()
     _logger.debug(f'gr1c returncode: {p.returncode}')
     _logger.debug(f'gr1c stdout: {p.stdout.read()}')
@@ -517,7 +517,7 @@ def check_realizable(
         stdin=f,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True)
+        text=True)
     p.wait()
     _logger.info(f'`gr1c` input:\n{s}{_hl}')
     if p.returncode == 0:
@@ -558,7 +558,7 @@ def synthesize(
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            text=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception(
@@ -712,7 +712,7 @@ class GR1CSession:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                universal_newlines=True)
+                text=True)
         else:
             self.p = None
 
@@ -924,7 +924,7 @@ class GR1CSession:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                universal_newlines=True)
+                text=True)
         else:
             self.p = None
         return True

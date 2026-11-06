@@ -398,7 +398,7 @@ def call_ltl2ba(
          f'"{formula}"'],
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True)
+        text=True)
     p.wait()
     ltl2ba_output = p.stdout.read()
     _logger.info(
