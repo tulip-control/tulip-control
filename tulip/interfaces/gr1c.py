@@ -81,7 +81,7 @@ def check_gr1c() -> bool:
     try:
         v = subprocess.check_output(
             ["gr1c", "-V"],
-            universal_newlines=True)
+            text=True)
     except OSError:
         return False
     v = v.split()[1]
@@ -127,7 +127,7 @@ def get_version() -> tuple[int, int, int]:
     try:
         v_str = subprocess.check_output(
             ["gr1c", "-V"],
-            universal_newlines=True)
+            text=True)
     except OSError:
         raise OSError('gr1c not found')
     v_str = v_str.split()[1]
@@ -471,15 +471,15 @@ def check_syntax(
     Return `True` if syntax check passed, `False` on error.
     """
     _assert_gr1c()
-    f = tempfile.TemporaryFile()
-    f.write(bytes(spec_str, 'utf-8'))
+    f = tempfile.TemporaryFile(mode='wt')
+    f.write(spec_str)
     f.seek(0)
     p = subprocess.Popen(
         [f'{GR1C_BIN_PREFIX}gr1c', '-s'],
         stdin=f,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True)
+        text=True)
     p.wait()
     _logger.debug(f'gr1c returncode: {p.returncode}')
     _logger.debug(f'gr1c stdout: {p.stdout.read()}')
@@ -505,8 +505,8 @@ def check_realizable(
     _assert_gr1c()
     init_option = select_options(spec)
     s = translate(spec, 'gr1c')
-    f = tempfile.TemporaryFile()
-    f.write(bytes(s, 'utf-8'))
+    f = tempfile.TemporaryFile(mode='wt')
+    f.write(s)
     f.seek(0)
     _logger.info('starting realizability check')
     p = subprocess.Popen(
@@ -517,7 +517,7 @@ def check_realizable(
         stdin=f,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True)
+        text=True)
     p.wait()
     _logger.info(f'`gr1c` input:\n{s}{_hl}')
     if p.returncode == 0:
@@ -558,7 +558,7 @@ def synthesize(
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            text=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception(
@@ -712,7 +712,7 @@ class GR1CSession:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                universal_newlines=True)
+                text=True)
         else:
             self.p = None
 
@@ -924,7 +924,7 @@ class GR1CSession:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 bufsize=0,
-                universal_newlines=True)
+                text=True)
         else:
             self.p = None
         return True

@@ -75,8 +75,8 @@ def check_realizable(
         struct = _spec.translate(spec, 'slugs')
     else:
         struct = spec
-    with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(bytes(struct, 'utf-8'))
+    with tempfile.NamedTemporaryFile(mode='wt', delete=False) as fin:
+        fin.write(struct)
     realizable, out = _call_slugs(fin.name, synth=False)
     return realizable
 
@@ -98,8 +98,8 @@ def synthesize(
     assert not spec.moore
     assert not spec.plus_one
     struct = _spec.translate(spec, 'slugs')
-    with tempfile.NamedTemporaryFile(delete=False) as fin:
-        fin.write(bytes(struct, 'utf-8'))
+    with tempfile.NamedTemporaryFile(mode='wt', delete=False) as fin:
+        fin.write(struct)
     realizable, out = _call_slugs(
         fin.name,
         synth=True,
@@ -206,12 +206,11 @@ def _call_slugs(
                 slugs_compiler_path))
     if not os.path.exists(slugs_compiler_path):
         raise Exception('`slugs/compiler.py` not found.')
-    with tempfile.NamedTemporaryFile(delete=False) as slugs_infile:
+    with tempfile.NamedTemporaryFile(mode='wt', delete=False) as slugs_infile:
         subprocess.check_call(
             ['python', slugs_compiler_path, filename],
             stdout=slugs_infile,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True)
+            text=True)
     options = [slugs_path, slugs_infile.name]
     if synth:
         if symbolic:
@@ -237,7 +236,7 @@ def _call_slugs(
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            universal_newlines=True)
+            text=True)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise Exception('slugs not found in path.')

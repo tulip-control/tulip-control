@@ -21,6 +21,7 @@ jobs:
                     '3.12',
                     '3.13',
                     '3.14',
+                    '3.15',
                     ]
         steps:
             - uses: actions/checkout@v7
@@ -86,7 +87,7 @@ jobs:
                   python-version: ${{ matrix.python-version }}
             - name: Install dependencies from PyPI
               run: |
-                pip install -U pip setuptools sphinx gitpython
+                pip install -U pip setuptools sphinx
                 pip install .
             - name: Build
               run: |
