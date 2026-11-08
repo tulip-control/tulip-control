@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="535.71429"
+   height="301.42856"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.92.1 r15371"
+   sodipodi:docname="tulip_dependencies.svg"
+   inkscape:export-filename="/Users/ifilippi/Dropbox/ioannis/programming/python/tulip/distro/tulip_approach.png"
+   inkscape:export-xdpi="171.67999"
+   inkscape:export-ydpi="171.67999">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="EmptyDiamondSend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="EmptyDiamondSend"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path1195"
+         d="M 0,-7.0710768 -7.0710894,0 0,7.0710589 7.0710462,0 Z"
+         style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(0.2,0,0,0.2,-1.2,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="EmptyDiamondM"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="EmptyDiamondM"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path1174"
+         d="M 0,-7.0710768 -7.0710894,0 0,7.0710589 7.0710462,0 Z"
+         style="fill:#ffffff;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="scale(0.4)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker6137"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path6139"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linejoin:round;stroke-opacity:1"
+         d="M -5.5798962,-2.5815905 1.4126653,-0.01024849 -5.5798966,2.561093 c 1.117119,-1.518119 1.1106821,-3.5951692 4e-7,-5.1426835 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5881"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5883"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linejoin:round;stroke-opacity:1"
+         d="M -5.5798962,-2.5815905 1.4126653,-0.01024849 -5.5798966,2.561093 c 1.117119,-1.518119 1.1106821,-3.5951692 4e-7,-5.1426835 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5703"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5705"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linejoin:round;stroke-opacity:1"
+         d="M -5.5798962,-2.5815905 1.4126653,-0.01024849 -5.5798966,2.561093 c 1.117119,-1.518119 1.1106821,-3.5951692 4e-7,-5.1426835 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Mend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker5393"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path5395"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.40000001;stroke-linejoin:round;stroke-opacity:1"
+         d="M -5.5798962,-2.5815905 1.4126653,-0.01024849 -5.5798966,2.561093 c 1.117119,-1.518119 1.1106821,-3.5951692 4e-7,-5.1426835 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker4560"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path4299"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.73333335;stroke-linejoin:round;stroke-opacity:1"
+         d="M -11.403143,-4.732916 1.416553,-0.01878889 -11.403144,4.6953372 c 2.0480517,-2.7832182 2.0362508,-6.5911436 10e-7,-9.4282532 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Send"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Send"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path4311"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linejoin:round;stroke-opacity:1"
+         d="m -2.0539481,-1.2907953 3.4962807,1.28567106 -3.4962809,1.28567074 c 0.5585595,-0.75905949 0.5553411,-1.79758461 2e-7,-2.5713418 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow2Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow2Lend"
+       style="overflow:visible">
+      <path
+         id="path3790"
+         style="fill-rule:evenodd;stroke-width:0.73333335;stroke-linejoin:round"
+         d="M -11.403143,-4.732916 1.416553,-0.01878889 -11.403144,4.6953372 c 2.0480517,-2.7832182 2.0362508,-6.5911436 10e-7,-9.4282532 z"
+         inkscape:connector-curvature="0" />
+    </marker>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8"
+     inkscape:cx="327.84248"
+     inkscape:cy="105.81749"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1376"
+     inkscape:window-x="1080"
+     inkscape:window-y="510"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     showborder="true" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-22.142857,-8.2339401)">
+    <rect
+       style="opacity:1;fill:#e6e6e6;fill-opacity:0.91015625;fill-rule:evenodd;stroke:none;stroke-width:1.33333337;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4630"
+       width="535.71429"
+       height="301.42856"
+       x="22.142857"
+       y="8.2339401" />
+    <rect
+       y="265.5054"
+       x="471.2457"
+       height="21.011143"
+       width="55.482296"
+       id="rect4702"
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path1523"
+       d="m 299.87443,227.00988 59.88142,-26.295"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       sodipodi:nodetypes="cc" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path1525"
+       d="m 258.81007,226.66805 38.38579,0.25254"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path1503"
+       d="m 143.26517,251.33389 59.88142,-26.29501"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       sodipodi:nodetypes="cc" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path4296"
+       d="m 90.91014,184.87099 74.95589,-71.91472"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       sodipodi:nodetypes="cc" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path1505"
+       d="m 90.593667,190.25991 c 10.975663,24.59268 24.444103,62.01257 49.992933,60.98469"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       sodipodi:nodetypes="cc" />
+    <rect
+       y="177.22784"
+       x="36.821529"
+       height="21.011143"
+       width="55.482296"
+       id="rect4706"
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path1463"
+       d="M 205.8455,104.88026 311.98799,32.304161"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect4704"
+       width="55.482296"
+       height="21.011143"
+       x="166.95763"
+       y="102.96061" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4, 4;stroke-dashoffset:0;stroke-opacity:1"
+       d="m 263.803,114.22417 60.88582,27.40961"
+       id="path1461"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="M 263.803,114.22417 323.68442,87.929161"
+       id="path1459"
+       inkscape:connector-curvature="0" />
+    <a
+       id="a4676"
+       xlink:href="https://github.com/tulip-control/tulip-control"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text2987"
+         y="190.44093"
+         x="53.134602"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="190.44093"
+           x="53.134602"
+           id="tspan2989"
+           sodipodi:role="line">tulip</tspan></text>
+    </a>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 380.49698,141.57017 61.22107,0.50508"
+       id="path2995"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <rect
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect1007"
+       width="55.482296"
+       height="21.011143"
+       x="204.03944"
+       y="215.39603" />
+    <a
+       id="a4659"
+       xlink:href="https://github.com/tulip-control/omega"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         x="213.16786"
+         y="229.04637"
+         id="text1011"><tspan
+           sodipodi:role="line"
+           id="tspan1009"
+           x="213.16786"
+           y="229.04637"
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1">omega</tspan></text>
+    </a>
+    <rect
+       y="269.28671"
+       x="204.42442"
+       height="21.011143"
+       width="55.482296"
+       id="rect1013"
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <a
+       id="a4655"
+       xlink:href="https://github.com/tulip-control/gr1c"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text1017"
+         y="284.00854"
+         x="219.80283"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="284.00854"
+           x="219.80283"
+           id="tspan1015"
+           sodipodi:role="line">gr1c</tspan></text>
+    </a>
+    <rect
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect1019"
+       width="55.482296"
+       height="21.011143"
+       x="312.5228"
+       y="23.387455" />
+    <a
+       id="a4640"
+       xlink:href="https://github.com/numpy/numpy"
+       style="fill:#070707;fill-opacity:1">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#070707;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         x="319.32452"
+         y="36.889862"
+         id="text1023"><tspan
+           sodipodi:role="line"
+           id="tspan1021"
+           x="319.32452"
+           y="36.889862"
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#070707;fill-opacity:1">numpy</tspan></text>
+    </a>
+    <a
+       id="a4666"
+       xlink:href="https://github.com/scipy/scipy">
+      <rect
+         style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         id="rect1025"
+         width="55.482296"
+         height="21.011143"
+         x="325.1225"
+         y="77.547737" />
+    </a>
+    <a
+       id="a4684"
+       xlink:href="https://github.com/scipy/scipy"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text1029"
+         y="91.555229"
+         x="337.48007"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="91.555229"
+           x="337.48007"
+           id="tspan1027"
+           sodipodi:role="line">scipy</tspan></text>
+    </a>
+    <rect
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect1031"
+       width="55.482296"
+       height="21.011143"
+       x="325.27814"
+       y="130.34686" />
+    <a
+       id="a4692"
+       xlink:href="https://github.com/cvxopt/cvxopt/"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         x="332.07986"
+         y="144.35437"
+         id="text1035"><tspan
+           sodipodi:role="line"
+           id="tspan1033"
+           x="332.07986"
+           y="144.35437"
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1">cvxopt</tspan></text>
+    </a>
+    <rect
+       y="131.50967"
+       x="442.8053"
+       height="21.011143"
+       width="55.482296"
+       id="rect1037"
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <a
+       id="a4688"
+       xlink:href="https://www.gnu.org/software/glpk/"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text1041"
+         y="147.03241"
+         x="454.65778"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="147.03241"
+           x="454.65778"
+           id="tspan1039"
+           sodipodi:role="line">GLPK</tspan></text>
+    </a>
+    <rect
+       y="192.0327"
+       x="360.25519"
+       height="21.011143"
+       width="55.482296"
+       id="rect1043"
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <a
+       id="a4651"
+       xlink:href="https://github.com/tulip-control/dd"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text1047"
+         y="207.05034"
+         x="368.31961"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="207.05034"
+           x="368.31961"
+           id="tspan1045"
+           sodipodi:role="line">dd.bdd</tspan></text>
+    </a>
+    <rect
+       style="fill:#e9c6af;stroke:#000000;stroke-width:0.53333336;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect1049"
+       width="55.482296"
+       height="21.011143"
+       x="360.76025"
+       y="243.40834" />
+    <a
+       id="a4647"
+       xlink:href="https://github.com/tulip-control/dd/blob/master/dd/cudd.pyx"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         x="366.55182"
+         y="257.9209"
+         id="text1053"><tspan
+           sodipodi:role="line"
+           id="tspan1051"
+           x="366.55182"
+           y="257.9209"
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1">dd.cudd</tspan></text>
+    </a>
+    <a
+       id="a4696"
+       xlink:href="http://vlsi.colorado.edu/~fabio/"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text1059"
+         y="280.62543"
+         x="482.237"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="280.62543"
+           x="482.237"
+           id="tspan1057"
+           sodipodi:role="line">CUDD</tspan></text>
+    </a>
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 222.73864,113.88234 38.38579,0.25254"
+       id="path1063"
+       inkscape:connector-curvature="0" />
+    <circle
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path1457"
+       cx="263.87079"
+       cy="114.1033"
+       r="2.7761736" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="54.285713"
+       y="208.94823"
+       id="text1467"><tspan
+         sodipodi:role="line"
+         id="tspan1465"
+         x="54.285713"
+         y="208.94823">Python</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="377.68347"
+       y="276.30661"
+       id="text1471"><tspan
+         sodipodi:role="line"
+         id="tspan1469"
+         x="377.68347"
+         y="276.30661">Cython</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="497.14285"
+       y="296.73395"
+       id="text1475"><tspan
+         sodipodi:role="line"
+         id="tspan1473"
+         x="497.14285"
+         y="296.73395">C</tspan></text>
+    <text
+       id="text1483"
+       y="134.66251"
+       x="181.07143"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="134.66251"
+         x="181.07143"
+         id="tspan1481"
+         sodipodi:role="line">Python</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="325.71426"
+       y="53.948219"
+       id="text1487"><tspan
+         sodipodi:role="line"
+         id="tspan1485"
+         x="325.71426"
+         y="53.948219">Python, C, Cython</tspan></text>
+    <text
+       id="text1491"
+       y="108.44823"
+       x="339.64285"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="108.44823"
+         x="339.64285"
+         id="tspan1489"
+         sodipodi:role="line">Python, C, Cython, FORTRAN</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="341.07141"
+       y="161.01965"
+       id="text1495"><tspan
+         sodipodi:role="line"
+         id="tspan1493"
+         x="341.07141"
+         y="161.01965">Python, C</tspan></text>
+    <text
+       id="text1499"
+       y="222.52089"
+       x="375.18344"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="222.52089"
+         x="375.18344"
+         id="tspan1497"
+         sodipodi:role="line">Python</tspan></text>
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path1501"
+       d="m 143.26517,251.33389 60.88582,27.40961"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4, 4;stroke-dashoffset:0;stroke-opacity:1" />
+    <circle
+       r="2.7761736"
+       cy="251.21301"
+       cx="143.33296"
+       id="circle1507"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="219.99997"
+       y="246.01965"
+       id="text1511"><tspan
+         sodipodi:role="line"
+         id="tspan1509"
+         x="219.99997"
+         y="246.01965">Python</tspan></text>
+    <text
+       id="text1515"
+       y="301.3768"
+       x="228.21429"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="301.3768"
+         x="228.21429"
+         id="tspan1513"
+         sodipodi:role="line">C</tspan></text>
+    <text
+       id="text1519"
+       y="161.09108"
+       x="466.78571"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         y="161.09108"
+         x="466.78571"
+         id="tspan1517"
+         sodipodi:role="line">C</tspan></text>
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path1521"
+       d="m 299.87443,227.00988 60.88582,27.40961"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4, 4;stroke-dashoffset:0;stroke-opacity:1" />
+    <circle
+       r="2.7761736"
+       cy="226.88902"
+       cx="299.94223"
+       id="circle1527"
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 259.68525,280.62832 c 62.1141,14.76153 128.01061,21.95823 210.14161,-3.31404"
+       id="path1529"
+       inkscape:connector-curvature="0" />
+    <path
+       sodipodi:nodetypes="cc"
+       style="fill:none;stroke:#000000;stroke-width:1.06666672px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow2Lend)"
+       d="m 416.51143,254.61688 53.56797,16.63648"
+       id="path1531"
+       inkscape:connector-curvature="0" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="252.26167"
+       y="131.05519"
+       id="text1535"><tspan
+         sodipodi:role="line"
+         id="tspan1533"
+         x="252.26167"
+         y="131.05519">choice</tspan></text>
+    <text
+       id="text1539"
+       y="200.5576"
+       x="215.36569"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"
+       transform="rotate(-22.629892)"><tspan
+         y="200.5576"
+         x="215.36569"
+         id="tspan1537"
+         sodipodi:role="line">default</tspan></text>
+    <text
+       transform="rotate(-42.056487)"
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.5px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="-26.568375"
+       y="190.60745"
+       id="text4634"><tspan
+         sodipodi:role="line"
+         id="tspan4632"
+         x="-26.568375"
+         y="190.60745">depends on</tspan></text>
+    <a
+       id="a4680"
+       xlink:href="https://github.com/tulip-control/polytope"
+       style="fill:#000000;fill-opacity:1">
+      <text
+         id="text4674"
+         y="117.21152"
+         x="169.93701"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12.80000019px;line-height:0%;font-family:Tahoma;-inkscape-font-specification:Tahoma;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.06666672"
+         xml:space="preserve"><tspan
+           style="font-size:12.80000019px;line-height:1.25;stroke-width:1.06666672;fill:#000000;fill-opacity:1"
+           y="117.21152"
+           x="169.93701"
+           id="tspan4672"
+           sodipodi:role="line">polytope</tspan></text>
+    </a>
+  </g>
+</svg>
